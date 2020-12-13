@@ -1,4 +1,6 @@
 val kotlinVersion = "1.4.10"
+val ktorVersion = "1.4.3"
+val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
@@ -6,8 +8,15 @@ val androidGradlepluginVersion = "4.0.1"
 
 object Dependency {
 
+    val serializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion"
+
+    val ktorClient = "io.ktor:ktor-client-core:$ktorVersion"
+    val ktorOkHttpClient = "io.ktor:ktor-client-okhttp:$ktorVersion"
+    val ktorSerialization = "io.ktor:ktor-client-serialization-jvm:$ktorVersion"
+
     val androidBuildPlugin = "com.android.tools.build:gradle:${androidGradlepluginVersion}"
     val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+    val serializationGradlePlugin = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
 
     val kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     val androidxCoreKtx = "androidx.core:core-ktx:$coreKtxVersion"

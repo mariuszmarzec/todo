@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     id("kotlin")
+    kotlin("plugin.serialization")
 }
 
 java {
@@ -10,4 +11,8 @@ java {
 
 dependencies {
     implementation(Dependency.kotlinStdlib)
+    implementation(Dependency.ktorClient)
+    implementation(Dependency.ktorOkHttpClient)
+    implementation(Dependency.ktorSerialization)
+    implementation(Dependency.serializationJson)
 }
