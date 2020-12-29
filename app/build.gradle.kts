@@ -44,13 +44,21 @@ android {
         }
     }
     compileOptions {
-        setSourceCompatibility(JavaVersion.VERSION_1_8)
-        setTargetCompatibility(JavaVersion.VERSION_1_8)
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
     kotlinOptions {
         jvmTarget = "1.8"
+        useIR = true
     }
+
+    buildFeatures {
+        compose = true
+        composeOptions.kotlinCompilerExtensionVersion = composeVersion
+        composeOptions.kotlinCompilerVersion = kotlinVersion
+    }
+
 }
 
 dependencies {
@@ -58,4 +66,11 @@ dependencies {
     implementation(Dependency.androidxCoreKtx)
     implementation(Dependency.androidxAppCompat)
     implementation(Dependency.androidMaterial)
+    implementation(Dependency.Compose.composeUi)
+    implementation(Dependency.Compose.composeCompiler)
+    implementation(Dependency.Compose.composeTooling)
+    implementation(Dependency.Compose.composeFoundation)
+    implementation(Dependency.Compose.composeMaterial)
+    implementation(Dependency.Compose.composeMaterialIcons)
+    implementation(Dependency.Compose.composeMaterialIconsExtended)
 }
