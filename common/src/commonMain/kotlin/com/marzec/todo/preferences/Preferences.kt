@@ -1,7 +1,5 @@
 package com.marzec.todo.preferences
 
-import java.util.concurrent.ConcurrentHashMap
-
 interface Preferences {
     suspend fun set(key: String, value: String)
     suspend fun getString(key: String): String?
@@ -10,7 +8,7 @@ interface Preferences {
 
 class MemoryPreferences : Preferences {
 
-    private val map = ConcurrentHashMap<String, Any>()
+    private val map = HashMap<String, Any>()
 
     override suspend fun set(key: String, value: String) {
         map[key] = value

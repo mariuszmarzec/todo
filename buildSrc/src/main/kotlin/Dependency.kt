@@ -1,14 +1,16 @@
-val kotlinVersion = "1.4.21"
+val kotlinVersion = "1.4.21-2"
 val ktorVersion = "1.4.3"
 val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
-val androidGradlepluginVersion = "7.0.0-alpha03"
+val androidGradlepluginVersion = "7.0.0-alpha05"
 val composeVersion = "1.0.0-alpha09"
+private val composePluginVersion = "0.3.0-build146"
 
 object Dependency {
 
+    val composeGradlePlugin = "org.jetbrains.compose:compose-gradle-plugin:$composePluginVersion"
     val serializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion"
 
     val ktorClient = "io.ktor:ktor-client-core:$ktorVersion"
@@ -24,15 +26,6 @@ object Dependency {
     val androidxAppCompat = "androidx.appcompat:appcompat:$appCompatVersion"
     val androidMaterial = "com.google.android.material:material:$materialVersion"
 
-    object Compose {
-        val composeUi = "androidx.compose.ui:ui:$composeVersion"
-        val composeCompiler = "androidx.compose.compiler:compiler:$composeVersion"
-        val composeTooling = "androidx.compose.ui:ui-tooling:$composeVersion"
-        val composeFoundation = "androidx.compose.foundation:foundation:$composeVersion"
-        val composeMaterial = "androidx.compose.material:material:$composeVersion"
-        val composeMaterialIcons = "androidx.compose.material:material-icons-core:$composeVersion"
-        val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended:$composeVersion"
-    }
 }
 
 object Config {

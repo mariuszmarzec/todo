@@ -1,19 +1,37 @@
+import org.jetbrains.compose.compose
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
-    id("java-library")
-    id("kotlin")
-    kotlin("plugin.serialization")
+    kotlin("multiplatform")
+    id("org.jetbrains.compose")
 }
 
-java {
-    setSourceCompatibility(JavaVersion.VERSION_1_8)
-    setTargetCompatibility(JavaVersion.VERSION_1_8)
+kotlin {
+    jvm {
+        withJava()
+    }
+    sourceSets {
+        named("jvmMain") {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(project(":common"))
+            }
+        }
+    }
 }
 
-dependencies {
-    implementation(project(":todo"))
-    implementation(Dependency.kotlinStdlib)
-    implementation(Dependency.ktorClient)
-    implementation(Dependency.ktorOkHttpClient)
-    implementation(Dependency.ktorSerialization)
-    implementation(Dependency.serializationJson)
+compose.desktop {
+    application {
+        mainClass = "com.marzec.todo.MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "ToDo App"
+
+            windows {
+                menu = true
+                upgradeUuid = "ff6f9c4b-618c-4224-8ea3-ab56c0d94403"
+            }
+        }
+    }
 }

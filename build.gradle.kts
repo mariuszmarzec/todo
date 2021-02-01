@@ -4,12 +4,12 @@ buildscript {
         google()
         jcenter()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven("https://dl.bintray.com/arkivanov/maven")
     }
     dependencies {
         classpath(Dependency.androidBuildPlugin)
         classpath(Dependency.kotlinGradlePlugin)
         classpath(Dependency.serializationGradlePlugin)
+        classpath(Dependency.composeGradlePlugin)
     }
 }
 
@@ -17,7 +17,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 
