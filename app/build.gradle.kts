@@ -63,7 +63,6 @@ dependencies {
     implementation(project(":common"))
     implementation(Dependency.androidxAppCompat)
     implementation(Dependency.androidMaterial)
-    implementation(Dependency.androidActivityX)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
