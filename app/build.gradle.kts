@@ -48,8 +48,29 @@ android {
         sourceCompatibility(JavaVersion.VERSION_1_8)
         targetCompatibility(JavaVersion.VERSION_1_8)
     }
+
+    buildFeatures {
+        compose = true
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        useIR = true
+    }
 }
 
 dependencies {
     implementation(project(":common"))
+    implementation(Dependency.androidxAppCompat)
+    implementation(Dependency.androidMaterial)
+    implementation(Dependency.androidActivityX)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.freeCompilerArgs = listOf(
+        *kotlinOptions.freeCompilerArgs.toTypedArray(),
+        "-Xallow-jvm-ir-dependencies",
+        "-Xskip-prerelease-check")
+    kotlinOptions.useIR = true
 }

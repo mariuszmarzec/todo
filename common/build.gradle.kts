@@ -3,6 +3,7 @@ import org.jetbrains.compose.compose
 plugins {
     id("com.android.library")
     kotlin("multiplatform")
+    id("org.jetbrains.compose")
     kotlin("plugin.serialization")
 }
 
@@ -63,6 +64,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        compose = true
+    }
+
     sourceSets {
         named("main") {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -70,4 +75,13 @@ android {
 //            res.srcDirs("src/androidMain/res")
         }
     }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.freeCompilerArgs = listOf(
+        *kotlinOptions.freeCompilerArgs.toTypedArray(),
+        "-Xallow-jvm-ir-dependencies",
+        "-Xskip-prerelease-check")
+    kotlinOptions.useIR = true
 }

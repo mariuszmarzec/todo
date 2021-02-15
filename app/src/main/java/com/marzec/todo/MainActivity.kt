@@ -3,7 +3,7 @@ package com.marzec.todo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
-import androidx.compose.ui.platform.setContent
+import androidx.activity.compose.setContent
 import com.marzec.todo.widget.Greeting
 
 class MainActivity : AppCompatActivity() {

@@ -4,8 +4,9 @@ val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
-val androidGradlepluginVersion = "7.0.0-alpha05"
-val composeVersion = "1.0.0-alpha09"
+val androidActivityXVersion = "1.3.0-alpha02"
+val androidGradlepluginVersion = "7.0.0-alpha06"
+val composeVersion = "1.0.0-alpha12"
 private val composePluginVersion = "0.3.0-build146"
 
 object Dependency {
@@ -20,6 +21,8 @@ object Dependency {
     val androidBuildPlugin = "com.android.tools.build:gradle:${androidGradlepluginVersion}"
     val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
     val serializationGradlePlugin = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
+
+    val androidActivityX = "androidx.activity:activity-compose:$androidActivityXVersion"
 
     val kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     val androidxCoreKtx = "androidx.core:core-ktx:$coreKtxVersion"
