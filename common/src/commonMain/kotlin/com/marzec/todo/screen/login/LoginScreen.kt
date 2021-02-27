@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.todo.screen.login.model.LoginActions
 import com.marzec.todo.screen.login.model.LoginViewState
-import com.marzec.todo.screen.login.model.loginStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import androidx.compose.runtime.getValue
+import com.marzec.todo.screen.login.model.LoginStore
 
 @ExperimentalCoroutinesApi
 @Composable
-fun LoginScreen() {
+fun LoginScreen(loginStore: LoginStore) {
     val scope = rememberCoroutineScope()
 
     val state: LoginViewState by loginStore.state.collectAsState()
