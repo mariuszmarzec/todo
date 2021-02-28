@@ -2,17 +2,26 @@ package com.marzec.todo.screen.login.model
 
 import com.marzec.mvi.Intent
 import com.marzec.mvi.Store
+import com.marzec.todo.model.User
+import com.marzec.todo.network.Content
+import com.marzec.todo.repository.LoginRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class LoginStore : Store<LoginViewState, LoginActions>(
+class LoginStore(
+    private val loginRepository: LoginRepository
+) : Store<LoginViewState, LoginActions>(
     LoginViewState.Data(LoginData(login = "", password = ""))
 ) {
     init {
         intents = mapOf(
             LoginActions.LoginButtonClick::class to Intent(
-                sideEffect = { _: Any?, _ ->
-
+                onTrigger = {
+                    loginRepository.login(it.loginData.login, it.loginData.password)
+                },
+                sideEffect = { result: Any?, _ ->
+                    result as Content.Data<User>
+                    println(result)
                 }
             ),
             LoginActions.LoginChanged::class to Intent(

@@ -25,6 +25,7 @@ object Dependency {
     val androidActivityX = "androidx.activity:activity-compose:$androidActivityXVersion"
 
     val kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    val coroutineCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
     val androidxCoreKtx = "androidx.core:core-ktx:$coreKtxVersion"
     val androidxAppCompat = "androidx.appcompat:appcompat:$appCompatVersion"
     val androidMaterial = "com.google.android.material:material:$materialVersion"

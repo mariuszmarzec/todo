@@ -29,8 +29,8 @@ kotlin {
                 api(compose.foundation)
                 api(compose.material)
                 api(Dependency.kotlinStdlib)
+                api(Dependency.coroutineCore)
                 api(Dependency.ktorClient)
-                api(Dependency.ktorOkHttpClient)
                 api(Dependency.ktorSerialization)
                 api(Dependency.serializationJson)
             }
@@ -40,10 +40,15 @@ kotlin {
             dependencies {
                 api("androidx.appcompat:appcompat:1.1.0")
                 api("androidx.core:core-ktx:1.3.1")
+                api(Dependency.ktorOkHttpClient)
+
             }
         }
         named("desktopMain") {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
+            dependencies {
+                api(Dependency.ktorOkHttpClient)
+            }
         }
     }
 }

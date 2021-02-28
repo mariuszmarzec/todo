@@ -19,7 +19,9 @@ import com.marzec.todo.screen.login.model.LoginViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import androidx.compose.runtime.getValue
 import com.marzec.todo.screen.login.model.LoginStore
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
+@ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 @Composable
 fun LoginScreen(loginStore: LoginStore) {
@@ -40,7 +42,7 @@ fun LoginScreen(loginStore: LoginStore) {
             TextField(state.loginData.password, { loginStore.sendAction(LoginActions.PasswordChanged(it), scope) })
         }
         Box(modifier = Modifier.padding(16.dp)) {
-            TextButton({}) {
+            TextButton({ loginStore.sendAction(LoginActions.LoginButtonClick, scope) }) {
                 Text("Login")
             }
         }

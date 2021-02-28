@@ -28,7 +28,7 @@ open class Store<State, Action : Any>(defaultState: State) {
             actions.consume {
                 val intent = intents[action::class]
                 requireNotNull(intent)
-                val result = intent.onTrigger?.invoke()
+                val result = intent.onTrigger?.invoke(_state.value)
 
                 val newState = intent.reducer(action, result, _state.value)
 
@@ -43,9 +43,8 @@ open class Store<State, Action : Any>(defaultState: State) {
 
 }
 
-
 data class Intent<State>(
-    val onTrigger: (suspend () -> Any?)? = null,
+    val onTrigger: (suspend (State) -> Any?)? = null,
     val reducer: suspend (Any, Any?, State) -> State = {_, _, state -> state},
     val sideEffect: ((Any?, State) -> Unit)? = null
 )
