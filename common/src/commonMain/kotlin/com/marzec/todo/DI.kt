@@ -1,8 +1,13 @@
 package com.marzec.todo
 
+import androidx.compose.runtime.Composable
+import com.marzec.todo.navigation.model.NavigationState
+import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
+import com.marzec.todo.screen.login.LoginScreen
+import com.marzec.todo.screen.login.model.LoginStore
 import io.ktor.client.HttpClient
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
@@ -13,9 +18,15 @@ object DI {
 
     val preferences: Preferences = MemoryPreferences()
 
+    val navigationStore by lazy {
+        NavigationStore(NavigationState(listOf( @Composable { LoginScreen(provideLoginStore()) })))
+    }
+
     lateinit var client: HttpClient
 
     fun provideLoginRepository() = LoginRepository(client)
+
+    fun provideLoginStore() = LoginStore(provideLoginRepository())
 }
 
 object PreferencesKeys {
