@@ -31,7 +31,7 @@ val httpClient = HttpClient(OkHttp) {
                 val authorization = response.headers[Api.Headers.AUTHORIZATION]
                 if (authorization != null) {
                     runBlocking { DI.preferences.set(PreferencesKeys.AUTHORIZATION, authorization) }
-                } else {
+                } else if (response.code == 401) {
                     runBlocking { DI.preferences.remove(PreferencesKeys.AUTHORIZATION) }
                 }
                 return response
