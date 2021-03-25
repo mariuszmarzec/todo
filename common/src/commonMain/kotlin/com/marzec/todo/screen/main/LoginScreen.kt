@@ -15,5 +15,7 @@ fun MainScreen(navigationStore: NavigationStore) {
 
     val state: NavigationState by navigationStore.state.collectAsState()
 
-    state.stack.last()()
+    state.backStack.last().apply {
+        screenProvider(cacheKey)
+    }
 }

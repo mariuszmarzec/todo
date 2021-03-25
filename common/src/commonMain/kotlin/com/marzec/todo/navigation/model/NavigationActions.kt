@@ -1,8 +1,11 @@
 package com.marzec.todo.navigation.model
 
-import androidx.compose.runtime.Composable
-
 sealed class NavigationActions {
-    data class Next(val screenProvider: @Composable () -> Unit) : NavigationActions()
+    data class Next(val destination: Destinations) : NavigationActions()
     object Back : NavigationActions()
+}
+
+enum class Destinations {
+    LOGIN,
+    LISTS
 }

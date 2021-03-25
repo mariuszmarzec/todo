@@ -1,22 +1,26 @@
 package com.marzec.todo.preferences
 
 interface Preferences {
-    suspend fun set(key: String, value: String)
-    suspend fun getString(key: String): String?
-    suspend fun remove(key: String)
+    fun set(key: String, value: Any)
+    fun getString(key: String): String?
+    fun <T> get(key: String): T?
+    fun remove(key: String)
 }
 
 class MemoryPreferences : Preferences {
 
     private val map = HashMap<String, Any>()
 
-    override suspend fun set(key: String, value: String) {
+    override fun set(key: String, value: Any) {
         map[key] = value
     }
 
-    override suspend fun getString(key: String): String? = map[key] as? String
+    override fun getString(key: String): String? = map[key] as? String
 
-    override suspend fun remove(key: String) {
+    @Suppress("unchecked_cast")
+    override fun <T> get(key: String): T? = map[key] as? T
+
+    override fun remove(key: String) {
         map.remove(key)
     }
 }

@@ -10,19 +10,16 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.todo.screen.login.model.LoginActions
-import com.marzec.todo.screen.login.model.LoginViewState
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import androidx.compose.runtime.getValue
 import com.marzec.todo.screen.login.model.LoginStore
-import kotlinx.coroutines.ObsoleteCoroutinesApi
+import com.marzec.todo.screen.login.model.LoginViewState
+import kotlinx.coroutines.launch
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
 @Composable
 fun LoginScreen(loginStore: LoginStore) {
     val scope = rememberCoroutineScope()
@@ -36,13 +33,17 @@ fun LoginScreen(loginStore: LoginStore) {
     ) {
 
         Box(modifier = Modifier.padding(16.dp)) {
-            TextField(state.loginData.login, { loginStore.sendAction(LoginActions.LoginChanged(it), scope) })
+            TextField(state.loginData.login, {
+                scope.launch { loginStore.sendAction(LoginActions.LoginChanged(it)) }
+            })
         }
         Box(modifier = Modifier.padding(16.dp)) {
-            TextField(state.loginData.password, { loginStore.sendAction(LoginActions.PasswordChanged(it), scope) })
+            TextField(state.loginData.password, {
+                scope.launch { loginStore.sendAction(LoginActions.PasswordChanged(it)) }
+            })
         }
         Box(modifier = Modifier.padding(16.dp)) {
-            TextButton({ loginStore.sendAction(LoginActions.LoginButtonClick, scope) }) {
+            TextButton({ scope.launch { loginStore.sendAction(LoginActions.LoginButtonClick) } }) {
                 Text("Login")
             }
         }

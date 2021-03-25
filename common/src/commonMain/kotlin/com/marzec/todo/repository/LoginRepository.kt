@@ -18,11 +18,11 @@ class LoginRepository(private val client: HttpClient) {
     suspend fun login(login: String, password: String): Content<User> =
         withContext(DI.ioDispatcher) {
             asContent {
-                client.post<Unit>(Api.LOGIN) {
+                client.post<Unit>(Api.Login.LOGIN) {
                     contentType(ContentType.Application.Json)
                     body = LoginRequestDto(login, password)
                 }
-                client.get(Api.USER)
+                client.get(Api.Login.USER)
             }
         }
 }
