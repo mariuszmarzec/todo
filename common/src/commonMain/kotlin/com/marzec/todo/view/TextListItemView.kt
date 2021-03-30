@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TextListItemView(state: TaskListItem, onClickListener: (TaskListItem) -> Unit) {
+fun TextListItemView(state: TextListItem, onClickListener: (TextListItem) -> Unit) {
     Column (
         modifier = Modifier.fillMaxSize().clickable { onClickListener(state) }
     ) {
@@ -39,8 +39,8 @@ fun TextListItemView(state: TaskListItem, onClickListener: (TaskListItem) -> Uni
     }
 }
 
-data class TaskListItem(
-    val id: Int,
+data class TextListItem(
+    val id: String,
     val name: String,
     val description: String
 )

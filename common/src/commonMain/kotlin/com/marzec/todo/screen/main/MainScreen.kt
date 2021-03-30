@@ -25,16 +25,6 @@ fun MainScreen(navigationStore: NavigationStore) {
 
     val state: NavigationState by navigationStore.state.collectAsState()
 
-    TopAppBar {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart){
-            TextButton( {
-            scope.launch { navigationStore.sendAction(NavigationActions.Back) }
-            }) {
-                Text(color = Color.White,text = "Back")
-            }
-        }
-    }
-
     state.backStack.last().apply {
         screenProvider(cacheKey)
     }

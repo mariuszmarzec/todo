@@ -10,6 +10,8 @@ import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.screen.lists.ListsScreen
+import com.marzec.todo.screen.lists.ListsScreenState
+import com.marzec.todo.screen.lists.ListsScreenStore
 import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
@@ -30,7 +32,7 @@ object DI {
 
     private val router: Map<Destinations, (@Composable (cacheKey: String) -> Unit)> = mapOf(
         Destinations.LOGIN to @Composable { provideLoginScreen(it) },
-        Destinations.LISTS to @Composable { provideListScreen() }
+        Destinations.LISTS to @Composable { provideListScreen(it) }
     )
 
     private val cacheKeyProvider by lazy { { getTimeMillis().toString() } }
@@ -49,8 +51,19 @@ object DI {
     }
 
     @Composable
-    private fun provideListScreen() {
-        ListsScreen(navigationStore)
+    private fun provideListScreen(cacheKey: String) {
+        ListsScreen(navigationStore, provideListScreenStore(cacheKey = cacheKey))
+    }
+
+    @Composable
+    private fun provideListScreenStore(cacheKey: String) = ListsScreenStore(
+        stateCache = preferences,
+        cacheKey = cacheKey,
+        initialState = provideListScreenDefaultState()
+    )
+
+    private fun provideListScreenDefaultState(): ListsScreenState {
+        return ListsScreenState(emptyList(), addNewListDialog = false)
     }
 
     @Composable
