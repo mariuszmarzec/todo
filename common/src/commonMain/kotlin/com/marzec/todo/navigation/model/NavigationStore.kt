@@ -26,7 +26,7 @@ class NavigationStore(
             reducer {
                 state.copy(
                     backStack = state.backStack.toMutableList().apply {
-                        if (size > 0) {
+                        if (size > 1) {
                             removeLast().also { stateCache.remove(it.cacheKey) }
                         }
                     }
