@@ -9,6 +9,7 @@ import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
+import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.lists.ListsScreen
 import com.marzec.todo.screen.lists.ListsScreenState
 import com.marzec.todo.screen.lists.ListsScreenStore
@@ -57,13 +58,14 @@ object DI {
 
     @Composable
     private fun provideListScreenStore(cacheKey: String) = ListsScreenStore(
+        todoRepository = provideTodoRepository(),
         stateCache = preferences,
         cacheKey = cacheKey,
         initialState = provideListScreenDefaultState()
     )
 
     private fun provideListScreenDefaultState(): ListsScreenState {
-        return ListsScreenState(emptyList(), addNewListDialog = false)
+        return ListsScreenState.INITIAL
     }
 
     @Composable
@@ -90,6 +92,8 @@ object DI {
             )
         )
     )
+
+    fun provideTodoRepository() = TodoRepository(client)
 }
 
 object PreferencesKeys {
@@ -112,9 +116,8 @@ object Api {
     object Todo {
         const val BASE = "$HOST/todo/api/1"
 
-        const val LOGIN = "$BASE/login"
-        const val USER = "$BASE/user"
-        const val LOGOUT = "$BASE/logout"
+        const val TODO_LISTS = "$BASE/lists"
+        const val TODO_LIST = "$BASE/list"
     }
 
     object Headers {

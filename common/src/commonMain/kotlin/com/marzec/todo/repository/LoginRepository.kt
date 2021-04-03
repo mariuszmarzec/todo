@@ -2,7 +2,9 @@ package com.marzec.todo.repository
 
 import com.marzec.todo.Api
 import com.marzec.todo.DI
-import com.marzec.todo.model.LoginRequestDto
+import com.marzec.todo.api.LoginRequestDto
+import com.marzec.todo.api.UserDto
+import com.marzec.todo.api.toDomain
 import com.marzec.todo.model.User
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.asContent
@@ -22,7 +24,7 @@ class LoginRepository(private val client: HttpClient) {
                     contentType(ContentType.Application.Json)
                     body = LoginRequestDto(login, password)
                 }
-                client.get(Api.Login.USER)
+                client.get<UserDto>(Api.Login.USER).toDomain()
             }
         }
 }

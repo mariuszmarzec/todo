@@ -1,3 +1,5 @@
+import org.gradle.api.artifacts.Dependency
+
 val kotlinVersion = "1.4.21-2"
 val ktorVersion = "1.4.3"
 val serializationVersion = "1.0.1"
@@ -5,9 +7,10 @@ val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
 val androidActivityXVersion = "1.3.0-alpha02"
-val androidGradlepluginVersion = "7.0.0-alpha06"
+val androidGradlepluginVersion = "7.0.0-alpha12"
 val composeVersion = "1.0.0-alpha12"
 private val composePluginVersion = "0.3.0-build146"
+private val dateTimeVersion = "0.1.1"
 
 object Dependency {
 
@@ -30,6 +33,7 @@ object Dependency {
     val androidxAppCompat = "androidx.appcompat:appcompat:$appCompatVersion"
     val androidMaterial = "com.google.android.material:material:$materialVersion"
 
+    val kotlinDateTime = "org.jetbrains.kotlinx:kotlinx-datetime:$dateTimeVersion"
 }
 
 object Config {

@@ -97,7 +97,9 @@ class IntentBuilder<State: Any, Action: Any, Result: Any> {
         val action: Action,
         val state: State,
         val result: Result?
-    )
+    ) {
+        fun resultNonNull(): Result = result!!
+    }
 }
 
 fun <State: Any, Action: Any, Result: Any> intent(

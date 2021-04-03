@@ -33,6 +33,7 @@ kotlin {
                 api(Dependency.ktorClient)
                 api(Dependency.ktorSerialization)
                 api(Dependency.serializationJson)
+                implementation(Dependency.kotlinDateTime)
             }
         }
         named("androidMain") {
