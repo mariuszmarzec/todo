@@ -21,10 +21,7 @@ class ListsScreenStore(
             }
 
             reducer {
-                when (val result = resultNonNull()) {
-                    is Content.Data -> state.reduceData(result)
-                    is Content.Error -> ListsScreenState.Error(result.exception.message.orEmpty())
-                }
+                resultNonNull().reduceContent(state)
             }
 
             sideEffect {
@@ -59,29 +56,32 @@ class ListsScreenStore(
             }
         }
 
-        addIntent<ListScreenActions.CreateButtonClicked> {
-            reducer {
-                (state as? ListsScreenState.Data)?.copy(
-                    addNewListDialog = state.addNewListDialog.copy(
-                        inputField = "",
-                        visible = false
-                    )
-                ) ?: state
-            }
-            sideEffect {
-                sendAction(ListScreenActions.CreateNewList(action.newListName))
-            }
-        }
-
-        addIntent<ListScreenActions.CreateNewList> {
+        addIntent<ListScreenActions.CreateButtonClicked, Content<List<ToDoList>>> {
             onTrigger {
-                todoRepository.createList(action.newListName)
+                println(todoRepository.createList(action.newListName))
+                todoRepository.getLists()
+            }
+            reducer {
+                (resultNonNull().reduceContent(state) as? ListsScreenState.Data)?.let {
+                    it.copy(
+                        addNewListDialog = it.addNewListDialog.copy(
+                            inputField = "",
+                            visible = false
+                        )
+                    )
+                } ?: state
             }
             sideEffect {
-                sendAction(ListScreenActions.LoadLists)
+                println(result)
             }
         }
     }
+
+    private fun Content<List<ToDoList>>.reduceContent(state: ListsScreenState) =
+        when (this) {
+            is Content.Data -> state.reduceData(this)
+            is Content.Error -> ListsScreenState.Error(this.exception.message.orEmpty())
+        }
 
     override suspend fun onNewState(newState: ListsScreenState) {
         stateCache.set(cacheKey, newState)

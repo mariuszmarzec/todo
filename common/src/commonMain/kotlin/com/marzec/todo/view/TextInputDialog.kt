@@ -30,7 +30,6 @@ fun TextInputDialog(
 ) {
     if (state.visible) {
         Dialog(
-            properties = DialogPropertiesDefault.properties,
             onDismissRequest = { onDismiss() }
         ) {
             Column(
@@ -70,7 +69,3 @@ data class TextInputDialog(
     val dismissButton: String,
     val visible: Boolean
 )
-
-expect object DialogPropertiesDefault {
-    val properties: DialogProperties
-}

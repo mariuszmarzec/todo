@@ -11,6 +11,8 @@ import com.marzec.todo.network.asContent
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.withContext
 
 class TodoRepository(private val client: HttpClient) {
@@ -26,6 +28,7 @@ class TodoRepository(private val client: HttpClient) {
         withContext(DI.ioDispatcher) {
             asContent {
                 client.post(Api.Todo.TODO_LIST) {
+                    contentType(ContentType.Application.Json)
                     body = CreateTodoListDto(title = title)
                 }
             }

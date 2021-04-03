@@ -25,6 +25,7 @@ compose.desktop {
         mainClass = "com.marzec.todo.MainKt"
 
         nativeDistributions {
+            version = "1.0.0"
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ToDo App"
 

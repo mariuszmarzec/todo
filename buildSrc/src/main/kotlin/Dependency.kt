@@ -1,6 +1,6 @@
 import org.gradle.api.artifacts.Dependency
 
-val kotlinVersion = "1.4.21-2"
+val kotlinVersion = "1.4.31"
 val ktorVersion = "1.4.3"
 val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
@@ -9,12 +9,12 @@ val materialVersion = "1.1.0"
 val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "7.0.0-alpha12"
 val composeVersion = "1.0.0-alpha12"
-private val composePluginVersion = "0.3.0-build146"
+private val composePluginVersion = "0.4.0-build178"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {
 
-    val composeGradlePlugin = "org.jetbrains.compose:compose-gradle-plugin:$composePluginVersion"
+        val composeGradlePlugin = "org.jetbrains.compose:compose-gradle-plugin:$composePluginVersion"
     val serializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion"
 
     val ktorClient = "io.ktor:ktor-client-core:$ktorVersion"

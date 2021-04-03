@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.todo.DI
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.view.TextInputDialog
@@ -59,7 +60,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
             ) {
                 Text("+")
             }
-        }, bodyContent = {
+        }) {
             when (val state = state) {
                 is ListsScreenState.Data -> {
                     LazyColumn {
@@ -97,5 +98,4 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                 }
             }
         }
-    )
 }
