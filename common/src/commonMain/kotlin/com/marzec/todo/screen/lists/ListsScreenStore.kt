@@ -33,7 +33,11 @@ class ListsScreenStore(
         }
 
         addIntent<ListScreenActions.AddNewList> {
-            sideEffect { println("+ Clicked") }
+            reducer {
+                (state as? ListsScreenState.Data)?.copy(
+                    addNewListDialog = state.addNewListDialog.copy(visible = true)
+                ) ?: state
+            }
         }
     }
 

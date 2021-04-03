@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.view.TextInputDialog
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
@@ -84,6 +85,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                             }
                         }
                     }
+                    TextInputDialog(state = state.addNewListDialog)
                 }
                 is ListsScreenState.Error -> {
                     Text(text = state.message)
