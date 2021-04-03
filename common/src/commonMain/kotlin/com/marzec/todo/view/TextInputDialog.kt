@@ -26,7 +26,7 @@ fun TextInputDialog(
     state: TextInputDialog,
     onTextChanged: (String) -> Unit = {},
     onDismiss: () -> Unit = {},
-    onConfirm: () -> Unit = {}
+    onConfirm: (String) -> Unit = {}
 ) {
     if (state.visible) {
         Dialog(
@@ -51,7 +51,7 @@ fun TextInputDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { onConfirm() }) {
+                    TextButton(onClick = { onConfirm(state.inputField) }) {
                         Text(state.confirmButton)
                     }
                     TextButton(onClick = { onDismiss() }) {

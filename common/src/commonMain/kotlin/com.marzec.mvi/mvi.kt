@@ -26,6 +26,7 @@ open class Store<State: Any, Action : Any>(defaultState: State) {
     @ObsoleteCoroutinesApi
     suspend fun sendAction(action: Action) {
         actions.consume {
+            println(action)
             val intent = intents[action::class]
             requireNotNull(intent)
             val result = intent.onTrigger?.invoke(action, _state.value)
@@ -54,19 +55,19 @@ open class Store<State: Any, Action : Any>(defaultState: State) {
 }
 
 data class Intent<State>(
-    val onTrigger: (suspend (action: Any, state: State) -> Any)? = null,
+    val onTrigger: (suspend (action: Any, state: State) -> Any?)? = null,
     val reducer: suspend (action: Any, result: Any?, state: State) -> State = {_, _, state -> state},
-    val sideEffect: ((action: Any, result: Any?, state: State) -> Unit)? = null
+    val sideEffect: (suspend (action: Any, result: Any?, state: State) -> Unit)? = null
 )
 
 @Suppress("UNCHECKED_CAST")
 class IntentBuilder<State: Any, Action: Any, Result: Any> {
 
-    private var onTrigger: (suspend (action: Any, state: State) -> Any)? = null
+    private var onTrigger: (suspend (action: Any, state: State) -> Any?)? = null
     private var reducer: suspend (action: Any, result: Any?, state: State) -> State = {_, _, state -> state}
-    private var sideEffect: ((action: Any, result: Any?, state: State) -> Unit)? = null
+    private var sideEffect: (suspend (action: Any, result: Any?, state: State) -> Unit)? = null
 
-    fun onTrigger(func: suspend IntentContext<State, Action, Result>.() -> Result): IntentBuilder<State, Action, Result> {
+    fun onTrigger(func: suspend IntentContext<State, Action, Result>.() -> Result?): IntentBuilder<State, Action, Result> {
         onTrigger = { action: Any, state ->
             action as Action
             IntentContext<State, Action, Result>(action, state, null).func()
@@ -82,7 +83,7 @@ class IntentBuilder<State: Any, Action: Any, Result: Any> {
         return this
     }
 
-    fun sideEffect(func: IntentContext<State, Action, Result>.() -> Unit): IntentBuilder<State, Action, Result> {
+    fun sideEffect(func: suspend IntentContext<State, Action, Result>.() -> Unit): IntentBuilder<State, Action, Result> {
         sideEffect = { action: Any, result: Any?, state ->
             action as Action
             val res = result as? Result

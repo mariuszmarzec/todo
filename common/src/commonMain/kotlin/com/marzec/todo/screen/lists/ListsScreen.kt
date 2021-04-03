@@ -85,7 +85,12 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                             }
                         }
                     }
-                    TextInputDialog(state = state.addNewListDialog)
+                    TextInputDialog(
+                        state = state.addNewListDialog,
+                        onTextChanged = { scope.launch { listsScreenStore.sendAction(ListScreenActions.NewListNameChanged(it)) } },
+                        onConfirm = { scope.launch { listsScreenStore.sendAction(ListScreenActions.CreateButtonClicked(it)) } },
+                        onDismiss = { scope.launch { listsScreenStore.sendAction(ListScreenActions.DialogDismissed) } }
+                    )
                 }
                 is ListsScreenState.Error -> {
                     Text(text = state.message)

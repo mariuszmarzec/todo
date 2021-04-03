@@ -39,6 +39,48 @@ class ListsScreenStore(
                 ) ?: state
             }
         }
+
+        addIntent<ListScreenActions.NewListNameChanged> {
+            reducer {
+                (state as? ListsScreenState.Data)?.copy(
+                    addNewListDialog = state.addNewListDialog.copy(inputField = action.text)
+                ) ?: state
+            }
+        }
+
+        addIntent<ListScreenActions.DialogDismissed> {
+            reducer {
+                (state as? ListsScreenState.Data)?.copy(
+                    addNewListDialog = state.addNewListDialog.copy(
+                        inputField = "",
+                        visible = false
+                    )
+                ) ?: state
+            }
+        }
+
+        addIntent<ListScreenActions.CreateButtonClicked> {
+            reducer {
+                (state as? ListsScreenState.Data)?.copy(
+                    addNewListDialog = state.addNewListDialog.copy(
+                        inputField = "",
+                        visible = false
+                    )
+                ) ?: state
+            }
+            sideEffect {
+                sendAction(ListScreenActions.CreateNewList(action.newListName))
+            }
+        }
+
+        addIntent<ListScreenActions.CreateNewList> {
+            onTrigger {
+                todoRepository.createList(action.newListName)
+            }
+            sideEffect {
+                sendAction(ListScreenActions.LoadLists)
+            }
+        }
     }
 
     override suspend fun onNewState(newState: ListsScreenState) {
