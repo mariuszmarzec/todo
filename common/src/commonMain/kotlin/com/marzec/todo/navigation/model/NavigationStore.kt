@@ -3,9 +3,10 @@ package com.marzec.todo.navigation.model
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.Store
 import com.marzec.todo.preferences.Preferences
+import kotlin.reflect.KClass
 
 class NavigationStore(
-    router: Map<Destinations, @Composable (cacheKey: String) -> Unit>,
+    router: Map<KClass<out Destination>, @Composable() (destination: Destination, cacheKey: String) -> Unit>,
     private val stateCache: Preferences,
     cacheKeyProvider: () -> String,
     initialState: NavigationState
@@ -16,8 +17,8 @@ class NavigationStore(
                 state.copy(
                     backStack = state.backStack.toMutableList().apply {
                         val cacheKey = cacheKeyProvider()
-                        val screenProvider = router.getValue(action.destination)
-                        add(NavigationEntry(cacheKey, screenProvider))
+                        val screenProvider = router.getValue(action.destination::class)
+                        add(NavigationEntry(action.destination, cacheKey, screenProvider))
                     }
                 )
             }

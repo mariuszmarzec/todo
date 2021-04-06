@@ -19,7 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.marzec.todo.DI
+import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.view.TextInputDialog
@@ -76,9 +76,9 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                             key(it.id) {
                                 TextListItemView(state = it) {
                                     scope.launch {
-                                        listsScreenStore.sendAction(
-                                            ListScreenActions.ListItemClicked(
-                                                it.id
+                                        navigationStore.sendAction(
+                                            NavigationActions.Next(
+                                                Destination.Tasks(it.id.toInt())
                                             )
                                         )
                                     }

@@ -33,4 +33,14 @@ class TodoRepository(private val client: HttpClient) {
                 }
             }
         }
+
+    suspend fun getList(listId: Int): Content<ToDoList> =
+        withContext(DI.ioDispatcher) {
+            asContent {
+                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
+                    it.id == listId
+                }
+            }
+        }
+
 }

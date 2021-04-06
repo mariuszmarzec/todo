@@ -1,7 +1,7 @@
 package com.marzec.todo
 
 import androidx.compose.runtime.Composable
-import com.marzec.todo.navigation.model.Destinations
+import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationEntry
 import com.marzec.todo.navigation.model.NavigationState
@@ -17,9 +17,13 @@ import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.login.model.LoginViewState
+import com.marzec.todo.screen.tasks.TasksScreen
+import com.marzec.todo.screen.tasks.model.TasksScreenState
+import com.marzec.todo.screen.tasks.model.TasksStore
 import io.ktor.client.HttpClient
 import io.ktor.util.date.getTimeMillis
 import kotlin.coroutines.CoroutineContext
+import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,21 +35,40 @@ object DI {
 
     val preferences: Preferences = MemoryPreferences()
 
-    private val router: Map<Destinations, (@Composable (cacheKey: String) -> Unit)> = mapOf(
-        Destinations.LOGIN to @Composable { provideLoginScreen(it) },
-        Destinations.LISTS to @Composable { provideListScreen(it) }
+    private val ROUTER: Map<KClass<out Destination>, (@Composable (destination: Destination, cacheKey: String) -> Unit)> = mapOf(
+        Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
+        Destination.Lists::class to @Composable { _, cacheKey -> provideListScreen(cacheKey) },
+        Destination.Tasks::class to @Composable { destination, cacheKey ->
+            destination as Destination.Tasks
+            provideTasksScreen(destination.listId, cacheKey)
+        }
     )
+
+    @Composable
+    private fun provideTasksScreen(listId: Int, cacheKey: String) {
+        TasksScreen(navigationStore, provideTasksStore(listId = listId, cacheKey = cacheKey))
+    }
+
+    private fun provideTasksStore(listId: Int, cacheKey: String): TasksStore {
+        return TasksStore(
+            listId = listId,
+            todoRepository = provideTodoRepository(),
+            stateCache = preferences,
+            cacheKey = cacheKey,
+            initialState = TasksScreenState.INITIAL_STATE
+        )
+    }
 
     private val cacheKeyProvider by lazy { { getTimeMillis().toString() } }
 
     val navigationStore: NavigationStore by lazy {
         NavigationStore(
-            router = router,
+            router = ROUTER,
             stateCache = preferences,
             cacheKeyProvider = cacheKeyProvider,
             initialState = NavigationState(
                 backStack = listOf(
-                    NavigationEntry(cacheKeyProvider()) @Composable { provideLoginScreen(it) }
+                    NavigationEntry(Destination.Login, cacheKeyProvider()) @Composable { _, it -> provideLoginScreen(it) }
                 )
             )
         )
@@ -82,7 +105,7 @@ object DI {
         cacheKey = cacheKey,
         onLoginSuccess = {
             navigationScope.launch {
-                navigationStore.sendAction(NavigationActions.Next(Destinations.LISTS))
+                navigationStore.sendAction(NavigationActions.Next(Destination.Lists))
             }
         },
         initialState = LoginViewState.Data(
