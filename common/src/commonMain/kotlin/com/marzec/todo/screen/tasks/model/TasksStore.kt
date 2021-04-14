@@ -1,12 +1,18 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.Store
+import com.marzec.todo.extensions.asInstanceSuspend
 import com.marzec.todo.model.ToDoList
+import com.marzec.todo.navigation.model.Destination
+import com.marzec.todo.navigation.model.NavigationActions
+import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 
 class TasksStore(
+    private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
     initialState: TasksScreenState,
@@ -24,6 +30,14 @@ class TasksStore(
                 when (val result = resultNonNull()) {
                    is Content.Data -> state.reduceData(result.data)
                    is Content.Error -> TasksScreenState.Error(result.exception.message.orEmpty())
+                }
+            }
+        }
+
+        addIntent<TasksScreenActions.AddNewTask> {
+            sideEffect {
+                state.asInstanceSuspend<TasksScreenState.Data> {
+                    navigationStore.next(Destination.AddNewTask(listId))
                 }
             }
         }

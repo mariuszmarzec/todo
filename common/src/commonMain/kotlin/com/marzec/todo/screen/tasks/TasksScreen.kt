@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.tasks.model.TasksScreenActions
@@ -56,7 +57,9 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch { tasksStore.sendAction(TasksScreenActions.AddNewTask) }
+                    scope.launch {
+                        tasksStore.sendAction(TasksScreenActions.AddNewTask)
+                    }
                 }
             ) {
                 Text("+")

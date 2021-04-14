@@ -13,3 +13,7 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
         Content.Error(e)
     }
 }
+
+fun <T> Content<T>.ifData(action: Content.Data<T>.() -> Unit) = (this as? Content.Data)?.action()
+
+suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) = (this as? Content.Data)?.action()

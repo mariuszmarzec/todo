@@ -6,7 +6,7 @@ import com.marzec.todo.preferences.Preferences
 import kotlin.reflect.KClass
 
 class NavigationStore(
-    router: Map<KClass<out Destination>, @Composable() (destination: Destination, cacheKey: String) -> Unit>,
+    router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
     private val stateCache: Preferences,
     cacheKeyProvider: () -> String,
     initialState: NavigationState
@@ -36,3 +36,7 @@ class NavigationStore(
         }
     }
 }
+
+suspend fun NavigationStore.goBack() = sendAction(NavigationActions.Back)
+
+suspend fun NavigationStore.next(destination: Destination) = sendAction(NavigationActions.Next(destination))

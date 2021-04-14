@@ -33,3 +33,10 @@ fun ToDoListDto.toDomain() = ToDoList(
     title = title,
     tasks = tasks.map { it.toDomain() }
 )
+
+@Serializable
+data class CreateTaskDto(
+    val description: String,
+    val parentTaskId: Int? = null,
+    val priority: Int
+)

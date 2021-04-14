@@ -2,6 +2,7 @@ package com.marzec.todo.repository
 
 import com.marzec.todo.Api
 import com.marzec.todo.DI
+import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.CreateTodoListDto
 import com.marzec.todo.api.ToDoListDto
 import com.marzec.todo.api.toDomain
@@ -43,4 +44,17 @@ class TodoRepository(private val client: HttpClient) {
             }
         }
 
+    suspend fun addNewTask(listId: Int, description: String): Content<Unit> =
+        withContext(DI.ioDispatcher) {
+            asContent {
+                client.post(Api.Todo.createTask(listId)) {
+                    contentType(ContentType.Application.Json)
+                    body = CreateTaskDto(
+                        description = description,
+                        parentTaskId = null,
+                        priority = 10
+                    )
+                }
+            }
+        }
 }

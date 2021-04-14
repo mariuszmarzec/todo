@@ -9,4 +9,5 @@ sealed class Destination {
     object Login : Destination()
     object Lists : Destination()
     data class Tasks(val listId: Int) : Destination()
+    data class AddNewTask(val listId: Int) : Destination()
 }

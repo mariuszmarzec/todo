@@ -10,6 +10,9 @@ import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
+import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
+import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
+import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.todo.screen.lists.ListsScreen
 import com.marzec.todo.screen.lists.ListsScreenState
 import com.marzec.todo.screen.lists.ListsScreenStore
@@ -41,7 +44,11 @@ object DI {
         Destination.Tasks::class to @Composable { destination, cacheKey ->
             destination as Destination.Tasks
             provideTasksScreen(destination.listId, cacheKey)
-        }
+        },
+        Destination.AddNewTask::class to @Composable { destination, cacheKey ->
+            destination as Destination.AddNewTask
+            provideAddNewTaskScreen(destination.listId, cacheKey)
+        },
     )
 
     @Composable
@@ -51,11 +58,28 @@ object DI {
 
     private fun provideTasksStore(listId: Int, cacheKey: String): TasksStore {
         return TasksStore(
+            navigationStore = navigationStore,
             listId = listId,
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE
+        )
+    }
+
+    @Composable
+    private fun provideAddNewTaskScreen(listId: Int, cacheKey: String) {
+        AddNewTaskScreen(navigationStore, provideAddNewTaskStore(listId = listId, cacheKey = cacheKey))
+    }
+
+    private fun provideAddNewTaskStore(listId: Int, cacheKey: String): AddNewTaskStore {
+        return AddNewTaskStore(
+            navigationStore = navigationStore,
+            listId = listId,
+            todoRepository = provideTodoRepository(),
+            stateCache = preferences,
+            cacheKey = cacheKey,
+            initialState = AddNewTaskState.DEFAULT
         )
     }
 
@@ -141,6 +165,7 @@ object Api {
 
         const val TODO_LISTS = "$BASE/lists"
         const val TODO_LIST = "$BASE/list"
+        fun createTask(listId: Int) = "$BASE/list/{$listId}/tasks"
     }
 
     object Headers {
