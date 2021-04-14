@@ -10,6 +10,7 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     return try {
         Content.Data(request())
     } catch (e: Exception) {
+        println(e.message)
         Content.Error(e)
     }
 }
