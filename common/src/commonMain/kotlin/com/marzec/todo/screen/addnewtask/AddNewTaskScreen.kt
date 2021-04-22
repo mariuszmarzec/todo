@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +31,12 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
 
     val state: AddNewTaskState by store.state.collectAsState()
 
+    LaunchedEffect(Unit) {
+        scope.launch {
+            store.sendAction(AddNewTaskActions.InitialLoad)
+        }
+    }
+
     Scaffold(
         topBar = {
             ActionBar(navigationStore, "Tasks")
@@ -43,13 +50,13 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextField(state.description, {
+                        TextField(state.data.description, {
                             scope.launch { store.sendAction(AddNewTaskActions.DescriptionChanged(it)) }
                         })
                     }
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextButton({ scope.launch { store.sendAction(AddNewTaskActions.Add) } }) {
-                            Text("Create")
+                            state.data.taskId?.let { Text("Update") } ?: Text("Create")
                         }
                     }
                 }

@@ -40,3 +40,11 @@ data class CreateTaskDto(
     val parentTaskId: Int? = null,
     val priority: Int
 )
+
+@Serializable
+data class UpdateTaskDto(
+    val description: String,
+    val parentTaskId: Int? = null,
+    val priority: Int,
+    val isToDo: Boolean
+)

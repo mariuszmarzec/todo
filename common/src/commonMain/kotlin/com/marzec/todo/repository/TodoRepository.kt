@@ -6,11 +6,14 @@ import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.CreateTodoListDto
 import com.marzec.todo.api.ToDoListDto
 import com.marzec.todo.api.toDomain
+import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
+import com.marzec.todo.model.UpdateTaskDto
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.asContent
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -44,6 +47,17 @@ class TodoRepository(private val client: HttpClient) {
             }
         }
 
+    suspend fun getTask(listId: Int, taskId: Int): Content<Task> =
+        withContext(DI.ioDispatcher) {
+            asContent {
+                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
+                    it.id == listId
+                }.tasks.first {
+                    it.id == taskId
+                }
+            }
+        }
+
     suspend fun addNewTask(listId: Int, description: String): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
@@ -53,6 +67,21 @@ class TodoRepository(private val client: HttpClient) {
                         description = description,
                         parentTaskId = null,
                         priority = 10
+                    )
+                }
+            }
+        }
+
+    suspend fun updateTask(taskId: Int, description: String): Content<Unit> =
+        withContext(DI.ioDispatcher) {
+            asContent {
+                client.patch(Api.Todo.updateTask(taskId)) {
+                    contentType(ContentType.Application.Json)
+                    body = UpdateTaskDto(
+                        description = description,
+                        parentTaskId = null,
+                        priority = 10,
+                        isToDo = true
                     )
                 }
             }

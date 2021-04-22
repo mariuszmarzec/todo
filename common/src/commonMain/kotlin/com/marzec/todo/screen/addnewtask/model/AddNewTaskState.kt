@@ -3,7 +3,7 @@ package com.marzec.todo.screen.addnewtask.model
 sealed class AddNewTaskState {
 
     data class Data(
-        val description: String
+        val data: TaskData
     ) : AddNewTaskState()
 
     object Loading : AddNewTaskState()
@@ -11,6 +11,18 @@ sealed class AddNewTaskState {
     data class Error(val message: String) : AddNewTaskState()
 
     companion object {
-        val DEFAULT = Data(description = "")
+        fun initial(listId: Int, taskId: Int?) = Data(
+            data = TaskData(
+                taskId = taskId,
+                listId = listId,
+                description = ""
+            )
+        )
     }
 }
+
+data class TaskData(
+    val taskId: Int?,
+    val listId: Int,
+    val description: String
+)

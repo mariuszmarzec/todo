@@ -34,10 +34,16 @@ class TasksStore(
             }
         }
 
+        addIntent<TasksScreenActions.ListItemClicked> {
+            sideEffect {
+                navigationStore.next(Destination.AddNewTask(listId, action.id.toInt()))
+            }
+        }
+
         addIntent<TasksScreenActions.AddNewTask> {
             sideEffect {
                 state.asInstanceSuspend<TasksScreenState.Data> {
-                    navigationStore.next(Destination.AddNewTask(listId))
+                    navigationStore.next(Destination.AddNewTask(listId, null))
                 }
             }
         }

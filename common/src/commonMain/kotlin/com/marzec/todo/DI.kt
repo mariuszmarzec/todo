@@ -47,7 +47,7 @@ object DI {
         },
         Destination.AddNewTask::class to @Composable { destination, cacheKey ->
             destination as Destination.AddNewTask
-            provideAddNewTaskScreen(destination.listId, cacheKey)
+            provideAddNewTaskScreen(destination.listId, destination.taskId, cacheKey)
         },
     )
 
@@ -68,18 +68,17 @@ object DI {
     }
 
     @Composable
-    private fun provideAddNewTaskScreen(listId: Int, cacheKey: String) {
-        AddNewTaskScreen(navigationStore, provideAddNewTaskStore(listId = listId, cacheKey = cacheKey))
+    private fun provideAddNewTaskScreen(listId: Int, taskId: Int?, cacheKey: String) {
+        AddNewTaskScreen(navigationStore, provideAddNewTaskStore(listId = listId, taskId = taskId, cacheKey = cacheKey))
     }
 
-    private fun provideAddNewTaskStore(listId: Int, cacheKey: String): AddNewTaskStore {
+    private fun provideAddNewTaskStore(listId: Int, taskId: Int?, cacheKey: String): AddNewTaskStore {
         return AddNewTaskStore(
             navigationStore = navigationStore,
-            listId = listId,
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = AddNewTaskState.DEFAULT
+            initialState = AddNewTaskState.initial(listId, taskId),
         )
     }
 
@@ -166,6 +165,7 @@ object Api {
         const val TODO_LISTS = "$BASE/lists"
         const val TODO_LIST = "$BASE/list"
         fun createTask(listId: Int) = "$BASE/list/$listId/tasks"
+        fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
     }
 
     object Headers {
