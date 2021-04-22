@@ -1,10 +1,9 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.Store
-import com.marzec.todo.extensions.asInstanceSuspend
+import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
@@ -42,7 +41,7 @@ class TasksStore(
 
         addIntent<TasksScreenActions.AddNewTask> {
             sideEffect {
-                state.asInstanceSuspend<TasksScreenState.Data> {
+                state.asInstance<TasksScreenState.Data> {
                     navigationStore.next(Destination.AddNewTask(listId, null))
                 }
             }

@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.addnewtask.model
 
 import com.marzec.mvi.Store
-import com.marzec.todo.extensions.asInstanceAndReturnSuspend
+import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.NavigationStore
@@ -23,7 +23,7 @@ class AddNewTaskStore(
     init {
         addIntent<AddNewTaskActions.InitialLoad, Content<Task>> {
             onTrigger {
-                state.asInstanceAndReturnSuspend<AddNewTaskState.Data, Content<Task>?> {
+                state.asInstanceAndReturn<AddNewTaskState.Data, Content<Task>?> {
                     data.taskId?.let { todoRepository.getTask(data.listId, it) }
                 }
             }
@@ -43,7 +43,7 @@ class AddNewTaskStore(
         }
         addIntent<AddNewTaskActions.Add, Content<Unit>> {
             onTrigger {
-                state.asInstanceAndReturnSuspend<AddNewTaskState.Data, Content<Unit>> {
+                state.asInstanceAndReturn<AddNewTaskState.Data, Content<Unit>> {
                     val taskId = data.taskId
                     if (taskId != null) {
                         todoRepository.updateTask(taskId, data.description)
