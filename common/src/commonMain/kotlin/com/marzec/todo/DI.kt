@@ -166,6 +166,7 @@ object Api {
         const val TODO_LIST = "$BASE/list"
         fun createTask(listId: Int) = "$BASE/list/$listId/tasks"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
+        fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
     }
 
     object Headers {

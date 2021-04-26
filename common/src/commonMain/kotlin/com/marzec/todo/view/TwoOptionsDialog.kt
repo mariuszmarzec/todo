@@ -5,27 +5,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 
 @Composable
-fun TextInputDialog(
-    state: TextInputDialog,
-    onTextChanged: (String) -> Unit = {},
+fun TwoOptionsDialog(
+    state: TwoOptionsDialog,
     onDismiss: () -> Unit = {},
-    onConfirm: (String) -> Unit = {}
+    onConfirm: () -> Unit = {}
 ) {
     if (state.visible) {
         Dialog(
@@ -37,19 +40,22 @@ fun TextInputDialog(
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(state.title)
 
                 Box(modifier = Modifier.padding(16.dp)) {
-                    TextField(state.inputField, {
-                        onTextChanged(it)
-                    })
+                    Text(
+                        text = state.title,
+                        fontSize = 16.sp,
+                        style = TextStyle.Default.copy(fontWeight = FontWeight.Bold)
+                    )
                 }
+
+                Text(text = state.message)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { onConfirm(state.inputField) }) {
+                    TextButton(onClick = { onConfirm() }) {
                         Text(state.confirmButton)
                     }
                     TextButton(onClick = { onDismiss() }) {
@@ -61,9 +67,9 @@ fun TextInputDialog(
     }
 }
 
-data class TextInputDialog(
+data class TwoOptionsDialog(
     val title: String,
-    val inputField: String,
+    val message: String,
     val confirmButton: String,
     val dismissButton: String,
     val visible: Boolean

@@ -5,7 +5,8 @@ import com.marzec.todo.model.Task
 sealed class TasksScreenState {
 
     data class Data(
-        val tasks: List<Task>
+        val tasks: List<Task>,
+        val removeTaskDialog: RemoveDialog
     ) : TasksScreenState()
 
     object Loading : TasksScreenState()
@@ -15,6 +16,17 @@ sealed class TasksScreenState {
     companion object {
 
         val INITIAL_STATE = Loading
-        val EMPTY_DATA = Data(emptyList())
+        val EMPTY_DATA = Data(
+            tasks = emptyList(),
+            removeTaskDialog = RemoveDialog(
+                visible = false,
+                idToRemove = -1
+            )
+        )
     }
 }
+
+data class RemoveDialog(
+    val visible: Boolean,
+    val idToRemove: Int
+)

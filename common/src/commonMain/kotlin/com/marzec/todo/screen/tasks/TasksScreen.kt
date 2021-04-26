@@ -2,6 +2,7 @@ package com.marzec.todo.screen.tasks
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
+import com.marzec.todo.view.TwoOptionsDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,18 +80,46 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                         },
                     ) {
                         key(it.id) {
-                            TextListItemView(state = it) {
-                                scope.launch {
-                                    tasksStore.sendAction(
-                                        TasksScreenActions.ListItemClicked(
-                                            it.id
-                                        )
-                                    )
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Row(Modifier.fillMaxWidth(fraction = 0.7f)) {
+                                    TextListItemView(state = it) {
+                                        scope.launch {
+                                            tasksStore.sendAction(
+                                                TasksScreenActions.ListItemClicked(
+                                                    it.id
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                                TextButton({
+                                    scope.launch { tasksStore.sendAction(TasksScreenActions.ShowRemoveDialog(it.id.toInt())) }
+                                }) {
+                                    Text(text = "Remove")
                                 }
                             }
                         }
                     }
                 }
+                TwoOptionsDialog(
+                    state = TwoOptionsDialog(
+                        title = "Remove task",
+                        message = "Do you really want to remove this task?",
+                        confirmButton = "Yes",
+                        dismissButton = "No",
+                        visible = state.removeTaskDialog.visible
+                    ),
+                    onDismiss = { scope.launch { tasksStore.sendAction(TasksScreenActions.HideRemoveDialog) } },
+                    onConfirm = {
+                        scope.launch {
+                            tasksStore.sendAction(
+                                TasksScreenActions.RemoveTask(
+                                    state.removeTaskDialog.idToRemove
+                                )
+                            )
+                        }
+                    }
+                )
             }
             TasksScreenState.Loading -> {
                 Text(text = "Loading")

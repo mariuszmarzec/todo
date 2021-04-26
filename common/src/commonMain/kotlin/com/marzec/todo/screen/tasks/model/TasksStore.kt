@@ -2,6 +2,7 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.Store
 import com.marzec.todo.extensions.asInstance
+import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
@@ -27,8 +28,8 @@ class TasksStore(
             }
             reducer {
                 when (val result = resultNonNull()) {
-                   is Content.Data -> state.reduceData(result.data)
-                   is Content.Error -> TasksScreenState.Error(result.exception.message.orEmpty())
+                    is Content.Data -> state.reduceData(result.data)
+                    is Content.Error -> TasksScreenState.Error(result.exception.message.orEmpty())
                 }
             }
         }
@@ -46,6 +47,54 @@ class TasksStore(
                 }
             }
         }
+
+        addIntent<TasksScreenActions.ShowRemoveDialog> {
+            reducer {
+                state.reduceData {
+                    copy(
+                        removeTaskDialog = removeTaskDialog.copy(
+                            visible = true,
+                            idToRemove = action.id
+                        )
+                    )
+                }
+            }
+        }
+
+        addIntent<TasksScreenActions.HideRemoveDialog> {
+            reducer {
+                state.reduceData {
+                    copy(
+                        removeTaskDialog = removeTaskDialog.copy(
+                            visible = false
+                        )
+                    )
+                }
+            }
+        }
+
+        addIntent<TasksScreenActions.RemoveTask, Content<Unit>> {
+            onTrigger { todoRepository.removeTask(action.id) }
+            reducer {
+                when (val result = resultNonNull()) {
+                    is Content.Data -> {
+                        state.reduceData {
+                            copy(
+                                removeTaskDialog = removeTaskDialog.copy(
+                                    visible = false
+                                )
+                            )
+                        }
+                    }
+                    is Content.Error -> TasksScreenState.Error(result.getMessage())
+                }
+            }
+
+            sideEffect {
+                sendAction(TasksScreenActions.HideRemoveDialog)
+                sendAction(TasksScreenActions.LoadLists)
+            }
+        }
     }
 
     override suspend fun onNewState(newState: TasksScreenState) {
@@ -60,3 +109,12 @@ private fun TasksScreenState.reduceData(data: ToDoList): TasksScreenState = when
 }.copy(
     tasks = data.tasks
 )
+
+private fun TasksScreenState.reduceData(
+    reducer: TasksScreenState.Data.() -> TasksScreenState.Data
+): TasksScreenState =
+    when (this) {
+        is TasksScreenState.Data -> this.reducer()
+        TasksScreenState.Loading -> TasksScreenState.EMPTY_DATA
+        is TasksScreenState.Error -> TasksScreenState.EMPTY_DATA
+    }
