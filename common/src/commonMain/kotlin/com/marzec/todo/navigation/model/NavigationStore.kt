@@ -16,6 +16,16 @@ class NavigationStore(
             reducer {
                 state.copy(
                     backStack = state.backStack.toMutableList().apply {
+                        action.options?.let { options ->
+                            takeLastWhile { it.destination != options.popTo }.forEach {
+                                if (it.destination != options.popTo) {
+                                    remove(it)
+                                }
+                            }
+                            if (options.popToInclusive && lastOrNull()?.destination == options.popTo) {
+                                removeLast()
+                            }
+                        }
                         val cacheKey = cacheKeyProvider()
                         val screenProvider = router.getValue(action.destination::class)
                         add(NavigationEntry(action.destination, cacheKey, screenProvider))

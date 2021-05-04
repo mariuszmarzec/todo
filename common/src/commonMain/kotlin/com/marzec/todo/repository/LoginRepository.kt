@@ -27,4 +27,10 @@ class LoginRepository(private val client: HttpClient) {
                 client.get<UserDto>(Api.Login.USER).toDomain()
             }
         }
+
+    suspend fun logout(): Content<Unit> = withContext(DI.ioDispatcher) {
+        asContent {
+            client.get<Unit>(Api.Login.LOGOUT)
+        }
+    }
 }

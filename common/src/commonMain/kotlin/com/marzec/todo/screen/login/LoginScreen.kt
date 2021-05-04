@@ -15,6 +15,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.todo.DI
+import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.screen.login.model.LoginActions
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.login.model.LoginViewState
@@ -46,6 +48,11 @@ fun LoginScreen(loginStore: LoginStore) {
             TextButton({ scope.launch { loginStore.sendAction(LoginActions.LoginButtonClick) } }) {
                 Text("Login")
             }
+        }
+        TextButton({
+            scope.launch { DI.navigationStore.sendAction(NavigationActions.Back) }
+        }) {
+            Text(text = "Back")
         }
     }
 }
