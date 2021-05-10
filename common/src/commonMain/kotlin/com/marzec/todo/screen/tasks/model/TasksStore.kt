@@ -36,7 +36,7 @@ class TasksStore(
 
         addIntent<TasksScreenActions.ListItemClicked> {
             sideEffect {
-                navigationStore.next(Destination.AddNewTask(listId, action.id.toInt()))
+                navigationStore.next(Destination.TaskDetails(listId, action.id.toInt()))
             }
         }
 

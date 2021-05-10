@@ -3,6 +3,7 @@ package com.marzec.todo.screen.login
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
@@ -44,15 +45,12 @@ fun LoginScreen(loginStore: LoginStore) {
                 scope.launch { loginStore.sendAction(LoginActions.PasswordChanged(it)) }
             })
         }
-        Box(modifier = Modifier.padding(16.dp)) {
-            TextButton({ scope.launch { loginStore.sendAction(LoginActions.LoginButtonClick) } }) {
-                Text("Login")
+        Row(horizontalArrangement = Arrangement.Center) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                TextButton({ scope.launch { loginStore.sendAction(LoginActions.LoginButtonClick) } }) {
+                    Text("Edit")
+                }
             }
-        }
-        TextButton({
-            scope.launch { DI.navigationStore.sendAction(NavigationActions.Back) }
-        }) {
-            Text(text = "Back")
         }
     }
 }

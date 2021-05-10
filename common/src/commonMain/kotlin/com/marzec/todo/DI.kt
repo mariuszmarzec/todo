@@ -20,6 +20,9 @@ import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.login.model.LoginViewState
+import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
+import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
+import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.screen.tasks.TasksScreen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
@@ -38,18 +41,23 @@ object DI {
 
     val preferences: Preferences = MemoryPreferences()
 
-    private val ROUTER: Map<KClass<out Destination>, (@Composable (destination: Destination, cacheKey: String) -> Unit)> = mapOf(
-        Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
-        Destination.Lists::class to @Composable { _, cacheKey -> provideListScreen(cacheKey) },
-        Destination.Tasks::class to @Composable { destination, cacheKey ->
-            destination as Destination.Tasks
-            provideTasksScreen(destination.listId, cacheKey)
-        },
-        Destination.AddNewTask::class to @Composable { destination, cacheKey ->
-            destination as Destination.AddNewTask
-            provideAddNewTaskScreen(destination.listId, destination.taskId, cacheKey)
-        },
-    )
+    private val ROUTER: Map<KClass<out Destination>, (@Composable (destination: Destination, cacheKey: String) -> Unit)> =
+        mapOf(
+            Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
+            Destination.Lists::class to @Composable { _, cacheKey -> provideListScreen(cacheKey) },
+            Destination.Tasks::class to @Composable { destination, cacheKey ->
+                destination as Destination.Tasks
+                provideTasksScreen(destination.listId, cacheKey)
+            },
+            Destination.AddNewTask::class to @Composable { destination, cacheKey ->
+                destination as Destination.AddNewTask
+                provideAddNewTaskScreen(destination.listId, destination.taskId, cacheKey)
+            },
+            Destination.TaskDetails::class to @Composable { destination, cacheKey ->
+                destination as Destination.TaskDetails
+                provideTaskDetailsScreen(destination.listId, destination.taskId, cacheKey)
+            }
+        )
 
     @Composable
     private fun provideTasksScreen(listId: Int, cacheKey: String) {
@@ -69,16 +77,50 @@ object DI {
 
     @Composable
     private fun provideAddNewTaskScreen(listId: Int, taskId: Int?, cacheKey: String) {
-        AddNewTaskScreen(navigationStore, provideAddNewTaskStore(listId = listId, taskId = taskId, cacheKey = cacheKey))
+        AddNewTaskScreen(
+            navigationStore,
+            provideAddNewTaskStore(listId = listId, taskId = taskId, cacheKey = cacheKey)
+        )
     }
 
-    private fun provideAddNewTaskStore(listId: Int, taskId: Int?, cacheKey: String): AddNewTaskStore {
+    private fun provideAddNewTaskStore(
+        listId: Int,
+        taskId: Int?,
+        cacheKey: String
+    ): AddNewTaskStore {
         return AddNewTaskStore(
             navigationStore = navigationStore,
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = AddNewTaskState.initial(listId, taskId),
+        )
+    }
+
+    @Composable
+    private fun provideTaskDetailsScreen(listId: Int, taskId: Int, cacheKey: String) {
+        TaskDetailsScreen(
+            navigationStore, provideTaskDetailsStore(
+                listId = listId,
+                taskId = taskId,
+                cacheKey = cacheKey
+            )
+        )
+    }
+
+    private fun provideTaskDetailsStore(
+        listId: Int,
+        taskId: Int,
+        cacheKey: String
+    ): TaskDetailsStore {
+        return TaskDetailsStore(
+            navigationStore = navigationStore,
+            todoRepository = provideTodoRepository(),
+            stateCache = preferences,
+            cacheKey = cacheKey,
+            initialState = TaskDetailsState.INITIAL,
+            listId = listId,
+            taskId = taskId
         )
     }
 
@@ -91,7 +133,10 @@ object DI {
             cacheKeyProvider = cacheKeyProvider,
             initialState = NavigationState(
                 backStack = listOf(
-                    NavigationEntry(Destination.Login, cacheKeyProvider()) @Composable { _, it -> provideLoginScreen(it) }
+                    NavigationEntry(
+                        Destination.Login,
+                        cacheKeyProvider()
+                    ) @Composable { _, it -> provideLoginScreen(it) }
                 )
             )
         )
