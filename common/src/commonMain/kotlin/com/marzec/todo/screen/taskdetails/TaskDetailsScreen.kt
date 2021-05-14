@@ -55,7 +55,7 @@ fun TaskDetailsScreen(navigationStore: NavigationStore, store: TaskDetailsStore)
                     Spacer(Modifier.size(16.dp))
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextButton({ scope.launch { store.sendAction(TaskDetailsActions.Edit) } }) {
-                            Text("Login")
+                            Text("Edit")
                         }
                     }
                 }

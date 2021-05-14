@@ -11,9 +11,10 @@ sealed class AddNewTaskState {
     data class Error(val message: String) : AddNewTaskState()
 
     companion object {
-        fun initial(listId: Int, taskId: Int?) = Data(
+        fun initial(listId: Int, taskId: Int?, parentTaskId: Int?) = Data(
             data = TaskData(
                 taskId = taskId,
+                parentTaskId = parentTaskId,
                 listId = listId,
                 description = ""
             )
@@ -23,6 +24,7 @@ sealed class AddNewTaskState {
 
 data class TaskData(
     val taskId: Int?,
+    val parentTaskId: Int?,
     val listId: Int,
     val description: String
 )

@@ -48,7 +48,7 @@ class AddNewTaskStore(
                     if (taskId != null) {
                         todoRepository.updateTask(taskId, data.description)
                     } else {
-                        todoRepository.addNewTask(data.listId, data.description)
+                        todoRepository.addNewTask(data.listId, data.parentTaskId, data.description)
                     }
                 }
             }

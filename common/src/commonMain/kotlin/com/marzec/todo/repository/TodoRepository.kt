@@ -59,14 +59,14 @@ class TodoRepository(private val client: HttpClient) {
             }
         }
 
-    suspend fun addNewTask(listId: Int, description: String): Content<Unit> =
+    suspend fun addNewTask(listId: Int, parentTaskId: Int? = null, description: String): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
                 client.post(Api.Todo.createTask(listId)) {
                     contentType(ContentType.Application.Json)
                     body = CreateTaskDto(
                         description = description,
-                        parentTaskId = null,
+                        parentTaskId = parentTaskId,
                         priority = 10
                     )
                 }

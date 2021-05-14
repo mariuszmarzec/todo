@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.Store
+import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
@@ -40,7 +41,9 @@ class TaskDetailsStore(
 
         addIntent<TaskDetailsActions.Edit> {
             sideEffect {
-                navigationStore.next(Destination.AddNewTask(listId, taskId))
+                state.asInstance<TaskDetailsState.Data> {
+                    navigationStore.next(Destination.AddNewTask(listId, taskId, task.parentTaskId))
+                }
             }
         }
     }

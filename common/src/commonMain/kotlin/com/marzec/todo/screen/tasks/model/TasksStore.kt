@@ -43,7 +43,7 @@ class TasksStore(
         addIntent<TasksScreenActions.AddNewTask> {
             sideEffect {
                 state.asInstance<TasksScreenState.Data> {
-                    navigationStore.next(Destination.AddNewTask(listId, null))
+                    navigationStore.next(Destination.AddNewTask(listId, null, null))
                 }
             }
         }

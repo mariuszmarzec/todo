@@ -51,7 +51,12 @@ object DI {
             },
             Destination.AddNewTask::class to @Composable { destination, cacheKey ->
                 destination as Destination.AddNewTask
-                provideAddNewTaskScreen(destination.listId, destination.taskId, cacheKey)
+                provideAddNewTaskScreen(
+                    listId = destination.listId,
+                    taskId = destination.taskId,
+                    parentTaskId = destination.parentTaskId,
+                    cacheKey
+                )
             },
             Destination.TaskDetails::class to @Composable { destination, cacheKey ->
                 destination as Destination.TaskDetails
@@ -76,16 +81,27 @@ object DI {
     }
 
     @Composable
-    private fun provideAddNewTaskScreen(listId: Int, taskId: Int?, cacheKey: String) {
+    private fun provideAddNewTaskScreen(
+        listId: Int,
+        taskId: Int?,
+        parentTaskId: Int?,
+        cacheKey: String
+    ) {
         AddNewTaskScreen(
             navigationStore,
-            provideAddNewTaskStore(listId = listId, taskId = taskId, cacheKey = cacheKey)
+            provideAddNewTaskStore(
+                listId = listId,
+                taskId = taskId,
+                parentTaskId = parentTaskId,
+                cacheKey = cacheKey
+            )
         )
     }
 
     private fun provideAddNewTaskStore(
         listId: Int,
         taskId: Int?,
+        parentTaskId: Int?,
         cacheKey: String
     ): AddNewTaskStore {
         return AddNewTaskStore(
@@ -93,7 +109,11 @@ object DI {
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = AddNewTaskState.initial(listId, taskId),
+            initialState = AddNewTaskState.initial(
+                listId = listId,
+                taskId = taskId,
+                parentTaskId = parentTaskId
+            ),
         )
     }
 

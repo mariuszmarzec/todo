@@ -48,7 +48,7 @@ fun LoginScreen(loginStore: LoginStore) {
         Row(horizontalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.padding(16.dp)) {
                 TextButton({ scope.launch { loginStore.sendAction(LoginActions.LoginButtonClick) } }) {
-                    Text("Edit")
+                    Text("Login")
                 }
             }
         }
