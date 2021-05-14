@@ -5,10 +5,10 @@ import com.marzec.todo.DI
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.CreateTodoListDto
 import com.marzec.todo.api.ToDoListDto
+import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.api.toDomain
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
-import com.marzec.todo.model.UpdateTaskDto
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.asContent
 import io.ktor.client.HttpClient

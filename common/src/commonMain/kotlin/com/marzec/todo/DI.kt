@@ -13,6 +13,9 @@ import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
+import com.marzec.todo.screen.addsubtask.AddSubTaskScreen
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskState
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.screen.lists.ListsScreen
 import com.marzec.todo.screen.lists.ListsScreenState
 import com.marzec.todo.screen.lists.ListsScreenStore
@@ -53,7 +56,7 @@ object DI {
                 destination as Destination.AddNewTask
                 provideAddNewTaskScreen(
                     listId = destination.listId,
-                    taskId = destination.taskId,
+                    taskId = destination.taskToEditId,
                     parentTaskId = destination.parentTaskId,
                     cacheKey
                 )
@@ -61,6 +64,10 @@ object DI {
             Destination.TaskDetails::class to @Composable { destination, cacheKey ->
                 destination as Destination.TaskDetails
                 provideTaskDetailsScreen(destination.listId, destination.taskId, cacheKey)
+            },
+            Destination.AddSubTask::class to @Composable { destination, cacheKey ->
+                destination as Destination.AddSubTask
+                provideAddSubTaskScreen(destination.listId, destination.taskId, cacheKey)
             }
         )
 
@@ -139,6 +146,33 @@ object DI {
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = TaskDetailsState.INITIAL,
+            listId = listId,
+            taskId = taskId
+        )
+    }
+
+    @Composable
+    private fun provideAddSubTaskScreen(listId: Int, taskId: Int, cacheKey: String) {
+        AddSubTaskScreen(
+            navigationStore, provideAddSubTaskStore(
+                listId = listId,
+                taskId = taskId,
+                cacheKey = cacheKey
+            )
+        )
+    }
+
+    private fun provideAddSubTaskStore(
+        listId: Int,
+        taskId: Int,
+        cacheKey: String
+    ): AddSubTaskStore {
+        return AddSubTaskStore(
+            navigationStore = navigationStore,
+            todoRepository = provideTodoRepository(),
+            stateCache = preferences,
+            cacheKey = cacheKey,
+            initialState = AddSubTaskState.INITIAL,
             listId = listId,
             taskId = taskId
         )

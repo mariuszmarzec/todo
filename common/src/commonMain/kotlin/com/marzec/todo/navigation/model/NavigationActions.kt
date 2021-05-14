@@ -20,8 +20,9 @@ sealed class Destination {
     data class Tasks(val listId: Int) : Destination()
     data class AddNewTask(
         val listId: Int,
-        val taskId: Int?,
+        val taskToEditId: Int?,
         val parentTaskId: Int?
     ) : Destination()
     data class TaskDetails(val listId: Int, val taskId: Int) : Destination()
+    data class AddSubTask(val listId: Int, val taskId: Int) : Destination()
 }

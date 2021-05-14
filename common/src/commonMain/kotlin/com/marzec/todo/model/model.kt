@@ -1,9 +1,10 @@
 package com.marzec.todo.model
 
+import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.ToDoListDto
+import com.marzec.todo.api.UpdateTaskDto
 import kotlinx.datetime.LocalDateTime
-import kotlinx.serialization.Serializable
 
 data class Task(
     val id: Int,
@@ -56,13 +57,6 @@ data class CreateTask(
     val priority: Int
 )
 
-@Serializable
-data class CreateTaskDto(
-    val description: String,
-    val parentTaskId: Int? = null,
-    val priority: Int
-)
-
 fun CreateTaskDto.toDomain() = CreateTask(
     description = description,
     parentTaskId = parentTaskId,
@@ -78,14 +72,6 @@ fun CreateTask.toDto() = CreateTaskDto(
 data class UpdateTask(
     val description: String,
     val parentTaskId: Int?,
-    val priority: Int,
-    val isToDo: Boolean
-)
-
-@Serializable
-data class UpdateTaskDto(
-    val description: String,
-    val parentTaskId: Int? = null,
     val priority: Int,
     val isToDo: Boolean
 )

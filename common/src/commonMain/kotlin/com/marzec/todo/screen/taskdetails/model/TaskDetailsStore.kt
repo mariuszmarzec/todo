@@ -46,6 +46,14 @@ class TaskDetailsStore(
                 }
             }
         }
+
+        addIntent<TaskDetailsActions.OnAddSubTaskClick> {
+            sideEffect {
+                state.asInstance<TaskDetailsState.Data> {
+                    navigationStore.next(Destination.AddSubTask(listId, taskId))
+                }
+            }
+        }
     }
 
     override suspend fun onNewState(newState: TaskDetailsState) {

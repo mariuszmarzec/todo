@@ -1,4 +1,4 @@
-package com.marzec.todo.screen.taskdetails
+package com.marzec.todo.screen.addsubtask
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,56 +20,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.screen.taskdetails.model.TaskDetailsActions
-import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
-import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskActions
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskState
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.view.ActionBar
 import kotlinx.coroutines.launch
 
 @Composable
-fun TaskDetailsScreen(navigationStore: NavigationStore, store: TaskDetailsStore) {
+fun AddSubTaskScreen(navigationStore: NavigationStore, store: AddSubTaskStore) {
 
     val scope = rememberCoroutineScope()
 
-    val state: TaskDetailsState by store.state.collectAsState()
+    val state: AddSubTaskState by store.state.collectAsState()
 
     LaunchedEffect(Unit) {
         scope.launch {
-            store.sendAction(TaskDetailsActions.InitialLoad)
+            store.sendAction(AddSubTaskActions.InitialLoad)
         }
     }
 
     Scaffold(
         topBar = {
-            ActionBar(navigationStore, "Task details")
+            ActionBar(navigationStore, "Add Sub Task")
         }
     ) {
         when (val state = state) {
-            is TaskDetailsState.Data -> {
+            is AddSubTaskState.Data -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    Text(text = state.task.description, fontSize = 16.sp)
                     Spacer(Modifier.size(16.dp))
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextButton({ scope.launch { store.sendAction(TaskDetailsActions.Edit) } }) {
-                            Text("Edit")
-                        }
-                    }
-                    Spacer(Modifier.size(16.dp))
-                    Box(modifier = Modifier.padding(16.dp)) {
-                        TextButton({ scope.launch { store.sendAction(TaskDetailsActions.OnAddSubTaskClick) } }) {
-                            Text("Add subtask")
+                        TextButton({ scope.launch { store.sendAction(AddSubTaskActions.OnAddSubTaskClick) } }) {
+                            Text("Create new subtask")
                         }
                     }
                 }
             }
-            TaskDetailsState.Loading -> {
+            AddSubTaskState.Loading -> {
                 Text(text = "Loading")
             }
-            is TaskDetailsState.Error -> {
+            is AddSubTaskState.Error -> {
                 Text(text = state.message)
             }
         }
