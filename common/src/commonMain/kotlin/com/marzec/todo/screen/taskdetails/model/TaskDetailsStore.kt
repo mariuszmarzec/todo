@@ -34,6 +34,7 @@ class TaskDetailsStore(
                     when (result) {
                         is Content.Data -> state.reduceData(result.data)
                         is Content.Error -> TaskDetailsState.Error(result.getMessage())
+                        is Content.Loading -> TaskDetailsState.Loading
                     }
                 } ?: state
             }

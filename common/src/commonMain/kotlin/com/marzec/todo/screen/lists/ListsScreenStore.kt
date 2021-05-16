@@ -81,6 +81,7 @@ class ListsScreenStore(
         when (this) {
             is Content.Data -> state.reduceData(this)
             is Content.Error -> ListsScreenState.Error(this.exception.message.orEmpty())
+            is Content.Loading -> ListsScreenState.INITIAL
         }
 
     override suspend fun onNewState(newState: ListsScreenState) {

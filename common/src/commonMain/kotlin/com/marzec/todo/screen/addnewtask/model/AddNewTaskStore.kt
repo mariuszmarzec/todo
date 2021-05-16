@@ -32,6 +32,7 @@ class AddNewTaskStore(
                     when (result) {
                         is Content.Data -> state.reduceData(result.data.description)
                         is Content.Error -> AddNewTaskState.Error(result.getMessage())
+                        is Content.Loading -> state.reduceData(result.data?.description.orEmpty())
                     }
                 } ?: state
             }

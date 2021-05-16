@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+@Deprecated("Use Store2")
 @ExperimentalCoroutinesApi
 open class Store<State: Any, Action : Any>(defaultState: State) {
     

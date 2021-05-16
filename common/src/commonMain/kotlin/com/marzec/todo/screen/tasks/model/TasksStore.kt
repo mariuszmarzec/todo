@@ -30,6 +30,7 @@ class TasksStore(
                 when (val result = resultNonNull()) {
                     is Content.Data -> state.reduceData(result.data)
                     is Content.Error -> TasksScreenState.Error(result.exception.message.orEmpty())
+                    is Content.Loading -> TasksScreenState.Loading
                 }
             }
         }
@@ -87,6 +88,7 @@ class TasksStore(
                         }
                     }
                     is Content.Error -> TasksScreenState.Error(result.getMessage())
+                    is Content.Loading -> TasksScreenState.Loading
                 }
             }
 
