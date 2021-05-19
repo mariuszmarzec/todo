@@ -7,6 +7,7 @@ import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.navigation.model.goBack
 import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
@@ -110,6 +111,19 @@ class TaskDetailsStore(
         }
     }
 
+    suspend fun showRemoveSubTaskDialog(subtaskId: String) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(
+                    removeTaskDialog = removeTaskDialog.copy(
+                        visible = true,
+                        idToRemove = subtaskId.toInt()
+                    )
+                )
+            }
+        }
+    }
+
     suspend fun hideRemoveTaskDialog() = intent<Unit> {
         reducer {
             state.reduceData {
@@ -127,7 +141,7 @@ class TaskDetailsStore(
             state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>> {
                 flow {
                     emit(
-                        todoRepository.removeTask(task.id)
+                        todoRepository.removeTask(removeTaskDialog.idToRemove)
                     )
                 }
             }
@@ -151,7 +165,13 @@ class TaskDetailsStore(
 
         sideEffect {
             hideRemoveTaskDialog()
-            initialLoad()
+            state.asInstance<TaskDetailsState.Data> {
+                if (removeTaskDialog.idToRemove == task.id) {
+                    navigationStore.goBack()
+                } else {
+                    initialLoad()
+                }
+            }
         }
     }
 }

@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
-import com.marzec.todo.screen.tasks.model.TasksScreenActions
 import com.marzec.todo.view.ActionBar
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
@@ -102,6 +101,11 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                                         scope.launch { store.unpinSubtask(it.id) }
                                     }) {
                                         Text(text = "Unpin")
+                                    }
+                                    TextButton({
+                                        scope.launch { store.showRemoveSubTaskDialog(it.id) }
+                                    }) {
+                                        Text(text = "Remove")
                                     }
                                 }
                             }
