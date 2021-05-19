@@ -27,6 +27,6 @@ sealed class TasksScreenState {
 }
 
 data class RemoveDialog(
-    val visible: Boolean,
-    val idToRemove: Int
+    val visible: Boolean = false,
+    val idToRemove: Int = -1
 )

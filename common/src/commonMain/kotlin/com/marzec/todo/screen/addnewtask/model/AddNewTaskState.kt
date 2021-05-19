@@ -16,7 +16,9 @@ sealed class AddNewTaskState {
                 taskId = taskId,
                 parentTaskId = parentTaskId,
                 listId = listId,
-                description = ""
+                description = "",
+                priority = 0,
+                isToDo = true
             )
         )
     }
@@ -26,5 +28,7 @@ data class TaskData(
     val taskId: Int?,
     val parentTaskId: Int?,
     val listId: Int,
+    val priority: Int,
+    val isToDo: Boolean,
     val description: String
 )

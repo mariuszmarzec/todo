@@ -53,7 +53,7 @@ class TodoRepository(private val client: HttpClient) {
             asContent {
                 client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
                     it.id == listId
-                }.tasks.first {
+                }.tasks.flatMapTask().first {
                     it.id == taskId
                 }
             }
@@ -73,16 +73,22 @@ class TodoRepository(private val client: HttpClient) {
             }
         }
 
-    suspend fun updateTask(taskId: Int, description: String): Content<Unit> =
+    suspend fun updateTask(
+        taskId: Int,
+        description: String,
+        parentTaskId: Int?,
+        priority: Int,
+        isToDo: Boolean
+    ): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
                 client.patch(Api.Todo.updateTask(taskId)) {
                     contentType(ContentType.Application.Json)
                     body = UpdateTaskDto(
                         description = description,
-                        parentTaskId = null,
-                        priority = 10,
-                        isToDo = true
+                        parentTaskId = parentTaskId,
+                        priority = priority,
+                        isToDo = isToDo
                     )
                 }
             }
@@ -94,4 +100,12 @@ class TodoRepository(private val client: HttpClient) {
                 client.delete(Api.Todo.updateTask(taskId))
             }
         }
+}
+
+private fun List<Task>.flatMapTask(tasks: MutableList<Task> = mutableListOf()): List<Task> {
+    forEach {
+        tasks.add(it)
+        it.subTasks.flatMapTask(tasks)
+    }
+    return tasks
 }

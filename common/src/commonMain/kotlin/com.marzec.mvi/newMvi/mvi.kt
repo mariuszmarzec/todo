@@ -36,7 +36,7 @@ open class Store2<State : Any>(defaultState: State) {
         scope.launch {
             actions.flatMapMerge { intent ->
                 debug("actions flatMapMerge intent: $intent")
-                intent.onTrigger(_state.value).map {
+                (intent.onTrigger(_state.value) ?: flowOf(null)).map {
                     debug("actions onTrigger state: ${intent.state} result: $it")
                     intent.copy(result = it, sideEffect = intent.sideEffect)
                 }
@@ -66,6 +66,10 @@ open class Store2<State : Any>(defaultState: State) {
         actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
     }
 
+    suspend fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
+        actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
+    }
+
     open suspend fun onNewState(newState: State) = Unit
 
     fun debug(string: String) {
@@ -76,7 +80,7 @@ open class Store2<State : Any>(defaultState: State) {
 }
 
 data class Intent2<State, out Result : Any>(
-    val onTrigger: suspend (stateParam: State) -> Flow<Result?> = { _ -> flowOf(null) },
+    val onTrigger: suspend (stateParam: State) -> Flow<Result>? = { _ -> null },
     val reducer: suspend (result: Any?, stateParam: State) -> State = { _, stateParam -> stateParam },
     val sideEffect: (suspend (result: Any?, state: State) -> Unit)? = null,
     val state: State?,
@@ -88,11 +92,11 @@ data class Intent2<State, out Result : Any>(
 @Suppress("UNCHECKED_CAST")
 class IntentBuilder<State: Any, Result: Any> {
 
-    private var onTrigger: suspend (stateParam: State) -> Flow<Result?> = { _ -> flowOf(null) }
+    private var onTrigger: suspend (stateParam: State) -> Flow<Result>? = { _ -> null }
     private var reducer: suspend (result: Any?, stateParam: State) -> State = { _, stateParam -> stateParam }
     private var sideEffect: (suspend (result: Any?, state: State) -> Unit)? = null
 
-    fun onTrigger(func: suspend IntentContext<State, Result>.() -> Flow<Result?>): IntentBuilder<State, Result> {
+    fun onTrigger(func: suspend IntentContext<State, Result>.() -> Flow<Result>? = { null }): IntentBuilder<State, Result> {
         onTrigger = { state ->
             IntentContext<State, Result>(state, null).func()
         }

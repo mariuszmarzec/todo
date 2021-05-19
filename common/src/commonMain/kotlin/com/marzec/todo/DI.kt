@@ -127,6 +127,8 @@ object DI {
     @Composable
     private fun provideTaskDetailsScreen(listId: Int, taskId: Int, cacheKey: String) {
         TaskDetailsScreen(
+            listId = listId,
+            taskId = taskId,
             navigationStore, provideTaskDetailsStore(
                 listId = listId,
                 taskId = taskId,
@@ -247,7 +249,7 @@ object PreferencesKeys {
 
 object Api {
 
-    const val HOST = "http://fiteo-env.eba-mpctrvdb.us-east-2.elasticbeanstalk.com/test"
+    const val HOST = "http://fiteo-env-1.eba-cba76vkj.us-east-2.elasticbeanstalk.com/test"
 //    const val HOST = "http://localhost:500"
 
     object Login {
