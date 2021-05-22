@@ -16,6 +16,13 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     }
 }
 
+fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
+    is Content.Data -> Content.Data(mapper(this.data))
+    is Content.Loading -> Content.Loading(this.data?.let(mapper))
+    is Content.Error -> Content.Error(this.exception)
+}
+
 fun <T> Content<T>.ifData(action: Content.Data<T>.() -> Unit) = (this as? Content.Data)?.action()
 
-suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) = (this as? Content.Data)?.action()
+suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) =
+    (this as? Content.Data)?.action()

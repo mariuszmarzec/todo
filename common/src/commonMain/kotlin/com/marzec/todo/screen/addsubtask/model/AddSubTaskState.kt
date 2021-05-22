@@ -2,14 +2,23 @@ package com.marzec.todo.screen.addsubtask.model
 
 import com.marzec.todo.model.Task
 
-sealed class AddSubTaskState {
+sealed class AddSubTaskState(
+    open val tasks: List<Task>,
+) {
     data class Data(
-        val tasks: List<Task>,
-    ) : AddSubTaskState()
-    object Loading : AddSubTaskState()
-    data class Error(val message: String) : AddSubTaskState()
+        override val tasks: List<Task>,
+    ) : AddSubTaskState(tasks)
+
+    data class Loading(
+        override val tasks: List<Task>,
+    ) : AddSubTaskState(tasks)
+
+    data class Error(
+        override val tasks: List<Task>,
+        val message: String
+    ) : AddSubTaskState(tasks)
 
     companion object {
-        val INITIAL = Loading
+        val INITIAL = Loading(emptyList())
     }
 }
