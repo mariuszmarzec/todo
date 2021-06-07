@@ -2,20 +2,26 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.todo.model.Task
 
-sealed class TasksScreenState {
-
+sealed class TasksScreenState(
+    open val tasks: List<Task>
+) {
     data class Data(
-        val tasks: List<Task>,
+        override val tasks: List<Task>,
         val removeTaskDialog: RemoveDialog
-    ) : TasksScreenState()
+    ) : TasksScreenState(tasks)
 
-    object Loading : TasksScreenState()
+    class Loading(
+        override val tasks: List<Task>
+    ) : TasksScreenState(tasks)
 
-    data class Error(val message: String) : TasksScreenState()
+    data class Error(
+        override val tasks: List<Task>,
+        val message: String
+    ) : TasksScreenState(tasks)
 
     companion object {
 
-        val INITIAL_STATE = Loading
+        val INITIAL_STATE = Loading(emptyList())
         val EMPTY_DATA = Data(
             tasks = emptyList(),
             removeTaskDialog = RemoveDialog(

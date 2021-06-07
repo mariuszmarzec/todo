@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.FabPosition
@@ -38,9 +39,8 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
     val state: TasksScreenState by tasksStore.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        scope.launch {
-            tasksStore.sendAction(TasksScreenActions.LoadLists)
-        }
+        tasksStore.init(this)
+        tasksStore.loadList()
     }
 
     Scaffold(
@@ -59,9 +59,7 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch {
-                        tasksStore.sendAction(TasksScreenActions.AddNewTask)
-                    }
+                    scope.launch { tasksStore.addNewTask() }
                 }
             ) {
                 Text("+")
@@ -81,19 +79,25 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                     ) {
                         key(it.id) {
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Row(Modifier.fillMaxWidth(fraction = 0.7f)) {
+                                Row(Modifier.fillMaxWidth(fraction = 0.4f)) {
                                     TextListItemView(state = it) {
                                         scope.launch {
-                                            tasksStore.sendAction(
-                                                TasksScreenActions.ListItemClicked(
-                                                    it.id
-                                                )
-                                            )
+                                            tasksStore.onListItemClicked(it.id)
                                         }
                                     }
                                 }
                                 TextButton({
-                                    scope.launch { tasksStore.sendAction(TasksScreenActions.ShowRemoveDialog(it.id.toInt())) }
+                                    scope.launch { tasksStore.moveToTop(it.id) }
+                                }) {
+                                    Text(text = "Move to top")
+                                }
+                                TextButton({
+                                    scope.launch { tasksStore.moveToBottom(it.id) }
+                                }) {
+                                    Text(text = "Move to bottom")
+                                }
+                                TextButton({
+                                    scope.launch { tasksStore.showRemoveDialog(it.id) }
                                 }) {
                                     Text(text = "Remove")
                                 }
@@ -109,19 +113,15 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                         dismissButton = "No",
                         visible = state.removeTaskDialog.visible
                     ),
-                    onDismiss = { scope.launch { tasksStore.sendAction(TasksScreenActions.HideRemoveDialog) } },
+                    onDismiss = { scope.launch { tasksStore.hideRemoveDialog() } },
                     onConfirm = {
                         scope.launch {
-                            tasksStore.sendAction(
-                                TasksScreenActions.RemoveTask(
-                                    state.removeTaskDialog.idToRemove
-                                )
-                            )
+                            tasksStore.removeTask(state.removeTaskDialog.idToRemove)
                         }
                     }
                 )
             }
-            TasksScreenState.Loading -> {
+            is TasksScreenState.Loading -> {
                 Text(text = "Loading")
             }
             is TasksScreenState.Error -> {
