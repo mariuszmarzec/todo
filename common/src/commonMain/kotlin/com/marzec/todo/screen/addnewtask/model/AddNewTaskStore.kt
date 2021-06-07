@@ -108,12 +108,3 @@ private fun AddNewTaskState.reduceData(task: Task): AddNewTaskState = when (this
     AddNewTaskState.Loading -> this
     is AddNewTaskState.Error -> this.copy()
 }
-
-private fun TaskDetailsState.reduceData(
-    reducer: TaskDetailsState.Data.() -> TaskDetailsState.Data
-): TaskDetailsState =
-    when (this) {
-        is TaskDetailsState.Data -> this.reducer()
-        TaskDetailsState.Loading -> TaskDetailsState.Loading
-        is TaskDetailsState.Error -> TaskDetailsState.Error(message)
-    }

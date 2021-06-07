@@ -15,7 +15,6 @@ import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.tasks.model.RemoveDialog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 
 class TaskDetailsStore(
     private val navigationStore: NavigationStore,
@@ -29,7 +28,7 @@ class TaskDetailsStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
-    suspend fun initialLoad() = intent<Content<Task>> {
+    suspend fun loadDetails() = intent<Content<Task>> {
         onTrigger {
             flow {
                 emit(Content.Loading())
@@ -40,8 +39,8 @@ class TaskDetailsStore(
             result?.let { result ->
                 when (result) {
                     is Content.Data -> state.reduceData(result.data)
-                    is Content.Error -> TaskDetailsState.Error(result.getMessage())
-                    is Content.Loading -> TaskDetailsState.Loading
+                    is Content.Error -> TaskDetailsState.Error(state.task, result.getMessage())
+                    is Content.Loading -> TaskDetailsState.Loading(state.task)
                 }
             } ?: state
         }
@@ -89,7 +88,7 @@ class TaskDetailsStore(
 
         sideEffect {
             result?.asInstance<Content.Data<*>> {
-                initialLoad()
+                loadDetails()
             }
         }
     }
@@ -158,8 +157,8 @@ class TaskDetailsStore(
                         )
                     }
                 }
-                is Content.Error -> TaskDetailsState.Error(result.getMessage())
-                is Content.Loading -> TaskDetailsState.Loading
+                is Content.Error -> TaskDetailsState.Error(state.task, result.getMessage())
+                is Content.Loading -> TaskDetailsState.Loading(state.task)
             }
         }
 
@@ -169,9 +168,79 @@ class TaskDetailsStore(
                 if (removeTaskDialog.idToRemove == task.id) {
                     navigationStore.goBack()
                 } else {
-                    initialLoad()
+                    loadDetails()
                 }
             }
+        }
+    }
+
+    suspend fun moveToTop(id: String) = intent<Content<Unit>> {
+        onTrigger {
+            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+                val maxPriority = task.subTasks.maxOf { it.priority }
+                task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
+                    flow {
+                        emit(Content.Loading())
+                        emit(
+                            todoRepository.updateTask(
+                                taskId = id.toInt(),
+                                description = task.description,
+                                parentTaskId = task.parentTaskId,
+                                priority = maxPriority.inc(),
+                                isToDo = task.isToDo
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        reducer {
+            when (val result = resultNonNull()) {
+                is Content.Data -> state
+                is Content.Error -> TaskDetailsState.Error(
+                    state.task,
+                    result.exception.message.orEmpty()
+                )
+                is Content.Loading -> TaskDetailsState.Loading(state.task)
+            }
+        }
+        sideEffect {
+            loadDetails()
+        }
+    }
+
+    suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
+        onTrigger {
+            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+                val minPriority = task.subTasks.minOf { it.priority }
+                task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
+                    flow {
+                        emit(Content.Loading())
+                        emit(
+                            todoRepository.updateTask(
+                                taskId = id.toInt(),
+                                description = task.description,
+                                parentTaskId = task.parentTaskId,
+                                priority = minPriority.dec(),
+                                isToDo = task.isToDo
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        reducer {
+            when (val result = resultNonNull()) {
+                is Content.Data -> state
+                is Content.Error -> TaskDetailsState.Error(
+                    state.task,
+                    result.exception.message.orEmpty()
+                )
+                is Content.Loading -> TaskDetailsState.Loading(state.task)
+            }
+        }
+        sideEffect {
+            loadDetails()
         }
     }
 }
@@ -190,6 +259,6 @@ private fun TaskDetailsState.reduceData(
 ): TaskDetailsState =
     when (this) {
         is TaskDetailsState.Data -> this.reducer()
-        TaskDetailsState.Loading -> TaskDetailsState.Loading
-        is TaskDetailsState.Error -> TaskDetailsState.Error(message)
+        is TaskDetailsState.Loading -> TaskDetailsState.Loading(task)
+        is TaskDetailsState.Error -> TaskDetailsState.Error(task, message)
     }

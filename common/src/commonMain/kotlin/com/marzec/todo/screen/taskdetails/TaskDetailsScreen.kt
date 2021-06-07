@@ -42,7 +42,7 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
 
     LaunchedEffect(listId, taskId) {
         store.init(scope)
-        scope.launch { store.initialLoad() }
+        scope.launch { store.loadDetails() }
     }
 
     Scaffold(
@@ -90,12 +90,22 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                         ) {
                             key(it.id) {
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                    Row(Modifier.fillMaxWidth(fraction = 0.7f)) {
+                                    Row(Modifier.fillMaxWidth(fraction = 0.3f)) {
                                         TextListItemView(state = it) {
                                             scope.launch {
                                                 store.goToSubtaskDetails(it.id)
                                             }
                                         }
+                                    }
+                                    TextButton({
+                                        scope.launch { store.moveToTop(it.id) }
+                                    }) {
+                                        Text(text = "Move to top")
+                                    }
+                                    TextButton({
+                                        scope.launch { store.moveToBottom(it.id) }
+                                    }) {
+                                        Text(text = "Move to bottom")
                                     }
                                     TextButton({
                                         scope.launch { store.unpinSubtask(it.id) }
@@ -126,7 +136,7 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                     }
                 )
             }
-            TaskDetailsState.Loading -> {
+            is TaskDetailsState.Loading -> {
                 Text(text = "Loading")
             }
             is TaskDetailsState.Error -> {
