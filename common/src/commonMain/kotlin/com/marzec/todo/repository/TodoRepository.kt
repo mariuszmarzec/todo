@@ -7,6 +7,7 @@ import com.marzec.todo.api.CreateTodoListDto
 import com.marzec.todo.api.ToDoListDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.api.toDomain
+import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
@@ -18,9 +19,16 @@ import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-class TodoRepository(private val client: HttpClient) {
+class TodoRepository(
+    private val client: HttpClient,
+    private val memoryCache: MemoryCache
+) {
 
     suspend fun getLists(): Content<List<ToDoList>> =
         withContext(DI.ioDispatcher) {
@@ -38,6 +46,40 @@ class TodoRepository(private val client: HttpClient) {
                 }
             }
         }
+
+    suspend fun observeLists(listId: Int): Flow<Content<ToDoList>> = withContext(DI.ioDispatcher) {
+        val key = "key"
+        val cached = memoryCache.observe<ToDoList>(key).firstOrNull()
+        val initial = if (cached != null) {
+            Content.Data(cached)
+        } else {
+            Content.Loading()
+        }
+        combine(
+            flow {
+                emit(initial)
+                val call = asContent {
+                    client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
+                        it.id == listId
+                    }
+                }
+                if (call is Content.Error) {
+                    emit(call)
+                } else if (call is Content.Data) {
+                    memoryCache.put(key, call.data)
+                }
+            },
+            memoryCache.observe<ToDoList>(key)
+        ) { networkCall, cache ->
+            if (cache != null) {
+                println(Content.Data(cache))
+                Content.Data(cache)
+            } else {
+                println(networkCall)
+                networkCall
+            }
+        }
+    }
 
     suspend fun getList(listId: Int): Content<ToDoList> =
         withContext(DI.ioDispatcher) {
@@ -59,7 +101,11 @@ class TodoRepository(private val client: HttpClient) {
             }
         }
 
-    suspend fun addNewTask(listId: Int, parentTaskId: Int? = null, description: String): Content<Unit> =
+    suspend fun addNewTask(
+        listId: Int,
+        parentTaskId: Int? = null,
+        description: String
+    ): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
                 client.post(Api.Todo.createTask(listId)) {

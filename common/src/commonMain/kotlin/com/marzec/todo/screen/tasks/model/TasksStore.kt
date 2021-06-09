@@ -28,10 +28,7 @@ class TasksStore(
 
     suspend fun loadList() = intent<Content<ToDoList>> {
         onTrigger {
-            flow {
-                emit(Content.Loading())
-                emit(todoRepository.getList(listId))
-            }
+            todoRepository.observeLists(listId)
         }
 
         reducer {

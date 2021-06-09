@@ -1,6 +1,7 @@
 package com.marzec.todo
 
 import androidx.compose.runtime.Composable
+import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationEntry
@@ -41,6 +42,8 @@ object DI {
 
     var ioDispatcher: CoroutineContext = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
+
+    val memoryCache = MemoryCache()
 
     val preferences: Preferences = MemoryPreferences()
 
@@ -240,7 +243,7 @@ object DI {
         )
     )
 
-    fun provideTodoRepository() = TodoRepository(client)
+    fun provideTodoRepository() = TodoRepository(client, memoryCache)
 }
 
 object PreferencesKeys {
