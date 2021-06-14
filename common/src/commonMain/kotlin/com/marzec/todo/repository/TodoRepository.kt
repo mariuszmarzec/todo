@@ -41,7 +41,6 @@ class TodoRepository(
         withContext(DI.ioDispatcher) {
             asContent {
                 client.post(Api.Todo.TODO_LIST) {
-                    contentType(ContentType.Application.Json)
                     body = CreateTodoListDto(title = title)
                 }
             }
@@ -109,7 +108,6 @@ class TodoRepository(
         withContext(DI.ioDispatcher) {
             asContent {
                 client.post(Api.Todo.createTask(listId)) {
-                    contentType(ContentType.Application.Json)
                     body = CreateTaskDto(
                         description = description,
                         parentTaskId = parentTaskId,
@@ -129,7 +127,6 @@ class TodoRepository(
         withContext(DI.ioDispatcher) {
             asContent {
                 client.patch(Api.Todo.updateTask(taskId)) {
-                    contentType(ContentType.Application.Json)
                     body = UpdateTaskDto(
                         description = description,
                         parentTaskId = parentTaskId,
