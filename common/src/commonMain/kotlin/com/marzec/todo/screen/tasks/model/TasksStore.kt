@@ -1,9 +1,11 @@
 package com.marzec.todo.screen.tasks.model
 
+import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.todo.extensions.asInstance
-import com.marzec.todo.extensions.asInstanceAndReturn
-import com.marzec.todo.extensions.getMessage
+import com.marzec.mvi.reduceContent
+import com.marzec.mvi.reduceContentNoChanges
+import com.marzec.mvi.reduceData
+import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
@@ -12,17 +14,16 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class TasksStore(
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
-    initialState: TasksScreenState,
+    initialState: State<TasksScreenState>,
     val todoRepository: TodoRepository,
     val listId: Int
-) : Store2<TasksScreenState>(
+) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
@@ -32,10 +33,14 @@ class TasksStore(
         }
 
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> state.reduceData(result.data)
-                is Content.Error -> TasksScreenState.Error(state.tasks, result.exception.message.orEmpty())
-                is Content.Loading -> TasksScreenState.Loading(state.tasks)
+            state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) { result ->
+                copy(
+                    tasks = result.data.tasks.sortedWith(
+                        compareByDescending(Task::priority).thenBy(
+                            Task::modifiedTime
+                        )
+                    )
+                )
             }
         }
     }
@@ -45,7 +50,7 @@ class TasksStore(
     }
 
     suspend fun addNewTask() = sideEffectIntent {
-        state.asInstance<TasksScreenState.Data> {
+        state.asData {
             navigationStore.next(Destination.AddNewTask(listId, null, null))
         }
     }
@@ -84,18 +89,12 @@ class TasksStore(
             }
         }
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> {
-                    state.reduceData {
-                        copy(
-                            removeTaskDialog = removeTaskDialog.copy(
-                                visible = false
-                            )
-                        )
-                    }
-                }
-                is Content.Error -> TasksScreenState.Error(state.tasks, result.getMessage())
-                is Content.Loading -> TasksScreenState.Loading(state.tasks)
+            state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) {
+                copy(
+                    removeTaskDialog = removeTaskDialog.copy(
+                        visible = false
+                    )
+                )
             }
         }
 
@@ -105,13 +104,13 @@ class TasksStore(
         }
     }
 
-    override suspend fun onNewState(newState: TasksScreenState) {
+    override suspend fun onNewState(newState: State<TasksScreenState>) {
         stateCache.set(cacheKey, newState)
     }
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TasksScreenState.Data, Flow<Content<Unit>>?> {
+            state.asDataAndReturn {
                 val maxPriority = tasks.maxOf { it.priority }
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     flow {
@@ -130,14 +129,7 @@ class TasksStore(
             }
         }
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> state
-                is Content.Error -> TasksScreenState.Error(
-                    state.tasks,
-                    result.exception.message.orEmpty()
-                )
-                is Content.Loading -> TasksScreenState.Loading(state.tasks)
-            }
+            state.reduceContentNoChanges(resultNonNull())
         }
         sideEffect {
             loadList()
@@ -146,7 +138,7 @@ class TasksStore(
 
     suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TasksScreenState.Data, Flow<Content<Unit>>?> {
+            state.asDataAndReturn {
                 val minPriority = tasks.minOf { it.priority }
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     flow {
@@ -165,34 +157,10 @@ class TasksStore(
             }
         }
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> state
-                is Content.Error -> TasksScreenState.Error(
-                    state.tasks,
-                    result.exception.message.orEmpty()
-                )
-                is Content.Loading -> TasksScreenState.Loading(state.tasks)
-            }
+            state.reduceContentNoChanges(resultNonNull())
         }
         sideEffect {
             loadList()
         }
     }
 }
-
-private fun TasksScreenState.reduceData(data: ToDoList): TasksScreenState = when (this) {
-    is TasksScreenState.Data -> this
-    is TasksScreenState.Loading -> TasksScreenState.EMPTY_DATA
-    is TasksScreenState.Error -> TasksScreenState.EMPTY_DATA
-}.copy(
-    tasks = data.tasks.sortedWith(compareByDescending(Task::priority).thenBy(Task::modifiedTime))
-)
-
-private fun TasksScreenState.reduceData(
-    reducer: TasksScreenState.Data.() -> TasksScreenState.Data
-): TasksScreenState =
-    when (this) {
-        is TasksScreenState.Data -> this.reducer()
-        is TasksScreenState.Loading -> TasksScreenState.EMPTY_DATA
-        is TasksScreenState.Error -> TasksScreenState.EMPTY_DATA
-    }

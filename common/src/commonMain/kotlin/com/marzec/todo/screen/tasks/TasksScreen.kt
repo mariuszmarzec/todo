@@ -20,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.mvi.State
 import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.tasks.model.TasksScreenState
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
     val scope = rememberCoroutineScope()
 
-    val state: TasksScreenState by tasksStore.state.collectAsState()
+    val state: State<TasksScreenState> by tasksStore.state.collectAsState()
 
     LaunchedEffect(Unit) {
         tasksStore.init(this)
@@ -63,10 +64,10 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
             }
         }) {
         when (val state = state) {
-            is TasksScreenState.Data -> {
+            is State.Data -> {
                 LazyColumn {
                     items(
-                        items = state.tasks.map {
+                        items = state.data.tasks.map {
                             TextListItem(
                                 id = it.id.toString(),
                                 name = it.description,
@@ -108,20 +109,20 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                         message = "Do you really want to remove this task?",
                         confirmButton = "Yes",
                         dismissButton = "No",
-                        visible = state.removeTaskDialog.visible
+                        visible = state.data.removeTaskDialog.visible
                     ),
                     onDismiss = { scope.launch { tasksStore.hideRemoveDialog() } },
                     onConfirm = {
                         scope.launch {
-                            tasksStore.removeTask(state.removeTaskDialog.idToRemove)
+                            tasksStore.removeTask(state.data.removeTaskDialog.idToRemove)
                         }
                     }
                 )
             }
-            is TasksScreenState.Loading -> {
+            is State.Loading -> {
                 Text(text = "Loading")
             }
-            is TasksScreenState.Error -> {
+            is State.Error -> {
                 Text(text = state.message)
             }
         }
