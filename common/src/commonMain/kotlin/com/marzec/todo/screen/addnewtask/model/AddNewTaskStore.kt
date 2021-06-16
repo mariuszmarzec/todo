@@ -6,15 +6,13 @@ import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationActions
+import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.navigation.model.goBack
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 
 class AddNewTaskStore(
     private val navigationStore: NavigationStore,
@@ -70,8 +68,8 @@ class AddNewTaskStore(
                         if (data.parentTaskId != null) {
                             val destination =
                                 Destination.TaskDetails(data.listId, data.parentTaskId)
-                            navigationStore.sendAction(
-                                NavigationActions.Next(
+                            navigationStore.next(
+                                NavigationAction(
                                     destination = destination,
                                     options = NavigationOptions(destination, true)
                                 )

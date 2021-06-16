@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationActions
+import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.view.TextInputDialog
 import com.marzec.todo.view.TextListItem
@@ -43,7 +43,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
         topBar = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton({
-                    scope.launch { navigationStore.sendAction(NavigationActions.Back) }
+                    scope.launch { navigationStore.goBack() }
                 }) {
                     Text(text = "Back")
                 }
@@ -76,8 +76,8 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                             key(it.id) {
                                 TextListItemView(state = it) {
                                     scope.launch {
-                                        navigationStore.sendAction(
-                                            NavigationActions.Next(
+                                        navigationStore.next(
+                                            NavigationAction(
                                                 Destination.Tasks(it.id.toInt())
                                             )
                                         )

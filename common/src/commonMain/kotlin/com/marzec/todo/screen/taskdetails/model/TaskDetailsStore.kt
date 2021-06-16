@@ -7,7 +7,6 @@ import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.navigation.model.goBack
 import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences

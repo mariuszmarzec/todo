@@ -1,12 +1,9 @@
 package com.marzec.todo.navigation.model
 
-sealed class NavigationActions {
-    data class Next(
-        val destination: Destination,
-        val options: NavigationOptions? = null
-        ) : NavigationActions()
-    object Back : NavigationActions()
-}
+data class NavigationAction(
+    val destination: Destination,
+    val options: NavigationOptions? = null
+)
 
 data class NavigationOptions(
     val popTo: Destination,
@@ -23,6 +20,7 @@ sealed class Destination {
         val taskToEditId: Int?,
         val parentTaskId: Int?
     ) : Destination()
+
     data class TaskDetails(val listId: Int, val taskId: Int) : Destination()
     data class AddSubTask(val listId: Int, val taskId: Int) : Destination()
 }

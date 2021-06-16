@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
-import com.marzec.todo.navigation.model.NavigationActions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
@@ -45,7 +44,7 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
         topBar = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton({
-                    scope.launch { navigationStore.sendAction(NavigationActions.Back) }
+                    scope.launch { navigationStore.goBack() }
                 }) {
                     Text(text = "Back")
                 }

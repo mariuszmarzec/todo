@@ -3,7 +3,7 @@ package com.marzec.todo
 import androidx.compose.runtime.Composable
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationActions
+import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
@@ -232,7 +232,7 @@ object DI {
         cacheKey = cacheKey,
         onLoginSuccess = {
             navigationScope.launch {
-                navigationStore.sendAction(NavigationActions.Next(Destination.Lists))
+                navigationStore.next(NavigationAction(Destination.Lists))
             }
         },
         initialState = LoginViewState.Data(

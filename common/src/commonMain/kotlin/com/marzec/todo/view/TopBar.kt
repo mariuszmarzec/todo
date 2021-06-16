@@ -2,7 +2,6 @@ package com.marzec.todo.view
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -14,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.marzec.mvi.Store
 import com.marzec.todo.DI
 import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationActions
+import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.repository.LoginRepository
@@ -26,7 +25,7 @@ fun ActionBar(store: NavigationStore, title: String) {
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextButton({
-            scope.launch { store.sendAction(NavigationActions.Back) }
+            scope.launch { store.goBack() }
         }) {
             Text(text = "Back")
         }
@@ -55,8 +54,8 @@ class TopBarStore(
                 LoginRepository(DI.client).logout()
             }
             sideEffect {
-                store.sendAction(
-                    NavigationActions.Next(
+                store.next(
+                    NavigationAction(
                         destination = Destination.Login,
                         NavigationOptions(
                             Destination.Login,
