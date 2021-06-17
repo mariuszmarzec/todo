@@ -73,18 +73,23 @@ fun AddSubTaskScreen(navigationStore: NavigationStore, store: AddSubTaskStore) {
                             },
                         ) {
                             key(it.id) {
-                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     Row(Modifier.fillMaxWidth(fraction = 0.7f)) {
-                                        TextListItemView(state = it) {
-                                            scope.launch {
-                                                store.goToSubtaskDetails(it.id)
+                                        TextListItemView(state = it,
+                                            onClickListener = {
+                                                scope.launch {
+                                                    store.goToSubtaskDetails(it.id)
+                                                }
+                                            }) {
+                                            TextButton({
+                                                scope.launch { store.pinSubtask(it.id) }
+                                            }) {
+                                                Text(text = "Pin")
                                             }
                                         }
-                                    }
-                                    TextButton({
-                                        scope.launch { store.pinSubtask(it.id) }
-                                    }) {
-                                        Text(text = "Pin")
                                     }
                                 }
                             }

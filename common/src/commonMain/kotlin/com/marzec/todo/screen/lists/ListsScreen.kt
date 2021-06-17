@@ -74,7 +74,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                             },
                         ) {
                             key(it.id) {
-                                TextListItemView(state = it) {
+                                TextListItemView(state = it, onClickListener = {
                                     scope.launch {
                                         navigationStore.next(
                                             NavigationAction(
@@ -82,7 +82,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                                             )
                                         )
                                     }
-                                }
+                                })
                             }
                         }
                     }

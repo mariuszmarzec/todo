@@ -93,35 +93,34 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                         ) {
                             key(it.id) {
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                    Row(Modifier.fillMaxWidth(fraction = 0.3f)) {
-                                        TextListItemView(
-                                            state = it,
-                                            selectable = true
-                                        ) {
+                                    TextListItemView(
+                                        state = it,
+                                        onClickListener = {
                                             scope.launch {
                                                 store.goToSubtaskDetails(it.id)
                                             }
                                         }
-                                    }
-                                    TextButton({
-                                        scope.launch { store.moveToTop(it.id) }
-                                    }) {
-                                        Text(text = "Move to top")
-                                    }
-                                    TextButton({
-                                        scope.launch { store.moveToBottom(it.id) }
-                                    }) {
-                                        Text(text = "Move to bottom")
-                                    }
-                                    TextButton({
-                                        scope.launch { store.unpinSubtask(it.id) }
-                                    }) {
-                                        Text(text = "Unpin")
-                                    }
-                                    TextButton({
-                                        scope.launch { store.showRemoveSubTaskDialog(it.id) }
-                                    }) {
-                                        Text(text = "Remove")
+                                    ) {
+                                        TextButton({
+                                            scope.launch { store.moveToTop(it.id) }
+                                        }) {
+                                            Text(text = "Move to top")
+                                        }
+                                        TextButton({
+                                            scope.launch { store.moveToBottom(it.id) }
+                                        }) {
+                                            Text(text = "Move to bottom")
+                                        }
+                                        TextButton({
+                                            scope.launch { store.unpinSubtask(it.id) }
+                                        }) {
+                                            Text(text = "Unpin")
+                                        }
+                                        TextButton({
+                                            scope.launch { store.showRemoveSubTaskDialog(it.id) }
+                                        }) {
+                                            Text(text = "Remove")
+                                        }
                                     }
                                 }
                             }

@@ -75,28 +75,30 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                         },
                     ) {
                         key(it.id) {
-                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Row(Modifier.fillMaxWidth(fraction = 0.4f)) {
-                                    TextListItemView(state = it) {
-                                        scope.launch {
-                                            tasksStore.onListItemClicked(it.id)
-                                        }
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextListItemView(state = it, onClickListener = {
+                                    scope.launch {
+                                        tasksStore.onListItemClicked(it.id)
                                     }
-                                }
-                                TextButton({
-                                    scope.launch { tasksStore.moveToTop(it.id) }
                                 }) {
-                                    Text(text = "Move to top")
-                                }
-                                TextButton({
-                                    scope.launch { tasksStore.moveToBottom(it.id) }
-                                }) {
-                                    Text(text = "Move to bottom")
-                                }
-                                TextButton({
-                                    scope.launch { tasksStore.showRemoveDialog(it.id) }
-                                }) {
-                                    Text(text = "Remove")
+                                    TextButton({
+                                        scope.launch { tasksStore.moveToTop(it.id) }
+                                    }) {
+                                        Text(text = "Move to top")
+                                    }
+                                    TextButton({
+                                        scope.launch { tasksStore.moveToBottom(it.id) }
+                                    }) {
+                                        Text(text = "Move to bottom")
+                                    }
+                                    TextButton({
+                                        scope.launch { tasksStore.showRemoveDialog(it.id) }
+                                    }) {
+                                        Text(text = "Remove")
+                                    }
                                 }
                             }
                         }
