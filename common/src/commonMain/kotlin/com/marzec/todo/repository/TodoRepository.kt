@@ -17,8 +17,6 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
@@ -46,39 +44,14 @@ class TodoRepository(
             }
         }
 
-    suspend fun observeLists(listId: Int): Flow<Content<ToDoList>> = withContext(DI.ioDispatcher) {
-        val key = "key"
-        val cached = memoryCache.observe<ToDoList>(key).firstOrNull()
-        val initial = if (cached != null) {
-            Content.Data(cached)
-        } else {
-            Content.Loading()
-        }
-        combine(
-            flow {
-                emit(initial)
-                val call = asContent {
-                    client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
-                        it.id == listId
-                    }
-                }
-                if (call is Content.Error) {
-                    emit(call)
-                } else if (call is Content.Data) {
-                    memoryCache.put(key, call.data)
-                }
-            },
-            memoryCache.observe<ToDoList>(key)
-        ) { networkCall, cache ->
-            if (cache != null) {
-                println(Content.Data(cache))
-                Content.Data(cache)
-            } else {
-                println(networkCall)
-                networkCall
+    suspend fun observeLists(listId: Int): Flow<Content<ToDoList>> =
+        cacheCall(Api.Todo.TODO_LISTS + "_" + "$listId") {
+            asContent {
+                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS)
+                    .map { it.toDomain() }
+                    .first { it.id == listId }
             }
         }
-    }
 
     suspend fun getList(listId: Int): Content<ToDoList> =
         withContext(DI.ioDispatcher) {
@@ -141,6 +114,37 @@ class TodoRepository(
         withContext(DI.ioDispatcher) {
             asContent {
                 client.delete(Api.Todo.updateTask(taskId))
+            }
+        }
+
+    private suspend fun <T : Any> cacheCall(
+        key: String,
+        networkCall: suspend () -> Content<T>
+    ): Flow<Content<T>> =
+        withContext(DI.ioDispatcher) {
+            val cached = memoryCache.observe<T>(key).firstOrNull()
+            val initial = if (cached != null) {
+                Content.Data(cached)
+            } else {
+                Content.Loading()
+            }
+            combine(
+                flow {
+                    emit(initial)
+                    val callResult = networkCall()
+                    if (callResult is Content.Error) {
+                        emit(callResult)
+                    } else if (callResult is Content.Data) {
+                        memoryCache.put(key, callResult.data)
+                    }
+                },
+                memoryCache.observe<T>(key)
+            ) { networkCall, cache ->
+                if (cache != null) {
+                    Content.Data(cache)
+                } else {
+                    networkCall
+                }
             }
         }
 }
