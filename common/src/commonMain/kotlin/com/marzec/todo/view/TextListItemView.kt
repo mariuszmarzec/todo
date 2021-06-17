@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,7 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TextListItemView(state: TextListItem, onClickListener: (TextListItem) -> Unit) {
+fun TextListItemView(
+    state: TextListItem,
+    selectable: Boolean = false,
+    onClickListener: (TextListItem) -> Unit
+) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -28,11 +33,13 @@ fun TextListItemView(state: TextListItem, onClickListener: (TextListItem) -> Uni
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            Text(
-                text = state.name,
-                fontSize = 16.sp,
-                style = TextStyle.Default.copy(fontWeight = FontWeight.Bold)
-            )
+            SelectionContainer {
+                Text(
+                    text = state.name,
+                    fontSize = 16.sp,
+                    style = TextStyle.Default.copy(fontWeight = FontWeight.Bold)
+                )
+            }
             if (state.description.isNotEmpty()) {
                 Spacer(Modifier.size(16.dp))
                 Text(

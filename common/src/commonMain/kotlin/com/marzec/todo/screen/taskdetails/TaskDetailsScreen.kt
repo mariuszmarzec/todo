@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -57,7 +58,9 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    Text(text = state.task.description, fontSize = 16.sp)
+                    SelectionContainer {
+                        Text(text = state.task.description, fontSize = 16.sp)
+                    }
                     Spacer(Modifier.size(16.dp))
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextButton({ scope.launch { store.edit() } }) {
@@ -91,7 +94,10 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                             key(it.id) {
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                     Row(Modifier.fillMaxWidth(fraction = 0.3f)) {
-                                        TextListItemView(state = it) {
+                                        TextListItemView(
+                                            state = it,
+                                            selectable = true
+                                        ) {
                                             scope.launch {
                                                 store.goToSubtaskDetails(it.id)
                                             }
