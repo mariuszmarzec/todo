@@ -1,6 +1,7 @@
 package com.marzec.todo
 
 import androidx.compose.runtime.Composable
+import com.marzec.mvi.State
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
@@ -119,10 +120,12 @@ object DI {
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = AddNewTaskState.initial(
-                listId = listId,
-                taskId = taskId,
-                parentTaskId = parentTaskId
+            initialState = State.Data(
+                AddNewTaskState.initial(
+                    listId = listId,
+                    taskId = taskId,
+                    parentTaskId = parentTaskId
+                )
             ),
         )
     }

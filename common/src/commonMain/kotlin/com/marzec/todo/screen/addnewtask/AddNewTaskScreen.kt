@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.mvi.State
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskActions
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
@@ -29,11 +30,12 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
 
     val scope = rememberCoroutineScope()
 
-    val state: AddNewTaskState by store.state.collectAsState()
+    val state: State<AddNewTaskState> by store.state.collectAsState()
 
     LaunchedEffect(Unit) {
+        store.init(scope)
         scope.launch {
-            store.sendAction(AddNewTaskActions.InitialLoad)
+            store.initialLoad()
         }
     }
 
@@ -43,7 +45,7 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
         }
     ) {
         when (val state = state) {
-            is AddNewTaskState.Data -> {
+            is State.Data -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,27 +53,27 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextField(state.data.description, {
-                            scope.launch { store.sendAction(AddNewTaskActions.DescriptionChanged(it)) }
+                            scope.launch { store.onDescriptionChanged(it) }
                         })
                     }
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextButton({ scope.launch { store.sendAction(AddNewTaskActions.Add) } }) {
+                        TextButton({ scope.launch { store.addNewTask() } }) {
                             state.data.taskId?.let { Text("Update") } ?: Text("Create")
                         }
                     }
                     if (state.data.taskId == null) {
                         Box(modifier = Modifier.padding(16.dp)) {
-                            TextButton({ scope.launch { store.sendAction(AddNewTaskActions.AddMany) } }) {
+                            TextButton({ scope.launch { store.addManyTasks() } }) {
                                 Text("Create tasks line by line")
                             }
                         }
                     }
                 }
             }
-            AddNewTaskState.Loading -> {
+            is State.Loading -> {
                 Text(text = "Loading")
             }
-            is AddNewTaskState.Error -> {
+            is State.Error -> {
                 Text(text = state.message)
             }
         }

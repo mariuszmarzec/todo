@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDateTime
 
 data class Task(
     val id: Int,
+    val listId: Int,
     val description: String,
     val addedTime: LocalDateTime,
     val modifiedTime: LocalDateTime,
@@ -40,13 +41,14 @@ fun Task.toDto(): TaskDto = TaskDto(
     priority = priority
 )
 
-fun TaskDto.toDomain(): Task = Task(
-    id = id,
+fun TaskDto.toDomain(listId: Int): Task = Task(
+    id = this.id,
+    listId = listId,
     description = description,
     addedTime = LocalDateTime.parse(addedTime),
     modifiedTime = LocalDateTime.parse(modifiedTime),
     parentTaskId = parentTaskId,
-    subTasks = subTasks.map { it.toDomain() },
+    subTasks = subTasks.map { it.toDomain(listId) },
     isToDo = isToDo,
     priority = priority
 )

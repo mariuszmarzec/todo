@@ -31,7 +31,7 @@ data class CreateTodoListDto(
 fun ToDoListDto.toDomain() = ToDoList(
     id = id,
     title = title,
-    tasks = tasks.map { it.toDomain() }
+    tasks = tasks.map { it.toDomain(id) }
 )
 
 @Serializable

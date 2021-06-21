@@ -1,10 +1,10 @@
 package com.marzec.todo.screen.addnewtask.model
 
-import com.marzec.mvi.IntentBuilder
-import com.marzec.mvi.Store
-import com.marzec.todo.extensions.asInstance
-import com.marzec.todo.extensions.asInstanceAndReturn
-import com.marzec.todo.extensions.getMessage
+import com.marzec.mvi.State
+import com.marzec.mvi.newMvi.IntentBuilder
+import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.reduceData
+import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
@@ -14,81 +14,104 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
+import kotlinx.coroutines.flow.flow
 
 class AddNewTaskStore(
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
-    initialState: AddNewTaskState,
-    todoRepository: TodoRepository,
-) : Store<AddNewTaskState, AddNewTaskActions>(
+    private val initialState: State<AddNewTaskState>,
+    private val todoRepository: TodoRepository,
+) : Store2<State<AddNewTaskState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
-    init {
-        addIntent<AddNewTaskActions.InitialLoad, Content<Task>> {
-            onTrigger {
-                state.asInstanceAndReturn<AddNewTaskState.Data, Content<Task>?> {
-                    data.taskId?.let { todoRepository.getTask(data.listId, it) }
-                }
-            }
-            reducer {
-                result?.let { result ->
-                    when (result) {
-                        is Content.Data -> state.reduceData(result.data)
-                        is Content.Error -> AddNewTaskState.Error(result.getMessage())
-                        is Content.Loading -> AddNewTaskState.Loading
-                    }
-                } ?: state
-            }
-        }
-        addIntent<AddNewTaskActions.DescriptionChanged> {
-            reducer {
-                state.reduceData(action.description)
-            }
-        }
-        addIntent<AddNewTaskActions.Add, Content<Unit>> {
-            onTrigger {
-                state.asInstanceAndReturn<AddNewTaskState.Data, Content<Unit>> {
-                    val taskId = data.taskId
-                    if (taskId != null) {
-                        todoRepository.updateTask(
-                            taskId = taskId,
-                            description = data.description,
-                            parentTaskId = data.parentTaskId,
-                            priority = data.priority,
-                            isToDo = data.isToDo
-                        )
-                    } else {
-                        todoRepository.addNewTask(data.listId, data.parentTaskId, data.description)
+
+    suspend fun initialLoad() = intent<Content<Task>> {
+        onTrigger {
+            state.asDataAndReturn {
+                taskId?.let {
+                    flow {
+                        emit(Content.Loading())
+                        emit(todoRepository.getTask(listId, it))
                     }
                 }
             }
-            sideEffect {
-                navigateOutAfterCall()
-            }
         }
-        addIntent<AddNewTaskActions.AddMany, Content<Unit>> {
-            onTrigger {
-                state.asInstanceAndReturn<AddNewTaskState.Data, Content<Unit>> {
-                    todoRepository.addNewTasks(
-                        listId = data.listId,
-                        parentTaskId = data.parentTaskId,
-                        descriptions = data.description.split("\n")
+        reducer {
+            result?.let {
+                state.reduceDataWithContent(
+                    result = resultNonNull(),
+                    defaultData = AddNewTaskState.initial(0, null, null)
+                ) { result ->
+                    copy(
+                        taskId = result.data.id,
+                        parentTaskId = result.data.parentTaskId,
+                        listId = result.data.listId,
+                        description = result.data.description,
+                        priority = result.data.priority,
+                        isToDo = result.data.isToDo
                     )
                 }
-            }
-            sideEffect {
-//                navigateOutAfterCall()
-            }
+            } ?: state
         }
     }
 
-    private suspend fun IntentBuilder.IntentContext<AddNewTaskState, AddNewTaskActions.Add, Content<Unit>>.navigateOutAfterCall() {
+    suspend fun onDescriptionChanged(description: String) = intent<Unit> {
+        reducer {
+            state.reduceData { copy(description = description) }
+        }
+    }
+
+    suspend fun addNewTask() = intent<Content<Unit>> {
+        onTrigger {
+            flow {
+                state.asDataAndReturn {
+                    val taskId = taskId
+                    val result = if (taskId != null) {
+                        todoRepository.updateTask(
+                            taskId = taskId,
+                            description = description,
+                            parentTaskId = parentTaskId,
+                            priority = priority,
+                            isToDo = isToDo
+                        )
+                    } else {
+                        todoRepository.addNewTask(listId, parentTaskId, description)
+                    }
+                    emit(result)
+                }
+            }
+        }
+        sideEffect {
+            navigateOutAfterCall()
+        }
+    }
+
+    suspend fun addManyTasks() = intent<Content<Unit>> {
+        onTrigger {
+            state.asDataAndReturn {
+                flow {
+                    emit(
+                        todoRepository.addNewTasks(
+                            listId = listId,
+                            parentTaskId = parentTaskId,
+                            descriptions = description.split("\n")
+                        )
+                    )
+                }
+            }
+        }
+        sideEffect {
+            navigateOutAfterCall()
+        }
+    }
+
+    private suspend fun IntentBuilder.IntentContext<State<AddNewTaskState>, Content<Unit>>.navigateOutAfterCall() {
         result?.ifDataSuspend {
-            state.asInstance<AddNewTaskState.Data> {
-                if (data.parentTaskId != null) {
+            state.asData {
+                if (parentTaskId != null) {
                     val destination =
-                        Destination.TaskDetails(data.listId, data.parentTaskId)
+                        Destination.TaskDetails(listId, parentTaskId)
                     navigationStore.next(
                         NavigationAction(
                             destination = destination,
@@ -102,26 +125,7 @@ class AddNewTaskStore(
         }
     }
 
-    override suspend fun onNewState(newState: AddNewTaskState) {
+    override suspend fun onNewState(newState: State<AddNewTaskState>) {
         stateCache.set(cacheKey, newState)
     }
-}
-
-private fun AddNewTaskState.reduceData(description: String): AddNewTaskState = when (this) {
-    is AddNewTaskState.Data -> this.copy(data = this.data.copy(description = description))
-    AddNewTaskState.Loading -> this
-    is AddNewTaskState.Error -> this.copy()
-}
-
-private fun AddNewTaskState.reduceData(task: Task): AddNewTaskState = when (this) {
-    is AddNewTaskState.Data -> this.copy(
-        data = this.data.copy(
-            parentTaskId = task.parentTaskId,
-            description = task.description,
-            priority = task.priority,
-            isToDo = task.isToDo
-        )
-    )
-    AddNewTaskState.Loading -> this
-    is AddNewTaskState.Error -> this.copy()
 }
