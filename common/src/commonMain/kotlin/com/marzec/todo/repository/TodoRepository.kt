@@ -90,6 +90,25 @@ class TodoRepository(
             }
         }
 
+    suspend fun addNewTasks(
+        listId: Int,
+        parentTaskId: Int? = null,
+        descriptions: List<String>
+    ): Content<Unit> =
+        withContext(DI.ioDispatcher) {
+            asContent {
+                descriptions.forEach {
+                    client.post(Api.Todo.createTask(listId)) {
+                        body = CreateTaskDto(
+                            description = it,
+                            parentTaskId = parentTaskId,
+                            priority = 10
+                        )
+                    }
+                }
+            }
+        }
+
     suspend fun updateTask(
         taskId: Int,
         description: String,

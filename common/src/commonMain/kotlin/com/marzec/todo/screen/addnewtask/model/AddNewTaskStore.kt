@@ -1,5 +1,6 @@
 package com.marzec.todo.screen.addnewtask.model
 
+import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.Store
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
@@ -63,21 +64,39 @@ class AddNewTaskStore(
                 }
             }
             sideEffect {
-                result?.ifDataSuspend {
-                    state.asInstance<AddNewTaskState.Data> {
-                        if (data.parentTaskId != null) {
-                            val destination =
-                                Destination.TaskDetails(data.listId, data.parentTaskId)
-                            navigationStore.next(
-                                NavigationAction(
-                                    destination = destination,
-                                    options = NavigationOptions(destination, true)
-                                )
-                            )
-                        } else {
-                            navigationStore.goBack()
-                        }
-                    }
+                navigateOutAfterCall()
+            }
+        }
+        addIntent<AddNewTaskActions.AddMany, Content<Unit>> {
+            onTrigger {
+                state.asInstanceAndReturn<AddNewTaskState.Data, Content<Unit>> {
+                    todoRepository.addNewTasks(
+                        listId = data.listId,
+                        parentTaskId = data.parentTaskId,
+                        descriptions = data.description.split("\n")
+                    )
+                }
+            }
+            sideEffect {
+//                navigateOutAfterCall()
+            }
+        }
+    }
+
+    private suspend fun IntentBuilder.IntentContext<AddNewTaskState, AddNewTaskActions.Add, Content<Unit>>.navigateOutAfterCall() {
+        result?.ifDataSuspend {
+            state.asInstance<AddNewTaskState.Data> {
+                if (data.parentTaskId != null) {
+                    val destination =
+                        Destination.TaskDetails(data.listId, data.parentTaskId)
+                    navigationStore.next(
+                        NavigationAction(
+                            destination = destination,
+                            options = NavigationOptions(destination, true)
+                        )
+                    )
+                } else {
+                    navigationStore.goBack()
                 }
             }
         }

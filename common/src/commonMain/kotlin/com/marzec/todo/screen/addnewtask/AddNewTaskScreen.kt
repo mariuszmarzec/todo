@@ -59,6 +59,13 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
                             state.data.taskId?.let { Text("Update") } ?: Text("Create")
                         }
                     }
+                    if (state.data.taskId == null) {
+                        Box(modifier = Modifier.padding(16.dp)) {
+                            TextButton({ scope.launch { store.sendAction(AddNewTaskActions.AddMany) } }) {
+                                Text("Create tasks line by line")
+                            }
+                        }
+                    }
                 }
             }
             AddNewTaskState.Loading -> {
