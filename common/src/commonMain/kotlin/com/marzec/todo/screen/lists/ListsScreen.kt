@@ -61,20 +61,22 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                 Text("+")
             }
         }) {
-            when (val state = state) {
-                is ListsScreenState.Data -> {
-                    LazyColumn {
-                        items(
-                            items = state.todoLists.map {
-                                TextListItem(
-                                    id = it.id.toString(),
-                                    name = it.title,
-                                    description = ""
-                                )
-                            },
-                        ) {
-                            key(it.id) {
-                                TextListItemView(state = it, onClickListener = {
+        when (val state = state) {
+            is ListsScreenState.Data -> {
+                LazyColumn {
+                    items(
+                        items = state.todoLists.map {
+                            TextListItem(
+                                id = it.id.toString(),
+                                name = it.title,
+                                description = ""
+                            )
+                        },
+                    ) {
+                        key(it.id) {
+                            TextListItemView(
+                                state = it,
+                                onClickListener = {
                                     scope.launch {
                                         navigationStore.next(
                                             NavigationAction(
@@ -82,20 +84,37 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                                             )
                                         )
                                     }
-                                })
-                            }
+                                }
+                            )
                         }
                     }
-                    TextInputDialog(
-                        state = state.addNewListDialog,
-                        onTextChanged = { scope.launch { listsScreenStore.sendAction(ListScreenActions.NewListNameChanged(it)) } },
-                        onConfirm = { scope.launch { listsScreenStore.sendAction(ListScreenActions.CreateButtonClicked(it)) } },
-                        onDismiss = { scope.launch { listsScreenStore.sendAction(ListScreenActions.DialogDismissed) } }
-                    )
                 }
-                is ListsScreenState.Error -> {
-                    Text(text = state.message)
-                }
+                TextInputDialog(
+                    state = state.addNewListDialog,
+                    onTextChanged = {
+                        scope.launch {
+                            listsScreenStore.sendAction(
+                                ListScreenActions.NewListNameChanged(
+                                    it
+                                )
+                            )
+                        }
+                    },
+                    onConfirm = {
+                        scope.launch {
+                            listsScreenStore.sendAction(
+                                ListScreenActions.CreateButtonClicked(
+                                    it
+                                )
+                            )
+                        }
+                    },
+                    onDismiss = { scope.launch { listsScreenStore.sendAction(ListScreenActions.DialogDismissed) } }
+                )
+            }
+            is ListsScreenState.Error -> {
+                Text(text = state.message)
             }
         }
+    }
 }

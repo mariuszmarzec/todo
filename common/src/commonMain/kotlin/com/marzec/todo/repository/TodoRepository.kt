@@ -113,7 +113,14 @@ class TodoRepository(
     suspend fun removeTask(taskId: Int): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
-                client.delete(Api.Todo.updateTask(taskId))
+                client.delete(Api.Todo.removeTask(taskId))
+            }
+        }
+
+    suspend fun removeList(id: Int): Content<Unit> =
+        withContext(DI.ioDispatcher) {
+            asContent {
+                client.delete(Api.Todo.removeList(id))
             }
         }
 

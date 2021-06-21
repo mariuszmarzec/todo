@@ -271,6 +271,7 @@ object Api {
         fun createTask(listId: Int) = "$BASE/list/$listId/tasks"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
+        fun removeList(listId: Int) = "$BASE/list/$listId"
     }
 
     object Headers {
