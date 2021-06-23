@@ -14,6 +14,7 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class AddSubTaskStore(
     private val navigationStore: NavigationStore,
@@ -29,14 +30,10 @@ class AddSubTaskStore(
 
     suspend fun initialLoad() = intent<Content<List<Task>>> {
         onTrigger {
-            flow {
-                emit(Content.Loading())
-                emit(
-                    todoRepository.getList(listId)
-                        .mapData { toDoList ->
-                            toDoList.tasks.filterNot { it.id == taskId }
-                        }
-                )
+            todoRepository.observeList(listId).map { content ->
+                content.mapData { toDoList ->
+                    toDoList.tasks.filterNot { it.id == taskId }
+                }
             }
         }
         reducer {

@@ -2,7 +2,6 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.reduceContent
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
@@ -29,7 +28,7 @@ class TasksStore(
 
     suspend fun loadList() = intent<Content<ToDoList>> {
         onTrigger {
-            todoRepository.observeLists(listId)
+            todoRepository.observeList(listId)
         }
 
         reducer {

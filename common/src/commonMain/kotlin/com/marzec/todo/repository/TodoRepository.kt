@@ -13,15 +13,19 @@ import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.asContent
+import com.marzec.todo.network.mapData
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class TodoRepository(
@@ -29,33 +33,17 @@ class TodoRepository(
     private val memoryCache: MemoryCache
 ) {
 
-    suspend fun getLists(): Content<List<ToDoList>> =
-        withContext(DI.ioDispatcher) {
-            asContent { dataSource.getTodoLists().map { it.toDomain() } }
+    suspend fun observeLists(): Flow<Content<List<ToDoList>>> = getListsCacheFirst()
+
+    suspend fun observeList(listId: Int): Flow<Content<ToDoList>> =
+        getListsCacheFirst().map { content ->
+            content.mapData { lists -> lists.first { it.id == listId } }
         }
 
-    suspend fun observeLists(listId: Int): Flow<Content<ToDoList>> =
-        cacheCall(Api.Todo.TODO_LISTS + "_" + "$listId") {
-            asContent {
-                dataSource.getTodoLists()
-                    .map { it.toDomain() }
-                    .first { it.id == listId }
-            }
-        }
-
-    suspend fun getList(listId: Int): Content<ToDoList> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                dataSource.getTodoLists().map { it.toDomain() }.first {
-                    it.id == listId
-                }
-            }
-        }
-
-    suspend fun getTask(listId: Int, taskId: Int): Content<Task> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                dataSource.getTodoLists().map { it.toDomain() }.first {
+    suspend fun observeTask(listId: Int, taskId: Int): Flow<Content<Task>> =
+        getListsCacheFirst().map { content ->
+            content.mapData { lists ->
+                lists.first {
                     it.id == listId
                 }.tasks.flatMapTask().first {
                     it.id == taskId
@@ -115,6 +103,13 @@ class TodoRepository(
             asContent { dataSource.createToDoList(title) }
         }
 
+    private suspend fun getListsCacheFirst() =
+        cacheCall(Api.Todo.TODO_LISTS) {
+            asContent {
+                dataSource.getTodoLists()
+                    .map { it.toDomain() }
+            }
+        }
 
     private suspend fun <T : Any> cacheCall(
         key: String,
@@ -144,7 +139,7 @@ class TodoRepository(
                 } else {
                     networkCall
                 }
-            }
+            }.flowOn(DI.ioDispatcher)
         }
 }
 

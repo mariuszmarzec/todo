@@ -218,8 +218,8 @@ object DI {
         initialState = provideListScreenDefaultState()
     )
 
-    private fun provideListScreenDefaultState(): ListsScreenState {
-        return ListsScreenState.INITIAL
+    private fun provideListScreenDefaultState(): State<ListsScreenState> {
+        return State.Data(ListsScreenState.INITIAL)
     }
 
     @Composable

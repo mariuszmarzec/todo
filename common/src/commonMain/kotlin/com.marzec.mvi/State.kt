@@ -61,3 +61,9 @@ fun <T, R> State<T>.reduceDataWithContent(
             result.exception.message.orEmpty()
         )
     }
+
+fun <T, R> State<T>.mapData(mapper: (T) -> R) = when (this) {
+    is State.Data -> State.Data(mapper(this.data))
+    is State.Loading -> State.Loading(this.data?.let(mapper))
+    is State.Error -> State.Error(this.data?.let(mapper), this.message)
+}

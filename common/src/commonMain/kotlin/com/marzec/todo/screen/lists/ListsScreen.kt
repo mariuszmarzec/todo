@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.mvi.State
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationStore
@@ -31,11 +32,12 @@ import kotlinx.coroutines.launch
 fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenStore) {
     val scope = rememberCoroutineScope()
 
-    val state: ListsScreenState by listsScreenStore.state.collectAsState()
+    val state: State<ListsScreenState> by listsScreenStore.state.collectAsState()
 
     LaunchedEffect(Unit) {
+        listsScreenStore.init(scope)
         scope.launch {
-            listsScreenStore.sendAction(ListScreenActions.LoadLists)
+            listsScreenStore.initialLoad()
         }
     }
 
@@ -55,17 +57,17 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch { listsScreenStore.sendAction(ListScreenActions.AddNewList) }
+                    scope.launch { listsScreenStore.addNewList() }
                 }
             ) {
                 Text("+")
             }
         }) {
         when (val state = state) {
-            is ListsScreenState.Data -> {
+            is State.Data -> {
                 LazyColumn {
                     items(
-                        items = state.todoLists.map {
+                        items = state.data.todoLists.map {
                             TextListItem(
                                 id = it.id.toString(),
                                 name = it.title,
@@ -90,29 +92,21 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                     }
                 }
                 TextInputDialog(
-                    state = state.addNewListDialog,
+                    state = state.data.addNewListDialog,
                     onTextChanged = {
-                        scope.launch {
-                            listsScreenStore.sendAction(
-                                ListScreenActions.NewListNameChanged(
-                                    it
-                                )
-                            )
-                        }
+                        scope.launch { listsScreenStore.onNewListNameChanged(it) }
                     },
                     onConfirm = {
                         scope.launch {
-                            listsScreenStore.sendAction(
-                                ListScreenActions.CreateButtonClicked(
-                                    it
-                                )
-                            )
-                        }
+                            listsScreenStore.onCreateButtonClicked(it)                        }
                     },
-                    onDismiss = { scope.launch { listsScreenStore.sendAction(ListScreenActions.DialogDismissed) } }
+                    onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
                 )
             }
-            is ListsScreenState.Error -> {
+            is State.Loading -> {
+                Text(text = "Loading...")
+            }
+            is State.Error -> {
                 Text(text = state.message)
             }
         }

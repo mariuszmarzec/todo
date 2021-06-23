@@ -3,17 +3,13 @@ package com.marzec.todo.screen.lists
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.view.TextInputDialog
 
-sealed class ListsScreenState {
-
-    data class Data(
-        val todoLists: List<ToDoList>,
-        val addNewListDialog: TextInputDialog
-    ) : ListsScreenState()
-
-    data class Error(val message: String) : ListsScreenState()
+data class ListsScreenState(
+    val todoLists: List<ToDoList>,
+    val addNewListDialog: TextInputDialog
+) {
 
     companion object {
-        val INITIAL = Data(
+        val INITIAL = ListsScreenState(
             todoLists = emptyList(),
             addNewListDialog = TextInputDialog(
                 visible = false,

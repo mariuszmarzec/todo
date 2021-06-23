@@ -30,10 +30,7 @@ class AddNewTaskStore(
         onTrigger {
             state.asDataAndReturn {
                 taskId?.let {
-                    flow {
-                        emit(Content.Loading())
-                        emit(todoRepository.getTask(listId, it))
-                    }
+                    todoRepository.observeTask(listId, it)
                 }
             }
         }

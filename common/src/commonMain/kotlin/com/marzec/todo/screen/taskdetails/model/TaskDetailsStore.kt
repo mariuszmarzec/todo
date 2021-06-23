@@ -29,10 +29,7 @@ class TaskDetailsStore(
 
     suspend fun loadDetails() = intent<Content<Task>> {
         onTrigger {
-            flow {
-                emit(Content.Loading())
-                emit(todoRepository.getTask(listId, taskId))
-            }
+            todoRepository.observeTask(listId, taskId)
         }
         reducer {
             result?.let { result ->
