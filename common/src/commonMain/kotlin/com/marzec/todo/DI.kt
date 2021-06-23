@@ -8,6 +8,7 @@ import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.network.DataSource
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
@@ -246,7 +247,7 @@ object DI {
         )
     )
 
-    fun provideTodoRepository() = TodoRepository(client, memoryCache)
+    fun provideTodoRepository() = TodoRepository(DataSource(client), memoryCache)
 }
 
 object PreferencesKeys {

@@ -11,6 +11,7 @@ import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
+import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.asContent
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
@@ -24,30 +25,19 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class TodoRepository(
-    private val client: HttpClient,
+    private val dataSource: DataSource,
     private val memoryCache: MemoryCache
 ) {
 
     suspend fun getLists(): Content<List<ToDoList>> =
         withContext(DI.ioDispatcher) {
-            asContent {
-                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }
-            }
-        }
-
-    suspend fun createList(title: String): Content<List<ToDoListDto>> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                client.post(Api.Todo.TODO_LIST) {
-                    body = CreateTodoListDto(title = title)
-                }
-            }
+            asContent { dataSource.getTodoLists().map { it.toDomain() } }
         }
 
     suspend fun observeLists(listId: Int): Flow<Content<ToDoList>> =
         cacheCall(Api.Todo.TODO_LISTS + "_" + "$listId") {
             asContent {
-                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS)
+                dataSource.getTodoLists()
                     .map { it.toDomain() }
                     .first { it.id == listId }
             }
@@ -56,7 +46,7 @@ class TodoRepository(
     suspend fun getList(listId: Int): Content<ToDoList> =
         withContext(DI.ioDispatcher) {
             asContent {
-                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
+                dataSource.getTodoLists().map { it.toDomain() }.first {
                     it.id == listId
                 }
             }
@@ -65,7 +55,7 @@ class TodoRepository(
     suspend fun getTask(listId: Int, taskId: Int): Content<Task> =
         withContext(DI.ioDispatcher) {
             asContent {
-                client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS).map { it.toDomain() }.first {
+                dataSource.getTodoLists().map { it.toDomain() }.first {
                     it.id == listId
                 }.tasks.flatMapTask().first {
                     it.id == taskId
@@ -79,15 +69,7 @@ class TodoRepository(
         description: String
     ): Content<Unit> =
         withContext(DI.ioDispatcher) {
-            asContent {
-                client.post(Api.Todo.createTask(listId)) {
-                    body = CreateTaskDto(
-                        description = description,
-                        parentTaskId = parentTaskId,
-                        priority = 10
-                    )
-                }
-            }
+            asContent { dataSource.addNewTask(listId, description, parentTaskId) }
         }
 
     suspend fun addNewTasks(
@@ -98,13 +80,7 @@ class TodoRepository(
         withContext(DI.ioDispatcher) {
             asContent {
                 descriptions.forEach {
-                    client.post(Api.Todo.createTask(listId)) {
-                        body = CreateTaskDto(
-                            description = it,
-                            parentTaskId = parentTaskId,
-                            priority = 10
-                        )
-                    }
+                    dataSource.addNewTask(listId, it, parentTaskId)
                 }
             }
         }
@@ -118,30 +94,27 @@ class TodoRepository(
     ): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
-                client.patch(Api.Todo.updateTask(taskId)) {
-                    body = UpdateTaskDto(
-                        description = description,
-                        parentTaskId = parentTaskId,
-                        priority = priority,
-                        isToDo = isToDo
-                    )
-                }
+                dataSource.updateTask(taskId, description, parentTaskId, priority, isToDo)
             }
         }
 
     suspend fun removeTask(taskId: Int): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
-                client.delete(Api.Todo.removeTask(taskId))
+                dataSource.removeTask(taskId)
             }
         }
 
     suspend fun removeList(id: Int): Content<Unit> =
         withContext(DI.ioDispatcher) {
-            asContent {
-                client.delete(Api.Todo.removeList(id))
-            }
+            asContent { dataSource.removeList(id) }
         }
+
+    suspend fun createList(title: String): Content<List<ToDoListDto>> =
+        withContext(DI.ioDispatcher) {
+            asContent { dataSource.createToDoList(title) }
+        }
+
 
     private suspend fun <T : Any> cacheCall(
         key: String,
