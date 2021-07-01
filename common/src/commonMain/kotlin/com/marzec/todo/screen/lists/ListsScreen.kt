@@ -23,7 +23,8 @@ import com.marzec.mvi.State
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.view.TextInputDialog
+import com.marzec.todo.view.Dialog
+import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
@@ -91,16 +92,22 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                         }
                     }
                 }
-                TextInputDialog(
-                    state = state.data.addNewListDialog,
-                    onTextChanged = {
-                        scope.launch { listsScreenStore.onNewListNameChanged(it) }
-                    },
-                    onConfirm = {
-                        scope.launch {
-                            listsScreenStore.onCreateButtonClicked(it)                        }
-                    },
-                    onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
+                DialogBox(
+                    state = Dialog.TextInputDialog(
+                        visible = state.data.addNewListDialog.visible,
+                        title = "Put name of new list",
+                        inputField = state.data.addNewListDialog.inputField,
+                        confirmButton = "Create",
+                        dismissButton = "Cancel",
+                        onTextChanged = {
+                            scope.launch { listsScreenStore.onNewListNameChanged(it) }
+                        },
+                        onConfirm = {
+                            scope.launch {
+                                listsScreenStore.onCreateButtonClicked(it)                        }
+                        },
+                        onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
+                    )
                 )
             }
             is State.Loading -> {

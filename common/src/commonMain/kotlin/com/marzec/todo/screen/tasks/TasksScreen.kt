@@ -24,9 +24,10 @@ import com.marzec.mvi.State
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
+import com.marzec.todo.view.Dialog
+import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
-import com.marzec.todo.view.TwoOptionsDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -104,20 +105,20 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                         }
                     }
                 }
-                TwoOptionsDialog(
-                    state = TwoOptionsDialog(
+                DialogBox(
+                    state = Dialog.TwoOptionsDialog(
                         title = "Remove task",
                         message = "Do you really want to remove this task?",
                         confirmButton = "Yes",
                         dismissButton = "No",
-                        visible = state.data.removeTaskDialog.visible
-                    ),
-                    onDismiss = { scope.launch { tasksStore.hideRemoveDialog() } },
-                    onConfirm = {
-                        scope.launch {
-                            tasksStore.removeTask(state.data.removeTaskDialog.idToRemove)
+                        visible = state.data.removeTaskDialog.visible,
+                        onDismiss = { scope.launch { tasksStore.hideRemoveDialog() } },
+                        onConfirm = {
+                            scope.launch {
+                                tasksStore.removeTask(state.data.removeTaskDialog.idToRemove)
+                            }
                         }
-                    }
+                    )
                 )
             }
             is State.Loading -> {

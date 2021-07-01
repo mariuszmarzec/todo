@@ -18,15 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TextInputDialog(
-    state: TextInputDialog,
-    onTextChanged: (String) -> Unit = {},
-    onDismiss: () -> Unit = {},
-    onConfirm: (String) -> Unit = {}
-) {
+fun TextInputDialog(state: Dialog.TextInputDialog) {
     if (state.visible) {
         CustomDialog(
-            onDismissRequest = { onDismiss() }
+            onDismissRequest = { state.onDismiss() }
         ) {
             Column(
                 modifier = Modifier
@@ -38,7 +33,7 @@ fun TextInputDialog(
 
                 Box(modifier = Modifier.padding(16.dp)) {
                     TextField(state.inputField, {
-                        onTextChanged(it)
+                        state.onTextChanged(it)
                     })
                 }
 
@@ -46,10 +41,10 @@ fun TextInputDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { onConfirm(state.inputField) }) {
+                    TextButton(onClick = { state.onConfirm(state.inputField) }) {
                         Text(state.confirmButton)
                     }
-                    TextButton(onClick = { onDismiss() }) {
+                    TextButton(onClick = { state.onDismiss() }) {
                         Text(state.dismissButton)
                     }
                 }
@@ -58,10 +53,3 @@ fun TextInputDialog(
     }
 }
 
-data class TextInputDialog(
-    val title: String,
-    val inputField: String,
-    val confirmButton: String,
-    val dismissButton: String,
-    val visible: Boolean
-)

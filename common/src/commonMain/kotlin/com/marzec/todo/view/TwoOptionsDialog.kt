@@ -20,14 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TwoOptionsDialog(
-    state: TwoOptionsDialog,
-    onDismiss: () -> Unit = {},
-    onConfirm: () -> Unit = {}
-) {
+fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog) {
     if (state.visible) {
         CustomDialog(
-            onDismissRequest = { onDismiss() }
+            onDismissRequest = { state.onDismiss() }
         ) {
             Column(
                 modifier = Modifier
@@ -50,10 +46,10 @@ fun TwoOptionsDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { onConfirm() }) {
+                    TextButton(onClick = { state.onConfirm() }) {
                         Text(state.confirmButton)
                     }
-                    TextButton(onClick = { onDismiss() }) {
+                    TextButton(onClick = { state.onDismiss() }) {
                         Text(state.dismissButton)
                     }
                 }
@@ -61,11 +57,3 @@ fun TwoOptionsDialog(
         }
     }
 }
-
-data class TwoOptionsDialog(
-    val title: String,
-    val message: String,
-    val confirmButton: String,
-    val dismissButton: String,
-    val visible: Boolean
-)
