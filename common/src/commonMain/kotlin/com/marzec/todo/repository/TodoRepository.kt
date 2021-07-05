@@ -2,10 +2,6 @@ package com.marzec.todo.repository
 
 import com.marzec.todo.Api
 import com.marzec.todo.DI
-import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.api.CreateTodoListDto
-import com.marzec.todo.api.ToDoListDto
-import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.api.toDomain
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.model.Task
@@ -13,19 +9,17 @@ import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.asContent
+import com.marzec.todo.network.asContentFlow
+import com.marzec.todo.network.ifData
+import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.network.mapData
-import io.ktor.client.HttpClient
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.request.patch
-import io.ktor.client.request.post
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
 class TodoRepository(
@@ -93,14 +87,20 @@ class TodoRepository(
             }
         }
 
-    suspend fun removeList(id: Int): Content<Unit> =
-        withContext(DI.ioDispatcher) {
-            asContent { dataSource.removeList(id) }
-        }
+    fun removeList(id: Int): Flow<Content<Unit>> =
+        asContentFlow { dataSource.removeList(id) }
+            .onEach {
+                if (it is Content.Data) {
+                    refreshListsCache()
+                }
+            }
 
-    suspend fun createList(title: String): Content<List<ToDoListDto>> =
+    suspend fun createList(title: String): Content<List<ToDoList>> =
         withContext(DI.ioDispatcher) {
-            asContent { dataSource.createToDoList(title) }
+            asContent {
+                dataSource.createToDoList(title)
+                    .map { it.toDomain() }
+            }
         }
 
     private suspend fun getListsCacheFirst() =
@@ -110,6 +110,12 @@ class TodoRepository(
                     .map { it.toDomain() }
             }
         }
+
+    private suspend fun refreshListsCache() = asContent {
+        dataSource.getTodoLists().map { it.toDomain() }
+    }.ifDataSuspend {
+        memoryCache.put(Api.Todo.TODO_LISTS, data)
+    }
 
     private suspend fun <T : Any> cacheCall(
         key: String,

@@ -4,21 +4,24 @@ import com.marzec.todo.model.ToDoList
 
 data class ListsScreenState(
     val todoLists: List<ToDoList>,
-    val addNewListDialog: NewListDialog
+    val dialog: ListsScreenDialog?
 ) {
 
     companion object {
         val INITIAL = ListsScreenState(
             todoLists = emptyList(),
-            addNewListDialog = NewListDialog(
-                visible = false,
-                inputField = ""
-            )
+            dialog = null
         )
     }
 }
 
-data class NewListDialog(
-    val visible: Boolean,
-    val inputField: String,
-)
+sealed class ListsScreenDialog {
+
+    data class RemoveListDialog(
+        val id: Int,
+    ): ListsScreenDialog()
+
+    data class AddNewListDialog(
+        val inputField: String,
+    ): ListsScreenDialog()
+}

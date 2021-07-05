@@ -21,37 +21,35 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog) {
-    if (state.visible) {
-        CustomDialog(
-            onDismissRequest = { state.onDismiss() }
+    CustomDialog(
+        onDismissRequest = { state.onDismiss() }
+    ) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .background(Color.White)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+
+            Box(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = state.title,
+                    fontSize = 16.sp,
+                    style = TextStyle.Default.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+
+            Text(text = state.message)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-
-                Box(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = state.title,
-                        fontSize = 16.sp,
-                        style = TextStyle.Default.copy(fontWeight = FontWeight.Bold)
-                    )
+                TextButton(onClick = { state.onConfirm() }) {
+                    Text(state.confirmButton)
                 }
-
-                Text(text = state.message)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    TextButton(onClick = { state.onConfirm() }) {
-                        Text(state.confirmButton)
-                    }
-                    TextButton(onClick = { state.onDismiss() }) {
-                        Text(state.dismissButton)
-                    }
+                TextButton(onClick = { state.onDismiss() }) {
+                    Text(state.dismissButton)
                 }
             }
         }

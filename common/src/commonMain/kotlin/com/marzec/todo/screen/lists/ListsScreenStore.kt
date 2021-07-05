@@ -5,6 +5,8 @@ import com.marzec.mvi.Store
 import com.marzec.mvi.mapData
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.todo.extensions.asInstanceAndReturn
+import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
@@ -38,10 +40,15 @@ class ListsScreenStore(
     suspend fun addNewList() = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(
-                    addNewListDialog = it.addNewListDialog.copy(visible = true)
-                )
+                it.copy(dialog = ListsScreenDialog.AddNewListDialog(emptyString()))
+            }
+        }
+    }
 
+    suspend fun showRemoveListDialog(id: Int) = intent<Unit> {
+        reducer {
+            state.mapData {
+                it.copy(dialog = ListsScreenDialog.RemoveListDialog(id))
             }
         }
     }
@@ -50,7 +57,9 @@ class ListsScreenStore(
         reducer {
             state.mapData {
                 it.copy(
-                    addNewListDialog = it.addNewListDialog.copy(inputField = listName)
+                    dialog = it.dialog?.asInstanceAndReturn<ListsScreenDialog.AddNewListDialog, ListsScreenDialog.AddNewListDialog> {
+                        this.copy(inputField = listName)
+                    }
                 )
             }
         }
@@ -59,17 +68,22 @@ class ListsScreenStore(
     suspend fun onDialogDismissed() = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(
-                    addNewListDialog = it.addNewListDialog.copy(
-                        inputField = "",
-                        visible = false
-                    )
-                )
+                it.copy(dialog = null)
             }
         }
     }
 
-    suspend fun onCreateButtonClicked(newListName: String) =         intent<Content<List<ToDoList>>> {
+    suspend fun removeList(id: Int) = intent<Content<Unit>> {
+        onTrigger { todoRepository.removeList(id) }
+
+        reducer {
+            state.reduceDataWithContent(resultNonNull(), ListsScreenState.INITIAL) {
+                copy(dialog = null)
+            }
+        }
+    }
+
+    suspend fun onCreateButtonClicked(newListName: String) = intent<Content<List<ToDoList>>> {
         onTrigger {
             println(todoRepository.createList(newListName))
             todoRepository.observeLists()
@@ -78,10 +92,7 @@ class ListsScreenStore(
             state.reduceDataWithContent(resultNonNull(), ListsScreenState.INITIAL) { result ->
                 copy(
                     todoLists = result.data,
-                    addNewListDialog = addNewListDialog.copy(
-                        inputField = "",
-                        visible = false
-                    )
+                    dialog = null
                 )
             }
         }

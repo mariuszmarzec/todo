@@ -1,7 +1,9 @@
 package com.marzec.todo.screen.lists
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -88,27 +90,48 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                                         )
                                     }
                                 }
-                            )
+                            ) {
+                                Box(modifier = Modifier.padding(16.dp)) {
+                                    TextButton({ scope.launch { listsScreenStore.showRemoveListDialog(it.id.toInt()) } }) {
+                                        Text("Remove")
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-                DialogBox(
-                    state = Dialog.TextInputDialog(
-                        visible = state.data.addNewListDialog.visible,
-                        title = "Put name of new list",
-                        inputField = state.data.addNewListDialog.inputField,
-                        confirmButton = "Create",
-                        dismissButton = "Cancel",
-                        onTextChanged = {
-                            scope.launch { listsScreenStore.onNewListNameChanged(it) }
-                        },
-                        onConfirm = {
-                            scope.launch {
-                                listsScreenStore.onCreateButtonClicked(it)                        }
-                        },
-                        onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
-                    )
-                )
+                val dialog = when(val dialogState= state.data.dialog) {
+                    is ListsScreenDialog.RemoveListDialog -> {
+                        Dialog.TwoOptionsDialog(
+                            title = "Remove List",
+                            message = "Do you really want to remove list?",
+                            confirmButton = "Remove",
+                            dismissButton = "Cancel",
+                            onConfirm = {
+                                scope.launch { listsScreenStore.removeList(dialogState.id) }
+                            },
+                            onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
+                        )
+                    }
+                    is ListsScreenDialog.AddNewListDialog -> {
+                        Dialog.TextInputDialog(
+                            title = "Put name of new list",
+                            inputField = dialogState.inputField,
+                            confirmButton = "Create",
+                            dismissButton = "Cancel",
+                            onTextChanged = {
+                                scope.launch { listsScreenStore.onNewListNameChanged(it) }
+                            },
+                            onConfirm = {
+                                scope.launch {
+                                    listsScreenStore.onCreateButtonClicked(it)                        }
+                            },
+                            onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
+                        )
+                    }
+                    null -> Dialog.NoDialog
+                }
+                DialogBox(state = dialog)
             }
             is State.Loading -> {
                 Text(text = "Loading...")

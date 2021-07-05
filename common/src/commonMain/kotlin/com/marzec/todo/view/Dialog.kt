@@ -7,17 +7,14 @@ import androidx.compose.runtime.Composable
 fun DialogBox(
     state: Dialog
 ) {
-    if (state.visible) {
-        when (state) {
-            is Dialog.TextInputDialog -> TextInputDialog(state)
-            is Dialog.TwoOptionsDialog -> TwoOptionsDialog(state)
-        }
+    when (state) {
+        is Dialog.TextInputDialog -> TextInputDialog(state)
+        is Dialog.TwoOptionsDialog -> TwoOptionsDialog(state)
+        is Dialog.NoDialog -> Unit
     }
 }
 
-sealed class Dialog(
-    open val visible: Boolean
-) {
+sealed class Dialog {
 
     data class TextInputDialog(
         val title: String,
@@ -27,8 +24,7 @@ sealed class Dialog(
         val onTextChanged: (String) -> Unit = {},
         val onDismiss: () -> Unit = {},
         val onConfirm: (String) -> Unit = {},
-        override val visible: Boolean
-    ) : Dialog(visible)
+    ) : Dialog()
 
     data class TwoOptionsDialog(
         val title: String,
@@ -37,6 +33,7 @@ sealed class Dialog(
         val dismissButton: String,
         val onDismiss: () -> Unit = {},
         val onConfirm: () -> Unit = {},
-        override val visible: Boolean
-    ) : Dialog(visible)
+    ) : Dialog()
+
+    object NoDialog: Dialog()
 }

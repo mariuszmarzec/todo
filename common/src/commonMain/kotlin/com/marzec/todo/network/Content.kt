@@ -1,5 +1,8 @@
 package com.marzec.todo.network
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+
 sealed class Content<T> {
 
     data class Data<T>(val data: T) : Content<T>()
@@ -13,6 +16,17 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     } catch (e: Exception) {
         println(e.message)
         Content.Error(e)
+    }
+}
+fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
+    return flow {
+        emit(Content.Loading())
+        try {
+            emit(Content.Data(request()))
+        } catch (e: Exception) {
+            println(e.message)
+            emit(Content.Error<T>(e))
+        }
     }
 }
 

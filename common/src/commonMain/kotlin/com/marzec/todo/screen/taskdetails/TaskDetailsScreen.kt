@@ -134,7 +134,6 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                         message = "Do you really want to remove this task?",
                         confirmButton = "Yes",
                         dismissButton = "No",
-                        visible = state.removeTaskDialog.visible,
                         onDismiss = { scope.launch { store.hideRemoveTaskDialog() } },
                         onConfirm = {
                             scope.launch { store.removeTask() }

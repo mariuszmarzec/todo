@@ -19,34 +19,32 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TextInputDialog(state: Dialog.TextInputDialog) {
-    if (state.visible) {
-        CustomDialog(
-            onDismissRequest = { state.onDismiss() }
+    CustomDialog(
+        onDismissRequest = { state.onDismiss() }
+    ) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .background(Color.White)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Text(state.title)
+
+            Box(modifier = Modifier.padding(16.dp)) {
+                TextField(state.inputField, {
+                    state.onTextChanged(it)
+                })
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(state.title)
-
-                Box(modifier = Modifier.padding(16.dp)) {
-                    TextField(state.inputField, {
-                        state.onTextChanged(it)
-                    })
+                TextButton(onClick = { state.onConfirm(state.inputField) }) {
+                    Text(state.confirmButton)
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    TextButton(onClick = { state.onConfirm(state.inputField) }) {
-                        Text(state.confirmButton)
-                    }
-                    TextButton(onClick = { state.onDismiss() }) {
-                        Text(state.dismissButton)
-                    }
+                TextButton(onClick = { state.onDismiss() }) {
+                    Text(state.dismissButton)
                 }
             }
         }
