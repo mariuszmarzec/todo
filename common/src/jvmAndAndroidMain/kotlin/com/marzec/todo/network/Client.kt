@@ -3,6 +3,7 @@ package com.marzec.todo.network
 import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
+import com.marzec.todo.cache.getTyped
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.defaultRequest
@@ -29,7 +30,7 @@ val httpClient = HttpClient(OkHttp) {
         addNetworkInterceptor(object : Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
                 var request = chain.request()
-                runBlocking { DI.preferences.getString(PreferencesKeys.AUTHORIZATION) }?.let { authForRequest ->
+                runBlocking { DI.fileCache.getTyped<String>(PreferencesKeys.AUTHORIZATION) }?.let { authForRequest ->
                     request = request.newBuilder()
                         .addHeader(Api.Headers.AUTHORIZATION, authForRequest)
                         .build()
@@ -38,9 +39,9 @@ val httpClient = HttpClient(OkHttp) {
                 val response = chain.proceed(request)
                 val authorization = response.headers[Api.Headers.AUTHORIZATION]
                 if (authorization != null) {
-                    runBlocking { DI.preferences.set(PreferencesKeys.AUTHORIZATION, authorization) }
+                    runBlocking { DI.fileCache.put(PreferencesKeys.AUTHORIZATION, authorization) }
                 } else if (response.code == 401) {
-                    runBlocking { DI.preferences.remove(PreferencesKeys.AUTHORIZATION) }
+                    runBlocking { DI.fileCache.put(PreferencesKeys.AUTHORIZATION, null) }
                 }
                 return response
             }

@@ -2,7 +2,9 @@ package com.marzec.todo
 
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.State
+import com.marzec.todo.cache.FileCache
 import com.marzec.todo.cache.MemoryCache
+import com.marzec.todo.cache.getTyped
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
@@ -46,6 +48,8 @@ object DI {
     lateinit var navigationScope: CoroutineScope
 
     val memoryCache = MemoryCache()
+
+    lateinit var fileCache: FileCache
 
     val preferences: Preferences = MemoryPreferences()
 
@@ -186,20 +190,31 @@ object DI {
             taskId = taskId
         )
     }
-
     private val cacheKeyProvider by lazy { { getTimeMillis().toString() } }
 
-    val navigationStore: NavigationStore by lazy {
-        NavigationStore(
+    lateinit var navigationStore: NavigationStore
+
+    suspend fun provideNavigationStore(): NavigationStore {
+        val authToken = fileCache.getTyped<String>(PreferencesKeys.AUTHORIZATION)
+
+        val defaultScreen = if (authToken.isNullOrEmpty()) {
+            NavigationEntry(
+                Destination.Login,
+                cacheKeyProvider()
+            ) @Composable { _, it -> provideLoginScreen(it) }
+        } else {
+            NavigationEntry(
+                Destination.Lists,
+                cacheKeyProvider()
+            ) @Composable { _, it -> provideListScreen(it) }
+        }
+        return NavigationStore(
             router = ROUTER,
             stateCache = preferences,
             cacheKeyProvider = cacheKeyProvider,
             initialState = NavigationState(
                 backStack = listOf(
-                    NavigationEntry(
-                        Destination.Login,
-                        cacheKeyProvider()
-                    ) @Composable { _, it -> provideLoginScreen(it) }
+                    defaultScreen
                 )
             )
         )
