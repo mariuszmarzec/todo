@@ -97,8 +97,7 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog.copy(
-                        visible = true,
+                    removeTaskDialog = removeTaskDialog?.copy(
                         idToRemove = task.id
                     )
                 )
@@ -110,8 +109,7 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog.copy(
-                        visible = true,
+                    removeTaskDialog = removeTaskDialog?.copy(
                         idToRemove = subtaskId.toInt()
                     )
                 )
@@ -123,9 +121,7 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog.copy(
-                        visible = false
-                    )
+                    removeTaskDialog = null
                 )
             }
         }
@@ -133,13 +129,16 @@ class TaskDetailsStore(
 
     suspend fun removeTask() = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>> {
-                flow {
-                    emit(
-                        todoRepository.removeTask(removeTaskDialog.idToRemove)
-                    )
+            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+                removeTaskDialog?.idToRemove?.let { id ->
+                    flow {
+                        emit(
+                            todoRepository.removeTask(id)
+                        )
+                    }
                 }
             }
+
         }
 
         reducer {
@@ -147,9 +146,7 @@ class TaskDetailsStore(
                 is Content.Data -> {
                     state.reduceData {
                         copy(
-                            removeTaskDialog = removeTaskDialog.copy(
-                                visible = false
-                            )
+                            removeTaskDialog = null
                         )
                     }
                 }
@@ -161,7 +158,7 @@ class TaskDetailsStore(
         sideEffect {
             hideRemoveTaskDialog()
             state.asInstance<TaskDetailsState.Data> {
-                if (removeTaskDialog.idToRemove == task.id) {
+                if (removeTaskDialog?.idToRemove == task.id) {
                     navigationStore.goBack()
                 } else {
                     loadDetails()
@@ -247,7 +244,7 @@ private fun TaskDetailsState.reduceData(data: Task): TaskDetailsState =
             TaskDetailsState
             > { copy(task = data) } ?: TaskDetailsState.Data(
         task = data,
-        removeTaskDialog = RemoveDialog()
+        removeTaskDialog = null
     )
 
 private fun TaskDetailsState.reduceData(

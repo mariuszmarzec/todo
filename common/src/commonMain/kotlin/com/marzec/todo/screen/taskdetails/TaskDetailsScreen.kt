@@ -128,18 +128,21 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                         }
                     }
                 }
-                DialogBox(
-                    state = Dialog.TwoOptionsDialog(
-                        title = "Remove task",
-                        message = "Do you really want to remove this task?",
-                        confirmButton = "Yes",
-                        dismissButton = "No",
-                        onDismiss = { scope.launch { store.hideRemoveTaskDialog() } },
-                        onConfirm = {
-                            scope.launch { store.removeTask() }
-                        }
+                if (state.removeTaskDialog != null) {
+                    DialogBox(
+                        state = Dialog.TwoOptionsDialog(
+                            title = "Remove task",
+                            message = "Do you really want to remove this task?",
+                            confirmButton = "Yes",
+                            dismissButton = "No",
+                            onDismiss = { scope.launch { store.hideRemoveTaskDialog() } },
+                            onConfirm = {
+                                scope.launch { store.removeTask() }
+                            }
+                        )
                     )
-                )
+
+                }
             }
             is TaskDetailsState.Loading -> {
                 Text(text = "Loading")

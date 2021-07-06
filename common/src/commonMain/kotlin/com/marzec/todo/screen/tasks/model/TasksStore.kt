@@ -58,8 +58,7 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog.copy(
-                        visible = true,
+                    removeTaskDialog = removeTaskDialog?.copy(
                         idToRemove = id.toInt()
                     )
                 )
@@ -71,9 +70,7 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog.copy(
-                        visible = false
-                    )
+                    removeTaskDialog = null
                 )
             }
         }
@@ -90,9 +87,7 @@ class TasksStore(
         reducer {
             state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) {
                 copy(
-                    removeTaskDialog = removeTaskDialog.copy(
-                        visible = false
-                    )
+                    removeTaskDialog = null
                 )
             }
         }

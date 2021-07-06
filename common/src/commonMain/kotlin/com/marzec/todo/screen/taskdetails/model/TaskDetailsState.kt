@@ -8,7 +8,7 @@ sealed class TaskDetailsState(
 ) {
     data class Data(
         override val task: Task,
-        val removeTaskDialog: RemoveDialog
+        val removeTaskDialog: RemoveDialog?
     ) : TaskDetailsState(task)
 
     data class Loading(
