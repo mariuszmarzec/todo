@@ -37,3 +37,16 @@ sealed class Dialog {
 
     object NoDialog: Dialog()
 }
+
+sealed class DialogState {
+
+    data class RemoveDialog(
+        val idToRemove: Int,
+    ): DialogState()
+
+    data class InputDialog(
+        val inputField: String,
+    ): DialogState()
+
+    object NoDialog: DialogState()
+}

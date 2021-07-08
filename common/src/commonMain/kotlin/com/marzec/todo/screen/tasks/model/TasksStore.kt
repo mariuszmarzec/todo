@@ -13,6 +13,7 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
+import com.marzec.todo.view.DialogState
 import kotlinx.coroutines.flow.flow
 
 class TasksStore(
@@ -58,7 +59,7 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog?.copy(
+                    removeTaskDialog = DialogState.RemoveDialog(
                         idToRemove = id.toInt()
                     )
                 )
@@ -70,7 +71,7 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = null
+                    removeTaskDialog = DialogState.NoDialog
                 )
             }
         }
@@ -87,7 +88,7 @@ class TasksStore(
         reducer {
             state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) {
                 copy(
-                    removeTaskDialog = null
+                    removeTaskDialog = DialogState.NoDialog
                 )
             }
         }

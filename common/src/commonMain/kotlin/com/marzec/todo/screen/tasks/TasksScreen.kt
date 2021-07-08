@@ -26,6 +26,7 @@ import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
+import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
@@ -106,7 +107,7 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                     }
                 }
                 val removeTaskDialog = state.data.removeTaskDialog
-                if (removeTaskDialog != null) {
+                if (removeTaskDialog is DialogState.RemoveDialog) {
                     DialogBox(
                         state = Dialog.TwoOptionsDialog(
                             title = "Remove task",

@@ -1,14 +1,14 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.todo.model.Task
-import com.marzec.todo.screen.tasks.model.RemoveDialog
+import com.marzec.todo.view.DialogState
 
 sealed class TaskDetailsState(
     open val task: Task?
 ) {
     data class Data(
         override val task: Task,
-        val removeTaskDialog: RemoveDialog?
+        val dialog: DialogState
     ) : TaskDetailsState(task)
 
     data class Loading(

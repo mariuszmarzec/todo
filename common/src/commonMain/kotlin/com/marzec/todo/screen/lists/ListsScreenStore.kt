@@ -1,7 +1,6 @@
 package com.marzec.todo.screen.lists
 
 import com.marzec.mvi.State
-import com.marzec.mvi.Store
 import com.marzec.mvi.mapData
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceDataWithContent
@@ -11,7 +10,7 @@ import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import kotlinx.coroutines.flow.first
+import com.marzec.todo.view.DialogState
 
 class ListsScreenStore(
     private val cacheKey: String,
@@ -40,7 +39,7 @@ class ListsScreenStore(
     suspend fun addNewList() = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(dialog = ListsScreenDialog.AddNewListDialog(emptyString()))
+                it.copy(dialog = DialogState.InputDialog(emptyString()))
             }
         }
     }
@@ -48,7 +47,7 @@ class ListsScreenStore(
     suspend fun showRemoveListDialog(id: Int) = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(dialog = ListsScreenDialog.RemoveListDialog(id))
+                it.copy(dialog = DialogState.RemoveDialog(id))
             }
         }
     }
@@ -57,9 +56,9 @@ class ListsScreenStore(
         reducer {
             state.mapData {
                 it.copy(
-                    dialog = it.dialog?.asInstanceAndReturn<ListsScreenDialog.AddNewListDialog, ListsScreenDialog.AddNewListDialog> {
+                    dialog = it.dialog.asInstanceAndReturn<DialogState.InputDialog, DialogState.InputDialog> {
                         this.copy(inputField = listName)
-                    }
+                    } ?: it.dialog
                 )
             }
         }
@@ -68,7 +67,7 @@ class ListsScreenStore(
     suspend fun onDialogDismissed() = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(dialog = null)
+                it.copy(dialog = DialogState.NoDialog)
             }
         }
     }
@@ -78,7 +77,7 @@ class ListsScreenStore(
 
         reducer {
             state.reduceDataWithContent(resultNonNull(), ListsScreenState.INITIAL) {
-                copy(dialog = null)
+                copy(dialog = DialogState.NoDialog)
             }
         }
     }
@@ -92,7 +91,7 @@ class ListsScreenStore(
             state.reduceDataWithContent(resultNonNull(), ListsScreenState.INITIAL) { result ->
                 copy(
                     todoLists = result.data,
-                    dialog = null
+                    dialog = DialogState.NoDialog
                 )
             }
         }

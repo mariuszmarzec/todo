@@ -27,6 +27,7 @@ import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
+import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
@@ -101,19 +102,19 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                     }
                 }
                 val dialog = when(val dialogState= state.data.dialog) {
-                    is ListsScreenDialog.RemoveListDialog -> {
+                    is DialogState.RemoveDialog -> {
                         Dialog.TwoOptionsDialog(
                             title = "Remove List",
                             message = "Do you really want to remove list?",
                             confirmButton = "Remove",
                             dismissButton = "Cancel",
                             onConfirm = {
-                                scope.launch { listsScreenStore.removeList(dialogState.id) }
+                                scope.launch { listsScreenStore.removeList(dialogState.idToRemove) }
                             },
                             onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
                         )
                     }
-                    is ListsScreenDialog.AddNewListDialog -> {
+                    is DialogState.InputDialog -> {
                         Dialog.TextInputDialog(
                             title = "Put name of new list",
                             inputField = dialogState.inputField,
@@ -129,7 +130,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                             onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
                         )
                     }
-                    null -> Dialog.NoDialog
+                    DialogState.NoDialog -> Dialog.NoDialog
                 }
                 DialogBox(state = dialog)
             }

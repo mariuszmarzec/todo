@@ -11,7 +11,7 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import com.marzec.todo.screen.tasks.model.RemoveDialog
+import com.marzec.todo.view.DialogState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -97,9 +97,7 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog?.copy(
-                        idToRemove = task.id
-                    )
+                    dialog = DialogState.RemoveDialog(idToRemove = task.id)
                 )
             }
         }
@@ -109,9 +107,7 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = removeTaskDialog?.copy(
-                        idToRemove = subtaskId.toInt()
-                    )
+                    dialog = DialogState.RemoveDialog(idToRemove = subtaskId.toInt())
                 )
             }
         }
@@ -121,24 +117,19 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = null
+                    dialog = DialogState.NoDialog
                 )
             }
         }
     }
 
-    suspend fun removeTask() = intent<Content<Unit>> {
+    suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
-                removeTaskDialog?.idToRemove?.let { id ->
-                    flow {
-                        emit(
-                            todoRepository.removeTask(id)
-                        )
-                    }
-                }
+            flow {
+                emit(
+                    todoRepository.removeTask(idToRemove)
+                )
             }
-
         }
 
         reducer {
@@ -146,7 +137,7 @@ class TaskDetailsStore(
                 is Content.Data -> {
                     state.reduceData {
                         copy(
-                            removeTaskDialog = null
+                            dialog = DialogState.NoDialog
                         )
                     }
                 }
@@ -158,7 +149,7 @@ class TaskDetailsStore(
         sideEffect {
             hideRemoveTaskDialog()
             state.asInstance<TaskDetailsState.Data> {
-                if (removeTaskDialog?.idToRemove == task.id) {
+                if (idToRemove == task.id) {
                     navigationStore.goBack()
                 } else {
                     loadDetails()
@@ -244,7 +235,7 @@ private fun TaskDetailsState.reduceData(data: Task): TaskDetailsState =
             TaskDetailsState
             > { copy(task = data) } ?: TaskDetailsState.Data(
         task = data,
-        removeTaskDialog = null
+        dialog = DialogState.NoDialog
     )
 
 private fun TaskDetailsState.reduceData(
