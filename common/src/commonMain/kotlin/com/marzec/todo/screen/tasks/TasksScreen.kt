@@ -8,9 +8,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,7 +68,7 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                     scope.launch { tasksStore.addNewTask() }
                 }
             ) {
-                Text("+")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
             }
         }) {
         when (val state = state) {
@@ -86,20 +93,20 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                                         tasksStore.onListItemClicked(it.id)
                                     }
                                 }) {
-                                    TextButton({
+                                    IconButton({
                                         scope.launch { tasksStore.moveToTop(it.id) }
                                     }) {
-                                        Text(text = "Move to top")
+                                        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = "Move to top")
                                     }
-                                    TextButton({
+                                    IconButton({
                                         scope.launch { tasksStore.moveToBottom(it.id) }
                                     }) {
-                                        Text(text = "Move to bottom")
+                                        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Move to bottom")
                                     }
-                                    TextButton({
+                                    IconButton({
                                         scope.launch { tasksStore.showRemoveDialog(it.id) }
                                     }) {
-                                        Text(text = "Remove")
+                                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove")
                                     }
                                 }
                             }

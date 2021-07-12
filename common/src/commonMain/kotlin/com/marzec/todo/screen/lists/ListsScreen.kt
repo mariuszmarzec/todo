@@ -9,9 +9,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,7 +69,7 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                     scope.launch { listsScreenStore.addNewList() }
                 }
             ) {
-                Text("+")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
             }
         }) {
         when (val state = state) {
@@ -93,8 +98,8 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
                                 }
                             ) {
                                 Box(modifier = Modifier.padding(16.dp)) {
-                                    TextButton({ scope.launch { listsScreenStore.showRemoveListDialog(it.id.toInt()) } }) {
-                                        Text("Remove")
+                                    IconButton({ scope.launch { listsScreenStore.showRemoveListDialog(it.id.toInt()) } }) {
+                                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove")
                                     }
                                 }
                             }
