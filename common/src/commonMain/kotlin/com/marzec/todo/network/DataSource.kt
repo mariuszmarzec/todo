@@ -28,13 +28,9 @@ class DataSource(
             body = CreateTodoListDto(title = title)
         }
 
-    suspend fun addNewTask(listId: Int, description: String, parentTaskId: Int?) {
+    suspend fun addNewTask(listId: Int, createTaskDto: CreateTaskDto) {
         client.post<Unit>(Api.Todo.createTask(listId)) {
-            body = CreateTaskDto(
-                description = description,
-                parentTaskId = parentTaskId,
-                priority = 10
-            )
+            body = createTaskDto
         }
     }
 

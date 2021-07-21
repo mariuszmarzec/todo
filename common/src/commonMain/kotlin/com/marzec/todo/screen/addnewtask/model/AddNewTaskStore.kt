@@ -20,7 +20,7 @@ class AddNewTaskStore(
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
-    private val initialState: State<AddNewTaskState>,
+    initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
 ) : Store2<State<AddNewTaskState>>(
     stateCache.get(cacheKey) ?: initialState
@@ -73,7 +73,12 @@ class AddNewTaskStore(
                             isToDo = isToDo
                         )
                     } else {
-                        todoRepository.addNewTask(listId, parentTaskId, description)
+                        todoRepository.addNewTask(
+                            listId,
+                            description,
+                            parentTaskId,
+                            highestPriorityAsDefault
+                        )
                     }
                     emit(result)
                 }
@@ -91,6 +96,7 @@ class AddNewTaskStore(
                     emit(
                         todoRepository.addNewTasks(
                             listId = listId,
+                            highestPriorityAsDefault = highestPriorityAsDefault,
                             parentTaskId = parentTaskId,
                             descriptions = description.split("\n")
                         )
@@ -100,6 +106,12 @@ class AddNewTaskStore(
         }
         sideEffect {
             navigateOutAfterCall()
+        }
+    }
+
+    suspend fun toggleHighestPriority() = intent<Unit> {
+        reducer {
+            state.reduceData { copy(highestPriorityAsDefault = !highestPriorityAsDefault) }
         }
     }
 

@@ -6,7 +6,8 @@ data class AddNewTaskState(
     val listId: Int,
     val priority: Int,
     val isToDo: Boolean,
-    val description: String
+    val description: String,
+    val highestPriorityAsDefault: Boolean
 ) {
 
     companion object {
@@ -16,7 +17,8 @@ data class AddNewTaskState(
             listId = listId,
             description = "",
             priority = 0,
-            isToDo = true
+            isToDo = true,
+            highestPriorityAsDefault = false
         )
     }
 }

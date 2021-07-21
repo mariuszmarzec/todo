@@ -2,6 +2,7 @@ package com.marzec.todo.repository
 
 import com.marzec.todo.Api
 import com.marzec.todo.DI
+import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.toDomain
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.model.Task
@@ -47,22 +48,38 @@ class TodoRepository(
 
     suspend fun addNewTask(
         listId: Int,
+        description: String,
         parentTaskId: Int? = null,
-        description: String
-    ): Content<Unit> =
+        highestPriorityAsDefault: Boolean
+        ): Content<Unit> =
         withContext(DI.ioDispatcher) {
-            asContent { dataSource.addNewTask(listId, description, parentTaskId) }
+            asContent {
+                dataSource.addNewTask(
+                    listId, CreateTaskDto(
+                        description = description,
+                        parentTaskId = parentTaskId,
+                        highestPriorityAsDefault = highestPriorityAsDefault
+                    )
+                )
+            }
         }
 
     suspend fun addNewTasks(
         listId: Int,
+        highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
         descriptions: List<String>
     ): Content<Unit> =
         withContext(DI.ioDispatcher) {
             asContent {
                 descriptions.forEach {
-                    dataSource.addNewTask(listId, it, parentTaskId)
+                    dataSource.addNewTask(
+                        listId, CreateTaskDto(
+                            description = it,
+                            parentTaskId = parentTaskId,
+                            highestPriorityAsDefault = highestPriorityAsDefault
+                        )
+                    )
                 }
             }
         }

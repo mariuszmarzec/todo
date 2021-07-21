@@ -38,7 +38,8 @@ fun ToDoListDto.toDomain() = ToDoList(
 data class CreateTaskDto(
     val description: String,
     val parentTaskId: Int? = null,
-    val priority: Int
+    val priority: Int? = null,
+    val highestPriorityAsDefault: Boolean? = null
 )
 
 @Serializable

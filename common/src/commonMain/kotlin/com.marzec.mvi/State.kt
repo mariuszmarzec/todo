@@ -42,7 +42,7 @@ fun <T> State<T>.reduceData(
 ): State<T> =
     when (this) {
         is State.Data -> State.Data(this.data.reducer())
-        is State.Loading -> copy()
+        is State.Loading -> copy(this.data?.reducer())
         is State.Error -> copy()
     }
 

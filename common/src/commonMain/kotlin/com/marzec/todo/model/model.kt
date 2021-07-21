@@ -56,7 +56,8 @@ fun TaskDto.toDomain(listId: Int): Task = Task(
 data class CreateTask(
     val description: String,
     val parentTaskId: Int?,
-    val priority: Int
+    val priority: Int? = null,
+    val highestPriorityAsDefault: Boolean? = null
 )
 
 fun CreateTaskDto.toDomain() = CreateTask(
@@ -69,6 +70,7 @@ fun CreateTask.toDto() = CreateTaskDto(
     description = description,
     parentTaskId = parentTaskId,
     priority = priority,
+    highestPriorityAsDefault = highestPriorityAsDefault
 )
 
 data class UpdateTask(

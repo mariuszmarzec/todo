@@ -3,8 +3,10 @@ package com.marzec.todo.screen.addnewtask
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -55,6 +57,18 @@ fun AddNewTaskScreen(navigationStore: NavigationStore, store: AddNewTaskStore) {
                         TextField(state.data.description, {
                             scope.launch { store.onDescriptionChanged(it) }
                         })
+                    }
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = state.data.highestPriorityAsDefault,
+                            onCheckedChange = { scope.launch { store.toggleHighestPriority() } }
+                        )
+                        TextButton({ scope.launch { store.toggleHighestPriority() } }) {
+                            Text("Highest priority as default")
+                        }
                     }
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextButton({ scope.launch { store.addNewTask() } }) {
