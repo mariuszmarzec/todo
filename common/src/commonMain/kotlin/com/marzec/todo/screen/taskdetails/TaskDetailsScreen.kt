@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,6 +71,12 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
                 ) {
                     SelectionContainer {
                         Text(text = state.task.description, fontSize = 16.sp)
+                    }
+                    Spacer(Modifier.size(16.dp))
+                    IconButton({
+                        scope.launch { store.copyDescription() }
+                    }) {
+                        Icon(imageVector = Icons.Default.Share, contentDescription = "Copy")
                     }
                     Spacer(Modifier.size(16.dp))
                     Box(modifier = Modifier.padding(16.dp)) {

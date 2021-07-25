@@ -5,6 +5,7 @@ import com.marzec.mvi.State
 import com.marzec.todo.cache.FileCache
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.cache.getTyped
+import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
@@ -44,6 +45,7 @@ import kotlinx.coroutines.launch
 
 object DI {
 
+    lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     var ioDispatcher: CoroutineContext = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
@@ -160,7 +162,8 @@ object DI {
             cacheKey = cacheKey,
             initialState = TaskDetailsState.INITIAL,
             listId = listId,
-            taskId = taskId
+            taskId = taskId,
+            copyToClipBoardHelper = copyToClipBoardHelper
         )
     }
 

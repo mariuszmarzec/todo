@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.getMessage
@@ -22,7 +23,8 @@ class TaskDetailsStore(
     initialState: TaskDetailsState,
     private val todoRepository: TodoRepository,
     private val listId: Int,
-    private val taskId: Int
+    private val taskId: Int,
+    private val copyToClipBoardHelper: CopyToClipBoardHelper
 ) : Store2<TaskDetailsState>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -225,6 +227,12 @@ class TaskDetailsStore(
         }
         sideEffect {
             loadDetails()
+        }
+    }
+
+    suspend fun copyDescription() = sideEffectIntent {
+        state.asInstance<TaskDetailsState.Data> {
+            copyToClipBoardHelper.copy(task.description)
         }
     }
 }
