@@ -23,7 +23,7 @@ class DataSource(
     suspend fun removeList(id: Int): Unit =
         client.delete(Api.Todo.removeList(id))
 
-    suspend fun createToDoList(title: String): List<ToDoListDto> =
+    suspend fun createToDoList(title: String): ToDoListDto =
         client.post(Api.Todo.TODO_LIST) {
             body = CreateTodoListDto(title = title)
         }

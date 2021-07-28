@@ -64,18 +64,13 @@ class AddSubTaskStore(
         onTrigger {
             state.asInstanceAndReturn<AddSubTaskState.Data, Flow<Content<Unit>>?> {
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    flow {
-                        emit(Content.Loading())
-                        emit(
-                            todoRepository.updateTask(
-                                taskId = id.toInt(),
-                                description = task.description,
-                                parentTaskId = taskId,
-                                priority = task.priority,
-                                isToDo = task.isToDo
-                            )
-                        )
-                    }
+                    todoRepository.updateTask(
+                        taskId = id.toInt(),
+                        description = task.description,
+                        parentTaskId = taskId,
+                        priority = task.priority,
+                        isToDo = task.isToDo
+                    )
                 }
             }
         }

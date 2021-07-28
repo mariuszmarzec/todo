@@ -11,7 +11,6 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.asContent
 import com.marzec.todo.network.asContentFlow
-import com.marzec.todo.network.ifData
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.network.mapData
 import kotlinx.coroutines.flow.Flow
@@ -51,17 +50,15 @@ class TodoRepository(
         description: String,
         parentTaskId: Int? = null,
         highestPriorityAsDefault: Boolean
-        ): Content<Unit> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                dataSource.addNewTask(
-                    listId, CreateTaskDto(
-                        description = description,
-                        parentTaskId = parentTaskId,
-                        highestPriorityAsDefault = highestPriorityAsDefault
-                    )
+    ): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.addNewTask(
+                listId, CreateTaskDto(
+                    description = description,
+                    parentTaskId = parentTaskId,
+                    highestPriorityAsDefault = highestPriorityAsDefault
                 )
-            }
+            )
         }
 
     suspend fun addNewTasks(
@@ -69,18 +66,16 @@ class TodoRepository(
         highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
         descriptions: List<String>
-    ): Content<Unit> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                descriptions.forEach {
-                    dataSource.addNewTask(
-                        listId, CreateTaskDto(
-                            description = it,
-                            parentTaskId = parentTaskId,
-                            highestPriorityAsDefault = highestPriorityAsDefault
-                        )
+    ): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            descriptions.forEach {
+                dataSource.addNewTask(
+                    listId, CreateTaskDto(
+                        description = it,
+                        parentTaskId = parentTaskId,
+                        highestPriorityAsDefault = highestPriorityAsDefault
                     )
-                }
+                )
             }
         }
 
@@ -90,34 +85,22 @@ class TodoRepository(
         parentTaskId: Int?,
         priority: Int,
         isToDo: Boolean
-    ): Content<Unit> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                dataSource.updateTask(taskId, description, parentTaskId, priority, isToDo)
-            }
+    ): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.updateTask(taskId, description, parentTaskId, priority, isToDo)
         }
 
-    suspend fun removeTask(taskId: Int): Content<Unit> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                dataSource.removeTask(taskId)
-            }
+    suspend fun removeTask(taskId: Int): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.removeTask(taskId)
         }
 
     fun removeList(id: Int): Flow<Content<Unit>> =
-        asContentFlow { dataSource.removeList(id) }
-            .onEach {
-                if (it is Content.Data) {
-                    refreshListsCache()
-                }
-            }
+        asContentWithListUpdate { dataSource.removeList(id) }
 
-    suspend fun createList(title: String): Content<List<ToDoList>> =
-        withContext(DI.ioDispatcher) {
-            asContent {
-                dataSource.createToDoList(title)
-                    .map { it.toDomain() }
-            }
+    suspend fun createList(title: String): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.createToDoList(title)
         }
 
     private suspend fun getListsCacheFirst() =
@@ -164,6 +147,14 @@ class TodoRepository(
                 }
             }.flowOn(DI.ioDispatcher)
         }
+
+    private fun asContentWithListUpdate(request: suspend () -> Unit) =
+        asContentFlow(request)
+            .onEach {
+                if (it is Content.Data) {
+                    refreshListsCache()
+                }
+            }
 }
 
 private fun List<Task>.flatMapTask(tasks: MutableList<Task> = mutableListOf()): List<Task> {

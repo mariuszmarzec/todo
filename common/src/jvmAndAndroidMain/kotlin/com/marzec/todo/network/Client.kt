@@ -26,7 +26,6 @@ val httpClient = HttpClient(OkHttp) {
     }
 
     engine {
-
         addNetworkInterceptor(object : Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
                 var request = chain.request()

@@ -82,15 +82,13 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun onCreateButtonClicked(newListName: String) = intent<Content<List<ToDoList>>> {
+    suspend fun onCreateButtonClicked(newListName: String) = intent<Content<Unit>> {
         onTrigger {
-            println(todoRepository.createList(newListName))
-            todoRepository.observeLists()
+            todoRepository.createList(newListName)
         }
         reducer {
-            state.reduceDataWithContent(resultNonNull(), ListsScreenState.INITIAL) { result ->
+            state.reduceDataWithContent(resultNonNull(), ListsScreenState.INITIAL) {
                 copy(
-                    todoLists = result.data,
                     dialog = DialogState.NoDialog
                 )
             }

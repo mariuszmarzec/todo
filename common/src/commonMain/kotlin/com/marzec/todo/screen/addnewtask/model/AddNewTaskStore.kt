@@ -61,26 +61,23 @@ class AddNewTaskStore(
 
     suspend fun addNewTask() = intent<Content<Unit>> {
         onTrigger {
-            flow {
-                state.asDataAndReturn {
-                    val taskId = taskId
-                    val result = if (taskId != null) {
-                        todoRepository.updateTask(
-                            taskId = taskId,
-                            description = description,
-                            parentTaskId = parentTaskId,
-                            priority = priority,
-                            isToDo = isToDo
-                        )
-                    } else {
-                        todoRepository.addNewTask(
-                            listId,
-                            description,
-                            parentTaskId,
-                            highestPriorityAsDefault
-                        )
-                    }
-                    emit(result)
+            state.asDataAndReturn {
+                val taskId = taskId
+                if (taskId != null) {
+                    todoRepository.updateTask(
+                        taskId = taskId,
+                        description = description,
+                        parentTaskId = parentTaskId,
+                        priority = priority,
+                        isToDo = isToDo
+                    )
+                } else {
+                    todoRepository.addNewTask(
+                        listId,
+                        description,
+                        parentTaskId,
+                        highestPriorityAsDefault
+                    )
                 }
             }
         }
@@ -92,16 +89,12 @@ class AddNewTaskStore(
     suspend fun addManyTasks() = intent<Content<Unit>> {
         onTrigger {
             state.asDataAndReturn {
-                flow {
-                    emit(
-                        todoRepository.addNewTasks(
-                            listId = listId,
-                            highestPriorityAsDefault = highestPriorityAsDefault,
-                            parentTaskId = parentTaskId,
-                            descriptions = description.split("\n")
-                        )
-                    )
-                }
+                todoRepository.addNewTasks(
+                    listId = listId,
+                    highestPriorityAsDefault = highestPriorityAsDefault,
+                    parentTaskId = parentTaskId,
+                    descriptions = description.split("\n")
+                )
             }
         }
         sideEffect {

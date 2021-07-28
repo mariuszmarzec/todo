@@ -68,25 +68,14 @@ class TaskDetailsStore(
         onTrigger {
             state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    flow {
-                        emit(Content.Loading())
-                        emit(
-                            todoRepository.updateTask(
-                                taskId = id.toInt(),
-                                description = task.description,
-                                parentTaskId = null,
-                                priority = task.priority,
-                                isToDo = task.isToDo
-                            )
-                        )
-                    }
+                    todoRepository.updateTask(
+                        taskId = id.toInt(),
+                        description = task.description,
+                        parentTaskId = null,
+                        priority = task.priority,
+                        isToDo = task.isToDo
+                    )
                 }
-            }
-        }
-
-        sideEffect {
-            result?.asInstance<Content.Data<*>> {
-                loadDetails()
             }
         }
     }
@@ -118,29 +107,21 @@ class TaskDetailsStore(
     suspend fun hideRemoveTaskDialog() = intent<Unit> {
         reducer {
             state.reduceData {
-                copy(
-                    dialog = DialogState.NoDialog
-                )
+                copy(dialog = DialogState.NoDialog)
             }
         }
     }
 
     suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
-            flow {
-                emit(
-                    todoRepository.removeTask(idToRemove)
-                )
-            }
+            todoRepository.removeTask(idToRemove)
         }
 
         reducer {
             when (val result = resultNonNull()) {
                 is Content.Data -> {
                     state.reduceData {
-                        copy(
-                            dialog = DialogState.NoDialog
-                        )
+                        copy(dialog = DialogState.NoDialog)
                     }
                 }
                 is Content.Error -> TaskDetailsState.Error(state.task, result.getMessage())
@@ -150,11 +131,9 @@ class TaskDetailsStore(
 
         sideEffect {
             hideRemoveTaskDialog()
-            state.asInstance<TaskDetailsState.Data> {
-                if (idToRemove == task.id) {
+            resultNonNull().asInstance<Content.Data<Unit>> {
+                if (idToRemove == taskId) {
                     navigationStore.goBack()
-                } else {
-                    loadDetails()
                 }
             }
         }
@@ -165,18 +144,13 @@ class TaskDetailsStore(
             state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
                 val maxPriority = task.subTasks.maxOf { it.priority }
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    flow {
-                        emit(Content.Loading())
-                        emit(
-                            todoRepository.updateTask(
-                                taskId = id.toInt(),
-                                description = task.description,
-                                parentTaskId = task.parentTaskId,
-                                priority = maxPriority.inc(),
-                                isToDo = task.isToDo
-                            )
-                        )
-                    }
+                    todoRepository.updateTask(
+                        taskId = id.toInt(),
+                        description = task.description,
+                        parentTaskId = task.parentTaskId,
+                        priority = maxPriority.inc(),
+                        isToDo = task.isToDo
+                    )
                 }
             }
         }
@@ -189,9 +163,6 @@ class TaskDetailsStore(
                 )
                 is Content.Loading -> TaskDetailsState.Loading(state.task)
             }
-        }
-        sideEffect {
-            loadDetails()
         }
     }
 
@@ -200,18 +171,13 @@ class TaskDetailsStore(
             state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
                 val minPriority = task.subTasks.minOf { it.priority }
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    flow {
-                        emit(Content.Loading())
-                        emit(
-                            todoRepository.updateTask(
-                                taskId = id.toInt(),
-                                description = task.description,
-                                parentTaskId = task.parentTaskId,
-                                priority = minPriority.dec(),
-                                isToDo = task.isToDo
-                            )
-                        )
-                    }
+                    todoRepository.updateTask(
+                        taskId = id.toInt(),
+                        description = task.description,
+                        parentTaskId = task.parentTaskId,
+                        priority = minPriority.dec(),
+                        isToDo = task.isToDo
+                    )
                 }
             }
         }
@@ -224,9 +190,6 @@ class TaskDetailsStore(
                 )
                 is Content.Loading -> TaskDetailsState.Loading(state.task)
             }
-        }
-        sideEffect {
-            loadDetails()
         }
     }
 
