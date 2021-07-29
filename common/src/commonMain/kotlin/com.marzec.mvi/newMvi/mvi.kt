@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -126,4 +127,13 @@ class IntentBuilder<State: Any, Result: Any> {
     ) {
         fun resultNonNull(): Result = result!!
     }
+}
+
+fun <State: Any, Result: Any> IntentBuilder<State, Result>.oneShotTrigger(action: suspend IntentBuilder.IntentContext<State, Result>.() -> Result): IntentBuilder<State, Result> {
+    onTrigger {
+        flow {
+            emit(action())
+        }
+    }
+    return this
 }

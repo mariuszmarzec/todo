@@ -9,7 +9,7 @@ import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 
 @Composable
-fun MainScreen(navigationStore: NavigationStore) {
+fun HomeScreen(navigationStore: NavigationStore) {
     val scope = rememberCoroutineScope()
 
     val state: NavigationState by navigationStore.state.collectAsState()

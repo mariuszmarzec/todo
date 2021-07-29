@@ -35,6 +35,7 @@ import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.screen.tasks.TasksScreen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
+import com.marzec.todo.view.ActionBarProvider
 import io.ktor.client.HttpClient
 import io.ktor.util.date.getTimeMillis
 import kotlin.coroutines.CoroutineContext
@@ -112,7 +113,8 @@ object DI {
                 taskId = taskId,
                 parentTaskId = parentTaskId,
                 cacheKey = cacheKey
-            )
+            ),
+            actionBarProvider
         )
     }
 
@@ -142,11 +144,12 @@ object DI {
         TaskDetailsScreen(
             listId = listId,
             taskId = taskId,
-            navigationStore, provideTaskDetailsStore(
+            store = provideTaskDetailsStore(
                 listId = listId,
                 taskId = taskId,
                 cacheKey = cacheKey
-            )
+            ),
+            actionBarProvider = actionBarProvider
         )
     }
 
@@ -170,11 +173,12 @@ object DI {
     @Composable
     private fun provideAddSubTaskScreen(listId: Int, taskId: Int, cacheKey: String) {
         AddSubTaskScreen(
-            navigationStore, provideAddSubTaskStore(
+            store = provideAddSubTaskStore(
                 listId = listId,
                 taskId = taskId,
                 cacheKey = cacheKey
-            )
+            ),
+            actionBarProvider = actionBarProvider
         )
     }
 
@@ -225,7 +229,7 @@ object DI {
 
     @Composable
     private fun provideListScreen(cacheKey: String) {
-        ListsScreen(navigationStore, provideListScreenStore(cacheKey = cacheKey))
+        ListsScreen(navigationStore, actionBarProvider, provideListScreenStore(cacheKey = cacheKey))
     }
 
     @Composable
@@ -233,7 +237,9 @@ object DI {
         todoRepository = provideTodoRepository(),
         stateCache = preferences,
         cacheKey = cacheKey,
-        initialState = provideListScreenDefaultState()
+        initialState = provideListScreenDefaultState(),
+        navigationStore = navigationStore,
+        loginRepository = loginRepository
     )
 
     private fun provideListScreenDefaultState(): State<ListsScreenState> {
@@ -246,10 +252,10 @@ object DI {
 
     lateinit var client: HttpClient
 
-    fun provideLoginRepository() = LoginRepository(client)
+    val loginRepository by lazy { LoginRepository(client) }
 
     fun provideLoginStore(cacheKey: String): LoginStore = LoginStore(
-        loginRepository = provideLoginRepository(),
+        loginRepository = loginRepository,
         stateCache = preferences,
         cacheKey = cacheKey,
         onLoginSuccess = {
@@ -266,6 +272,10 @@ object DI {
     )
 
     fun provideTodoRepository() = TodoRepository(DataSource(client), memoryCache)
+
+    private val actionBarProvider: ActionBarProvider by lazy {
+        ActionBarProvider(navigationStore)
+    }
 }
 
 object PreferencesKeys {

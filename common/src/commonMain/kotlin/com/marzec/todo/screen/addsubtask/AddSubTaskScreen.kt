@@ -30,13 +30,16 @@ import androidx.compose.ui.unit.dp
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskState
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
-import com.marzec.todo.view.ActionBar
+import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddSubTaskScreen(navigationStore: NavigationStore, store: AddSubTaskStore) {
+fun AddSubTaskScreen(
+    store: AddSubTaskStore,
+    actionBarProvider: ActionBarProvider
+) {
 
     val scope = rememberCoroutineScope()
 
@@ -49,7 +52,7 @@ fun AddSubTaskScreen(navigationStore: NavigationStore, store: AddSubTaskStore) {
 
     Scaffold(
         topBar = {
-            ActionBar(navigationStore, "Add Sub Task")
+            actionBarProvider.provide("Add Sub Task")
         }
     ) {
         when (val state = state) {

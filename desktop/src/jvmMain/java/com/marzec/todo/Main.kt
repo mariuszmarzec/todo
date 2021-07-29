@@ -7,7 +7,7 @@ import com.marzec.todo.cache.FileCacheImpl
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.network.httpClient
-import com.marzec.todo.screen.main.MainScreen
+import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Toolkit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,9 +15,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 import java.awt.datatransfer.StringSelection
-
-
-
 
 @ExperimentalCoroutinesApi
 fun main() {
@@ -51,6 +48,6 @@ fun main() {
     ) {
         DI.navigationScope = rememberCoroutineScope()
 
-        MainScreen(DI.navigationStore)
+        HomeScreen(DI.navigationStore)
     }
 }

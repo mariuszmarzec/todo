@@ -19,8 +19,19 @@ import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.repository.LoginRepository
 import kotlinx.coroutines.launch
 
+class ActionBarProvider(private val store: NavigationStore) {
+    @Composable
+    fun provide(title: String, rightContent: @Composable () -> Unit = { }) {
+        ActionBar(store = store, title = title, rightContent)
+    }
+}
+
 @Composable
-fun ActionBar(store: NavigationStore, title: String) {
+private fun ActionBar(
+    store: NavigationStore,
+    title: String,
+    rightContent: @Composable () -> Unit = { }
+) {
     val scope = rememberCoroutineScope()
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -32,44 +43,7 @@ fun ActionBar(store: NavigationStore, title: String) {
         Spacer(modifier = Modifier.width(20.dp))
         Text(text = title)
         Spacer(modifier = Modifier.weight(1f))
-        TextButton({
-            scope.launch { topBarStore.logout() }
-        }) {
-            Text(text = "Logout")
-        }
+
+        rightContent()
     }
-}
-
-val topBarStore by lazy {
-    TopBarStore(DI.navigationStore)
-}
-
-class TopBarStore(
-    private val store: NavigationStore
-) : Store<Unit, TopBarStore.Logout>(Unit) {
-
-    init {
-        addIntent<Logout> {
-            onTrigger {
-                LoginRepository(DI.client).logout()
-            }
-            sideEffect {
-                store.next(
-                    NavigationAction(
-                        destination = Destination.Login,
-                        NavigationOptions(
-                            Destination.Login,
-                            popToInclusive = true
-                        )
-                    )
-                )
-            }
-        }
-    }
-
-    suspend fun logout() {
-        sendAction(Logout)
-    }
-
-    object Logout
 }

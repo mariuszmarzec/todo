@@ -30,6 +30,7 @@ import com.marzec.mvi.State
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
@@ -38,7 +39,11 @@ import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
 
 @Composable
-fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenStore) {
+fun ListsScreen(
+    navigationStore: NavigationStore,
+    actionBarProvider: ActionBarProvider,
+    listsScreenStore: ListsScreenStore
+) {
     val scope = rememberCoroutineScope()
 
     val state: State<ListsScreenState> by listsScreenStore.state.collectAsState()
@@ -52,14 +57,12 @@ fun ListsScreen(navigationStore: NavigationStore, listsScreenStore: ListsScreenS
 
     Scaffold(
         topBar = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            actionBarProvider.provide(title = "ToDo Listy") {
                 TextButton({
-                    scope.launch { navigationStore.goBack() }
+                    scope.launch { listsScreenStore.logout() }
                 }) {
-                    Text(text = "Back")
+                    Text(text = "Logout")
                 }
-                Spacer(modifier = Modifier.width(20.dp))
-                Text(text = "ToDo Listy")
             }
         },
         floatingActionButtonPosition = FabPosition.End,

@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,10 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
-import com.marzec.todo.view.ActionBar
+import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
@@ -46,7 +44,12 @@ import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
 
 @Composable
-fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore, store: TaskDetailsStore) {
+fun TaskDetailsScreen(
+    listId: Int,
+    taskId: Int,
+    store: TaskDetailsStore,
+    actionBarProvider: ActionBarProvider
+) {
 
     val scope = rememberCoroutineScope()
 
@@ -59,7 +62,7 @@ fun TaskDetailsScreen(listId: Int, taskId: Int, navigationStore: NavigationStore
 
     Scaffold(
         topBar = {
-            ActionBar(navigationStore, "Task details")
+            actionBarProvider.provide("Task details")
         }
     ) {
         when (val state = state) {

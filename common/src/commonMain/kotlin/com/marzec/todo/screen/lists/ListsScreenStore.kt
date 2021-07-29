@@ -3,20 +3,30 @@ package com.marzec.todo.screen.lists
 import com.marzec.mvi.State
 import com.marzec.mvi.mapData
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.newMvi.oneShotTrigger
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.todo.DI
 import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.model.ToDoList
+import com.marzec.todo.navigation.model.Destination
+import com.marzec.todo.navigation.model.NavigationAction
+import com.marzec.todo.navigation.model.NavigationOptions
+import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
+import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import kotlinx.coroutines.flow.flow
 
 class ListsScreenStore(
     private val cacheKey: String,
     private val stateCache: Preferences,
     initialState: State<ListsScreenState>,
-    private val todoRepository: TodoRepository
+    private val todoRepository: TodoRepository,
+    private val navigationStore: NavigationStore,
+    private val loginRepository: LoginRepository
 ) : Store2<State<ListsScreenState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -97,6 +107,23 @@ class ListsScreenStore(
             println(result)
         }
     }
+
+    suspend fun logout() = intent<Unit> {
+        oneShotTrigger { loginRepository.logout() }
+
+        sideEffect {
+            navigationStore.next(
+                NavigationAction(
+                    destination = Destination.Login,
+                    NavigationOptions(
+                        Destination.Login,
+                        popToInclusive = true
+                    )
+                )
+            )
+        }
+    }
+
 
     override suspend fun onNewState(newState: State<ListsScreenState>) {
         stateCache.set(cacheKey, newState)
