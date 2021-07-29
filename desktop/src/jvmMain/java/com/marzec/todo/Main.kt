@@ -22,6 +22,8 @@ import java.awt.datatransfer.StringSelection
 @ExperimentalCoroutinesApi
 fun main() {
 
+    DI.memoryCache = MemoryCache()
+
     DI.fileCache = FileCacheImpl(
         "todo.cache",
         Json,

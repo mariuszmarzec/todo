@@ -4,7 +4,7 @@ import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.toDomain
-import com.marzec.todo.cache.MemoryCache
+import com.marzec.todo.cache.Cache
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
 
 class TodoRepository(
     private val dataSource: DataSource,
-    private val memoryCache: MemoryCache
+    private val memoryCache: Cache
 ) {
 
     suspend fun observeLists(): Flow<Content<List<ToDoList>>> = getListsCacheFirst()

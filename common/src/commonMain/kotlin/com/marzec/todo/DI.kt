@@ -2,8 +2,8 @@ package com.marzec.todo
 
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.State
+import com.marzec.todo.cache.Cache
 import com.marzec.todo.cache.FileCache
-import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.cache.getTyped
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.navigation.model.Destination
@@ -49,7 +49,7 @@ object DI {
     var ioDispatcher: CoroutineContext = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
-    val memoryCache = MemoryCache()
+    lateinit var memoryCache: Cache
 
     lateinit var fileCache: FileCache
 
