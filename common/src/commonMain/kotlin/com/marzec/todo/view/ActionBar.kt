@@ -3,20 +3,19 @@ package com.marzec.todo.view
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.marzec.mvi.Store
-import com.marzec.todo.DI
-import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationAction
-import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.repository.LoginRepository
 import kotlinx.coroutines.launch
 
 class ActionBarProvider(private val store: NavigationStore) {
@@ -34,11 +33,15 @@ private fun ActionBar(
 ) {
     val scope = rememberCoroutineScope()
 
+    val state by store.state.collectAsState()
+
     Row(verticalAlignment = Alignment.CenterVertically) {
-        TextButton({
-            scope.launch { store.goBack() }
-        }) {
-            Text(text = "Back")
+        if (state.backStack.size > 1) {
+            IconButton({
+                scope.launch { store.goBack() }
+            }) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+            }
         }
         Spacer(modifier = Modifier.width(20.dp))
         Text(text = title)

@@ -1,9 +1,7 @@
 package com.marzec.todo.screen.tasks
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.FabPosition
@@ -12,7 +10,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -26,11 +23,10 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
-import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
+import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
@@ -39,7 +35,7 @@ import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
 
 @Composable
-fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
+fun TasksScreen(tasksStore: TasksStore, actionBarProvider: ActionBarProvider) {
     val scope = rememberCoroutineScope()
 
     val state: State<TasksScreenState> by tasksStore.state.collectAsState()
@@ -51,15 +47,7 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
 
     Scaffold(
         topBar = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton({
-                    scope.launch { navigationStore.goBack() }
-                }) {
-                    Text(text = "Back")
-                }
-                Spacer(modifier = Modifier.width(20.dp))
-                Text(text = "Tasks")
-            }
+            actionBarProvider.provide(title = "Tasks")
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
@@ -96,17 +84,26 @@ fun TasksScreen(navigationStore: NavigationStore, tasksStore: TasksStore) {
                                     IconButton({
                                         scope.launch { tasksStore.moveToTop(it.id) }
                                     }) {
-                                        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = "Move to top")
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowUp,
+                                            contentDescription = "Move to top"
+                                        )
                                     }
                                     IconButton({
                                         scope.launch { tasksStore.moveToBottom(it.id) }
                                     }) {
-                                        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Move to bottom")
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowDown,
+                                            contentDescription = "Move to bottom"
+                                        )
                                     }
                                     IconButton({
                                         scope.launch { tasksStore.showRemoveDialog(it.id) }
                                     }) {
-                                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove")
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Remove"
+                                        )
                                     }
                                 }
                             }

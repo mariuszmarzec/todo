@@ -85,7 +85,7 @@ object DI {
 
     @Composable
     private fun provideTasksScreen(listId: Int, cacheKey: String) {
-        TasksScreen(navigationStore, provideTasksStore(listId = listId, cacheKey = cacheKey))
+        TasksScreen(provideTasksStore(listId = listId, cacheKey = cacheKey), actionBarProvider)
     }
 
     private fun provideTasksStore(listId: Int, cacheKey: String): TasksStore {
