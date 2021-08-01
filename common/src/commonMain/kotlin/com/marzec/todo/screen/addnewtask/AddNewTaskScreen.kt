@@ -65,12 +65,14 @@ fun AddNewTaskScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = state.data.highestPriorityAsDefault,
-                            onCheckedChange = { scope.launch { store.toggleHighestPriority() } }
-                        )
-                        TextButton({ scope.launch { store.toggleHighestPriority() } }) {
-                            Text("Highest priority as default")
+                        if (state.data.taskId == null) {
+                            Checkbox(
+                                checked = state.data.highestPriorityAsDefault,
+                                onCheckedChange = { scope.launch { store.toggleHighestPriority() } }
+                            )
+                            TextButton({ scope.launch { store.toggleHighestPriority() } }) {
+                                Text("Highest priority as default")
+                            }
                         }
                     }
                     Box(modifier = Modifier.padding(16.dp)) {
