@@ -107,7 +107,6 @@ object DI {
         cacheKey: String
     ) {
         AddNewTaskScreen(
-            navigationStore,
             provideAddNewTaskStore(
                 listId = listId,
                 taskId = taskId,

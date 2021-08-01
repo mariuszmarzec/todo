@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddNewTaskScreen(
-    navigationStore: NavigationStore,
     store: AddNewTaskStore,
     actionBarProvider: ActionBarProvider
 ) {
