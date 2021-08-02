@@ -34,7 +34,11 @@ fun TextListItemView(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .weight(1f)
+            ) {
                 Text(
                     text = state.name,
                     fontSize = 16.sp,
@@ -49,7 +53,6 @@ fun TextListItemView(
                     )
                 }
             }
-            Spacer(Modifier.weight(1f))
             rightContent()
         }
     }

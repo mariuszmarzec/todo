@@ -1,11 +1,13 @@
 package com.marzec.todo.screen.taskdetails
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -105,13 +107,16 @@ fun TaskDetailsScreen(
                 ) {
                     Row(
                         modifier = Modifier
+                            .padding(all = 16.dp)
                             .fillMaxWidth()
                             .wrapContentHeight(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SelectionContainer {
-                            Text(text = state.task.description, fontSize = 16.sp)
+                        Box(Modifier.weight(1f)) {
+                            SelectionContainer {
+                                Text(text = state.task.description, fontSize = 16.sp)
+                            }
                         }
                         Spacer(Modifier.size(16.dp))
                         IconButton({
