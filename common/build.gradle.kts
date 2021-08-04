@@ -87,7 +87,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs = listOf(
         *kotlinOptions.freeCompilerArgs.toTypedArray(),
-        "-P", "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true",
         "-Xallow-jvm-ir-dependencies",
         "-Xskip-prerelease-check")
     kotlinOptions.useIR = true

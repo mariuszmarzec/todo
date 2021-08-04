@@ -1,5 +1,5 @@
 
-val kotlinVersion = "1.5.10"
+val kotlinVersion = "1.5.21"
 val ktorVersion = "1.4.3"
 val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
@@ -7,8 +7,8 @@ val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
 val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "4.2.2"
-val buildkonfigVersion = "0.7.0"
-private val composePluginVersion = "0.5.0-build225"
+val buildkonfigVersion = "0.8.0"
+private val composePluginVersion = "1.0.0-alpha2"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {
@@ -28,7 +28,7 @@ object Dependency {
     val androidActivityX = "androidx.activity:activity-compose:$androidActivityXVersion"
 
     val kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    val coroutineCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
+    val coroutineCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1"
     val androidxCoreKtx = "androidx.core:core-ktx:$coreKtxVersion"
     val androidxAppCompat = "androidx.appcompat:appcompat:$appCompatVersion"
     val androidMaterial = "com.google.android.material:material:$materialVersion"
