@@ -7,17 +7,6 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-android {
-    configurations {
-        create("androidTestApi")
-        create("androidTestDebugApi")
-        create("androidTestReleaseApi")
-        create("testApi")
-        create("testDebugApi")
-        create("testReleaseApi")
-    }
-}
-
 kotlin {
     android()
     jvm("desktop")
@@ -87,6 +76,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs = listOf(
         *kotlinOptions.freeCompilerArgs.toTypedArray(),
+        "-P", "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true",
         "-Xallow-jvm-ir-dependencies",
         "-Xskip-prerelease-check")
     kotlinOptions.useIR = true
