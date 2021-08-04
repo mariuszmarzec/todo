@@ -7,6 +7,7 @@ val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
 val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "4.2.2"
+val buildkonfigVersion = "0.7.0"
 private val composePluginVersion = "0.5.0-build225"
 private val dateTimeVersion = "0.1.1"
 
@@ -22,6 +23,7 @@ object Dependency {
     val androidBuildPlugin = "com.android.tools.build:gradle:${androidGradlepluginVersion}"
     val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
     val serializationGradlePlugin = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
+    val buildKonfigPlugin = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin:$buildkonfigVersion"
 
     val androidActivityX = "androidx.activity:activity-compose:$androidActivityXVersion"
 

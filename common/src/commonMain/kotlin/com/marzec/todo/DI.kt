@@ -278,27 +278,30 @@ object DI {
 }
 
 object PreferencesKeys {
-    const val AUTHORIZATION = "AUTHORIZATION"
+    val AUTHORIZATION = "AUTHORIZATION"
 }
 
 object Api {
 
-    const val HOST = "http://fiteo-env-1.eba-cba76vkj.us-east-2.elasticbeanstalk.com/test"
-//    const val HOST = "http://localhost:500"
+    val HOST = if (BuildKonfig.ENVIRONMENT == "p") {
+        BuildKonfig.PROD_API_URL
+    } else {
+        BuildKonfig.PROD_AUTH_HEADER
+    }
 
     object Login {
-        const val BASE = "$HOST/fiteo/api/1"
+        val BASE = "$HOST/fiteo/api/1"
 
-        const val LOGIN = "$BASE/login"
-        const val USER = "$BASE/user"
-        const val LOGOUT = "$BASE/logout"
+        val LOGIN = "$BASE/login"
+        val USER = "$BASE/user"
+        val LOGOUT = "$BASE/logout"
     }
 
     object Todo {
-        const val BASE = "$HOST/todo/api/1"
+        val BASE = "$HOST/todo/api/1"
 
-        const val TODO_LISTS = "$BASE/lists"
-        const val TODO_LIST = "$BASE/list"
+        val TODO_LISTS = "$BASE/lists"
+        val TODO_LIST = "$BASE/list"
         fun createTask(listId: Int) = "$BASE/list/$listId/tasks"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
@@ -306,6 +309,10 @@ object Api {
     }
 
     object Headers {
-        const val AUTHORIZATION = "Authorization-Test"
+        val AUTHORIZATION = if (BuildKonfig.ENVIRONMENT == "p") {
+            BuildKonfig.PROD_AUTH_HEADER
+        } else {
+            BuildKonfig.TEST_AUTH_HEADER
+        }
     }
 }

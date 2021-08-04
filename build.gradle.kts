@@ -12,6 +12,7 @@ buildscript {
         classpath(Dependency.kotlinGradlePlugin)
         classpath(Dependency.serializationGradlePlugin)
         classpath(Dependency.composeGradlePlugin)
+        classpath(Dependency.buildKonfigPlugin)
     }
 }
 
@@ -35,6 +36,6 @@ gradle.projectsEvaluated {
 
 tasks.create<Delete>("clean") {
     delete = setOf(
-            rootProject.buildDir
+        rootProject.buildDir
     )
 }

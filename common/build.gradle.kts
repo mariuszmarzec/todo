@@ -1,11 +1,22 @@
 import org.jetbrains.compose.compose
+import com.codingfeline.buildkonfig.compiler.FieldSpec
+import java.util.Properties
 
 plugins {
     id("com.android.library")
     kotlin("multiplatform")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
+    id("com.codingfeline.buildkonfig")
 }
+
+val properties: Properties = Properties()
+properties.load(project.rootProject.file("local.properties").inputStream())
+val environment = properties.getProperty("environment")
+val prodApiUrl = properties.getProperty("prod.apiUrl")
+val prodAuthHeader = properties.getProperty("prod.authHeader")
+val testApiUrl = properties.getProperty("test.apiUrl")
+val testAuthHeader = properties.getProperty("test.authHeader")
 
 kotlin {
     android()
@@ -80,4 +91,15 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
         "-Xallow-jvm-ir-dependencies",
         "-Xskip-prerelease-check")
     kotlinOptions.useIR = true
+}
+
+buildkonfig {
+    packageName = "com.marzec.todo"
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "ENVIRONMENT", environment)
+        buildConfigField(FieldSpec.Type.STRING, "PROD_API_URL", prodApiUrl)
+        buildConfigField(FieldSpec.Type.STRING, "PROD_AUTH_HEADER", prodAuthHeader)
+        buildConfigField(FieldSpec.Type.STRING, "TEST_API_URL", testApiUrl)
+        buildConfigField(FieldSpec.Type.STRING, "TEST_AUTH_HEADER", testAuthHeader)
+    }
 }
