@@ -6,9 +6,9 @@ val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
 val androidActivityXVersion = "1.3.0-alpha02"
-val androidGradlepluginVersion = "4.2.2"
+val androidGradlepluginVersion = "7.1.0-alpha06"
 val buildkonfigVersion = "0.8.0"
-private val composePluginVersion = "1.0.0-alpha2"
+private val composePluginVersion = "1.0.0-alpha4-build310"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {

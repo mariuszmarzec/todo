@@ -286,14 +286,13 @@ object Api {
     val HOST = if (BuildKonfig.ENVIRONMENT == "p") {
         BuildKonfig.PROD_API_URL
     } else {
-        BuildKonfig.PROD_AUTH_HEADER
+        BuildKonfig.TEST_API_URL
     }
 
     object Login {
         val BASE = "$HOST/fiteo/api/1"
 
         val LOGIN = "$BASE/login"
-        val USER = "$BASE/user"
         val LOGOUT = "$BASE/logout"
     }
 
