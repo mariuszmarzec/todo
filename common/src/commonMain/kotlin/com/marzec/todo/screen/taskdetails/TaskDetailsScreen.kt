@@ -131,8 +131,8 @@ fun TaskDetailsScreen(
                             items = state.task.subTasks.map {
                                 TextListItem(
                                     id = it.id.toString(),
-                                    name = it.description,
-                                    description = it.subTasks.firstOrNull()?.description ?: ""
+                                    name = it.description.lines().first(),
+                                    description = it.subTasks.firstOrNull()?.description?.lines()?.first() ?: ""
                                 )
                             },
                         ) {

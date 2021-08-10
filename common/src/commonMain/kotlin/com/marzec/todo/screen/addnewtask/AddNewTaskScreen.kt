@@ -76,7 +76,7 @@ fun AddNewTaskScreen(
                     }
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextButton({ scope.launch { store.addNewTask() } }) {
-                            state.data.taskId?.let { Text("Update") } ?: Text("Create")
+                            Text(text = state.data.taskId?.let { "Update" } ?: "Create")
                         }
                     }
                     if (state.data.taskId == null) {
