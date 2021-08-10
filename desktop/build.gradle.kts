@@ -23,6 +23,8 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "com.marzec.todo.MainKt"
+        println(System.getenv("JDK_15"))
+        javaHome = System.getenv("JDK_15")
 
         nativeDistributions {
             version = "1.0.0"
