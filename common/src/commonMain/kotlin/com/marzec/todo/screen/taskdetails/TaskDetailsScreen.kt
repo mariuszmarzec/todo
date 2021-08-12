@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Share
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.marzec.todo.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.view.ActionBarProvider
@@ -116,6 +118,15 @@ fun TaskDetailsScreen(
                         Box(Modifier.weight(1f)) {
                             SelectionContainer {
                                 Text(text = state.task.description, fontSize = 16.sp)
+                            }
+                        }
+                        val urls = state.task.description.urls()
+                        if (urls.isNotEmpty()) {
+                            Spacer(Modifier.size(16.dp))
+                            IconButton({
+                                scope.launch { println(urls) }
+                            }) {
+                                Icon(imageVector = Icons.Default.ExitToApp, contentDescription = "Open")
                             }
                         }
                         Spacer(Modifier.size(16.dp))
