@@ -10,6 +10,7 @@ fun DialogBox(
     when (state) {
         is Dialog.TextInputDialog -> TextInputDialog(state)
         is Dialog.TwoOptionsDialog -> TwoOptionsDialog(state)
+        is Dialog.SelectOptionsDialog -> SelectOptionsDialog(state)
         is Dialog.NoDialog -> Unit
     }
 }
@@ -35,6 +36,12 @@ sealed class Dialog {
         val onConfirm: () -> Unit = {},
     ) : Dialog()
 
+    data class SelectOptionsDialog(
+        val items: List<TextListItem>,
+        val onDismiss: () -> Unit = {},
+        val onItemClicked: (String) -> Unit = {}
+    ) : Dialog()
+
     object NoDialog: Dialog()
 }
 
@@ -46,6 +53,10 @@ sealed class DialogState {
 
     data class InputDialog(
         val inputField: String,
+    ): DialogState()
+
+    data class SelectOptionsDialog(
+        val items: List<Any>,
     ): DialogState()
 
     object NoDialog: DialogState()

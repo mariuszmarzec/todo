@@ -2,6 +2,7 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.todo.common.CopyToClipBoardHelper
+import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.getMessage
@@ -14,7 +15,6 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 class TaskDetailsStore(
     private val navigationStore: NavigationStore,
@@ -24,7 +24,8 @@ class TaskDetailsStore(
     private val todoRepository: TodoRepository,
     private val listId: Int,
     private val taskId: Int,
-    private val copyToClipBoardHelper: CopyToClipBoardHelper
+    private val copyToClipBoardHelper: CopyToClipBoardHelper,
+    private val openUrlHelper: OpenUrlHelper
 ) : Store2<TaskDetailsState>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -104,7 +105,7 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun hideRemoveTaskDialog() = intent<Unit> {
+    suspend fun hideDialog() = intent<Unit> {
         reducer {
             state.reduceData {
                 copy(dialog = DialogState.NoDialog)
@@ -130,7 +131,7 @@ class TaskDetailsStore(
         }
 
         sideEffect {
-            hideRemoveTaskDialog()
+            hideDialog()
             resultNonNull().asInstance<Content.Data<Unit>> {
                 if (idToRemove == taskId) {
                     navigationStore.goBack()
@@ -196,6 +197,26 @@ class TaskDetailsStore(
     suspend fun copyDescription() = sideEffectIntent {
         state.asInstance<TaskDetailsState.Data> {
             copyToClipBoardHelper.copy(task.description)
+        }
+    }
+
+    suspend fun openUrls(urls: List<String>) = sideEffectIntent {
+        if (urls.size == 1) {
+            openUrl(urls.first())
+        } else {
+            showSelectUrlDialog(urls)
+        }
+    }
+
+    suspend fun openUrl(url: String) = sideEffectIntent {
+        openUrlHelper.open(url)
+    }
+
+    private suspend fun showSelectUrlDialog(urls: List<String>) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(dialog = DialogState.SelectOptionsDialog(urls))
+            }
         }
     }
 }

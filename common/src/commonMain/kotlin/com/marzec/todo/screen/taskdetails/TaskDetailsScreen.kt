@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -39,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.marzec.todo.extensions.asInstance
+import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
@@ -124,9 +125,12 @@ fun TaskDetailsScreen(
                         if (urls.isNotEmpty()) {
                             Spacer(Modifier.size(16.dp))
                             IconButton({
-                                scope.launch { println(urls) }
+                                scope.launch { store.openUrls(urls) }
                             }) {
-                                Icon(imageVector = Icons.Default.ExitToApp, contentDescription = "Open")
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = "Open url"
+                                )
                             }
                         }
                         Spacer(Modifier.size(16.dp))
@@ -143,7 +147,8 @@ fun TaskDetailsScreen(
                                 TextListItem(
                                     id = it.id.toString(),
                                     name = it.description.lines().first(),
-                                    description = it.subTasks.firstOrNull()?.description?.lines()?.first() ?: ""
+                                    description = it.subTasks.firstOrNull()?.description?.lines()
+                                        ?.first() ?: ""
                                 )
                             },
                         ) {
@@ -199,20 +204,43 @@ fun TaskDetailsScreen(
                     }
                 }
                 val dialog = state.dialog
-                if (dialog is DialogState.RemoveDialog) {
-                    DialogBox(
-                        state = Dialog.TwoOptionsDialog(
-                            title = "Remove task",
-                            message = "Do you really want to remove this task?",
-                            confirmButton = "Yes",
-                            dismissButton = "No",
-                            onDismiss = { scope.launch { store.hideRemoveTaskDialog() } },
-                            onConfirm = {
-                                scope.launch { store.removeTask(dialog.idToRemove) }
-                            }
+                when (dialog) {
+                    is DialogState.RemoveDialog -> {
+                        DialogBox(
+                            state = Dialog.TwoOptionsDialog(
+                                title = "Remove task",
+                                message = "Do you really want to remove this task?",
+                                confirmButton = "Yes",
+                                dismissButton = "No",
+                                onDismiss = { scope.launch { store.hideDialog() } },
+                                onConfirm = {
+                                    scope.launch { store.removeTask(dialog.idToRemove) }
+                                }
+                            )
                         )
-                    )
 
+                    }
+                    is DialogState.SelectOptionsDialog -> {
+                        DialogBox(
+                            state = Dialog.SelectOptionsDialog(
+                                items = dialog.items.filterIsInstance<String>()
+                                    .mapIndexed { index, url ->
+                                        TextListItem(
+                                            id = index.toString(),
+                                            description = url,
+                                            name = emptyString()
+                                        )
+                                    },
+                                onDismiss = { scope.launch { store.hideDialog() } },
+                                onItemClicked = { id ->
+                                    scope.launch {
+                                        store.openUrl(dialog.items[id.toInt()] as String)
+                                    }
+                                }
+                            )
+                        )
+                    }
+                    else -> Unit
                 }
             }
             is TaskDetailsState.Loading -> {

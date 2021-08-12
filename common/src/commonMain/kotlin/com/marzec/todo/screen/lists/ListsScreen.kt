@@ -129,12 +129,13 @@ fun ListsScreen(
                             },
                             onConfirm = {
                                 scope.launch {
-                                    listsScreenStore.onCreateButtonClicked(it)                        }
+                                    listsScreenStore.onCreateButtonClicked(it)
+                                }
                             },
                             onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
                         )
                     }
-                    DialogState.NoDialog -> Dialog.NoDialog
+                    else -> Dialog.NoDialog
                 }
                 DialogBox(state = dialog)
             }
