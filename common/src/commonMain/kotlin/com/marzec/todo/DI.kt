@@ -12,7 +12,9 @@ import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.DataSource
+import com.marzec.todo.network.LocalDataSource
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
@@ -199,6 +201,7 @@ object DI {
             taskId = taskId
         )
     }
+
     private val cacheKeyProvider by lazy { { getTimeMillis().toString() } }
 
     lateinit var navigationStore: NavigationStore
@@ -273,7 +276,13 @@ object DI {
         )
     )
 
-    fun provideTodoRepository() = TodoRepository(DataSource(client), memoryCache)
+    fun provideTodoRepository() = TodoRepository(provideDataSource(), memoryCache)
+
+    private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
+        LocalDataSource(fileCache)
+    } else {
+        ApiDataSource(client)
+    }
 
     private val actionBarProvider: ActionBarProvider by lazy {
         ActionBarProvider(navigationStore)

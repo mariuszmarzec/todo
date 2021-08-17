@@ -17,6 +17,7 @@ class FileCacheImpl(
     private val memoryCache: MemoryCache
 ) : FileCache {
 
+    // TODO polymorphism json serialization
     private val lock = ReentrantLock()
     private var initialized: AtomicBoolean = AtomicBoolean(false)
 
