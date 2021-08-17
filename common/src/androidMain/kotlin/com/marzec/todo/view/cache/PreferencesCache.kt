@@ -1,13 +1,11 @@
 package com.marzec.todo.view.cache
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.core.remove
 import androidx.datastore.preferences.core.toMutablePreferences
 import com.marzec.todo.cache.FileCache
-import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.extensions.toJsonElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -21,9 +19,9 @@ class PreferencesCache(
         dataStore.updateData { preferences ->
             preferences.toMutablePreferences().also {
                 if (value != null) {
-                    it[preferencesKey(key)] = value
+                    it[preferencesKey<String>(key)] = value.toString()
                 } else {
-                    it.remove(preferencesKey(key))
+                    it.remove(preferencesKey<String>(key))
                 }
             }
         }
@@ -31,16 +29,15 @@ class PreferencesCache(
 
     override suspend fun get(key: String): JsonElement? {
         return try {
-            dataStore.data.first()[preferencesKey(key)]?.toJsonElement()
+            dataStore.data.first()[preferencesKey<String>(key)]?.toJsonElement()
         } catch (e: Exception) {
-            Log.d("KURWA", e.getMessage())
-            "".toJsonElement()
+            null
         }
     }
 
     override suspend fun observe(key: String): Flow<JsonElement?> {
         return dataStore.data.map {
-            it[preferencesKey(key)]?.toJsonElement()
+            it[preferencesKey<String>(key)]?.toJsonElement()
         }
     }
 }
