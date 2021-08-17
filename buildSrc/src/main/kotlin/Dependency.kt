@@ -8,6 +8,8 @@ val materialVersion = "1.1.0"
 val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "7.1.0-alpha06"
 val buildkonfigVersion = "0.8.0"
+val datastore_version = "1.0.0-alpha05"
+
 private val composePluginVersion = "1.0.0-alpha4-build310"
 private val dateTimeVersion = "0.1.1"
 
@@ -38,10 +40,10 @@ object Dependency {
 
 object Config {
     object Android {
-        val compileSdkVersion = 29
+        val compileSdkVersion = 30
         val applicationId = "com.marzec.cheatday"
-        val minSdkVersion = 29
-        val targetSdkVersion = 29
+        val minSdkVersion = 30
+        val targetSdkVersion = 30
         val versionCode = 1
         val versionName = "1.0"
     }

@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion(Config.Android.compileSdkVersion)
+    compileSdk = Config.Android.compileSdkVersion
     defaultConfig {
+        minSdk = Config.Android.minSdkVersion
+        targetSdk = Config.Android.targetSdkVersion
         applicationId = Config.Android.applicationId
-        minSdkVersion(Config.Android.minSdkVersion)
-        targetSdkVersion(Config.Android.targetSdkVersion)
         versionCode = Config.Android.versionCode
         versionName = Config.Android.versionName
     }
@@ -63,6 +63,11 @@ dependencies {
     implementation(project(":common"))
     implementation(Dependency.androidxAppCompat)
     implementation(Dependency.androidMaterial)
+    implementation("androidx.activity:activity-compose:1.3.1")
+    implementation(compose.material)
+    implementation(compose.ui)
+    implementation(compose.uiTooling)
+    implementation(compose.foundation)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {

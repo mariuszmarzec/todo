@@ -43,6 +43,10 @@ kotlin {
                 api("androidx.core:core-ktx:1.3.1")
                 api(Dependency.ktorOkHttpClient)
 
+                // data store
+                api("androidx.datastore:datastore-preferences:${datastore_version}")
+                api("androidx.datastore:datastore:${datastore_version}")
+
             }
         }
         named("desktopMain") {
@@ -59,7 +63,7 @@ android {
     compileSdkVersion(30)
 
     defaultConfig {
-        minSdkVersion(26)
+        minSdkVersion(30)
         targetSdkVersion(30)
     }
 
