@@ -5,6 +5,9 @@ import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.extensions.urlToOpen
+import com.marzec.todo.extensions.urls
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
@@ -22,7 +25,8 @@ class TasksStore(
     private val stateCache: Preferences,
     initialState: State<TasksScreenState>,
     val todoRepository: TodoRepository,
-    val listId: Int
+    val listId: Int,
+    private val openUrlHelper: OpenUrlHelper
 ) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -134,5 +138,11 @@ class TasksStore(
         reducer {
             state.reduceContentNoChanges(resultNonNull())
         }
+    }
+
+    suspend fun openUrl(taskId: String) = sideEffectIntent {
+        state.data?.tasks?.firstOrNull { task -> task.id == taskId.toInt() }
+            ?.urlToOpen()
+            ?.let { openUrlHelper.open(it) }
     }
 }

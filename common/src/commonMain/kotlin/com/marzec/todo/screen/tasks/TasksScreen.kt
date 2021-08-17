@@ -13,6 +13,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.marzec.mvi.State
+import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
@@ -67,7 +69,8 @@ fun TasksScreen(tasksStore: TasksStore, actionBarProvider: ActionBarProvider) {
                             TextListItem(
                                 id = it.id.toString(),
                                 name = it.description.lines().first(),
-                                description = it.subTasks.firstOrNull()?.description?.lines()?.first() ?: ""
+                                description = it.subTasks.firstOrNull()?.description?.lines()
+                                    ?.first() ?: ""
                             )
                         },
                     ) {
@@ -81,6 +84,19 @@ fun TasksScreen(tasksStore: TasksStore, actionBarProvider: ActionBarProvider) {
                                         tasksStore.onListItemClicked(it.id)
                                     }
                                 }) {
+                                    // TODO REMOVE THIS LOGIC
+                                    if (state.data.tasks.firstOrNull { task -> task.id == it.id.toInt() }
+                                            ?.urlToOpen() != null
+                                    ) {
+                                        IconButton({
+                                            scope.launch { tasksStore.openUrl(it.id) }
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.ExitToApp,
+                                                contentDescription = "Open url"
+                                            )
+                                        }
+                                    }
                                     IconButton({
                                         scope.launch { tasksStore.moveToTop(it.id) }
                                     }) {

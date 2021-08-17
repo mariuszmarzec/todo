@@ -99,7 +99,8 @@ object DI {
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = TasksScreenState.INITIAL_STATE
+            initialState = TasksScreenState.INITIAL_STATE,
+            openUrlHelper = openUrlHelper
         )
     }
 
