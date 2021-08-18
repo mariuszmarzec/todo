@@ -3,13 +3,10 @@ package com.marzec.todo
 import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.datastore.preferences.createDataStore
 import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.view.cache.PreferencesCache
 import kotlinx.coroutines.Dispatchers
@@ -38,17 +35,6 @@ class ToDoApplication : Application() {
             override fun copy(text: String) {
                 getSystemService<ClipboardManager>()
                     ?.setPrimaryClip(ClipData.newPlainText("label", text))
-            }
-        }
-
-        DI.openUrlHelper = object : OpenUrlHelper {
-            override fun open(url: String) {
-                startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(url)
-                    )
-                )
             }
         }
 
