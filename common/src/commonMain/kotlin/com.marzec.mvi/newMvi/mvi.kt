@@ -1,13 +1,8 @@
 package com.marzec.mvi.newMvi
 
-import com.marzec.mvi.Intent
-import com.marzec.todo.model.User
-import com.marzec.todo.network.Content
-import com.marzec.todo.screen.login.model.LoginViewState
-import kotlin.jvm.JvmName
+import com.marzec.todo.DI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +16,7 @@ import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
-open class Store2<State : Any>(defaultState: State) {
+open class Store2<State : Any>(private val defaultState: State) {
 
     private val actions = MutableStateFlow<Intent2<State, Any>>(Intent2(state = defaultState, result = null))
 
@@ -37,9 +32,10 @@ open class Store2<State : Any>(defaultState: State) {
         scope.launch {
             actions.flatMapMerge { intent ->
                 debug("actions flatMapMerge intent: $intent")
-                (intent.onTrigger(_state.value) ?: flowOf(null)).map {
+                val currentState = _state.value
+                (intent.onTrigger(currentState) ?: flowOf(null)).map {
                     debug("actions onTrigger state: ${intent.state} result: $it")
-                    intent.copy(result = it, sideEffect = intent.sideEffect)
+                    intent.copy(state = currentState, result = it, sideEffect = intent.sideEffect)
                 }
             }.collect {
                 debug("actions collect intent: $it")
@@ -75,7 +71,7 @@ open class Store2<State : Any>(defaultState: State) {
 
     fun debug(string: String) {
         if (false) {
-            println(string)
+            DI.logger.log("MVI-${defaultState.javaClass.simpleName}", string)
         }
     }
 }

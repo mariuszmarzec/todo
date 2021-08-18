@@ -7,6 +7,7 @@ import com.marzec.todo.cache.FileCache
 import com.marzec.todo.cache.getTyped
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 
 object DI {
 
+    lateinit var logger: Logger
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
     var ioDispatcher: CoroutineContext = Dispatchers.Default
@@ -229,7 +231,8 @@ object DI {
                 backStack = listOf(
                     defaultScreen
                 )
-            )
+            ),
+            logger = logger
         )
     }
 

@@ -2,6 +2,7 @@ package com.marzec.todo.navigation.model
 
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.todo.logger.Logger
 import com.marzec.todo.preferences.Preferences
 import kotlin.reflect.KClass
 
@@ -9,7 +10,8 @@ class NavigationStore(
     private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
     private val stateCache: Preferences,
     private val cacheKeyProvider: () -> String,
-    initialState: NavigationState
+    initialState: NavigationState,
+    private val logger: Logger
 ) : Store2<NavigationState>(initialState) {
 
     suspend fun next(action: NavigationAction) = intent<Unit> {
@@ -44,6 +46,11 @@ class NavigationStore(
                 }
             )
         }
+    }
+
+    override suspend fun onNewState(newState: NavigationState) {
+        super.onNewState(newState)
+        logger.log("NavigationStore", newState.toString())
     }
 }
 

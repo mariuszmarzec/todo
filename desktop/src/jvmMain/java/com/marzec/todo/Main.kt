@@ -7,6 +7,7 @@ import com.marzec.todo.cache.FileCacheImpl
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.logger.Logger
 import com.marzec.todo.network.httpClient
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
@@ -21,6 +22,12 @@ import java.net.URI
 
 @ExperimentalCoroutinesApi
 fun main() {
+
+    DI.logger = object : Logger {
+        override fun log(tag: String, message: String) {
+            println("$tag: $message")
+        }
+    }
 
     DI.memoryCache = MemoryCache()
 
