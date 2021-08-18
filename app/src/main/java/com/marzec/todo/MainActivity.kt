@@ -7,6 +7,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.todo.screen.main.HomeScreen
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +21,16 @@ class MainActivity : AppCompatActivity() {
                 DI.logger.log("navigationStore", "content")
                 HomeScreen(DI.navigationStore)
             }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (DI.navigationStore.state.value.backStack.size > 1) {
+            DI.navigationScope.launch {
+                DI.navigationStore.goBack()
+            }
+        } else {
+            super.onBackPressed()
         }
     }
 }
