@@ -14,10 +14,7 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 class TaskDetailsStore(
     private val navigationStore: NavigationStore,
@@ -34,7 +31,7 @@ class TaskDetailsStore(
 ) {
 
     suspend fun loadDetails() = intent<Content<Task>> {
-        onTrigger {
+        onTrigger(isCancellableFlowTrigger = true) {
             todoRepository.observeTask(listId, taskId)
         }
         reducer {
@@ -119,6 +116,7 @@ class TaskDetailsStore(
     suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
             todoRepository.removeTask(idToRemove)
+                .cancelFlowsIf { it is Content.Data && idToRemove == taskId }
         }
 
         reducer {
@@ -137,7 +135,7 @@ class TaskDetailsStore(
             hideDialog()
             resultNonNull().asInstance<Content.Data<Unit>> {
                 if (idToRemove == taskId) {
-//                    navigationStore.goBack()
+                    navigationStore.goBack()
                 }
             }
         }
