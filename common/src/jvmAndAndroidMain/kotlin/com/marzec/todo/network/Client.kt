@@ -23,6 +23,7 @@ val httpClient = HttpClient(OkHttp) {
 
     defaultRequest {
         contentType(ContentType.Application.Json)
+        DI.logger.log("HTTP", url.encodedPath)
     }
 
     engine {

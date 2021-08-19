@@ -1,5 +1,6 @@
 package com.marzec.todo.network
 
+import com.marzec.todo.DI
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -14,7 +15,7 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     return try {
         Content.Data(request())
     } catch (e: Exception) {
-        println(e.message)
+        DI.logger.log("Content:", e.message.toString())
         Content.Error(e)
     }
 }
@@ -24,7 +25,7 @@ fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
         try {
             emit(Content.Data(request()))
         } catch (e: Exception) {
-            println(e.message)
+            DI.logger.log("Content:", e.message.toString())
             emit(Content.Error<T>(e))
         }
     }

@@ -14,7 +14,10 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class TaskDetailsStore(
     private val navigationStore: NavigationStore,
@@ -134,7 +137,7 @@ class TaskDetailsStore(
             hideDialog()
             resultNonNull().asInstance<Content.Data<Unit>> {
                 if (idToRemove == taskId) {
-                    navigationStore.goBack()
+//                    navigationStore.goBack()
                 }
             }
         }
