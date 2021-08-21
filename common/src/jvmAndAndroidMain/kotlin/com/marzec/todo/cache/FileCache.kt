@@ -1,15 +1,14 @@
 package com.marzec.todo.cache
 
-import com.marzec.todo.extensions.toJsonElement
-import com.marzec.todo.extensions.toJsonObject
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 
 class FileCacheImpl(
     private val fileName: String,
@@ -17,25 +16,28 @@ class FileCacheImpl(
     private val memoryCache: MemoryCache
 ) : FileCache {
 
-    // TODO polymorphism json serialization
     private val lock = ReentrantLock()
     private var initialized: AtomicBoolean = AtomicBoolean(false)
 
-    override suspend fun put(key: String, value: Any?) {
+    override suspend fun <T: Any> put(key: String, value: T?, serializer: KSerializer<T>) {
         initIfNeeded()
-        memoryCache.put(key, value.toJsonElement())
+        memoryCache.put(key, value?.let { json.encodeToString(serializer, value) })
         updateFile()
     }
 
-    override suspend fun get(key: String): JsonElement? {
+    override suspend fun <T: Any> get(key: String, serializer: KSerializer<T>): T? {
         initIfNeeded()
-        return memoryCache.get<JsonElement>(key)
+        return memoryCache.get<String>(key)?.let {
+                json.decodeFromString(serializer, it)
+        }
     }
 
 
-    override suspend fun observe(key: String): Flow<JsonElement?> {
+    override suspend fun <T: Any> observe(key: String, serializer: KSerializer<T>): Flow<T?> {
         initIfNeeded()
-        return memoryCache.observe<JsonElement>(key)
+        return memoryCache.observe<String>(key).map {
+            it?.let { json.decodeFromString(serializer, it) }
+        }
     }
 
     private suspend fun initIfNeeded() {
@@ -61,7 +63,7 @@ class FileCacheImpl(
     private suspend fun initMemoryCache() {
         val file = File(fileName)
         val content = file.readText().ifEmpty { "{}" }
-        json.decodeFromString<Map<String, JsonElement?>>(content).forEach {
+        json.decodeFromString<Map<String, String?>>(content).forEach {
             memoryCache.put(it.key, it.value)
         }
     }
@@ -70,7 +72,7 @@ class FileCacheImpl(
         try {
             lock.lock()
             val file = File(fileName)
-            val newContent = JsonObject(memoryCache.toMap().toJsonObject()).toString()
+            val newContent = json.encodeToString(memoryCache.toMap() as Map<String, String?>)
             file.writeText(newContent)
         } finally {
 

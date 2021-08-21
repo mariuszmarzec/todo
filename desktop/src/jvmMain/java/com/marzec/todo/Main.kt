@@ -33,7 +33,9 @@ fun main() {
 
     DI.fileCache = FileCacheImpl(
         "todo.cache",
-        Json,
+        Json {
+             isLenient = true
+        },
         MemoryCache()
     )
 

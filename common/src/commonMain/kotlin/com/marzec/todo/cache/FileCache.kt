@@ -1,27 +1,30 @@
 package com.marzec.todo.cache
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.serializer
 
 interface FileCache {
 
-    suspend fun put(key: String, value: Any?)
+    suspend fun <T: Any> put(key: String, value: T?, serializer: KSerializer<T>)
 
-    suspend fun get(key: String): JsonElement?
+    suspend fun <T: Any> get(key: String, serializer: KSerializer<T>): T?
 
-    suspend fun observe(key: String): Flow<JsonElement?>
+    suspend fun <T: Any> observe(key: String, serializer: KSerializer<T>): Flow<T?>
 }
 
-suspend inline fun <reified T> FileCache.getTyped(key: String): T? = get(key)?.let {
-    Json.Default.decodeFromJsonElement(it)
+@OptIn(InternalSerializationApi::class)
+suspend inline fun <reified T: Any> FileCache.putTyped(key: String, value: T?) {
+    put(key, value, T::class.serializer())
 }
 
-suspend inline fun <reified T> FileCache.observeTyped(key: String): Flow<T?> {
-    return observe(key).map { jsonElement ->
-        jsonElement
-            ?.let { it1 -> Json.Default.decodeFromJsonElement(it1) }
-    }
+@OptIn(InternalSerializationApi::class)
+suspend inline fun <reified T: Any> FileCache.getTyped(key: String): T? {
+    return get(key, T::class.serializer())
+}
+
+@OptIn(InternalSerializationApi::class)
+suspend inline fun <reified T: Any> FileCache.observeTyped(key: String): Flow<T?> {
+    return observe(key, T::class.serializer())
 }

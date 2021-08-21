@@ -4,15 +4,16 @@ import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
 import com.marzec.todo.cache.getTyped
+import com.marzec.todo.cache.putTyped
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.serializer
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -39,9 +40,9 @@ val httpClient = HttpClient(OkHttp) {
                 val response = chain.proceed(request)
                 val authorization = response.headers[Api.Headers.AUTHORIZATION]
                 if (authorization != null) {
-                    runBlocking { DI.fileCache.put(PreferencesKeys.AUTHORIZATION, authorization) }
+                    runBlocking { DI.fileCache.putTyped(PreferencesKeys.AUTHORIZATION, authorization) }
                 } else if (response.code == 401) {
-                    runBlocking { DI.fileCache.put(PreferencesKeys.AUTHORIZATION, null) }
+                    runBlocking { DI.fileCache.putTyped(PreferencesKeys.AUTHORIZATION, null) }
                 }
                 return response
             }

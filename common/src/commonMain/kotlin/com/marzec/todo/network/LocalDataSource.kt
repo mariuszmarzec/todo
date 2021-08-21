@@ -13,7 +13,7 @@ class LocalDataSource(
     private val cache: FileCache
 ) : DataSource {
 
-    // TODO Implement local cache data source after polymorphism json serialization
+    // TODO Implement local data source
     private val tasks = listOf(
         TaskDto(
             id = 1,

@@ -6,20 +6,22 @@ import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.core.remove
 import androidx.datastore.preferences.core.toMutablePreferences
 import com.marzec.todo.cache.FileCache
-import com.marzec.todo.extensions.toJsonElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 
 class PreferencesCache(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val json: Json
 ) : FileCache {
-    override suspend fun put(key: String, value: Any?) {
+
+    override suspend fun <T: Any> put(key: String, value: T?, serializer: KSerializer<T>) {
         dataStore.updateData { preferences ->
             preferences.toMutablePreferences().also {
                 if (value != null) {
-                    it[preferencesKey<String>(key)] = value.toString()
+                    it[preferencesKey<String>(key)] = json.encodeToString(serializer, value)
                 } else {
                     it.remove(preferencesKey<String>(key))
                 }
@@ -27,17 +29,21 @@ class PreferencesCache(
         }
     }
 
-    override suspend fun get(key: String): JsonElement? {
+    override suspend fun <T: Any> get(key: String, serializer: KSerializer<T>): T? {
         return try {
-            dataStore.data.first()[preferencesKey<String>(key)]?.toJsonElement()
+            dataStore.data.first()[preferencesKey<String>(key)]?.let {
+                json.decodeFromString(serializer, it)
+            }
         } catch (e: Exception) {
             null
         }
     }
 
-    override suspend fun observe(key: String): Flow<JsonElement?> {
+    override suspend fun <T: Any> observe(key: String, serializer: KSerializer<T>): Flow<T?> {
         return dataStore.data.map {
-            it[preferencesKey<String>(key)]?.toJsonElement()
+            it[preferencesKey<String>(key)]?.let { value ->
+                json.decodeFromString(serializer, value)
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import com.marzec.mvi.State
 import com.marzec.todo.cache.Cache
 import com.marzec.todo.cache.FileCache
-import com.marzec.todo.cache.getTyped
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.logger.Logger
@@ -47,6 +46,7 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 
 object DI {
 
@@ -210,7 +210,7 @@ object DI {
     lateinit var navigationStore: NavigationStore
 
     suspend fun provideNavigationStore(): NavigationStore {
-        val authToken = fileCache.getTyped<String>(PreferencesKeys.AUTHORIZATION)
+        val authToken = fileCache.get<String>(PreferencesKeys.AUTHORIZATION, String.serializer())
 
         val defaultScreen = if (authToken.isNullOrEmpty()) {
             NavigationEntry(
