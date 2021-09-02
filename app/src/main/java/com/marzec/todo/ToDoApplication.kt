@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import com.marzec.todo.network.httpClient
 import com.marzec.todo.cache.MemoryCache
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 
 class ToDoApplication : Application() {
 
@@ -28,7 +29,8 @@ class ToDoApplication : Application() {
         DI.memoryCache = MemoryCache()
 
         DI.fileCache = PreferencesCache(
-            createDataStore(name = "user_preferences")
+            createDataStore(name = "user_preferences"),
+            Json
         )
 
         DI.copyToClipBoardHelper = object : CopyToClipBoardHelper {
