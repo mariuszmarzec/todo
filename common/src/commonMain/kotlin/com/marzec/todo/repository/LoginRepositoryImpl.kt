@@ -15,9 +15,23 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.withContext
 
-class LoginRepository(private val client: HttpClient) {
+interface LoginRepository {
 
-    suspend fun login(login: String, password: String): Content<User> =
+    suspend fun login(login: String, password: String): Content<User>
+    suspend fun logout(): Content<Unit>
+}
+
+class LoginRepositoryMock : LoginRepository {
+    override suspend fun login(login: String, password: String): Content<User> =
+        Content.Data(User(1, "mock@user.com"))
+
+    override suspend fun logout(): Content<Unit> = Content.Data(Unit)
+
+}
+
+class LoginRepositoryImpl(private val client: HttpClient) : LoginRepository {
+
+    override suspend fun login(login: String, password: String): Content<User> =
         withContext(DI.ioDispatcher) {
             asContent {
                 client.post<UserDto>(Api.Login.LOGIN) {
@@ -27,7 +41,7 @@ class LoginRepository(private val client: HttpClient) {
             }
         }
 
-    suspend fun logout(): Content<Unit> = withContext(DI.ioDispatcher) {
+    override suspend fun logout(): Content<Unit> = withContext(DI.ioDispatcher) {
         asContent {
             client.get<Unit>(Api.Login.LOGOUT)
         }

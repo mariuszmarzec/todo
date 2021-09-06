@@ -5,7 +5,6 @@ import com.marzec.mvi.mapData
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.newMvi.oneShotTrigger
 import com.marzec.mvi.reduceDataWithContent
-import com.marzec.todo.DI
 import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.model.ToDoList
@@ -18,7 +17,6 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
-import kotlinx.coroutines.flow.flow
 
 class ListsScreenStore(
     private val cacheKey: String,

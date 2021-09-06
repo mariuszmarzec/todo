@@ -18,6 +18,8 @@ import com.marzec.todo.network.LocalDataSource
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
+import com.marzec.todo.repository.LoginRepositoryImpl
+import com.marzec.todo.repository.LoginRepositoryMock
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
@@ -261,7 +263,7 @@ object DI {
 
     lateinit var client: HttpClient
 
-    val loginRepository by lazy { LoginRepository(client) }
+    val loginRepository: LoginRepository by lazy { if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(client) }
 
     fun provideLoginStore(cacheKey: String): LoginStore = LoginStore(
         loginRepository = loginRepository,
@@ -283,7 +285,7 @@ object DI {
     fun provideTodoRepository() = TodoRepository(provideDataSource(), memoryCache)
 
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
-        LocalDataSource(fileCache)
+        LocalDataSource
     } else {
         ApiDataSource(client)
     }
