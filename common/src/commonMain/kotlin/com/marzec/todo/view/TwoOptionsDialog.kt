@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Checkbox
 import androidx.compose.material.TextButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,9 +19,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @Composable
-fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog) {
+fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog, content: @Composable () -> Unit = {}) {
     CustomDialog(
         onDismissRequest = { state.onDismiss() }
     ) {
@@ -41,6 +43,8 @@ fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog) {
 
             Text(text = state.message)
 
+            content()
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -51,6 +55,21 @@ fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog) {
                 TextButton(onClick = { state.onDismiss() }) {
                     Text(state.dismissButton)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun TwoOptionsDialogWithCheckbox(state: Dialog.TwoOptionsDialogWithCheckbox) {
+    TwoOptionsDialog(state.twoOptionsDialog) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = state.checked,
+                onCheckedChange = { state.onCheckedChange() }
+            )
+            TextButton({ state.onCheckedChange() }) {
+                Text(state.checkBoxLabel)
             }
         }
     }

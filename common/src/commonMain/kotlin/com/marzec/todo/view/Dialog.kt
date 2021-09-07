@@ -11,6 +11,7 @@ fun DialogBox(
         is Dialog.TextInputDialog -> TextInputDialog(state)
         is Dialog.TwoOptionsDialog -> TwoOptionsDialog(state)
         is Dialog.SelectOptionsDialog -> SelectOptionsDialog(state)
+        is Dialog.TwoOptionsDialogWithCheckbox -> TwoOptionsDialogWithCheckbox(state)
         is Dialog.NoDialog -> Unit
     }
 }
@@ -36,6 +37,13 @@ sealed class Dialog {
         val onConfirm: () -> Unit = {},
     ) : Dialog()
 
+    data class TwoOptionsDialogWithCheckbox(
+        val twoOptionsDialog: TwoOptionsDialog,
+        val checked: Boolean,
+        val checkBoxLabel: String,
+        val onCheckedChange: () -> Unit = {},
+    ) : Dialog()
+
     data class SelectOptionsDialog(
         val items: List<TextListItem>,
         val onDismiss: () -> Unit = {},
@@ -49,6 +57,11 @@ sealed class DialogState {
 
     data class RemoveDialog(
         val idToRemove: Int,
+    ): DialogState()
+
+    data class RemoveDialogWithCheckBox(
+        val idToRemove: Int,
+        val checked: Boolean = false
     ): DialogState()
 
     data class InputDialog(

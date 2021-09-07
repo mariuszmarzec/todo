@@ -49,6 +49,8 @@ import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
+import com.marzec.todo.view.TwoOptionsDialogWithCheckbox
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -218,6 +220,27 @@ fun TaskDetailsScreen(
                             )
                         )
 
+                    }
+                    is DialogState.RemoveDialogWithCheckBox -> {
+                        DialogBox(
+                            state = Dialog.TwoOptionsDialogWithCheckbox(
+                                twoOptionsDialog = Dialog.TwoOptionsDialog(
+                                    title = "Remove task",
+                                    message = "Do you really want to remove this task?",
+                                    confirmButton = "Yes",
+                                    dismissButton = "No",
+                                    onDismiss = { scope.launch { store.hideDialog() } },
+                                    onConfirm = {
+                                        scope.launch { store.removeTask(dialog.idToRemove) }
+                                    }
+                                ),
+                                checked = dialog.checked,
+                                checkBoxLabel = "Remove with all sub-tasks",
+                                onCheckedChange = {
+                                    scope.launch { store.onRemoveWithSubTasksChange() }
+                                }
+                            )
+                        )
                     }
                     is DialogState.SelectOptionsDialog -> {
                         DialogBox(

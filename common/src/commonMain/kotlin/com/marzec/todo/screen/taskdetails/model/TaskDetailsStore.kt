@@ -15,6 +15,8 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import kotlinx.coroutines.flow.Flow
 
 class TaskDetailsStore(
@@ -90,7 +92,7 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(
-                    dialog = DialogState.RemoveDialog(idToRemove = task.id)
+                    dialog = DialogState.RemoveDialogWithCheckBox(idToRemove = task.id)
                 )
             }
         }
@@ -116,8 +118,12 @@ class TaskDetailsStore(
 
     suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
-            todoRepository.removeTask(idToRemove)
-                .cancelFlowsIf { it is Content.Data && idToRemove == taskId }
+            if (isRemoveWithSubtasksChecked(state)) {
+                todoRepository.removeTaskWithSubtasks(state.task)
+            } else {
+                todoRepository.removeTask(idToRemove)
+
+            }.cancelFlowsIf { it is Content.Data && idToRemove == taskId }
         }
 
         reducer {
@@ -140,6 +146,17 @@ class TaskDetailsStore(
                 }
             }
         }
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private fun isRemoveWithSubtasksChecked(
+        state: TaskDetailsState
+    ): Boolean {
+        contract {
+            returns(true) implies (state is TaskDetailsState.Data)
+        }
+        return state is TaskDetailsState.Data
+                && (state.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
     }
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
@@ -218,6 +235,18 @@ class TaskDetailsStore(
         reducer {
             state.reduceData {
                 copy(dialog = DialogState.SelectOptionsDialog(urls))
+            }
+        }
+    }
+
+    suspend fun onRemoveWithSubTasksChange() = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(
+                    dialog = dialog.asInstanceAndReturn<DialogState.RemoveDialogWithCheckBox> {
+                        copy(checked = !this.checked)
+                    } ?: DialogState.NoDialog
+                )
             }
         }
     }
