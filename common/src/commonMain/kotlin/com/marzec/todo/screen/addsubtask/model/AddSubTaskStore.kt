@@ -3,6 +3,7 @@ package com.marzec.todo.screen.addsubtask.model
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
+import com.marzec.todo.extensions.asInstanceAndReturnOther
 import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
@@ -13,7 +14,6 @@ import com.marzec.todo.network.mapData
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class AddSubTaskStore(
@@ -62,7 +62,7 @@ class AddSubTaskStore(
 
     suspend fun pinSubtask(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<AddSubTaskState.Data, Flow<Content<Unit>>?> {
+            state.asInstanceAndReturnOther<AddSubTaskState.Data, Flow<Content<Unit>>?> {
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
                         taskId = id.toInt(),
@@ -96,7 +96,7 @@ class AddSubTaskStore(
 }
 
 private fun AddSubTaskState.reduceData(tasks: List<Task>): AddSubTaskState =
-    this.asInstanceAndReturn<
+    this.asInstanceAndReturnOther<
             AddSubTaskState.Data,
             AddSubTaskState
             > { AddSubTaskState.Data(tasks) } ?: AddSubTaskState.Data(tasks)

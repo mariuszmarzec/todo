@@ -1,7 +1,7 @@
 package com.marzec.mvi
 
 import com.marzec.todo.extensions.asInstance
-import com.marzec.todo.extensions.asInstanceAndReturn
+import com.marzec.todo.extensions.asInstanceAndReturnOther
 import com.marzec.todo.network.Content
 
 sealed class State<T>(open val data: T?) {
@@ -16,7 +16,7 @@ sealed class State<T>(open val data: T?) {
         }
 
     inline fun <R> asDataAndReturn(action: T.() -> R) =
-        asInstanceAndReturn<Data<T>, R> {
+        asInstanceAndReturnOther<Data<T>, R> {
             action(data)
         }
 }

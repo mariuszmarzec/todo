@@ -42,7 +42,7 @@ val httpClient = HttpClient(OkHttp) {
                 if (authorization != null) {
                     runBlocking { DI.fileCache.putTyped(PreferencesKeys.AUTHORIZATION, authorization) }
                 } else if (response.code == 401) {
-                    runBlocking { DI.fileCache.putTyped(PreferencesKeys.AUTHORIZATION, null) }
+                    runBlocking { DI.fileCache.putTyped<String>(PreferencesKeys.AUTHORIZATION, null) }
                 }
                 return response
             }

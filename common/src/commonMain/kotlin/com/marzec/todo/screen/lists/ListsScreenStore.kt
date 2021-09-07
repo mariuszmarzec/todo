@@ -64,7 +64,7 @@ class ListsScreenStore(
         reducer {
             state.mapData {
                 it.copy(
-                    dialog = it.dialog.asInstanceAndReturn<DialogState.InputDialog, DialogState.InputDialog> {
+                    dialog = it.dialog.asInstanceAndReturn<DialogState.InputDialog> {
                         this.copy(inputField = listName)
                     } ?: it.dialog
                 )

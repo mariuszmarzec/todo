@@ -5,6 +5,7 @@ import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
+import com.marzec.todo.extensions.asInstanceAndReturnOther
 import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
@@ -67,7 +68,7 @@ class TaskDetailsStore(
 
     suspend fun unpinSubtask(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+            state.asInstanceAndReturnOther<TaskDetailsState.Data, Flow<Content<Unit>>?> {
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
                         taskId = id.toInt(),
@@ -143,7 +144,7 @@ class TaskDetailsStore(
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+            state.asInstanceAndReturnOther<TaskDetailsState.Data, Flow<Content<Unit>>?> {
                 val maxPriority = task.subTasks.maxOf { it.priority }
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
@@ -170,7 +171,7 @@ class TaskDetailsStore(
 
     suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturn<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+            state.asInstanceAndReturnOther<TaskDetailsState.Data, Flow<Content<Unit>>?> {
                 val minPriority = task.subTasks.minOf { it.priority }
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
@@ -223,7 +224,7 @@ class TaskDetailsStore(
 }
 
 private fun TaskDetailsState.reduceData(data: Task): TaskDetailsState =
-    this.asInstanceAndReturn<
+    this.asInstanceAndReturnOther<
             TaskDetailsState.Data,
             TaskDetailsState
             > { copy(task = data) } ?: TaskDetailsState.Data(

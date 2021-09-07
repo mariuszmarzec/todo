@@ -203,8 +203,7 @@ fun TaskDetailsScreen(
                         }
                     }
                 }
-                val dialog = state.dialog
-                when (dialog) {
+                when (val dialog = state.dialog) {
                     is DialogState.RemoveDialog -> {
                         DialogBox(
                             state = Dialog.TwoOptionsDialog(

@@ -5,6 +5,7 @@ import com.marzec.todo.DI
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.toDomain
 import com.marzec.todo.cache.Cache
+import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
@@ -96,6 +97,14 @@ class TodoRepository(
             dataSource.removeTask(taskId)
         }
 
+    fun removeTaskWithSubtasks(task: Task): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            task.subTasks.flatMapTask().forEach {
+                dataSource.removeTask(it.id)
+            }
+            dataSource.removeTask(task.id)
+        }
+
     fun removeList(id: Int): Flow<Content<Unit>> =
         asContentWithListUpdate { dataSource.removeList(id) }
 
@@ -156,12 +165,4 @@ class TodoRepository(
                     refreshListsCache()
                 }
             }
-}
-
-private fun List<Task>.flatMapTask(tasks: MutableList<Task> = mutableListOf()): List<Task> {
-    forEach {
-        tasks.add(it)
-        it.subTasks.flatMapTask(tasks)
-    }
-    return tasks
 }
