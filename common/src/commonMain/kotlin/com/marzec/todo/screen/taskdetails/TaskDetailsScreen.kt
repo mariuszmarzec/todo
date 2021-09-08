@@ -38,8 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.emptyString
+import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
@@ -49,8 +49,6 @@ import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
-import com.marzec.todo.view.TwoOptionsDialogWithCheckbox
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -167,6 +165,20 @@ fun TaskDetailsScreen(
                                             }
                                         }
                                     ) {
+                                        // TODO REMOVE THIS LOGIC
+                                        val urlToOpen =
+                                            state.task.subTasks.firstOrNull { task -> task.id == it.id.toInt() }
+                                                ?.urlToOpen()
+                                        if (urlToOpen != null) {
+                                            IconButton({
+                                                scope.launch { store.openUrl(urlToOpen) }
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ExitToApp,
+                                                    contentDescription = "Open url"
+                                                )
+                                            }
+                                        }
                                         IconButton({
                                             scope.launch { store.moveToTop(it.id) }
                                         }) {
