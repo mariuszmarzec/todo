@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -25,7 +25,8 @@ fun TextInputDialog(state: Dialog.TextInputDialog) {
         Column(
             modifier = Modifier
                 .background(Color.White)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(state.title)

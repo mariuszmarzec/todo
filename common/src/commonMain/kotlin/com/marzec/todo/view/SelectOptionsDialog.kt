@@ -3,8 +3,8 @@ package com.marzec.todo.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -25,7 +25,8 @@ fun SelectOptionsDialog(state: Dialog.SelectOptionsDialog) {
         Column(
             modifier = Modifier
                 .background(Color.White)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
