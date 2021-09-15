@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,6 +88,16 @@ fun TaskDetailsScreen(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Remove"
                     )
+                }
+                if ((state.task?.description?.lines()?.size ?: 0) > 1) {
+                    IconButton({
+                        scope.launch { store.explodeIntoTasks(state.task?.description?.lines().orEmpty()) }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.List,
+                            contentDescription = "Explode"
+                        )
+                    }
                 }
             }
         },

@@ -250,6 +250,10 @@ class TaskDetailsStore(
             }
         }
     }
+
+    suspend fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
+        onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }
+    }
 }
 
 private fun TaskDetailsState.reduceData(data: Task): TaskDetailsState =
