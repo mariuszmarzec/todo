@@ -14,7 +14,6 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import kotlinx.coroutines.flow.flow
 
 class AddNewTaskStore(
     private val navigationStore: NavigationStore,
@@ -28,7 +27,7 @@ class AddNewTaskStore(
 
     suspend fun initialLoad() = intent<Content<Task>> {
         onTrigger {
-            state.asDataAndReturn {
+            state.ifDataAvailable {
                 taskId?.let {
                     todoRepository.observeTask(listId, it)
                 }
@@ -61,7 +60,7 @@ class AddNewTaskStore(
 
     suspend fun addNewTask() = intent<Content<Unit>> {
         onTrigger {
-            state.asDataAndReturn {
+            state.ifDataAvailable {
                 val taskId = taskId
                 if (taskId != null) {
                     todoRepository.updateTask(
@@ -88,7 +87,7 @@ class AddNewTaskStore(
 
     suspend fun addManyTasks() = intent<Content<Unit>> {
         onTrigger {
-            state.asDataAndReturn {
+            state.ifDataAvailable {
                 todoRepository.addNewTasks(
                     listId = listId,
                     highestPriorityAsDefault = highestPriorityAsDefault,

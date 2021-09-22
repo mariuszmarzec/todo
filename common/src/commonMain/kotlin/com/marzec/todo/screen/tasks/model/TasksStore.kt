@@ -7,7 +7,6 @@ import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.extensions.urlToOpen
-import com.marzec.todo.extensions.urls
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
@@ -17,7 +16,6 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
-import kotlinx.coroutines.flow.flow
 
 class TasksStore(
     private val navigationStore: NavigationStore,
@@ -102,7 +100,7 @@ class TasksStore(
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asDataAndReturn {
+            state.ifDataAvailable {
                 val maxPriority = tasks.maxOf { it.priority }
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
@@ -122,7 +120,7 @@ class TasksStore(
 
     suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asDataAndReturn {
+            state.ifDataAvailable {
                 val minPriority = tasks.minOf { it.priority }
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(

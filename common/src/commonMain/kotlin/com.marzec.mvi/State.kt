@@ -15,10 +15,10 @@ sealed class State<T>(open val data: T?) {
             action(data)
         }
 
-    inline fun <R> asDataAndReturn(action: T.() -> R) =
-        asInstanceAndReturnOther<Data<T>, R> {
-            action(data)
-        }
+    inline fun <R> ifDataAvailable(
+        blockOnLoading: Boolean = true,
+        action: T.() -> R
+    ) = data?.takeIf { !blockOnLoading || this !is Loading }?.let(action)
 }
 
 fun <T, R> State<T>.reduceContentNoChanges(result: Content<R>): State<T> =
@@ -43,7 +43,7 @@ fun <T> State<T>.reduceData(
     when (this) {
         is State.Data -> State.Data(this.data.reducer())
         is State.Loading -> copy(this.data?.reducer())
-        is State.Error -> copy()
+        is State.Error -> copy(this.data?.reducer())
     }
 
 fun <T, R> State<T>.reduceDataWithContent(
