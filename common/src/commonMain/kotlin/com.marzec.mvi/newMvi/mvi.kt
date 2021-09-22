@@ -4,16 +4,22 @@ import com.marzec.todo.DI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.launch
 
@@ -21,8 +27,7 @@ import kotlinx.coroutines.launch
 open class Store2<State : Any>(private val defaultState: State) {
 
     private val actions =
-        MutableStateFlow<Intent2<State, Any>>(Intent2(state = defaultState, result = null))
-
+        MutableSharedFlow<Intent2<State, Any>>(extraBufferCapacity = 10)
     private val _intentContextFlow =
         MutableStateFlow<Intent2<State, Any>>(Intent2(state = defaultState, result = null))
 
@@ -33,10 +38,11 @@ open class Store2<State : Any>(private val defaultState: State) {
 
     private var pause = MutableStateFlow(false)
 
-    suspend fun init(scope: CoroutineScope) {
+    suspend fun init(scope: CoroutineScope, initialAction: suspend () -> Unit = {}) {
         pause.emit(false)
         scope.launch {
-            actions.flatMapMerge { intent ->
+            actions.onSubscription { initialAction() }
+                .flatMapMerge { intent ->
                 debug("actions flatMapMerge intent: $intent")
                 val currentState = _state.value
                 val flow = intent.onTrigger(currentState)

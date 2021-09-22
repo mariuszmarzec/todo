@@ -37,8 +37,7 @@ fun AddNewTaskScreen(
     val state: State<AddNewTaskState> by store.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        store.init(scope)
-        scope.launch {
+        store.init(scope) {
             store.initialLoad()
         }
     }

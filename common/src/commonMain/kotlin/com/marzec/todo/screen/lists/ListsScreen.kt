@@ -45,8 +45,7 @@ fun ListsScreen(
     val state: State<ListsScreenState> by listsScreenStore.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        listsScreenStore.init(scope)
-        scope.launch {
+        listsScreenStore.init(scope) {
             listsScreenStore.initialLoad()
         }
     }

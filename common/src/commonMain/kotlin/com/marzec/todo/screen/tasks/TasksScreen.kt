@@ -43,8 +43,9 @@ fun TasksScreen(tasksStore: TasksStore, actionBarProvider: ActionBarProvider) {
     val state: State<TasksScreenState> by tasksStore.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        tasksStore.init(this)
-        tasksStore.loadList()
+        tasksStore.init(this) {
+            tasksStore.loadList()
+        }
     }
 
     Scaffold(

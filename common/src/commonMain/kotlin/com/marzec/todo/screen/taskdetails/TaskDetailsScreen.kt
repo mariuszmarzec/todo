@@ -65,8 +65,7 @@ fun TaskDetailsScreen(
     val state: TaskDetailsState by store.state.collectAsState()
 
     LaunchedEffect(listId, taskId) {
-        store.init(scope)
-        scope.launch { store.loadDetails() }
+        store.init(scope) { store.loadDetails() }
     }
 
     Scaffold(

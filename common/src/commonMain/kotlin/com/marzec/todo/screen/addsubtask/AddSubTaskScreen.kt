@@ -46,8 +46,9 @@ fun AddSubTaskScreen(
     val state: AddSubTaskState by store.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        store.init(scope)
-        store.initialLoad()
+        store.init(scope) {
+            store.initialLoad()
+        }
     }
 
     Scaffold(

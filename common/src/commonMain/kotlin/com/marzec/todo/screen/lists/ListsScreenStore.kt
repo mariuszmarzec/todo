@@ -17,6 +17,7 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import kotlinx.coroutines.delay
 
 class ListsScreenStore(
     private val cacheKey: String,
