@@ -1,5 +1,7 @@
 package com.marzec.todo.view
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -45,8 +47,12 @@ private fun ActionBar(
         }
         Spacer(modifier = Modifier.width(20.dp))
         Text(text = title)
-        Spacer(modifier = Modifier.weight(1f))
 
-        rightContent()
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.End
+        ) {
+            rightContent()
+        }
     }
 }

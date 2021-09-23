@@ -1,11 +1,14 @@
 package com.marzec.todo.screen.tasks.model
 
+import androidx.compose.ui.focus.FocusState
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.extensions.asInstanceAndReturn
+import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
@@ -96,6 +99,7 @@ class TasksStore(
 
     override suspend fun onNewState(newState: State<TasksScreenState>) {
         stateCache.set(cacheKey, newState)
+        println(newState)
     }
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
@@ -142,5 +146,42 @@ class TasksStore(
         state.data?.tasks?.firstOrNull { task -> task.id == taskId.toInt() }
             ?.urlToOpen()
             ?.let { openUrlHelper.open(it) }
+    }
+
+    suspend fun onSearchQueryChanged(query: String) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(search = query)
+            }
+        }
+    }
+    suspend fun clearSearch() = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(
+                    search = emptyString(),
+                    searchFocused = false
+                )
+            }
+        }
+    }
+
+    suspend fun activateSearch() = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(
+                    search = emptyString(),
+                    searchFocused = true
+                )
+            }
+        }
+    }
+
+    suspend fun onSearchFocusChanged(focused: Boolean) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(searchFocused = focused)
+            }
+        }
     }
 }
