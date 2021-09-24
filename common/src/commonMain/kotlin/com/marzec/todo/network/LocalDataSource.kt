@@ -105,6 +105,18 @@ object LocalDataSource : DataSource {
         priority: Int,
         isToDo: Boolean
     ) {
+        val indexInList = tasks.indexOfFirst { it.id == taskId }
+        val task = tasks[indexInList]
+
+        val newTask = task.copy(
+            description = description,
+            parentTaskId = parentTaskId,
+            priority = priority,
+            isToDo = isToDo,
+            modifiedTime = currentTime(),
+        )
+
+        tasks[indexInList] = newTask
     }
 
     private fun currentTime() =
