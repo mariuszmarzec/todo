@@ -22,6 +22,12 @@ kotlin {
     android()
     jvm("desktop")
 
+    jvm {
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
+
     sourceSets {
         named("commonMain") {
             dependencies {
@@ -34,6 +40,12 @@ kotlin {
                 api(Dependency.ktorSerialization)
                 api(Dependency.serializationJson)
                 implementation(Dependency.kotlinDateTime)
+            }
+        }
+        named("desktopTest") {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(Dependency.coroutineTest)
             }
         }
         named("androidMain") {

@@ -3,11 +3,10 @@ package com.marzec.todo.network
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.ToDoListDto
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import com.marzec.todo.common.currentTime
+import com.marzec.todo.common.formatDate
 
-object LocalDataSource : DataSource {
+class LocalDataSource : DataSource {
 
     private val tasks: MutableList<TaskDto> = mutableListOf()
 
@@ -15,9 +14,14 @@ object LocalDataSource : DataSource {
 
     private val listIdToTaskIds = mutableMapOf<Int, List<Int>>()
 
-
+    // TODO UPDATE LOCAL LOGIC
     override suspend fun removeTask(taskId: Int) {
         tasks.removeIf { it.id == taskId }
+        tasks.forEachIndexed { index, task ->
+            if (task.parentTaskId == taskId) {
+                tasks[index] = task.copy(parentTaskId = null)
+            }
+        }
         val listId = listIdToTaskIds.toList().find {
             it.second.any { taskIdFromList -> taskIdFromList == taskId }
         }!!.first
@@ -77,16 +81,19 @@ object LocalDataSource : DataSource {
             TaskDto(
                 id = newTaskId,
                 description = createTaskDto.description,
-                currentTime(),
-                currentTime(),
+                currentTime().formatDate(),
+                currentTime().formatDate(),
                 parentTaskId = createTaskDto.parentTaskId,
                 subTasks = emptyList(),
                 isToDo = true,
-                priority = if (createTaskDto.highestPriorityAsDefault == true) {
-                    (subTasksOfParentOrTasks(createTaskDto).maxOfOrNull { it.priority } ?: 0) + 1
-                } else {
-                    (subTasksOfParentOrTasks(createTaskDto).minOfOrNull { it.priority } ?: 0) - 1
-                }
+                priority = createTaskDto.priority
+                    ?: if (createTaskDto.highestPriorityAsDefault == true) {
+                        (subTasksOfParentOrTasks(createTaskDto).maxOfOrNull { it.priority }
+                            ?: 0) + 1
+                    } else {
+                        (subTasksOfParentOrTasks(createTaskDto).minOfOrNull { it.priority }
+                            ?: 0) - 1
+                    }
             )
         )
     }
@@ -113,12 +120,10 @@ object LocalDataSource : DataSource {
             parentTaskId = parentTaskId,
             priority = priority,
             isToDo = isToDo,
-            modifiedTime = currentTime(),
+            modifiedTime = currentTime().formatDate(),
         )
 
         tasks[indexInList] = newTask
     }
-
-    private fun currentTime() =
-        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
 }
+

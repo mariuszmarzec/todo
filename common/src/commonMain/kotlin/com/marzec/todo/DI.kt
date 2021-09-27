@@ -282,10 +282,14 @@ object DI {
         )
     )
 
+    val localDataSource by lazy {
+        LocalDataSource()
+    }
+
     fun provideTodoRepository() = TodoRepository(provideDataSource(), memoryCache)
 
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
-        LocalDataSource
+        localDataSource
     } else {
         ApiDataSource(client)
     }
@@ -300,6 +304,8 @@ object PreferencesKeys {
 }
 
 object Api {
+
+    const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
     val HOST = if (BuildKonfig.ENVIRONMENT == "p") {
         BuildKonfig.PROD_API_URL
