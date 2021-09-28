@@ -3,16 +3,35 @@ package com.marzec.todo.network
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.ToDoListDto
+import com.marzec.todo.cache.FileCache
+import com.marzec.todo.cache.getTyped
+import com.marzec.todo.cache.putTyped
 import com.marzec.todo.common.currentTime
 import com.marzec.todo.common.formatDate
+import kotlinx.serialization.Serializable
 
-class LocalDataSource : DataSource {
+@Serializable
+data class LocalData(
+    val tasks: MutableList<TaskDto> = mutableListOf(),
+    val lists: MutableList<ToDoListDto> = mutableListOf(),
+    val listIdToTaskIds: MutableMap<Int, List<Int>> = mutableMapOf()
+)
 
-    private val tasks: MutableList<TaskDto> = mutableListOf()
+class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
-    private val lists: MutableList<ToDoListDto> = mutableListOf()
+    private val CACHE_KEY = "LOCAL_DATA"
 
-    private val listIdToTaskIds = mutableMapOf<Int, List<Int>>()
+    private var tasks: MutableList<TaskDto> = mutableListOf()
+    private var lists: MutableList<ToDoListDto> = mutableListOf()
+    private var listIdToTaskIds = mutableMapOf<Int, List<Int>>()
+
+    suspend fun init() {
+        fileCache.getTyped<LocalData>(CACHE_KEY)?.let {
+            this@LocalDataSource.tasks = it.tasks
+            this@LocalDataSource.lists = it.lists
+            this@LocalDataSource.listIdToTaskIds = it.listIdToTaskIds
+        }
+    }
 
     // TODO UPDATE LOCAL LOGIC
     override suspend fun removeTask(taskId: Int) {
@@ -28,6 +47,12 @@ class LocalDataSource : DataSource {
         listIdToTaskIds[listId] = listIdToTaskIds[listId]!!.toMutableList().apply {
             remove(taskId)
         }
+        updateStorage()
+    }
+
+    private suspend fun updateStorage() {
+        val localData = LocalData(tasks, lists, listIdToTaskIds)
+        fileCache.putTyped(CACHE_KEY, localData)
     }
 
     override suspend fun getTodoLists(): List<ToDoListDto> {
@@ -64,12 +89,14 @@ class LocalDataSource : DataSource {
     override suspend fun removeList(id: Int) {
         lists.removeIf { it.id == id }
         listIdToTaskIds.remove(id)
+        updateStorage()
     }
 
     override suspend fun createToDoList(title: String) {
         val id = lists.size
         lists.add(ToDoListDto(id = id, title = title, tasks = emptyList()))
         listIdToTaskIds[id] = emptyList()
+        updateStorage()
     }
 
     override suspend fun addNewTask(listId: Int, createTaskDto: CreateTaskDto) {
@@ -96,6 +123,7 @@ class LocalDataSource : DataSource {
                     }
             )
         )
+        updateStorage()
     }
 
     private fun subTasksOfParentOrTasks(createTaskDto: CreateTaskDto) =
@@ -124,6 +152,7 @@ class LocalDataSource : DataSource {
         )
 
         tasks[indexInList] = newTask
+        updateStorage()
     }
 }
 

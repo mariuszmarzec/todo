@@ -47,7 +47,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.serializer
 
 object DI {
@@ -283,7 +285,7 @@ object DI {
     )
 
     val localDataSource by lazy {
-        LocalDataSource()
+        LocalDataSource(fileCache).apply { runBlocking { init() } }
     }
 
     fun provideTodoRepository() = TodoRepository(provideDataSource(), memoryCache)

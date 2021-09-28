@@ -20,9 +20,7 @@ val testAuthHeader = properties.getProperty("test.authHeader")
 
 kotlin {
     android()
-    jvm("desktop")
-
-    jvm {
+    jvm("desktop") {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
