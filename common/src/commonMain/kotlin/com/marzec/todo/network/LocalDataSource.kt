@@ -8,59 +8,56 @@ import com.marzec.todo.cache.getTyped
 import com.marzec.todo.cache.putTyped
 import com.marzec.todo.common.currentTime
 import com.marzec.todo.common.formatDate
+import com.marzec.todo.common.Lock
+import com.marzec.todo.extensions.replaceIf
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class LocalData(
-    val tasks: MutableList<TaskDto> = mutableListOf(),
-    val lists: MutableList<ToDoListDto> = mutableListOf(),
-    val listIdToTaskIds: MutableMap<Int, List<Int>> = mutableMapOf()
+    val tasks: List<TaskDto> = emptyList(),
+    val lists: List<ToDoListDto> = emptyList(),
+    val listIdToTaskIds: Map<Int, List<Int>> = emptyMap()
 )
 
 class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     private val CACHE_KEY = "LOCAL_DATA"
 
-    private var tasks: MutableList<TaskDto> = mutableListOf()
-    private var lists: MutableList<ToDoListDto> = mutableListOf()
-    private var listIdToTaskIds = mutableMapOf<Int, List<Int>>()
+    private val lock = Lock()
+
+    private var localData: LocalData = LocalData(emptyList(), emptyList(), emptyMap())
 
     suspend fun init() {
-        fileCache.getTyped<LocalData>(CACHE_KEY)?.let {
-            this@LocalDataSource.tasks = it.tasks
-            this@LocalDataSource.lists = it.lists
-            this@LocalDataSource.listIdToTaskIds = it.listIdToTaskIds
-        }
+        fileCache.getTyped<LocalData>(CACHE_KEY)?.let { localData = it }
     }
 
     // TODO UPDATE LOCAL LOGIC
-    override suspend fun removeTask(taskId: Int) {
-        tasks.removeIf { it.id == taskId }
-        tasks.forEachIndexed { index, task ->
-            if (task.parentTaskId == taskId) {
-                tasks[index] = task.copy(parentTaskId = null)
+    override suspend fun removeTask(taskId: Int) = update {
+        localData = localData.copy(
+            tasks = localData.tasks.toMutableList().apply { removeIf { it.id == taskId } }
+                .replaceIf(
+                    condition = { task -> task.parentTaskId == taskId },
+                    replace = { it.copy(parentTaskId = null) }
+                ),
+            listIdToTaskIds = localData.listIdToTaskIds.let { listIdToTaskIds ->
+                val listId = listIdToTaskIds.toList().find {
+                    it.second.any { taskIdFromList -> taskIdFromList == taskId }
+                }!!.first
+                listIdToTaskIds.toMutableMap().apply {
+                    val taskIds = getValue(listId).apply { remove(taskId) }
+                    set(listId, taskIds)
+                }
             }
-        }
-        val listId = listIdToTaskIds.toList().find {
-            it.second.any { taskIdFromList -> taskIdFromList == taskId }
-        }!!.first
-        listIdToTaskIds[listId] = listIdToTaskIds[listId]!!.toMutableList().apply {
-            remove(taskId)
-        }
-        updateStorage()
+        )
     }
 
-    private suspend fun updateStorage() {
-        val localData = LocalData(tasks, lists, listIdToTaskIds)
-        fileCache.putTyped(CACHE_KEY, localData)
-    }
-
-    override suspend fun getTodoLists(): List<ToDoListDto> {
-        val remainedTasks = tasks.toMutableList()
-        return lists.map { list ->
-            val tasksWithoutSubtasks = listIdToTaskIds.getValue(list.id)
+    override suspend fun getTodoLists(): List<ToDoListDto> = try {
+        lock.lock()
+        val remainedTasks = localData.tasks.toMutableList()
+        localData.lists.map { list ->
+            val tasksWithoutSubtasks = localData.listIdToTaskIds.getValue(list.id)
                 .mapNotNull { taskId ->
-                    val task = tasks.firstOrNull { taskId == it.id && it.parentTaskId == null }
+                    val task = localData.tasks.firstOrNull { taskId == it.id && it.parentTaskId == null }
                     task?.let { remainedTasks.remove(task) }
                     task
                 }
@@ -72,6 +69,8 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
             list.copy(tasks = tasks)
         }
+    } finally {
+        lock.unlock()
     }
 
     private fun getSubTasks(
@@ -86,47 +85,56 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }.sortedWith(compareByDescending(TaskDto::priority).thenBy(TaskDto::modifiedTime))
 
 
-    override suspend fun removeList(id: Int) {
-        lists.removeIf { it.id == id }
-        listIdToTaskIds.remove(id)
-        updateStorage()
-    }
-
-    override suspend fun createToDoList(title: String) {
-        val id = lists.size
-        lists.add(ToDoListDto(id = id, title = title, tasks = emptyList()))
-        listIdToTaskIds[id] = emptyList()
-        updateStorage()
-    }
-
-    override suspend fun addNewTask(listId: Int, createTaskDto: CreateTaskDto) {
-        val newTaskId = tasks.size
-        listIdToTaskIds[listId] = listIdToTaskIds[listId]!!.toMutableList().apply {
-            add(newTaskId)
-        }
-        tasks.add(
-            TaskDto(
-                id = newTaskId,
-                description = createTaskDto.description,
-                currentTime().formatDate(),
-                currentTime().formatDate(),
-                parentTaskId = createTaskDto.parentTaskId,
-                subTasks = emptyList(),
-                isToDo = true,
-                priority = createTaskDto.priority
-                    ?: if (createTaskDto.highestPriorityAsDefault == true) {
-                        (subTasksOfParentOrTasks(createTaskDto).maxOfOrNull { it.priority }
-                            ?: 0) + 1
-                    } else {
-                        (subTasksOfParentOrTasks(createTaskDto).minOfOrNull { it.priority }
-                            ?: 0) - 1
-                    }
-            )
+    override suspend fun removeList(id: Int) = update {
+        localData = localData.copy(
+            lists = localData.lists.toMutableList().apply { removeIf { it.id == id } },
+            listIdToTaskIds = localData.listIdToTaskIds.toMutableMap().apply { remove(id) }
         )
-        updateStorage()
     }
 
-    private fun subTasksOfParentOrTasks(createTaskDto: CreateTaskDto) =
+    override suspend fun createToDoList(title: String) = update {
+        val newListId = localData.lists.size
+        localData = localData.copy(
+            lists = localData.lists + ToDoListDto(id = newListId, title = title, tasks = emptyList()),
+            listIdToTaskIds = localData.listIdToTaskIds + (newListId to emptyList())
+        )
+    }
+
+    override suspend fun addNewTask(listId: Int, createTaskDto: CreateTaskDto) = update {
+        val tasks = localData.tasks
+        val newTaskId = tasks.size
+        localData = localData.copy(
+            tasks = tasks.toMutableList() + createNewTask(newTaskId, createTaskDto, tasks),
+            listIdToTaskIds = localData.listIdToTaskIds.toMutableMap().apply {
+                val taskIds = getValue(listId) + newTaskId
+                set(listId, taskIds)
+            }
+        )
+    }
+
+    private fun createNewTask(
+        newTaskId: Int,
+        createTaskDto: CreateTaskDto,
+        tasks: List<TaskDto>
+    ) = TaskDto(
+        id = newTaskId,
+        description = createTaskDto.description,
+        currentTime().formatDate(),
+        currentTime().formatDate(),
+        parentTaskId = createTaskDto.parentTaskId,
+        subTasks = emptyList(),
+        isToDo = true,
+        priority = createTaskDto.priority
+            ?: if (createTaskDto.highestPriorityAsDefault == true) {
+                (subTasksOfParentOrTasks(tasks, createTaskDto).maxOfOrNull { it.priority }
+                    ?: 0) + 1
+            } else {
+                (subTasksOfParentOrTasks(tasks, createTaskDto).minOfOrNull { it.priority }
+                    ?: 0) - 1
+            }
+    )
+
+    private fun subTasksOfParentOrTasks(tasks: List<TaskDto>, createTaskDto: CreateTaskDto) =
         (createTaskDto.parentTaskId?.let { parentTask ->
             getSubTasks(
                 tasks.toMutableList(),
@@ -139,20 +147,33 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         parentTaskId: Int?,
         priority: Int,
         isToDo: Boolean
-    ) {
-        val indexInList = tasks.indexOfFirst { it.id == taskId }
-        val task = tasks[indexInList]
-
-        val newTask = task.copy(
-            description = description,
-            parentTaskId = parentTaskId,
-            priority = priority,
-            isToDo = isToDo,
-            modifiedTime = currentTime().formatDate(),
+    ) = update {
+        localData = localData.copy(
+            tasks = localData.tasks.replaceIf(
+                condition = { it.id == taskId },
+                replace = { task ->
+                    task.copy(
+                        description = description,
+                        parentTaskId = parentTaskId,
+                        priority = priority,
+                        isToDo = isToDo,
+                        modifiedTime = currentTime().formatDate(),
+                    )
+                }
+            )
         )
+    }
 
-        tasks[indexInList] = newTask
+    private suspend fun update(action: () -> Unit) = try {
+        lock.lock()
+        action()
+    } finally {
         updateStorage()
+        lock.unlock()
+    }
+
+    private suspend fun updateStorage() {
+        fileCache.putTyped(CACHE_KEY, localData)
     }
 }
 

@@ -214,7 +214,7 @@ object DI {
     lateinit var navigationStore: NavigationStore
 
     suspend fun provideNavigationStore(): NavigationStore {
-        val authToken = fileCache.get<String>(PreferencesKeys.AUTHORIZATION, String.serializer())
+        val authToken = fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
 
         val defaultScreen = if (authToken.isNullOrEmpty()) {
             NavigationEntry(

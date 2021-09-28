@@ -1,8 +1,8 @@
 package com.marzec.todo.cache
 
+import com.marzec.todo.common.Lock
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.locks.ReentrantLock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.KSerializer
@@ -16,7 +16,7 @@ class FileCacheImpl(
     private val memoryCache: MemoryCache
 ) : FileCache {
 
-    private val lock = ReentrantLock()
+    private val lock = Lock()
     private var initialized: AtomicBoolean = AtomicBoolean(false)
 
     override suspend fun <T: Any> put(key: String, value: T?, serializer: KSerializer<T>) {
@@ -75,7 +75,6 @@ class FileCacheImpl(
             val newContent = json.encodeToString(memoryCache.toMap() as Map<String, String?>)
             file.writeText(newContent)
         } finally {
-
             lock.unlock()
         }
     }
