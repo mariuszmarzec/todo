@@ -10,6 +10,7 @@ import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
+import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.ApiDataSource
@@ -265,7 +266,11 @@ object DI {
 
     lateinit var client: HttpClient
 
-    val loginRepository: LoginRepository by lazy { if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(client) }
+    val loginRepository: LoginRepository by lazy {
+        if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(
+            client
+        )
+    }
 
     fun provideLoginStore(cacheKey: String): LoginStore = LoginStore(
         loginRepository = loginRepository,
@@ -273,7 +278,15 @@ object DI {
         cacheKey = cacheKey,
         onLoginSuccess = {
             navigationScope.launch {
-                navigationStore.next(NavigationAction(Destination.Lists))
+                navigationStore.next(
+                    NavigationAction(
+                        Destination.Lists,
+                        options = NavigationOptions(
+                            popTo = Destination.Lists,
+                            popToInclusive = true
+                        )
+                    )
+                )
             }
         },
         initialState = LoginViewState.Data(
