@@ -1,5 +1,6 @@
 package com.marzec.todo.extensions
 
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.model.Task
 
 fun emptyString() = ""
@@ -20,6 +21,14 @@ fun List<Task>.flatMapTask(tasks: MutableList<Task> = mutableListOf()): List<Tas
     forEach {
         tasks.add(it)
         it.subTasks.flatMapTask(tasks)
+    }
+    return tasks
+}
+
+fun List<TaskDto>.flatMapTaskDto(tasks: MutableList<TaskDto> = mutableListOf()): List<TaskDto> {
+    forEach {
+        tasks.add(it)
+        it.subTasks.flatMapTaskDto(tasks)
     }
     return tasks
 }

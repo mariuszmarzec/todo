@@ -9,6 +9,7 @@ import com.marzec.todo.cache.putTyped
 import com.marzec.todo.common.currentTime
 import com.marzec.todo.common.formatDate
 import com.marzec.todo.common.Lock
+import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.todo.extensions.replaceIf
 import kotlinx.serialization.Serializable
 
@@ -29,6 +30,17 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     suspend fun init() {
         fileCache.getTyped<LocalData>(CACHE_KEY)?.let { localData = it }
+    }
+
+    suspend fun init(lists: List<ToDoListDto>) = update {
+        val allTasks = lists.flatMap { it.tasks }.flatMapTaskDto()
+        localData = LocalData(
+            tasks = allTasks,
+            lists = lists,
+            listIdToTaskIds = lists.associate { list ->
+                list.id to list.tasks.flatMapTaskDto().map { it.id }
+            }
+        )
     }
 
     // TODO UPDATE LOCAL LOGIC

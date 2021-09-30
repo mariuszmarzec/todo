@@ -14,6 +14,7 @@ import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.ApiDataSource
+import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.LocalDataSource
 import com.marzec.todo.preferences.MemoryPreferences
@@ -306,7 +307,11 @@ object DI {
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
         localDataSource
     } else {
-        ApiDataSource(client)
+        CompositeDataSource(
+            localDataSource,
+            ApiDataSource(client),
+            memoryCache
+        ).apply { runBlocking { init() } }
     }
 
     private val actionBarProvider: ActionBarProvider by lazy {
