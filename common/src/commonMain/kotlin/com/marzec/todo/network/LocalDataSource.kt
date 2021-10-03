@@ -69,7 +69,9 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         localData.lists.map { list ->
             val tasksWithoutSubtasks = localData.listIdToTaskIds.getValue(list.id)
                 .mapNotNull { taskId ->
-                    val task = localData.tasks.firstOrNull { taskId == it.id && it.parentTaskId == null }
+                    val task = localData.tasks.firstOrNull {
+                        taskId == it.id && it.parentTaskId == null
+                    }
                     task?.let { remainedTasks.remove(task) }
                     task
                 }
