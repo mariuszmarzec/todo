@@ -65,6 +65,7 @@ object DI {
     lateinit var memoryCache: Cache
 
     lateinit var fileCache: FileCache
+    var quickCacheEnabled: Boolean = true
 
     val preferences: Preferences = MemoryPreferences()
 
@@ -306,12 +307,14 @@ object DI {
 
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
         localDataSource
-    } else {
+    } else if (quickCacheEnabled) {
         CompositeDataSource(
             localDataSource,
             ApiDataSource(client),
             memoryCache
         ).apply { runBlocking { init() } }
+    } else {
+        ApiDataSource(client)
     }
 
     private val actionBarProvider: ActionBarProvider by lazy {
