@@ -49,7 +49,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.serializer
@@ -66,6 +65,10 @@ object DI {
 
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = true
+
+    val navigationStoreCacheKey by lazy {
+        cacheKeyProvider()
+    }
 
     val preferences: Preferences = MemoryPreferences()
 
@@ -216,8 +219,10 @@ object DI {
 
     lateinit var navigationStore: NavigationStore
 
-    suspend fun provideNavigationStore(): NavigationStore {
-        val authToken = fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
+    fun provideNavigationStore(): NavigationStore {
+        val authToken = runBlocking {
+            fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
+        }
 
         val defaultScreen = if (authToken.isNullOrEmpty()) {
             NavigationEntry(
@@ -233,6 +238,7 @@ object DI {
         return NavigationStore(
             router = ROUTER,
             stateCache = preferences,
+            cacheKey = navigationStoreCacheKey,
             cacheKeyProvider = cacheKeyProvider,
             initialState = NavigationState(
                 backStack = listOf(

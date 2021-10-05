@@ -44,9 +44,5 @@ class ToDoApplication : Application() {
 
         DI.client = httpClient
         DI.ioDispatcher = Dispatchers.IO
-
-        DI.navigationStore = runBlocking {
-            DI.provideNavigationStore()
-        }
     }
 }

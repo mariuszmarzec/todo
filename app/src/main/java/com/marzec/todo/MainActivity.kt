@@ -1,16 +1,16 @@
 package com.marzec.todo
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.rememberCoroutineScope
+import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.screen.main.HomeScreen
 import kotlinx.coroutines.launch
-import android.content.Intent
-import android.net.Uri
-import com.marzec.todo.common.OpenUrlHelper
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,12 +29,12 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             MaterialTheme(colors = lightColors()) {
-                DI.logger.log("Navigation RECR", DI.navigationStore.state.value.backStack.map { it.destination }.toString())
-
 
                 DI.navigationScope = rememberCoroutineScope()
 
-                DI.logger.log("navigationStore", "content")
+                DI.navigationStore = DI.provideNavigationStore()
+
+                DI.logger.log("Navigation RECR", DI.navigationStore.state.value.backStack.map { it.destination }.toString())
                 HomeScreen(DI.navigationStore)
             }
         }

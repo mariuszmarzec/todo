@@ -9,10 +9,11 @@ import kotlin.reflect.KClass
 class NavigationStore(
     private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
     private val stateCache: Preferences,
+    private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState,
     private val logger: Logger
-) : Store2<NavigationState>(initialState) {
+) : Store2<NavigationState>(stateCache.get(cacheKey) ?: initialState) {
 
     suspend fun next(action: NavigationAction) = intent<Unit> {
         reducer {
@@ -29,9 +30,8 @@ class NavigationStore(
                             removeLast().also { stateCache.remove(it.cacheKey) }
                         }
                     }
-                    val cacheKey = cacheKeyProvider()
                     val screenProvider = router.getValue(action.destination::class)
-                    add(NavigationEntry(action.destination, cacheKey, screenProvider))
+                    add(NavigationEntry(action.destination, cacheKeyProvider(), screenProvider))
                 }
             )
         }
@@ -51,6 +51,7 @@ class NavigationStore(
 
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
+        stateCache.set(cacheKey, newState)
         logger.log("NavigationStore", newState.backStack.map { it.destination }.toString())
     }
 }
