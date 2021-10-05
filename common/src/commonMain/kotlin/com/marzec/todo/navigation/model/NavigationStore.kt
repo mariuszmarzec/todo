@@ -52,7 +52,6 @@ class NavigationStore(
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
         stateCache.set(cacheKey, newState)
-        logger.log("NavigationStore", newState.backStack.map { it.destination }.toString())
     }
 }
 

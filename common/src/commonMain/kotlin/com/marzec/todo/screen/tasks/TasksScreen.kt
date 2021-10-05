@@ -207,23 +207,30 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                         }
                     }
                 }
-                val removeTaskDialog = state.data.removeTaskDialog
-                if (removeTaskDialog is DialogState.RemoveDialog) {
-                    DialogBox(
-                        state = Dialog.TwoOptionsDialog(
-                            title = "Remove task",
-                            message = "Do you really want to remove this task?",
-                            confirmButton = "Yes",
-                            dismissButton = "No",
-                            onDismiss = { scope.launch { store.hideRemoveDialog() } },
-                            onConfirm = {
-                                scope.launch {
-                                    store.removeTask(removeTaskDialog.idToRemove)
+                val dialog = state.data.dialog
+                when (dialog) {
+                    is DialogState.RemoveDialogWithCheckBox -> {
+                        DialogBox(
+                            state = Dialog.TwoOptionsDialogWithCheckbox(
+                                twoOptionsDialog = Dialog.TwoOptionsDialog(
+                                    title = "Remove task",
+                                    message = "Do you really want to remove this task?",
+                                    confirmButton = "Yes",
+                                    dismissButton = "No",
+                                    onDismiss = { scope.launch { store.hideDialog() } },
+                                    onConfirm = {
+                                        scope.launch { store.removeTask(dialog.idToRemove) }
+                                    }
+                                ),
+                                checked = dialog.checked,
+                                checkBoxLabel = "Remove with all sub-tasks",
+                                onCheckedChange = {
+                                    scope.launch { store.onRemoveWithSubTasksChange() }
                                 }
-                            }
+                            )
                         )
-                    )
-
+                    }
+                    else -> { }
                 }
             }
             is State.Loading -> {

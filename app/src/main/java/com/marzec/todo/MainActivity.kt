@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
 
                 DI.navigationStore = DI.provideNavigationStore()
 
-                DI.logger.log("Navigation RECR", DI.navigationStore.state.value.backStack.map { it.destination }.toString())
                 HomeScreen(DI.navigationStore)
             }
         }
@@ -42,7 +41,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (DI.navigationStore.state.value.backStack.size > 1) {
-            DI.logger.log("Navigation BACK", DI.navigationStore.state.value.backStack.map { it.destination }.toString())
             DI.navigationScope.launch {
                 DI.navigationStore.goBack()
             }

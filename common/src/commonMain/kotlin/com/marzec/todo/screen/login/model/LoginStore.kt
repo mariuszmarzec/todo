@@ -56,7 +56,6 @@ class LoginStore(
             if (result is Content.Data) {
                 onLoginSuccess()
             }
-            println(result)
         }
 
     }

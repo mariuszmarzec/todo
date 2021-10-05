@@ -9,7 +9,7 @@ data class TasksScreenState(
     val tasks: List<Task>,
     val search: String,
     val searchFocused: Boolean,
-    val removeTaskDialog: DialogState
+    val dialog: DialogState
 ) {
     companion object {
         val INITIAL_STATE = State.Loading<TasksScreenState>()
@@ -17,7 +17,7 @@ data class TasksScreenState(
             tasks = emptyList(),
             search = emptyString(),
             searchFocused = false,
-            removeTaskDialog = DialogState.NoDialog
+            dialog = DialogState.NoDialog
         )
     }
 }

@@ -91,9 +91,7 @@ class TaskDetailsStore(
     suspend fun showRemoveTaskDialog() = intent<Unit> {
         reducer {
             state.reduceData {
-                copy(
-                    dialog = DialogState.RemoveDialogWithCheckBox(idToRemove = task.id)
-                )
+                copy(dialog = DialogState.RemoveDialogWithCheckBox(idToRemove = task.id))
             }
         }
     }

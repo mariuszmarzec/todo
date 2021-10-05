@@ -27,7 +27,6 @@ open class Store<State: Any, Action : Any>(defaultState: State) {
     @ObsoleteCoroutinesApi
     suspend fun sendAction(action: Action) {
         actions.consume {
-            println(action)
             val intent = intents[action::class]
             requireNotNull(intent)
             val result = intent.onTrigger?.invoke(action, _state.value)

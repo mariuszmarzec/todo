@@ -1,6 +1,5 @@
 package com.marzec.todo.screen.tasks.model
 
-import androidx.compose.ui.focus.FocusState
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentNoChanges
@@ -18,7 +17,10 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
+import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.view.DialogState
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 class TasksStore(
     private val navigationStore: NavigationStore,
@@ -64,42 +66,54 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    removeTaskDialog = DialogState.RemoveDialog(
-                        idToRemove = id.toInt()
-                    )
+                    dialog = DialogState.RemoveDialogWithCheckBox(idToRemove = id.toInt())
                 )
             }
         }
     }
 
-    suspend fun hideRemoveDialog() = intent<Unit> {
+    suspend fun hideDialog() = intent<Unit> {
         reducer {
             state.reduceData {
-                copy(removeTaskDialog = DialogState.NoDialog)
+                copy(dialog = DialogState.NoDialog)
             }
         }
     }
 
+    @OptIn(ExperimentalContracts::class)
+    private fun isRemoveWithSubtasksChecked(
+        state: State<TasksScreenState>
+    ): Boolean {
+        contract {
+            returns(true) implies (state is State.Data)
+        }
+        return state is State.Data<TasksScreenState>
+                && (state.data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
+    }
 
-    suspend fun removeTask(id: Int) = intent<Content<Unit>> {
+    suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
-            todoRepository.removeTask(id)
+            if (isRemoveWithSubtasksChecked(state)) {
+                todoRepository.removeTaskWithSubtasks(state.data.tasks.first { it.id == idToRemove })
+            } else {
+                todoRepository.removeTask(idToRemove)
+
+            }
         }
 
         reducer {
             state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) {
-                copy(removeTaskDialog = DialogState.NoDialog)
+                copy(dialog = DialogState.NoDialog)
             }
         }
 
         sideEffect {
-            hideRemoveDialog()
+            hideDialog()
         }
     }
 
     override suspend fun onNewState(newState: State<TasksScreenState>) {
         stateCache.set(cacheKey, newState)
-        println(newState)
     }
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
@@ -155,6 +169,7 @@ class TasksStore(
             }
         }
     }
+
     suspend fun clearSearch() = intent<Unit> {
         reducer {
             state.reduceData {
@@ -181,6 +196,18 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(searchFocused = focused)
+            }
+        }
+    }
+
+    suspend fun onRemoveWithSubTasksChange() = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(
+                    dialog = dialog.asInstanceAndReturn<DialogState.RemoveDialogWithCheckBox> {
+                        copy(checked = !this.checked)
+                    } ?: DialogState.NoDialog
+                )
             }
         }
     }

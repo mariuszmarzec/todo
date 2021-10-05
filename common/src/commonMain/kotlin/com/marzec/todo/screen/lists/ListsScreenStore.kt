@@ -40,9 +40,6 @@ class ListsScreenStore(
                 copy(todoLists = result.data)
             }
         }
-        sideEffect {
-            println(result)
-        }
     }
 
     suspend fun addNewList() = intent<Unit> {
@@ -101,9 +98,6 @@ class ListsScreenStore(
                     dialog = DialogState.NoDialog
                 )
             }
-        }
-        sideEffect {
-            println(result)
         }
     }
 
