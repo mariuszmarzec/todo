@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             MaterialTheme(colors = lightColors()) {
+                DI.logger.log("Navigation RECR", DI.navigationStore.state.value.backStack.map { it.destination }.toString())
+
 
                 DI.navigationScope = rememberCoroutineScope()
 
@@ -40,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (DI.navigationStore.state.value.backStack.size > 1) {
+            DI.logger.log("Navigation BACK", DI.navigationStore.state.value.backStack.map { it.destination }.toString())
             DI.navigationScope.launch {
                 DI.navigationStore.goBack()
             }

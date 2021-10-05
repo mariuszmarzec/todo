@@ -22,10 +22,11 @@ class NavigationStore(
                         takeLastWhile { it.destination != options.popTo }.forEach {
                             if (it.destination != options.popTo) {
                                 remove(it)
+                                stateCache.remove(it.cacheKey)
                             }
                         }
                         if (options.popToInclusive && lastOrNull()?.destination == options.popTo) {
-                            removeLast()
+                            removeLast().also { stateCache.remove(it.cacheKey) }
                         }
                     }
                     val cacheKey = cacheKeyProvider()
@@ -50,7 +51,7 @@ class NavigationStore(
 
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
-        logger.log("NavigationStore", newState.toString())
+        logger.log("NavigationStore", newState.backStack.map { it.destination }.toString())
     }
 }
 
