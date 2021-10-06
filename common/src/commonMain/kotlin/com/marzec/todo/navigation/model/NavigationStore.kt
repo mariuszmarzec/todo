@@ -2,7 +2,6 @@ package com.marzec.todo.navigation.model
 
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.todo.logger.Logger
 import com.marzec.todo.preferences.Preferences
 import kotlin.reflect.KClass
 
@@ -11,8 +10,7 @@ class NavigationStore(
     private val stateCache: Preferences,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
-    initialState: NavigationState,
-    private val logger: Logger
+    initialState: NavigationState
 ) : Store2<NavigationState>(stateCache.get(cacheKey) ?: initialState) {
 
     suspend fun next(action: NavigationAction) = intent<Unit> {

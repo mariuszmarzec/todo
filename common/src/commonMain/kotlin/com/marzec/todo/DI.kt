@@ -101,7 +101,10 @@ object DI {
 
     @Composable
     private fun provideTasksScreen(listId: Int, cacheKey: String) {
-        TasksScreen(provideTasksStore(listId = listId, cacheKey = cacheKey), actionBarProvider)
+        TasksScreen(
+            store = provideTasksStore(listId = listId, cacheKey = cacheKey),
+            actionBarProvider = provideActionBarProvider()
+        )
     }
 
     private fun provideTasksStore(listId: Int, cacheKey: String): TasksStore {
@@ -130,7 +133,7 @@ object DI {
                 parentTaskId = parentTaskId,
                 cacheKey = cacheKey
             ),
-            actionBarProvider
+            actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -165,7 +168,7 @@ object DI {
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
-            actionBarProvider = actionBarProvider
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -195,7 +198,7 @@ object DI {
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
-            actionBarProvider = actionBarProvider
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -244,14 +247,17 @@ object DI {
                 backStack = listOf(
                     defaultScreen
                 )
-            ),
-            logger = logger
+            )
         )
     }
 
     @Composable
     private fun provideListScreen(cacheKey: String) {
-        ListsScreen(navigationStore, actionBarProvider, provideListScreenStore(cacheKey = cacheKey))
+        ListsScreen(
+            navigationStore = navigationStore,
+            actionBarProvider = provideActionBarProvider(),
+            listsScreenStore = provideListScreenStore(cacheKey = cacheKey)
+        )
     }
 
     @Composable
@@ -323,9 +329,7 @@ object DI {
         ApiDataSource(client)
     }
 
-    private val actionBarProvider: ActionBarProvider by lazy {
-        ActionBarProvider(navigationStore)
-    }
+    private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
 }
 
 object PreferencesKeys {
