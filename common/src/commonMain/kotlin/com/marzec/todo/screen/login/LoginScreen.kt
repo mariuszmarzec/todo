@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.todo.screen.login.model.LoginActions
 import com.marzec.todo.screen.login.model.LoginStore
-import com.marzec.todo.screen.login.model.LoginViewState
+import com.marzec.todo.screen.login.model.LoginData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -36,10 +36,10 @@ fun LoginScreen(loginStore: LoginStore) {
         loginStore.init(scope)
     }
 
-    val state: LoginViewState by loginStore.state.collectAsState()
+    val state: LoginData by loginStore.state.collectAsState()
 
     when (val state = state) {
-        is LoginViewState.Data -> {
+        is LoginData.Data -> {
             LoginScreen(
                 login = state.loginData.login,
                 scope = scope,
@@ -48,11 +48,11 @@ fun LoginScreen(loginStore: LoginStore) {
                 error = ""
             )
         }
-        is LoginViewState.Pending -> {
+        is LoginData.Pending -> {
             Text(text = "Pending...", fontSize = 16.sp)
 
         }
-        is LoginViewState.Error -> {
+        is LoginData.Error -> {
             LoginScreen(
                 login = state.loginData.login,
                 scope = scope,

@@ -35,7 +35,6 @@ import com.marzec.todo.screen.lists.ListsScreenStore
 import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
-import com.marzec.todo.screen.login.model.LoginViewState
 import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
@@ -303,12 +302,7 @@ object DI {
                 )
             }
         },
-        initialState = LoginViewState.Data(
-            loginData = LoginData(
-                login = "mariusz.marzec00@gmail.com",
-                password = "password"
-            )
-        )
+        initialState = LoginData.INITIAL
     )
 
     val localDataSource by lazy {
