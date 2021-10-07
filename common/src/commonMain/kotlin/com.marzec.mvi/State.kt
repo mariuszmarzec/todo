@@ -62,8 +62,33 @@ fun <T, R> State<T>.reduceDataWithContent(
         )
     }
 
+fun <T, R> State<T>.reduceDataWithContent(
+    result: Content<R>,
+    reducer: T?.(R) -> T
+): State<T> =
+    when (result) {
+        is Content.Data -> State.Data((this.data).reducer(result.data))
+        is Content.Loading -> State.Loading(data)
+        is Content.Error -> State.Error(data, result.exception.message.orEmpty())
+    }
+
 fun <T, R> State<T>.mapData(mapper: (T) -> R) = when (this) {
     is State.Data -> State.Data(mapper(this.data))
     is State.Loading -> State.Loading(this.data?.let(mapper))
     is State.Error -> State.Error(this.data?.let(mapper), this.message)
 }
+
+fun <T, R> State<T>.reduceContentAsSideAction(
+    result: Content<R>
+): State<T> =
+    when (result) {
+        is Content.Loading -> State.Loading(data)
+        else -> {
+            val data = data
+            if (data != null) {
+                State.Data(data)
+            } else {
+                State.Error(data, message = "No data available")
+            }
+        }
+    }

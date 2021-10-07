@@ -1,12 +1,14 @@
 package com.marzec.todo.screen.taskdetails.model
 
+import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.reduceContentAsSideAction
+import com.marzec.mvi.reduceData
+import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturn
-import com.marzec.todo.extensions.asInstanceAndReturnOther
-import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
@@ -17,19 +19,18 @@ import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
-import kotlinx.coroutines.flow.Flow
 
 class TaskDetailsStore(
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
-    initialState: TaskDetailsState,
+    initialState: State<TaskDetailsState>,
     private val todoRepository: TodoRepository,
     private val listId: Int,
     private val taskId: Int,
     private val copyToClipBoardHelper: CopyToClipBoardHelper,
     private val openUrlHelper: OpenUrlHelper
-) : Store2<TaskDetailsState>(
+) : Store2<State<TaskDetailsState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
@@ -38,19 +39,15 @@ class TaskDetailsStore(
             todoRepository.observeTask(listId, taskId)
         }
         reducer {
-            result?.let { result ->
-                when (result) {
-                    is Content.Data -> state.reduceData(result.data)
-                    is Content.Error -> TaskDetailsState.Error(state.task, result.getMessage())
-                    is Content.Loading -> TaskDetailsState.Loading(state.task)
-                }
-            } ?: state
+            state.reduceDataWithContent(resultNonNull()) { result ->
+                TaskDetailsState(result, DialogState.NoDialog)
+            }
         }
     }
 
     suspend fun edit() = intent<Unit> {
         sideEffect {
-            state.asInstance<TaskDetailsState.Data> {
+            state.ifDataAvailable {
                 navigationStore.next(Destination.AddNewTask(listId, taskId, task.parentTaskId))
             }
         }
@@ -58,19 +55,19 @@ class TaskDetailsStore(
 
     suspend fun addSubTask() = intent<Unit> {
         sideEffect {
-            state.asInstance<TaskDetailsState.Data> {
+            state.ifDataAvailable {
                 navigationStore.next(Destination.AddSubTask(listId, taskId))
             }
         }
     }
 
-    override suspend fun onNewState(newState: TaskDetailsState) {
+    override suspend fun onNewState(newState: State<TaskDetailsState>) {
         stateCache.set(cacheKey, newState)
     }
 
     suspend fun unpinSubtask(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturnOther<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+            state.ifDataAvailable {
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
                         taskId = id.toInt(),
@@ -117,7 +114,7 @@ class TaskDetailsStore(
     suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
             if (isRemoveWithSubtasksChecked(state)) {
-                todoRepository.removeTaskWithSubtasks(state.task)
+                todoRepository.removeTaskWithSubtasks(state.data.task)
             } else {
                 todoRepository.removeTask(idToRemove)
 
@@ -125,19 +122,10 @@ class TaskDetailsStore(
         }
 
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> {
-                    state.reduceData {
-                        copy(dialog = DialogState.NoDialog)
-                    }
-                }
-                is Content.Error -> TaskDetailsState.Error(state.task, result.getMessage())
-                is Content.Loading -> TaskDetailsState.Loading(state.task)
-            }
+            state.reduceContentAsSideAction(resultNonNull())
         }
 
         sideEffect {
-            hideDialog()
             resultNonNull().asInstance<Content.Data<Unit>> {
                 if (idToRemove == taskId) {
                     navigationStore.goBack()
@@ -148,18 +136,18 @@ class TaskDetailsStore(
 
     @OptIn(ExperimentalContracts::class)
     private fun isRemoveWithSubtasksChecked(
-        state: TaskDetailsState
+        state: State<TaskDetailsState>
     ): Boolean {
         contract {
-            returns(true) implies (state is TaskDetailsState.Data)
+            returns(true) implies (state is State.Data)
         }
-        return state is TaskDetailsState.Data
-                && (state.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
+        return state is State.Data
+                && (state.data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
     }
 
     suspend fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturnOther<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+            state.ifDataAvailable {
                 val maxPriority = task.subTasks.maxOf { it.priority }
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
@@ -173,20 +161,13 @@ class TaskDetailsStore(
             }
         }
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> state
-                is Content.Error -> TaskDetailsState.Error(
-                    state.task,
-                    result.exception.message.orEmpty()
-                )
-                is Content.Loading -> TaskDetailsState.Loading(state.task)
-            }
+            state.reduceContentAsSideAction(resultNonNull())
         }
     }
 
     suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturnOther<TaskDetailsState.Data, Flow<Content<Unit>>?> {
+            state.ifDataAvailable {
                 val minPriority = task.subTasks.minOf { it.priority }
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
@@ -200,19 +181,12 @@ class TaskDetailsStore(
             }
         }
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> state
-                is Content.Error -> TaskDetailsState.Error(
-                    state.task,
-                    result.exception.message.orEmpty()
-                )
-                is Content.Loading -> TaskDetailsState.Loading(state.task)
-            }
+            state.reduceContentAsSideAction(resultNonNull())
         }
     }
 
     suspend fun copyDescription() = sideEffectIntent {
-        state.asInstance<TaskDetailsState.Data> {
+        state.ifDataAvailable {
             copyToClipBoardHelper.copy(task.description)
         }
     }
@@ -253,21 +227,3 @@ class TaskDetailsStore(
         onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }
     }
 }
-
-private fun TaskDetailsState.reduceData(data: Task): TaskDetailsState =
-    this.asInstanceAndReturnOther<
-            TaskDetailsState.Data,
-            TaskDetailsState
-            > { copy(task = data) } ?: TaskDetailsState.Data(
-        task = data,
-        dialog = DialogState.NoDialog
-    )
-
-private fun TaskDetailsState.reduceData(
-    reducer: TaskDetailsState.Data.() -> TaskDetailsState.Data
-): TaskDetailsState =
-    when (this) {
-        is TaskDetailsState.Data -> this.reducer()
-        is TaskDetailsState.Loading -> TaskDetailsState.Loading(task)
-        is TaskDetailsState.Error -> TaskDetailsState.Error(task, message)
-    }
