@@ -101,6 +101,10 @@ open class Store2<State : Any>(private val defaultState: State) {
         actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
     }
 
+    suspend fun <Result : Any> delegate(intent: Intent2<State, Result>) {
+        actions.emit(intent)
+    }
+
     suspend fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
         actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
     }

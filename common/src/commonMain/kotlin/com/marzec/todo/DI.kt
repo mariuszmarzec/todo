@@ -36,6 +36,7 @@ import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
+import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.screen.tasks.TasksScreen
@@ -44,7 +45,6 @@ import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
 import io.ktor.client.HttpClient
 import io.ktor.util.date.getTimeMillis
-import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -186,9 +186,12 @@ object DI {
             listId = listId,
             taskId = taskId,
             copyToClipBoardHelper = copyToClipBoardHelper,
-            openUrlHelper = openUrlHelper
+            openUrlHelper = openUrlHelper,
+            dialogDelegate = provideDialogDelegate()
         )
     }
+
+    private fun provideDialogDelegate(): DialogDelegate<TaskDetailsState> = DialogDelegate()
 
     @Composable
     private fun provideAddSubTaskScreen(listId: Int, taskId: Int, cacheKey: String) {
