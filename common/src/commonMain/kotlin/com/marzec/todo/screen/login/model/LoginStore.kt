@@ -37,10 +37,7 @@ class LoginStore(
     private suspend fun login() = intent<Content<User>> {
         onTrigger {
             state.ifDataAvailable {
-                flow {
-                    emit(Content.Loading())
-                    emit(loginRepository.login(login, password))
-                }
+                loginRepository.login(login, password)
             }
         }
 

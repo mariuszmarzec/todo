@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.marzec.mvi.State
 import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.extensions.urls
@@ -62,7 +63,7 @@ fun TaskDetailsScreen(
 
     val scope = rememberCoroutineScope()
 
-    val state: TaskDetailsState by store.state.collectAsState()
+    val state: State<TaskDetailsState> by store.state.collectAsState()
 
     LaunchedEffect(listId, taskId) {
         store.init(scope) { store.loadDetails() }
@@ -88,9 +89,13 @@ fun TaskDetailsScreen(
                         contentDescription = "Remove"
                     )
                 }
-                if ((state.task?.description?.lines()?.size ?: 0) > 1) {
+                if ((state.data?.task?.description?.lines()?.size ?: 0) > 1) {
                     IconButton({
-                        scope.launch { store.explodeIntoTasks(state.task?.description?.lines().orEmpty()) }
+                        scope.launch {
+                            store.explodeIntoTasks(
+                                state?.data?.task?.description?.lines().orEmpty()
+                            )
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Default.List,
@@ -112,7 +117,7 @@ fun TaskDetailsScreen(
         }
     ) {
         when (val state = state) {
-            is TaskDetailsState.Data -> {
+            is State.Data -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -128,10 +133,10 @@ fun TaskDetailsScreen(
                     ) {
                         Box(Modifier.weight(1f)) {
                             SelectionContainer {
-                                Text(text = state.task.description, fontSize = 16.sp)
+                                Text(text = state.data.task.description, fontSize = 16.sp)
                             }
                         }
-                        val urls = state.task.description.urls()
+                        val urls = state.data.task.description.urls()
                         if (urls.isNotEmpty()) {
                             Spacer(Modifier.size(16.dp))
                             IconButton({
@@ -153,7 +158,7 @@ fun TaskDetailsScreen(
                     Spacer(Modifier.size(16.dp))
                     LazyColumn {
                         items(
-                            items = state.task.subTasks.map {
+                            items = state.data.task.subTasks.map {
                                 TextListItem(
                                     id = it.id.toString(),
                                     name = it.description.lines().first(),
@@ -177,7 +182,7 @@ fun TaskDetailsScreen(
                                     ) {
                                         // TODO REMOVE THIS LOGIC
                                         val urlToOpen =
-                                            state.task.subTasks.firstOrNull { task -> task.id == it.id.toInt() }
+                                            state.data.task.subTasks.firstOrNull { task -> task.id == it.id.toInt() }
                                                 ?.urlToOpen()
                                         if (urlToOpen != null) {
                                             IconButton({
@@ -227,7 +232,7 @@ fun TaskDetailsScreen(
                         }
                     }
                 }
-                when (val dialog = state.dialog) {
+                when (val dialog = state.data.dialog) {
                     is DialogState.RemoveDialog -> {
                         DialogBox(
                             state = Dialog.TwoOptionsDialog(
@@ -287,10 +292,10 @@ fun TaskDetailsScreen(
                     else -> Unit
                 }
             }
-            is TaskDetailsState.Loading -> {
+            is State.Loading -> {
                 Text(text = "Loading")
             }
-            is TaskDetailsState.Error -> {
+            is State.Error -> {
                 Text(text = state.message)
             }
         }

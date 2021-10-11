@@ -46,6 +46,7 @@ import io.ktor.client.HttpClient
 import io.ktor.util.date.getTimeMillis
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -57,7 +58,7 @@ object DI {
     lateinit var logger: Logger
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
-    var ioDispatcher: CoroutineContext = Dispatchers.Default
+    var ioDispatcher: CoroutineDispatcher = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
     lateinit var memoryCache: Cache
@@ -281,7 +282,9 @@ object DI {
 
     val loginRepository: LoginRepository by lazy {
         if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(
-            client
+            client,
+            ioDispatcher,
+            fileCache
         )
     }
 

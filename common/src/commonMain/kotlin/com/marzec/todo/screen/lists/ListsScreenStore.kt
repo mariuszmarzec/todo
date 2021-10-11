@@ -13,6 +13,8 @@ import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.Content
+import com.marzec.todo.network.ifData
+import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
@@ -101,19 +103,23 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun logout() = intent<Unit> {
-        oneShotTrigger { loginRepository.logout() }
+    suspend fun logout() = intent<Content<Unit>> {
+        onTrigger {
+            loginRepository.logout()
+        }
 
         sideEffect {
-            navigationStore.next(
-                NavigationAction(
-                    destination = Destination.Login,
-                    NavigationOptions(
-                        Destination.Login,
-                        popToInclusive = true
+            resultNonNull().ifDataSuspend {
+                navigationStore.next(
+                    NavigationAction(
+                        destination = Destination.Login,
+                        NavigationOptions(
+                            Destination.Login,
+                            popToInclusive = true
+                        )
                     )
                 )
-            )
+            }
         }
     }
 

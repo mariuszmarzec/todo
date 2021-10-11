@@ -22,9 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.marzec.mvi.State
 import com.marzec.todo.screen.login.model.LoginActions
-import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.login.model.LoginData
+import com.marzec.todo.screen.login.model.LoginStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -36,29 +37,29 @@ fun LoginScreen(loginStore: LoginStore) {
         loginStore.init(scope)
     }
 
-    val state: LoginData by loginStore.state.collectAsState()
+    val state: State<LoginData> by loginStore.state.collectAsState()
 
     when (val state = state) {
-        is LoginData.Data -> {
+        is State.Data -> {
             LoginScreen(
-                login = state.loginData.login,
+                login = state.data.login,
                 scope = scope,
                 loginStore = loginStore,
-                password = state.loginData.password,
+                password = state.data.password,
                 error = ""
             )
         }
-        is LoginData.Pending -> {
+        is State.Loading -> {
             Text(text = "Pending...", fontSize = 16.sp)
 
         }
-        is LoginData.Error -> {
+        is State.Error -> {
             LoginScreen(
-                login = state.loginData.login,
+                login = state.data?.login.orEmpty(),
                 scope = scope,
                 loginStore = loginStore,
-                password = state.loginData.password,
-                error = state.error
+                password = state.data?.password.orEmpty(),
+                error = state.message
             )
         }
     }
