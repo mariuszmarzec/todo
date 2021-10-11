@@ -115,7 +115,8 @@ object DI {
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE,
-            openUrlHelper = openUrlHelper
+            openUrlHelper = openUrlHelper,
+            dialogDelegate = DialogDelegate()
         )
     }
 
