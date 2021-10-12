@@ -45,8 +45,6 @@ import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
 import io.ktor.client.HttpClient
-import io.ktor.util.date.getTimeMillis
-import java.util.*
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineDispatcher
@@ -228,7 +226,7 @@ object DI {
     }
 
     private val cacheKeyProvider by lazy {
-        { UUID.randomUUID().toString() }
+        {  Random.nextInt(Int.MAX_VALUE).toString() }
     }
 
     lateinit var navigationStore: NavigationStore
