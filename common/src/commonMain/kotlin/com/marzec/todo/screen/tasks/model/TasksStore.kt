@@ -61,7 +61,7 @@ class TasksStore(
     }
 
     suspend fun showRemoveDialog(id: String) =
-        delegate(dialogDelegate.showRemoveTaskDialog(id.toInt()))
+        delegate(dialogDelegate.showRemoveDialogWithCheckBox(id.toInt()))
 
     suspend fun hideDialog() = delegate(dialogDelegate.closeDialog())
 
