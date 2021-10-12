@@ -105,7 +105,9 @@ class TaskDetailsStore(
         }
 
         reducer {
-            state.reduceContentAsSideAction(resultNonNull())
+            state.reduceContentAsSideAction(resultNonNull()) {
+                copy(dialog = DialogState.NoDialog)
+            }
         }
 
         sideEffect {

@@ -79,14 +79,15 @@ fun <T, R> State<T>.mapData(mapper: (T) -> R) = when (this) {
 }
 
 fun <T, R> State<T>.reduceContentAsSideAction(
-    result: Content<R>
+    result: Content<R>,
+    reducer: T.() -> T = { this }
 ): State<T> =
     when (result) {
-        is Content.Loading -> State.Loading(data)
+        is Content.Loading -> State.Loading(data?.let { it.reducer() })
         else -> {
             val data = data
             if (data != null) {
-                State.Data(data)
+                State.Data(data.reducer())
             } else {
                 State.Error(data, message = "No data available")
             }

@@ -15,6 +15,7 @@ import com.marzec.todo.network.asContent
 import com.marzec.todo.network.asContentFlow
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.network.mapData
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,7 +27,8 @@ import kotlinx.coroutines.withContext
 
 class TodoRepository(
     private val dataSource: DataSource,
-    private val memoryCache: Cache
+    private val memoryCache: Cache,
+    private val dispatcher: CoroutineDispatcher
 ) {
 
     suspend fun observeLists(): Flow<Content<List<ToDoList>>> = getListsCacheFirst()
@@ -131,7 +133,7 @@ class TodoRepository(
         key: String,
         networkCall: suspend () -> Content<T>
     ): Flow<Content<T>> =
-        withContext(DI.ioDispatcher) {
+        withContext(dispatcher) {
             val cached = memoryCache.observe<T>(key).firstOrNull()
             val initial = if (cached != null) {
                 Content.Data(cached)
@@ -155,7 +157,7 @@ class TodoRepository(
                 } else {
                     networkCall
                 }
-            }.flowOn(DI.ioDispatcher)
+            }.flowOn(dispatcher)
         }
 
     private fun asContentWithListUpdate(request: suspend () -> Unit) =
@@ -164,5 +166,5 @@ class TodoRepository(
                 if (it is Content.Data) {
                     refreshListsCache()
                 }
-            }
+            }.flowOn(dispatcher)
 }

@@ -6,6 +6,7 @@ import com.marzec.todo.cache.Cache
 import com.marzec.todo.cache.FileCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
@@ -14,8 +15,9 @@ import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.ApiDataSource
-import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
+import com.marzec.todo.network.DeferrableDataSource
+import com.marzec.todo.network.JobActionRunner
 import com.marzec.todo.network.LocalDataSource
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
@@ -36,9 +38,6 @@ import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
-import com.marzec.todo.delegates.dialog.DialogDelegate
-import com.marzec.todo.network.DeferrableDataSource
-import com.marzec.todo.network.JobActionRunner
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.screen.tasks.TasksScreen
@@ -47,13 +46,13 @@ import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
 import io.ktor.client.HttpClient
 import io.ktor.util.date.getTimeMillis
+import java.util.*
 import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
@@ -229,7 +228,7 @@ object DI {
     }
 
     private val cacheKeyProvider by lazy {
-        { Random(getTimeMillis()).nextLong().toString() }
+        { UUID.randomUUID().toString() }
     }
 
     lateinit var navigationStore: NavigationStore
@@ -260,11 +259,7 @@ object DI {
                     defaultScreen
                 )
             )
-        ).also {
-            println("CACHE KEYS")
-            println(defaultScreen.cacheKey)
-            println(navigationStoreCacheKey)
-        }
+        )
     }
 
     @Composable
@@ -337,11 +332,6 @@ object DI {
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
         localDataSource
     } else if (quickCacheEnabled) {
-//        CompositeDataSource(
-//            localDataSource,
-//            ApiDataSource(client),
-//            memoryCache
-//        ).apply { runBlocking { init() } }
         DeferrableDataSource(
             localDataSource,
             ApiDataSource(client),

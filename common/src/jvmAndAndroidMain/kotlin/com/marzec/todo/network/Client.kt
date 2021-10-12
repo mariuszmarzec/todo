@@ -24,6 +24,7 @@ val httpClient = HttpClient(OkHttp) {
 
     defaultRequest {
         contentType(ContentType.Application.Json)
+        println("REQUEST: ${method.value} ${url.buildString()}")
     }
 
     engine {
