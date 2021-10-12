@@ -37,6 +37,8 @@ import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
 import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.todo.network.DeferrableDataSource
+import com.marzec.todo.network.JobActionRunner
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.screen.tasks.TasksScreen
@@ -45,11 +47,15 @@ import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
 import io.ktor.client.HttpClient
 import io.ktor.util.date.getTimeMillis
+import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.serializer
 
@@ -222,7 +228,9 @@ object DI {
         )
     }
 
-    private val cacheKeyProvider by lazy { { getTimeMillis().toString() } }
+    private val cacheKeyProvider by lazy {
+        { Random(getTimeMillis()).nextLong().toString() }
+    }
 
     lateinit var navigationStore: NavigationStore
 
@@ -252,7 +260,11 @@ object DI {
                     defaultScreen
                 )
             )
-        )
+        ).also {
+            println("CACHE KEYS")
+            println(defaultScreen.cacheKey)
+            println(navigationStoreCacheKey)
+        }
     }
 
     @Composable
@@ -316,15 +328,27 @@ object DI {
         LocalDataSource(fileCache).apply { runBlocking { init() } }
     }
 
-    fun provideTodoRepository() = TodoRepository(provideDataSource(), memoryCache)
+    private fun provideTodoRepository() = TodoRepository(
+        dataSource = provideDataSource(),
+        memoryCache = memoryCache,
+        dispatcher = ioDispatcher
+    )
 
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
         localDataSource
     } else if (quickCacheEnabled) {
-        CompositeDataSource(
+//        CompositeDataSource(
+//            localDataSource,
+//            ApiDataSource(client),
+//            memoryCache
+//        ).apply { runBlocking { init() } }
+        DeferrableDataSource(
             localDataSource,
             ApiDataSource(client),
-            memoryCache
+            memoryCache,
+            JobActionRunner(
+                logger, GlobalScope + ioDispatcher
+            )
         ).apply { runBlocking { init() } }
     } else {
         ApiDataSource(client)
