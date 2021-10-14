@@ -194,37 +194,41 @@ fun TaskDetailsScreen(
                                                 )
                                             }
                                         }
-                                        IconButton({
-                                            scope.launch { store.moveToTop(it.id) }
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.KeyboardArrowUp,
-                                                contentDescription = "Move to top"
-                                            )
+                                        Column {
+                                            IconButton({
+                                                scope.launch { store.moveToTop(it.id) }
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                                    contentDescription = "Move to top"
+                                                )
+                                            }
+                                            IconButton({
+                                                scope.launch { store.moveToBottom(it.id) }
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                                    contentDescription = "Move to bottom"
+                                                )
+                                            }
                                         }
-                                        IconButton({
-                                            scope.launch { store.moveToBottom(it.id) }
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.KeyboardArrowDown,
-                                                contentDescription = "Move to bottom"
-                                            )
-                                        }
-                                        IconButton({
-                                            scope.launch { store.unpinSubtask(it.id) }
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Clear,
-                                                contentDescription = "Unpin"
-                                            )
-                                        }
-                                        IconButton({
-                                            scope.launch { store.showRemoveSubTaskDialog(it.id) }
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Remove"
-                                            )
+                                        Column {
+                                            IconButton({
+                                                scope.launch { store.showRemoveSubTaskDialog(it.id) }
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = "Remove"
+                                                )
+                                            }
+                                            IconButton({
+                                                scope.launch { store.unpinSubtask(it.id) }
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Clear,
+                                                    contentDescription = "Unpin"
+                                                )
+                                            }
                                         }
                                     }
                                 }
