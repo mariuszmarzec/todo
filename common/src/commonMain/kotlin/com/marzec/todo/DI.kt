@@ -16,9 +16,8 @@ import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.DataSource
-import com.marzec.todo.network.DeferrableDataSource
-import com.marzec.todo.network.JobActionRunner
 import com.marzec.todo.network.LocalDataSource
+import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
@@ -330,13 +329,10 @@ object DI {
     private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
         localDataSource
     } else if (quickCacheEnabled) {
-        DeferrableDataSource(
+        CompositeDataSource(
             localDataSource,
             ApiDataSource(client),
             memoryCache,
-            JobActionRunner(
-                logger, GlobalScope + ioDispatcher
-            )
         ).apply { runBlocking { init() } }
     } else {
         ApiDataSource(client)
