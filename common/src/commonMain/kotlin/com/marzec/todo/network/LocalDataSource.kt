@@ -43,13 +43,13 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         )
     }
 
-    // TODO UPDATE LOCAL LOGIC
     override suspend fun removeTask(taskId: Int) = update {
+        val taskToRemove = localData.tasks.first { it.id == taskId }
         localData = localData.copy(
             tasks = localData.tasks.toMutableList().apply { removeIf { it.id == taskId } }
                 .replaceIf(
                     condition = { task -> task.parentTaskId == taskId },
-                    replace = { it.copy(parentTaskId = null) }
+                    replace = { it.copy(parentTaskId = taskToRemove.parentTaskId) }
                 ),
             listIdToTaskIds = localData.listIdToTaskIds.let { listIdToTaskIds ->
                 val listId = listIdToTaskIds.toList().find {
