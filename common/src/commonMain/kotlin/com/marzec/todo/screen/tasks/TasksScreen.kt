@@ -37,7 +37,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
-import com.marzec.todo.extensions.emptyString
+import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
@@ -136,102 +136,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         }) {
         when (val state = state) {
             is State.Data -> {
-                LazyColumn {
-                    val searchQuery = state.data.search.trim().split(" ")
-                    items(
-                        items = state.data.tasks.filter { task ->
-                            searchQuery == listOf(emptyString()) || searchQuery.all {
-                                task.description.contains(
-                                    it,
-                                    ignoreCase = true
-                                )
-                            }
-                        }.map {
-                            TextListItem(
-                                id = it.id.toString(),
-                                name = it.description.lines().first(),
-                                description = it.subTasks.firstOrNull()?.description?.lines()
-                                    ?.first() ?: ""
-                            )
-                        },
-                    ) {
-                        key(it.id) {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                TextListItemView(state = it, onClickListener = {
-                                    scope.launch {
-                                        store.onListItemClicked(it.id)
-                                    }
-                                }) {
-                                    // TODO REMOVE THIS LOGIC
-                                    if (state.data.tasks.firstOrNull { task -> task.id == it.id.toInt() }
-                                            ?.urlToOpen() != null
-                                    ) {
-                                        IconButton({
-                                            scope.launch { store.openUrl(it.id) }
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.ExitToApp,
-                                                contentDescription = "Open url"
-                                            )
-                                        }
-                                    }
-                                    IconButton({
-                                        scope.launch { store.moveToTop(it.id) }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowUp,
-                                            contentDescription = "Move to top"
-                                        )
-                                    }
-                                    IconButton({
-                                        scope.launch { store.moveToBottom(it.id) }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowDown,
-                                            contentDescription = "Move to bottom"
-                                        )
-                                    }
-                                    IconButton({
-                                        scope.launch { store.showRemoveDialog(it.id) }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Remove"
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                val dialog = state.data.dialog
-                when (dialog) {
-                    is DialogState.RemoveDialogWithCheckBox -> {
-                        DialogBox(
-                            state = Dialog.TwoOptionsDialogWithCheckbox(
-                                twoOptionsDialog = Dialog.TwoOptionsDialog(
-                                    title = "Remove task",
-                                    message = "Do you really want to remove this task?",
-                                    confirmButton = "Yes",
-                                    dismissButton = "No",
-                                    onDismiss = { scope.launch { store.hideDialog() } },
-                                    onConfirm = {
-                                        scope.launch { store.removeTask(dialog.idToRemove) }
-                                    }
-                                ),
-                                checked = dialog.checked,
-                                checkBoxLabel = "Remove with all sub-tasks",
-                                onCheckedChange = {
-                                    scope.launch { store.onRemoveWithSubTasksChange() }
-                                }
-                            )
-                        )
-                    }
-                    else -> { }
-                }
+                TaskScreenData(state, store)
             }
             is State.Loading -> {
                 Text(text = "Loading")
@@ -239,6 +144,112 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
             is State.Error -> {
                 Text(text = state.message)
             }
+        }
+    }
+}
+
+@Composable
+private fun TaskScreenData(
+    state: State.Data<TasksScreenState>,
+    store: TasksStore
+) {
+    val scope = rememberCoroutineScope()
+
+    LazyColumn {
+        val searchQuery = state.data.search.trim().split(" ")
+        items(
+            items = state.data.tasks.filter { task ->
+                searchQuery == listOf(EMPTY_STRING) || searchQuery.all {
+                    task.description.contains(
+                        it,
+                        ignoreCase = true
+                    )
+                }
+            }.map {
+                TextListItem(
+                    id = it.id.toString(),
+                    name = it.description.lines().first(),
+                    description = it.subTasks.firstOrNull()?.description?.lines()
+                        ?.first() ?: ""
+                )
+            },
+        ) {
+            key(it.id) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextListItemView(state = it, onClickListener = {
+                        scope.launch {
+                            store.onListItemClicked(it.id)
+                        }
+                    }) {
+                        // TODO REMOVE THIS LOGIC
+                        if (state.data.tasks.firstOrNull { task -> task.id == it.id.toInt() }
+                                ?.urlToOpen() != null
+                        ) {
+                            IconButton({
+                                scope.launch { store.openUrl(it.id) }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = "Open url"
+                                )
+                            }
+                        }
+                        IconButton({
+                            scope.launch { store.moveToTop(it.id) }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = "Move to top"
+                            )
+                        }
+                        IconButton({
+                            scope.launch { store.moveToBottom(it.id) }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Move to bottom"
+                            )
+                        }
+                        IconButton({
+                            scope.launch { store.showRemoveDialog(it.id) }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Remove"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+    val dialog = state.data.dialog
+    when (dialog) {
+        is DialogState.RemoveDialogWithCheckBox -> {
+            DialogBox(
+                state = Dialog.TwoOptionsDialogWithCheckbox(
+                    twoOptionsDialog = Dialog.TwoOptionsDialog(
+                        title = "Remove task",
+                        message = "Do you really want to remove this task?",
+                        confirmButton = "Yes",
+                        dismissButton = "No",
+                        onDismiss = { scope.launch { store.hideDialog() } },
+                        onConfirm = {
+                            scope.launch { store.removeTask(dialog.idToRemove) }
+                        }
+                    ),
+                    checked = dialog.checked,
+                    checkBoxLabel = "Remove with all sub-tasks",
+                    onCheckedChange = {
+                        scope.launch { store.onRemoveWithSubTasksChange() }
+                    }
+                )
+            )
+        }
+        else -> {
         }
     }
 }

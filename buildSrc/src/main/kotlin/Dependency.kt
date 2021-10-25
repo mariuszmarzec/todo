@@ -1,3 +1,4 @@
+import org.gradle.api.artifacts.Dependency
 
 val kotlinVersion = "1.5.21"
 val ktorVersion = "1.4.3"
@@ -10,6 +11,7 @@ val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "7.1.0-alpha06"
 val buildkonfigVersion = "0.8.0"
 val datastore_version = "1.0.0-alpha05"
+val detektVersion = "1.18.1"
 
 private val composePluginVersion = "1.0.0-alpha4-build310"
 private val dateTimeVersion = "0.1.1"
@@ -27,6 +29,7 @@ object Dependency {
     val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
     val serializationGradlePlugin = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
     val buildKonfigPlugin = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin:$buildkonfigVersion"
+    val detektPlugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion"
 
     val androidActivityX = "androidx.activity:activity-compose:$androidActivityXVersion"
 

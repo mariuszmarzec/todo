@@ -7,7 +7,7 @@ import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.DialogDelegate
-import com.marzec.todo.extensions.emptyString
+import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
@@ -145,7 +145,7 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    search = emptyString(),
+                    search = EMPTY_STRING,
                     searchFocused = false
                 )
             }
@@ -156,7 +156,7 @@ class TasksStore(
         reducer {
             state.reduceData {
                 copy(
-                    search = emptyString(),
+                    search = EMPTY_STRING,
                     searchFocused = true
                 )
             }

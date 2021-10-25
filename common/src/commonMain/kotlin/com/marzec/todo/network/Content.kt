@@ -14,9 +14,9 @@ sealed class Content<T> {
 suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     return try {
         Content.Data(request())
-    } catch (e: Exception) {
-        DI.logger.log("Content:", e.message.toString())
-        Content.Error(e)
+    } catch (expected: Exception) {
+        DI.logger.log("Content:", expected.message.toString())
+        Content.Error(expected)
     }
 }
 fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
@@ -24,9 +24,9 @@ fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
         emit(Content.Loading())
         try {
             emit(Content.Data(request()))
-        } catch (e: Exception) {
-            DI.logger.log("Content:", e.message.toString())
-            emit(Content.Error<T>(e))
+        } catch (expected: Exception) {
+            DI.logger.log("Content:", expected.message.toString())
+            emit(Content.Error<T>(expected))
         }
     }
 }
@@ -34,14 +34,12 @@ fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
 fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
     is Content.Data -> try {
         Content.Data(mapper(this.data))
-    } catch (e: Exception) {
-        Content.Error(e)
+    } catch (expected: Exception) {
+        Content.Error(expected)
     }
     is Content.Loading -> Content.Loading(this.data?.let(mapper))
     is Content.Error -> Content.Error(this.exception)
 }
-
-fun <T> Content<T>.ifData(action: Content.Data<T>.() -> Unit) = (this as? Content.Data)?.action()
 
 suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) =
     (this as? Content.Data)?.action()

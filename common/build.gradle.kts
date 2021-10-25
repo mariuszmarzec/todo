@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
     id("com.codingfeline.buildkonfig")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 val properties: Properties = Properties()
@@ -113,4 +114,16 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "TEST_API_URL", testApiUrl)
         buildConfigField(FieldSpec.Type.STRING, "TEST_AUTH_HEADER", testAuthHeader)
     }
+}
+
+detekt {
+    source = files(
+        "src/androidMain/kotlin",
+        "src/commonMain/kotlin",
+        "src/jvmAndAndroidMain/kotlin",
+        "src/desktopTest/kotlin",
+        "src/desktopMain/kotlin"
+    )
+
+    config = files("../config/detekt/detekt.yml")
 }

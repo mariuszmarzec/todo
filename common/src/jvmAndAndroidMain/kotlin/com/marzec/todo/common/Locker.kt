@@ -2,7 +2,7 @@ package com.marzec.todo.common
 
 import java.util.concurrent.locks.ReentrantLock
 
-actual class Lock {
+actual class Locker {
 
     private val lock = ReentrantLock()
 

@@ -13,8 +13,8 @@ import kotlinx.coroutines.launch
 
 @Deprecated("Use Store2")
 @ExperimentalCoroutinesApi
-open class Store<State: Any, Action : Any>(defaultState: State) {
-    
+open class Store<State : Any, Action : Any>(defaultState: State) {
+
     var intents = mapOf<KClass<out Any>, Intent<State>>()
 
     private val actions = BroadcastChannel<Action>(-1)
@@ -44,37 +44,49 @@ open class Store<State: Any, Action : Any>(defaultState: State) {
 
     open suspend fun onNewState(newState: State) = Unit
 
-    inline fun <reified IntentAction : Any, Result: Any> addIntent(noinline buildFun: IntentBuilder<State, IntentAction, Result>.() -> Unit) {
-        intents = intents + mapOf<KClass<out Any>, Intent<State>>(IntentAction::class to intent(buildFun))
+    inline fun <reified IntentAction : Any, Result : Any> addIntent(
+        noinline buildFun: IntentBuilder<State, IntentAction, Result>.() -> Unit
+    ) {
+        intents =
+            intents + mapOf<KClass<out Any>, Intent<State>>(IntentAction::class to intent(buildFun))
     }
 
     @JvmName("addIntentNoResult")
-    inline fun <reified IntentAction : Any> addIntent(noinline buildFun: IntentBuilder<State, IntentAction, Any>.() -> Unit) {
-        intents = intents + mapOf<KClass<out Any>, Intent<State>>(IntentAction::class to intent(buildFun))
+    inline fun <reified IntentAction : Any> addIntent(
+        noinline buildFun: IntentBuilder<State, IntentAction, Any>.() -> Unit
+    ) {
+        intents =
+            intents + mapOf<KClass<out Any>, Intent<State>>(IntentAction::class to intent(buildFun))
     }
 }
 
 data class Intent<State>(
     val onTrigger: (suspend (action: Any, state: State) -> Any?)? = null,
-    val reducer: suspend (action: Any, result: Any?, state: State) -> State = {_, _, state -> state},
+    val reducer: suspend (action: Any, result: Any?, state: State) -> State = { _, _, state -> state },
     val sideEffect: (suspend (action: Any, result: Any?, state: State) -> Unit)? = null
 )
 
 @Suppress("UNCHECKED_CAST")
-class IntentBuilder<State: Any, Action: Any, Result: Any> {
+class IntentBuilder<State : Any, Action : Any, Result : Any> {
 
     private var onTrigger: (suspend (action: Any, state: State) -> Any?)? = null
-    private var reducer: suspend (action: Any, result: Any?, state: State) -> State = {_, _, state -> state}
+    private var reducer: suspend (action: Any, result: Any?, state: State) -> State =
+        { _, _, state -> state }
     private var sideEffect: (suspend (action: Any, result: Any?, state: State) -> Unit)? = null
 
-    fun onTrigger(func: suspend IntentContext<State, Action, Result>.() -> Result?): IntentBuilder<State, Action, Result> {
+    fun onTrigger(
+        func: suspend IntentContext<State, Action, Result>.() -> Result?
+    ): IntentBuilder<State, Action, Result> {
         onTrigger = { action: Any, state ->
             action as Action
             IntentContext<State, Action, Result>(action, state, null).func()
         }
         return this
     }
-    fun reducer(func: suspend IntentContext<State, Action, Result>.() -> State): IntentBuilder<State, Action, Result> {
+
+    fun reducer(
+        func: suspend IntentContext<State, Action, Result>.() -> State
+    ): IntentBuilder<State, Action, Result> {
         reducer = { action: Any, result: Any?, state ->
             action as Action
             val res = result as? Result
@@ -83,7 +95,9 @@ class IntentBuilder<State: Any, Action: Any, Result: Any> {
         return this
     }
 
-    fun sideEffect(func: suspend IntentContext<State, Action, Result>.() -> Unit): IntentBuilder<State, Action, Result> {
+    fun sideEffect(
+        func: suspend IntentContext<State, Action, Result>.() -> Unit
+    ): IntentBuilder<State, Action, Result> {
         sideEffect = { action: Any, result: Any?, state ->
             action as Action
             val res = result as? Result
@@ -103,14 +117,14 @@ class IntentBuilder<State: Any, Action: Any, Result: Any> {
     }
 }
 
-fun <State: Any, Action: Any, Result: Any> intent(
+fun <State : Any, Action : Any, Result : Any> intent(
     buildFun: IntentBuilder<State, Action, Result>.() -> Unit
 ): Intent<State> = with(IntentBuilder<State, Action, Result>()) {
     buildFun().run { build() }
 }
 
 @JvmName("intentNoResult")
-fun <State: Any, Action: Any> intent(
+fun <State : Any, Action : Any> intent(
     buildFun: IntentBuilder<State, Action, Any>.() -> Unit
 ): Intent<State> = with(IntentBuilder<State, Action, Any>()) {
     buildFun().run { build() }

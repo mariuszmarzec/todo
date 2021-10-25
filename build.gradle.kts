@@ -13,6 +13,7 @@ buildscript {
         classpath(Dependency.serializationGradlePlugin)
         classpath(Dependency.composeGradlePlugin)
         classpath(Dependency.buildKonfigPlugin)
+        classpath(Dependency.detektPlugin)
     }
 }
 

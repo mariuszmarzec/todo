@@ -13,7 +13,6 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.serializer
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -41,11 +40,15 @@ val httpClient = HttpClient(OkHttp) {
                 val authorization = response.headers[Api.Headers.AUTHORIZATION]
                 if (authorization != null) {
                     runBlocking { DI.fileCache.putTyped(PreferencesKeys.AUTHORIZATION, authorization) }
-                } else if (response.code == 401) {
-                    runBlocking { DI.fileCache.putTyped<String>(PreferencesKeys.AUTHORIZATION, null) }
+                } else {
+                    if (response.code == HTTP_STATUS_UNAUTHORIZED) {
+                        runBlocking { DI.fileCache.putTyped<String>(PreferencesKeys.AUTHORIZATION, null) }
+                    }
                 }
                 return response
             }
         })
     }
 }
+
+private const val HTTP_STATUS_UNAUTHORIZED = 401

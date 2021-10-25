@@ -34,7 +34,7 @@ class PreferencesCache(
             dataStore.data.first()[preferencesKey<String>(key)]?.let {
                 json.decodeFromString(serializer, it)
             }
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
             null
         }
     }

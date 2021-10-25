@@ -74,32 +74,34 @@ object DI {
 
     val preferences: Preferences = MemoryPreferences()
 
-    private val ROUTER: Map<KClass<out Destination>, (@Composable (destination: Destination, cacheKey: String) -> Unit)> =
-        mapOf(
-            Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
-            Destination.Lists::class to @Composable { _, cacheKey -> provideListScreen(cacheKey) },
-            Destination.Tasks::class to @Composable { destination, cacheKey ->
-                destination as Destination.Tasks
-                provideTasksScreen(destination.listId, cacheKey)
-            },
-            Destination.AddNewTask::class to @Composable { destination, cacheKey ->
-                destination as Destination.AddNewTask
-                provideAddNewTaskScreen(
-                    listId = destination.listId,
-                    taskId = destination.taskToEditId,
-                    parentTaskId = destination.parentTaskId,
-                    cacheKey
-                )
-            },
-            Destination.TaskDetails::class to @Composable { destination, cacheKey ->
-                destination as Destination.TaskDetails
-                provideTaskDetailsScreen(destination.listId, destination.taskId, cacheKey)
-            },
-            Destination.AddSubTask::class to @Composable { destination, cacheKey ->
-                destination as Destination.AddSubTask
-                provideAddSubTaskScreen(destination.listId, destination.taskId, cacheKey)
-            }
-        )
+    private val ROUTER: Map<KClass<
+            out Destination>,
+            (@Composable (destination: Destination, cacheKey: String) -> Unit)
+            > = mapOf(
+        Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
+        Destination.Lists::class to @Composable { _, cacheKey -> provideListScreen(cacheKey) },
+        Destination.Tasks::class to @Composable { destination, cacheKey ->
+            destination as Destination.Tasks
+            provideTasksScreen(destination.listId, cacheKey)
+        },
+        Destination.AddNewTask::class to @Composable { destination, cacheKey ->
+            destination as Destination.AddNewTask
+            provideAddNewTaskScreen(
+                listId = destination.listId,
+                taskId = destination.taskToEditId,
+                parentTaskId = destination.parentTaskId,
+                cacheKey
+            )
+        },
+        Destination.TaskDetails::class to @Composable { destination, cacheKey ->
+            destination as Destination.TaskDetails
+            provideTaskDetailsScreen(destination.listId, destination.taskId, cacheKey)
+        },
+        Destination.AddSubTask::class to @Composable { destination, cacheKey ->
+            destination as Destination.AddSubTask
+            provideAddSubTaskScreen(destination.listId, destination.taskId, cacheKey)
+        }
+    )
 
     @Composable
     private fun provideTasksScreen(listId: Int, cacheKey: String) {
@@ -225,7 +227,7 @@ object DI {
     }
 
     private val cacheKeyProvider by lazy {
-        {  Random.nextInt(Int.MAX_VALUE).toString() }
+        { Random.nextInt(Int.MAX_VALUE).toString() }
     }
 
     lateinit var navigationStore: NavigationStore
@@ -342,7 +344,7 @@ object DI {
 }
 
 object PreferencesKeys {
-    val AUTHORIZATION = "AUTHORIZATION"
+    const val AUTHORIZATION = "AUTHORIZATION"
 }
 
 object Api {
@@ -355,6 +357,7 @@ object Api {
         BuildKonfig.TEST_API_URL
     }
 
+    @Suppress("MemberNameEqualsClassName")
     object Login {
         val BASE = "$HOST/fiteo/api/1"
 

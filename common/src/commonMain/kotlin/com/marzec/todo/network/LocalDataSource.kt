@@ -8,7 +8,7 @@ import com.marzec.todo.cache.getTyped
 import com.marzec.todo.cache.putTyped
 import com.marzec.todo.common.currentTime
 import com.marzec.todo.common.formatDate
-import com.marzec.todo.common.Lock
+import com.marzec.todo.common.Locker
 import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.todo.extensions.replaceIf
 import kotlinx.serialization.Serializable
@@ -22,14 +22,14 @@ data class LocalData(
 
 class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
-    private val CACHE_KEY = "LOCAL_DATA"
+    private val cacheKey = "LOCAL_DATA"
 
-    private val lock = Lock()
+    private val lock = Locker()
 
     private var localData: LocalData = LocalData(emptyList(), emptyList(), emptyMap())
 
     suspend fun init() {
-        fileCache.getTyped<LocalData>(CACHE_KEY)?.let { localData = it }
+        fileCache.getTyped<LocalData>(cacheKey)?.let { localData = it }
     }
 
     suspend fun init(lists: List<ToDoListDto>) = update {
@@ -187,7 +187,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }
 
     private suspend fun updateStorage() {
-        fileCache.putTyped(CACHE_KEY, localData)
+        fileCache.putTyped(cacheKey, localData)
     }
 }
 

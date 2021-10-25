@@ -1,6 +1,6 @@
 package com.marzec.todo.cache
 
-import com.marzec.todo.common.Lock
+import com.marzec.todo.common.Locker
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +16,7 @@ class FileCacheImpl(
     private val memoryCache: MemoryCache
 ) : FileCache {
 
-    private val lock = Lock()
+    private val lock = Locker()
     private var initialized: AtomicBoolean = AtomicBoolean(false)
 
     override suspend fun <T: Any> put(key: String, value: T?, serializer: KSerializer<T>) {

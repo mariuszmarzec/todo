@@ -3,23 +3,20 @@ package com.marzec.todo.screen.lists
 import com.marzec.mvi.State
 import com.marzec.mvi.mapData
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.newMvi.oneShotTrigger
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.asInstanceAndReturn
-import com.marzec.todo.extensions.emptyString
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.Content
-import com.marzec.todo.network.ifData
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
-import kotlinx.coroutines.delay
 
 class ListsScreenStore(
     private val cacheKey: String,
@@ -47,7 +44,7 @@ class ListsScreenStore(
     suspend fun addNewList() = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(dialog = DialogState.InputDialog(emptyString()))
+                it.copy(dialog = DialogState.InputDialog(EMPTY_STRING))
             }
         }
     }

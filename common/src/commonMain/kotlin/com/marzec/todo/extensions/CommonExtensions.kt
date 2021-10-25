@@ -3,7 +3,7 @@ package com.marzec.todo.extensions
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.model.Task
 
-fun emptyString() = ""
+const val EMPTY_STRING = ""
 
 @Suppress("unchecked_cast")
 inline fun <reified T: Any> Any.asInstance(action: T.() -> Unit) = (this as? T)?.action()

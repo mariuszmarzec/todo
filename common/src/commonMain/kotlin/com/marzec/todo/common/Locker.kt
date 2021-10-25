@@ -1,6 +1,6 @@
 package com.marzec.todo.common
 
-expect class Lock() {
+expect class Locker() {
 
     fun lock()
 

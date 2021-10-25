@@ -5,6 +5,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("org.jetbrains.compose")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 android {
@@ -75,4 +76,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.freeCompilerArgs = listOf(
         *kotlinOptions.freeCompilerArgs.toTypedArray(),
         "-Xskip-prerelease-check")
+}
+
+detekt {
+    source = files(
+        "src/main/kotlin"
+    )
+
+    config = files("../config/detekt/detekt.yml")
 }

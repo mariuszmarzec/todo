@@ -7,13 +7,11 @@ import kotlinx.coroutines.flow.map
 
 class MemoryCache : Cache {
 
-    val maxCacheSize = 10
-
     private val cache: MutableMap<String, MutableStateFlow<Any?>> =
         object : LinkedHashMap<String, MutableStateFlow<Any?>>() {
             override fun removeEldestEntry(
                 eldest: MutableMap.MutableEntry<String, MutableStateFlow<Any?>>?
-            ): Boolean = size > maxCacheSize
+            ): Boolean = size > MAX_CACHE_SIZE
         }.let { Collections.synchronizedMap(it) }
 
     override suspend fun put(key: String, value: Any?) {
@@ -41,4 +39,8 @@ class MemoryCache : Cache {
     }
 
     override suspend fun toMap(): Map<String, Any?> = cache.mapValues { it.value.value }
+
+    companion object {
+        private const val MAX_CACHE_SIZE = 10
+    }
 }

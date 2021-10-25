@@ -11,8 +11,6 @@ import com.marzec.todo.navigation.model.NavigationStore
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {
-    val scope = rememberCoroutineScope()
-
     val state: NavigationState by navigationStore.state.collectAsState()
 
     LaunchedEffect(key1 = Unit) {

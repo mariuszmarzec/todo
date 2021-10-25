@@ -96,15 +96,20 @@ fun ListsScreen(
                                 }
                             ) {
                                 Box(modifier = Modifier.padding(16.dp)) {
-                                    IconButton({ scope.launch { listsScreenStore.showRemoveListDialog(it.id.toInt()) } }) {
-                                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove")
+                                    IconButton({
+                                        scope.launch { listsScreenStore.showRemoveListDialog(it.id.toInt()) }
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Remove"
+                                        )
                                     }
                                 }
                             }
                         }
                     }
                 }
-                val dialog = when(val dialogState= state.data.dialog) {
+                val dialog = when (val dialogState = state.data.dialog) {
                     is DialogState.RemoveDialog -> {
                         Dialog.TwoOptionsDialog(
                             title = "Remove List",

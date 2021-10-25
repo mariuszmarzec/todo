@@ -40,7 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
-import com.marzec.todo.extensions.emptyString
+import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
@@ -281,7 +281,7 @@ fun TaskDetailsScreen(
                                         TextListItem(
                                             id = index.toString(),
                                             description = url,
-                                            name = emptyString()
+                                            name = EMPTY_STRING
                                         )
                                     },
                                 onDismiss = { scope.launch { store.hideDialog() } },
