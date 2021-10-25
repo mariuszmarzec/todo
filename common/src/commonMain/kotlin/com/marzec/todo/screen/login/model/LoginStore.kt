@@ -5,19 +5,23 @@ import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.todo.model.User
+import com.marzec.todo.navigation.model.Destination
+import com.marzec.todo.navigation.model.NavigationAction
+import com.marzec.todo.navigation.model.NavigationOptions
+import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.Content
+import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
 
 @ExperimentalCoroutinesApi
 class LoginStore(
-    private val loginRepository: LoginRepository,
+    private val navigationStore: NavigationStore,
     private val stateCache: Preferences,
-    private val onLoginSuccess: () -> Unit,
     private val cacheKey: String,
-    initialState: State<LoginData>
+    initialState: State<LoginData>,
+    private val loginRepository: LoginRepository
 ) : Store2<State<LoginData>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -46,11 +50,18 @@ class LoginStore(
         }
 
         sideEffect {
-            if (result is Content.Data) {
-                onLoginSuccess()
+            resultNonNull().ifDataSuspend {
+                navigationStore.next(
+                    NavigationAction(
+                        Destination.Lists,
+                        options = NavigationOptions(
+                            popTo = Destination.Lists,
+                            popToInclusive = true
+                        )
+                    )
+                )
             }
         }
-
     }
 
     private suspend fun onLoginChanged(login: String) = intent<Unit> {

@@ -9,9 +9,7 @@ import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationEntry
-import com.marzec.todo.navigation.model.NavigationOptions
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.ApiDataSource
@@ -49,9 +47,6 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.serializer
 
@@ -299,22 +294,10 @@ object DI {
     }
 
     fun provideLoginStore(cacheKey: String): LoginStore = LoginStore(
+        navigationStore = navigationStore,
         loginRepository = loginRepository,
         stateCache = preferences,
         cacheKey = cacheKey,
-        onLoginSuccess = {
-            navigationScope.launch {
-                navigationStore.next(
-                    NavigationAction(
-                        Destination.Lists,
-                        options = NavigationOptions(
-                            popTo = Destination.Lists,
-                            popToInclusive = true
-                        )
-                    )
-                )
-            }
-        },
         initialState = LoginData.INITIAL
     )
 
