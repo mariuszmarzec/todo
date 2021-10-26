@@ -1,26 +1,24 @@
 package com.marzec.mvi.newMvi
 
 import com.marzec.todo.DI
+import com.marzec.todo.network.Content
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.runningReduce
+import kotlinx.coroutines.internal.AtomicOp
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
@@ -45,14 +43,11 @@ open class Store2<State : Any>(private val defaultState: State) {
                 .flatMapMerge { intent ->
                 debug("actions flatMapMerge intent: $intent")
                 val currentState = _state.value
-                val flow = intent.onTrigger(currentState)
-                    ?.makeCancellableIfNeeded(
-                        intent.isCancellableFlowTrigger
-                    ) ?: flowOf(null)
+                val flow = intent.onTrigger(currentState) ?: flowOf(null)
                 flow.map {
                     debug("actions onTrigger state: ${intent.state} result: $it")
                     intent.copy(state = currentState, result = it, sideEffect = intent.sideEffect)
-                }
+                }.makeCancellableIfNeeded(intent.isCancellableFlowTrigger)
             }.collect {
                 debug("actions collect intent: $it")
                 _intentContextFlow.emit(it)
@@ -61,13 +56,27 @@ open class Store2<State : Any>(private val defaultState: State) {
         scope.launch {
             _intentContextFlow
                 .runningReduce { old, new ->
-                    val reducedState = new.reducer(new.result, old.state!!)
+                    val reducedState = if (!new.paused) {
+                        new.reducer(new.result, old.state!!)
+                    } else {
+                        old.state!!
+                    }
                     debug("_intentContextFlow runningReduce state: $reducedState")
-                    old.copy(state = reducedState, result = new.result, sideEffect = new.sideEffect)
+                    old.copy(
+                        state = reducedState,
+                        result = new.result,
+                        sideEffect = new.sideEffect,
+                        paused = new.paused,
+                        isCancellableFlowTrigger = new.isCancellableFlowTrigger,
+                        runSideEffectAfterCancel = new.runSideEffectAfterCancel
+                    )
                 }.onEach {
                     debug("_intentContextFlow onEach intent: $it")
                     onNewState(it.state!!)
-                    it.sideEffect?.invoke(it.result, it.state)
+
+                    if (!it.paused || it.runSideEffectAfterCancel) {
+                        it.sideEffect?.invoke(it.result, it.state)
+                    }
                 }.collect {
                     debug("_intentContextFlow collect state: ${it.state}")
                     _state.emit(it.state!!)
@@ -75,13 +84,12 @@ open class Store2<State : Any>(private val defaultState: State) {
         }
     }
 
-    private fun <T> Flow<T>.makeCancellableIfNeeded(
-        isCancellableFlowTrigger: Boolean
+    private fun Flow<Intent2<State, Any>>.makeCancellableIfNeeded(
+        isCancellableFlowTrigger: Boolean,
     ) = if (isCancellableFlowTrigger) {
-        combine(pause) { triggerValue, pause ->
-            pause to triggerValue
-        }.filter { !it.first }
-            .map { it.second }
+        combine(pause) { intent, paused ->
+            intent.copy(paused = paused)
+        }
     } else {
         this
     }
@@ -124,7 +132,9 @@ data class Intent2<State, out Result : Any>(
     val sideEffect: (suspend (result: Any?, state: State) -> Unit)? = null,
     val state: State?,
     val result: Result?,
-    val isCancellableFlowTrigger: Boolean = false
+    val isCancellableFlowTrigger: Boolean = false,
+    val runSideEffectAfterCancel: Boolean = false,
+    val paused: Boolean = false
 ) {
     fun resultNonNull(): Result = result!!
 }
@@ -137,12 +147,15 @@ class IntentBuilder<State : Any, Result : Any> {
         { _, stateParam -> stateParam }
     private var sideEffect: (suspend (result: Any?, state: State) -> Unit)? = null
     private var isCancellableFlowTrigger: Boolean = false
+    private var runSideEffectAfterCancel: Boolean = false
 
     fun onTrigger(
         isCancellableFlowTrigger: Boolean = false,
+        runSideEffectAfterCancel: Boolean = false,
         func: suspend IntentContext<State, Result>.() -> Flow<Result>? = { null }
     ): IntentBuilder<State, Result> {
         this.isCancellableFlowTrigger = isCancellableFlowTrigger
+        this.runSideEffectAfterCancel = runSideEffectAfterCancel
         onTrigger = { state ->
             IntentContext<State, Result>(state, null).func()
         }
@@ -171,7 +184,8 @@ class IntentBuilder<State : Any, Result : Any> {
         sideEffect = sideEffect,
         state = null,
         result = null,
-        isCancellableFlowTrigger = isCancellableFlowTrigger
+        isCancellableFlowTrigger = isCancellableFlowTrigger,
+        runSideEffectAfterCancel = runSideEffectAfterCancel
     )
 
     data class IntentContext<State, Result>(

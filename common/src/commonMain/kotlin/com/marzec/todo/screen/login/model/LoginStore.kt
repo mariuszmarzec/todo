@@ -39,9 +39,13 @@ class LoginStore(
     }
 
     private suspend fun login() = intent<Content<User>> {
-        onTrigger {
+        onTrigger(
+            isCancellableFlowTrigger = true,
+            runSideEffectAfterCancel = true
+        ) {
             state.ifDataAvailable {
                 loginRepository.login(login, password)
+                    .cancelFlowsIf { it is Content.Data }
             }
         }
 
