@@ -16,6 +16,7 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.view.DialogState
 
 class TaskDetailsStore(
@@ -27,8 +28,8 @@ class TaskDetailsStore(
     private val listId: Int,
     private val taskId: Int,
     private val copyToClipBoardHelper: CopyToClipBoardHelper,
-    private val openUrlHelper: OpenUrlHelper,
-    private val dialogDelegate: DialogDelegate<TaskDetailsState>
+    private val dialogDelegate: DialogDelegate<TaskDetailsState>,
+    private val urlDelegate: UrlDelegate<TaskDetailsState>
 ) : Store2<State<TaskDetailsState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -165,25 +166,9 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun openUrls(urls: List<String>) = sideEffectIntent {
-        if (urls.size == 1) {
-            openUrl(urls.first())
-        } else {
-            showSelectUrlDialog(urls)
-        }
-    }
+    suspend fun openUrls(urls: List<String>) = delegate(urlDelegate.openUrls(urls))
 
-    suspend fun openUrl(url: String) = sideEffectIntent {
-        openUrlHelper.open(url)
-    }
-
-    private suspend fun showSelectUrlDialog(urls: List<String>) = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copyWithDialog(dialog = DialogState.SelectOptionsDialog(urls))
-            }
-        }
-    }
+    suspend fun openUrl(url: String) = delegate(urlDelegate.openUrl(url))
 
     suspend fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
 

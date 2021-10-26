@@ -2,11 +2,11 @@ package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
-import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.delegates.StoreDelegate
+import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.view.DialogState
 
-class DialogDelegate<DATA : WithDialog<DATA>>: StoreDelegate<State<DATA>>() {
+class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
 
     fun closeDialog() = intent<Unit> {
         reducer {
@@ -46,7 +46,16 @@ class DialogDelegate<DATA : WithDialog<DATA>>: StoreDelegate<State<DATA>>() {
         }
     }
 
+    fun showSelectUrlDialog(urls: List<String>) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copyWithDialog(dialog = DialogState.SelectOptionsDialog(urls))
+            }
+        }
+    }
+
     fun isRemoveWithCheckBoxChecked(
         data: DATA
     ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
 }
+
