@@ -1,8 +1,12 @@
 package com.marzec.todo
 
-import androidx.compose.desktop.Window
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.window.Window
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import com.marzec.todo.cache.FileCacheImpl
 import com.marzec.todo.cache.MemoryCache
 import com.marzec.todo.common.CopyToClipBoardHelper
@@ -58,12 +62,15 @@ fun main() {
         DI.provideNavigationStore()
     }
 
-    Window(
-        title = "ToDo",
-        size = IntSize(700, 768)
-    ) {
-        DI.navigationScope = rememberCoroutineScope()
+    application {
+        Window(
+            ::exitApplication,
+            title = "ToDo",
+            state = rememberWindowState(width = 700.dp, height = 768.dp)
+        ) {
+            DI.navigationScope = rememberCoroutineScope()
 
-        HomeScreen(DI.navigationStore)
+            HomeScreen(DI.navigationStore)
+        }
     }
 }
