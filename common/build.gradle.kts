@@ -26,10 +26,7 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    js(IR) {
-        browser()
-        binaries.executable()
-    }
+
     sourceSets {
         named("commonMain") {
             dependencies {
@@ -67,12 +64,6 @@ kotlin {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
                 api(Dependency.ktorOkHttpClient)
-            }
-        }
-        val jsMain by getting {
-            dependencies {
-                implementation(compose.web.core)
-                implementation(compose.runtime)
             }
         }
     }
