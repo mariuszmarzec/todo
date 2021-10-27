@@ -9,7 +9,7 @@ val materialVersion = "1.1.0"
 val coroutinesVersion = "1.5.2"
 val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "7.1.0-alpha06"
-val buildkonfigVersion = "0.8.0"
+val buildkonfigVersion = "0.11.0"
 val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
 

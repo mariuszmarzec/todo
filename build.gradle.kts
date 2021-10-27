@@ -34,9 +34,3 @@ gradle.projectsEvaluated {
         compilerArgs.add("500")
     }
 }
-
-tasks.create<Delete>("clean") {
-    delete = setOf(
-        rootProject.buildDir
-    )
-}

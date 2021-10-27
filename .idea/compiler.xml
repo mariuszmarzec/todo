@@ -3,6 +3,10 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
       <module name="Todo.buildSrc" target="11" />
+      <module name="Todo.common.commonMain" target="1.8" />
+      <module name="Todo.common.commonTest" target="1.8" />
+      <module name="Todo.common.desktopMain" target="1.8" />
+      <module name="Todo.common.desktopTest" target="1.8" />
       <module name="Todo.common.jvmMain" target="1.8" />
       <module name="Todo.common.jvmTest" target="1.8" />
     </bytecodeTargetLevel>
