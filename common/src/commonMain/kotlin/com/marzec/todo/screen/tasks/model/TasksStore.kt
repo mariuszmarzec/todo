@@ -2,6 +2,7 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
@@ -77,7 +78,7 @@ class TasksStore(
         }
 
         reducer {
-            state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) {
+            state.reduceContentAsSideAction(resultNonNull()) {
                 copy(dialog = DialogState.NoDialog)
             }
         }
