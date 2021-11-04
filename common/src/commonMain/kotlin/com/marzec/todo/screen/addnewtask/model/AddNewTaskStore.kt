@@ -3,6 +3,7 @@ package com.marzec.todo.screen.addnewtask.model
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.IntentBuilder
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.model.Task
@@ -59,7 +60,10 @@ class AddNewTaskStore(
     }
 
     suspend fun addNewTask() = intent<Content<Unit>> {
-        onTrigger {
+        onTrigger(
+            isCancellableFlowTrigger = true,
+            runSideEffectAfterCancel = true
+        ) {
             state.ifDataAvailable {
                 val taskId = taskId
                 if (taskId != null) {
@@ -77,25 +81,38 @@ class AddNewTaskStore(
                         parentTaskId,
                         highestPriorityAsDefault
                     )
-                }
+                }.cancelFlowsIf { it is Content.Data }
             }
         }
+
+        reducer {
+            state.reduceContentNoChanges(resultNonNull())
+        }
+
         sideEffect {
             navigateOutAfterCall()
         }
     }
 
     suspend fun addManyTasks() = intent<Content<Unit>> {
-        onTrigger {
+        onTrigger(
+            isCancellableFlowTrigger = true,
+            runSideEffectAfterCancel = true
+        ) {
             state.ifDataAvailable {
                 todoRepository.addNewTasks(
                     listId = listId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     parentTaskId = parentTaskId,
                     descriptions = description.split("\n")
-                )
+                ).cancelFlowsIf { it is Content.Data }
             }
         }
+
+        reducer {
+            state.reduceContentNoChanges(resultNonNull())
+        }
+
         sideEffect {
             navigateOutAfterCall()
         }
@@ -109,7 +126,7 @@ class AddNewTaskStore(
 
     private suspend fun IntentBuilder.IntentContext<State<AddNewTaskState>, Content<Unit>>.navigateOutAfterCall() {
         result?.ifDataSuspend {
-            state.asData {
+            state.ifDataAvailable(blockOnLoading = false) {
                 if (parentTaskId != null) {
                     val destination =
                         Destination.TaskDetails(listId, parentTaskId)
