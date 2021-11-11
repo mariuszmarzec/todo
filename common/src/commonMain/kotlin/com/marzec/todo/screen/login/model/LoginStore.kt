@@ -30,15 +30,7 @@ class LoginStore(
         stateCache.set(cacheKey, newState)
     }
 
-    suspend fun sendAction(action: LoginActions) {
-        when (action) {
-            is LoginActions.PasswordChanged -> onPasswordChanged(action.password)
-            is LoginActions.LoginChanged -> onLoginChanged(action.login)
-            LoginActions.LoginButtonClick -> login()
-        }
-    }
-
-    private suspend fun login() = intent<Content<User>> {
+    suspend fun login() = intent<Content<User>> {
         onTrigger(
             isCancellableFlowTrigger = true,
             runSideEffectAfterCancel = true
@@ -68,13 +60,13 @@ class LoginStore(
         }
     }
 
-    private suspend fun onLoginChanged(login: String) = intent<Unit> {
+    suspend fun onLoginChanged(login: String) = intent<Unit> {
         reducer {
             state.reduceData { copy(login = login) }
         }
     }
 
-    private suspend fun onPasswordChanged(password: String) = intent<Unit> {
+    suspend fun onPasswordChanged(password: String) = intent<Unit> {
         reducer {
             state.reduceData { copy(password = password) }
         }

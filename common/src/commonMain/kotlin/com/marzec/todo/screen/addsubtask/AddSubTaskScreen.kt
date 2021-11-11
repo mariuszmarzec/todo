@@ -98,7 +98,6 @@ fun AddSubTaskScreen(
                             }
                         }
                     }
-
                 }
             }
             is AddSubTaskState.Loading -> {

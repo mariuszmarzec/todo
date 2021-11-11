@@ -81,17 +81,17 @@ private fun LoginScreen(
 
         Box(modifier = Modifier.padding(16.dp)) {
             TextField(login, {
-                scope.launch { loginStore.sendAction(LoginActions.LoginChanged(it)) }
+                scope.launch { loginStore.onLoginChanged(it) }
             })
         }
         Box(modifier = Modifier.padding(16.dp)) {
             TextField(password, {
-                scope.launch { loginStore.sendAction(LoginActions.PasswordChanged(it)) }
+                scope.launch { loginStore.onPasswordChanged(it) }
             })
         }
         Row(horizontalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.padding(16.dp)) {
-                TextButton({ scope.launch { loginStore.sendAction(LoginActions.LoginButtonClick) } }) {
+                TextButton({ scope.launch { loginStore.login() } }) {
                     Text("Login")
                 }
             }
