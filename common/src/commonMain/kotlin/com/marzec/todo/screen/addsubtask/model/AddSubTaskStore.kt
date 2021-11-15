@@ -40,7 +40,6 @@ class AddSubTaskStore(
                 this?.copy(tasks  = tasks) ?: AddSubTaskData.DEFAULT
             }
         }
-
     }
 
     fun onAddSubTaskClick() = sideEffectIntent {

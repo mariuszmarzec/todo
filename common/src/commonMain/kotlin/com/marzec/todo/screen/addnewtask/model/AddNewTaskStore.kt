@@ -26,7 +26,7 @@ class AddNewTaskStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
-    suspend fun initialLoad() = intent<Content<Task>> {
+    fun initialLoad() = intent<Content<Task>> {
         onTrigger {
             state.ifDataAvailable {
                 taskId?.let {
@@ -127,18 +127,17 @@ class AddNewTaskStore(
     private suspend fun IntentBuilder.IntentContext<State<AddNewTaskState>, Content<Unit>>.navigateOutAfterCall() {
         result?.ifDataSuspend {
             state.ifDataAvailable(blockOnLoading = false) {
-                if (parentTaskId != null) {
-                    val destination =
-                        Destination.TaskDetails(listId, parentTaskId)
-                    navigationStore.next(
-                        NavigationAction(
-                            destination = destination,
-                            options = NavigationOptions(destination, true)
-                        )
-                    )
+                val destination = if (parentTaskId != null) {
+                    Destination.TaskDetails(listId, parentTaskId)
                 } else {
-                    navigationStore.goBack()
+                    Destination.Tasks(listId)
                 }
+                navigationStore.next(
+                    NavigationAction(
+                        destination = destination,
+                        options = NavigationOptions(destination, true)
+                    )
+                )
             }
         }
     }
