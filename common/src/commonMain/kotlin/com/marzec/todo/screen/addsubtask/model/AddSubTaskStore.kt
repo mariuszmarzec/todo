@@ -28,7 +28,7 @@ class AddSubTaskStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
-    suspend fun initialLoad() = intent<Content<List<Task>>> {
+    fun initialLoad() = intent<Content<List<Task>>> {
         onTrigger {
             todoRepository.observeList(listId).map { content ->
                 content.mapData { toDoList ->
@@ -46,7 +46,7 @@ class AddSubTaskStore(
 
     }
 
-    suspend fun onAddSubTaskClick() = sideEffectIntent {
+    fun onAddSubTaskClick() = sideEffectIntent {
         navigationStore.next(
             Destination.AddNewTask(
                 listId = listId,
@@ -56,11 +56,11 @@ class AddSubTaskStore(
         )
     }
 
-    suspend fun goToSubtaskDetails(id: String) = sideEffectIntent {
+    fun goToSubtaskDetails(id: String) = sideEffectIntent {
         navigationStore.next(Destination.TaskDetails(listId, id.toInt()))
     }
 
-    suspend fun pinSubtask(id: String) = intent<Content<Unit>> {
+    fun pinSubtask(id: String) = intent<Content<Unit>> {
         onTrigger {
             state.asInstanceAndReturnOther<AddSubTaskState.Data, Flow<Content<Unit>>?> {
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->

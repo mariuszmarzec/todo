@@ -73,7 +73,7 @@ fun TaskDetailsScreen(
         topBar = {
             actionBarProvider.provide("Task details") {
                 IconButton({
-                    scope.launch { store.edit() }
+                    store.edit()
                 }) {
                     Icon(
                         imageVector = Icons.Default.Edit,
@@ -82,7 +82,7 @@ fun TaskDetailsScreen(
                 }
                 Spacer(Modifier.size(16.dp))
                 IconButton({
-                    scope.launch { store.showRemoveTaskDialog() }
+                    store.showRemoveTaskDialog()
                 }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -91,11 +91,9 @@ fun TaskDetailsScreen(
                 }
                 if ((state.data?.task?.description?.lines()?.size ?: 0) > 1) {
                     IconButton({
-                        scope.launch {
-                            store.explodeIntoTasks(
-                                state?.data?.task?.description?.lines().orEmpty()
-                            )
-                        }
+                        store.explodeIntoTasks(
+                            state?.data?.task?.description?.lines().orEmpty()
+                        )
                     }) {
                         Icon(
                             imageVector = Icons.Default.List,
@@ -109,7 +107,7 @@ fun TaskDetailsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch { store.addSubTask() }
+                    store.addSubTask()
                 }
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add subtask")
@@ -140,7 +138,7 @@ fun TaskDetailsScreen(
                         if (urls.isNotEmpty()) {
                             Spacer(Modifier.size(16.dp))
                             IconButton({
-                                scope.launch { store.openUrls(urls) }
+                                store.openUrls(urls)
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.ExitToApp,
@@ -150,7 +148,7 @@ fun TaskDetailsScreen(
                         }
                         Spacer(Modifier.size(16.dp))
                         IconButton({
-                            scope.launch { store.copyDescription() }
+                            store.copyDescription()
                         }) {
                             Icon(imageVector = Icons.Default.Share, contentDescription = "Copy")
                         }
@@ -186,7 +184,7 @@ fun TaskDetailsScreen(
                                                 ?.urlToOpen()
                                         if (urlToOpen != null) {
                                             IconButton({
-                                                scope.launch { store.openUrl(urlToOpen) }
+                                                store.openUrl(urlToOpen)
                                             }) {
                                                 Icon(
                                                     imageVector = Icons.Default.ExitToApp,
@@ -196,7 +194,7 @@ fun TaskDetailsScreen(
                                         }
                                         Column {
                                             IconButton({
-                                                scope.launch { store.moveToTop(it.id) }
+                                                store.moveToTop(it.id)
                                             }) {
                                                 Icon(
                                                     imageVector = Icons.Default.KeyboardArrowUp,
@@ -204,7 +202,7 @@ fun TaskDetailsScreen(
                                                 )
                                             }
                                             IconButton({
-                                                scope.launch { store.moveToBottom(it.id) }
+                                                store.moveToBottom(it.id)
                                             }) {
                                                 Icon(
                                                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -214,7 +212,7 @@ fun TaskDetailsScreen(
                                         }
                                         Column {
                                             IconButton({
-                                                scope.launch { store.showRemoveSubTaskDialog(it.id) }
+                                                store.showRemoveSubTaskDialog(it.id)
                                             }) {
                                                 Icon(
                                                     imageVector = Icons.Default.Delete,
@@ -222,7 +220,7 @@ fun TaskDetailsScreen(
                                                 )
                                             }
                                             IconButton({
-                                                scope.launch { store.unpinSubtask(it.id) }
+                                                store.unpinSubtask(it.id)
                                             }) {
                                                 Icon(
                                                     imageVector = Icons.Default.Clear,
@@ -244,9 +242,9 @@ fun TaskDetailsScreen(
                                 message = "Do you really want to remove this task?",
                                 confirmButton = "Yes",
                                 dismissButton = "No",
-                                onDismiss = { scope.launch { store.hideDialog() } },
+                                onDismiss = { store.hideDialog() },
                                 onConfirm = {
-                                    scope.launch { store.removeTask(dialog.idToRemove) }
+                                    store.removeTask(dialog.idToRemove)
                                 }
                             )
                         )
@@ -260,15 +258,15 @@ fun TaskDetailsScreen(
                                     message = "Do you really want to remove this task?",
                                     confirmButton = "Yes",
                                     dismissButton = "No",
-                                    onDismiss = { scope.launch { store.hideDialog() } },
+                                    onDismiss = { store.hideDialog() },
                                     onConfirm = {
-                                        scope.launch { store.removeTask(dialog.idToRemove) }
+                                        store.removeTask(dialog.idToRemove)
                                     }
                                 ),
                                 checked = dialog.checked,
                                 checkBoxLabel = "Remove with all sub-tasks",
                                 onCheckedChange = {
-                                    scope.launch { store.onRemoveWithSubTasksChange() }
+                                    store.onRemoveWithSubTasksChange()
                                 }
                             )
                         )
@@ -284,7 +282,7 @@ fun TaskDetailsScreen(
                                             name = EMPTY_STRING
                                         )
                                     },
-                                onDismiss = { scope.launch { store.hideDialog() } },
+                                onDismiss = { store.hideDialog() },
                                 onItemClicked = { id ->
                                     scope.launch {
                                         store.openUrl(dialog.items[id.toInt()] as String)

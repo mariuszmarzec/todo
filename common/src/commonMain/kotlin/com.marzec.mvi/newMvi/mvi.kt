@@ -1,7 +1,6 @@
 package com.marzec.mvi.newMvi
 
 import com.marzec.todo.DI
-import com.marzec.todo.network.Content
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -18,7 +16,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.runningReduce
-import kotlinx.coroutines.internal.AtomicOp
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
@@ -36,7 +33,10 @@ open class Store2<State : Any>(private val defaultState: State) {
 
     private var pause = MutableStateFlow(false)
 
+    private lateinit var scope: CoroutineScope
+
     suspend fun init(scope: CoroutineScope, initialAction: suspend () -> Unit = {}) {
+        this.scope = scope
         pause.emit(false)
         scope.launch {
             actions.onSubscription { initialAction() }
@@ -101,21 +101,24 @@ open class Store2<State : Any>(private val defaultState: State) {
             }
         }
 
-    protected suspend fun cancelFlows() {
-        pause.emit(true)
+    protected fun cancelFlows() {
+        scope.launch {
+            pause.emit(true)
+        }
     }
 
-    suspend fun <Result : Any> intent(buildFun: IntentBuilder<State, Result>.() -> Unit) {
+    fun <Result : Any> intent(buildFun: IntentBuilder<State, Result>.() -> Unit) = scope.launch {
         actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
     }
 
-    suspend fun <Result : Any> delegate(intent: Intent2<State, Result>) {
+    fun <Result : Any> delegate(intent: Intent2<State, Result>) = scope.launch {
         actions.emit(intent)
     }
 
-    suspend fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
-        actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
-    }
+    fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) =
+        scope.launch {
+            actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
+        }
 
     open suspend fun onNewState(newState: State) = Unit
 
@@ -135,9 +138,7 @@ data class Intent2<State, out Result : Any>(
     val isCancellableFlowTrigger: Boolean = false,
     val runSideEffectAfterCancel: Boolean = false,
     val paused: Boolean = false
-) {
-    fun resultNonNull(): Result = result!!
-}
+)
 
 @Suppress("UNCHECKED_CAST")
 class IntentBuilder<State : Any, Result : Any> {

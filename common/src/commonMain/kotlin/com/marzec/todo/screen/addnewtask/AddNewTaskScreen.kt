@@ -56,7 +56,7 @@ fun AddNewTaskScreen(
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextField(state.data.description, {
-                            scope.launch { store.onDescriptionChanged(it) }
+                            store.onDescriptionChanged(it)
                         })
                     }
                     Row(
@@ -66,21 +66,21 @@ fun AddNewTaskScreen(
                         if (state.data.taskId == null) {
                             Checkbox(
                                 checked = state.data.highestPriorityAsDefault,
-                                onCheckedChange = { scope.launch { store.toggleHighestPriority() } }
+                                onCheckedChange = { store.toggleHighestPriority() }
                             )
-                            TextButton({ scope.launch { store.toggleHighestPriority() } }) {
+                            TextButton({ store.toggleHighestPriority() }) {
                                 Text("Highest priority as default")
                             }
                         }
                     }
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextButton({ scope.launch { store.addNewTask() } }) {
+                        TextButton({ store.addNewTask() }) {
                             Text(text = state.data.taskId?.let { "Update" } ?: "Create")
                         }
                     }
                     if (state.data.taskId == null) {
                         Box(modifier = Modifier.padding(16.dp)) {
-                            TextButton({ scope.launch { store.addManyTasks() } }) {
+                            TextButton({ store.addManyTasks() }) {
                                 Text("Create tasks line by line")
                             }
                         }

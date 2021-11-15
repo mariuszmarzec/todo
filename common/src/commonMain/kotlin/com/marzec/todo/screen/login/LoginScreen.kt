@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
-import com.marzec.todo.screen.login.model.LoginActions
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import kotlinx.coroutines.CoroutineScope
@@ -81,17 +80,17 @@ private fun LoginScreen(
 
         Box(modifier = Modifier.padding(16.dp)) {
             TextField(login, {
-                scope.launch { loginStore.onLoginChanged(it) }
+                loginStore.onLoginChanged(it)
             })
         }
         Box(modifier = Modifier.padding(16.dp)) {
             TextField(password, {
-                scope.launch { loginStore.onPasswordChanged(it) }
+                loginStore.onPasswordChanged(it)
             })
         }
         Row(horizontalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.padding(16.dp)) {
-                TextButton({ scope.launch { loginStore.login() } }) {
+                TextButton({ loginStore.login() }) {
                     Text("Login")
                 }
             }

@@ -33,7 +33,7 @@ class TasksStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
-    suspend fun loadList() = intent<Content<ToDoList>> {
+    fun loadList() = intent<Content<ToDoList>> {
         onTrigger {
             todoRepository.observeList(listId)
         }
@@ -51,22 +51,22 @@ class TasksStore(
         }
     }
 
-    suspend fun onListItemClicked(id: String) = sideEffectIntent {
+    fun onListItemClicked(id: String) = sideEffectIntent {
         navigationStore.next(Destination.TaskDetails(listId, id.toInt()))
     }
 
-    suspend fun addNewTask() = sideEffectIntent {
+    fun addNewTask() = sideEffectIntent {
         state.asData {
             navigationStore.next(Destination.AddNewTask(listId, null, null))
         }
     }
 
-    suspend fun showRemoveDialog(id: String) =
+    fun showRemoveDialog(id: String) =
         delegate(dialogDelegate.showRemoveDialogWithCheckBox(id.toInt()))
 
-    suspend fun hideDialog() = delegate(dialogDelegate.closeDialog())
+    fun hideDialog() = delegate(dialogDelegate.closeDialog())
 
-    suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
+    fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 if (dialogDelegate.isRemoveWithCheckBoxChecked(this)) {
@@ -88,7 +88,7 @@ class TasksStore(
         stateCache.set(cacheKey, newState)
     }
 
-    suspend fun moveToTop(id: String) = intent<Content<Unit>> {
+    fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 val maxPriority = tasks.maxOf { it.priority }
@@ -108,7 +108,7 @@ class TasksStore(
         }
     }
 
-    suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
+    fun moveToBottom(id: String) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 val minPriority = tasks.minOf { it.priority }
@@ -128,13 +128,13 @@ class TasksStore(
         }
     }
 
-    suspend fun openUrl(taskId: String) = sideEffectIntent {
+    fun openUrl(taskId: String) = sideEffectIntent {
         state.data?.tasks?.firstOrNull { task -> task.id == taskId.toInt() }
             ?.urlToOpen()
             ?.let { openUrlHelper.open(it) }
     }
 
-    suspend fun onSearchQueryChanged(query: String) = intent<Unit> {
+    fun onSearchQueryChanged(query: String) = intent<Unit> {
         reducer {
             state.reduceData {
                 copy(search = query)
@@ -142,7 +142,7 @@ class TasksStore(
         }
     }
 
-    suspend fun clearSearch() = intent<Unit> {
+    fun clearSearch() = intent<Unit> {
         reducer {
             state.reduceData {
                 copy(
@@ -153,7 +153,7 @@ class TasksStore(
         }
     }
 
-    suspend fun activateSearch() = intent<Unit> {
+    fun activateSearch() = intent<Unit> {
         reducer {
             state.reduceData {
                 copy(
@@ -164,7 +164,7 @@ class TasksStore(
         }
     }
 
-    suspend fun onSearchFocusChanged(focused: Boolean) = intent<Unit> {
+    fun onSearchFocusChanged(focused: Boolean) = intent<Unit> {
         reducer {
             state.reduceData {
                 copy(searchFocused = focused)
@@ -172,5 +172,5 @@ class TasksStore(
         }
     }
 
-    suspend fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
+    fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
 }

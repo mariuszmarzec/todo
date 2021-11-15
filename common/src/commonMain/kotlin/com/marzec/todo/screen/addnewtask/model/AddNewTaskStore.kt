@@ -53,13 +53,13 @@ class AddNewTaskStore(
         }
     }
 
-    suspend fun onDescriptionChanged(description: String) = intent<Unit> {
+    fun onDescriptionChanged(description: String) = intent<Unit> {
         reducer {
             state.reduceData { copy(description = description) }
         }
     }
 
-    suspend fun addNewTask() = intent<Content<Unit>> {
+    fun addNewTask() = intent<Content<Unit>> {
         onTrigger(
             isCancellableFlowTrigger = true,
             runSideEffectAfterCancel = true
@@ -94,7 +94,7 @@ class AddNewTaskStore(
         }
     }
 
-    suspend fun addManyTasks() = intent<Content<Unit>> {
+    fun addManyTasks() = intent<Content<Unit>> {
         onTrigger(
             isCancellableFlowTrigger = true,
             runSideEffectAfterCancel = true
@@ -118,7 +118,7 @@ class AddNewTaskStore(
         }
     }
 
-    suspend fun toggleHighestPriority() = intent<Unit> {
+    fun toggleHighestPriority() = intent<Unit> {
         reducer {
             state.reduceData { copy(highestPriorityAsDefault = !highestPriorityAsDefault) }
         }

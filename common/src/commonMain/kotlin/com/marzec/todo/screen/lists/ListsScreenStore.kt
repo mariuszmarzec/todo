@@ -29,7 +29,7 @@ class ListsScreenStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
-    suspend fun initialLoad() = intent<Content<List<ToDoList>>> {
+    fun initialLoad() = intent<Content<List<ToDoList>>> {
         onTrigger {
             todoRepository.observeLists()
         }
@@ -41,7 +41,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun addNewList() = intent<Unit> {
+    fun addNewList() = intent<Unit> {
         reducer {
             state.mapData {
                 it.copy(dialog = DialogState.InputDialog(EMPTY_STRING))
@@ -49,7 +49,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun showRemoveListDialog(id: Int) = intent<Unit> {
+    fun showRemoveListDialog(id: Int) = intent<Unit> {
         reducer {
             state.mapData {
                 it.copy(dialog = DialogState.RemoveDialog(id))
@@ -57,7 +57,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun onNewListNameChanged(listName: String) = intent<Unit> {
+    fun onNewListNameChanged(listName: String) = intent<Unit> {
         reducer {
             state.mapData {
                 it.copy(
@@ -69,7 +69,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun onDialogDismissed() = intent<Unit> {
+    fun onDialogDismissed() = intent<Unit> {
         reducer {
             state.mapData {
                 it.copy(dialog = DialogState.NoDialog)
@@ -77,7 +77,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun removeList(id: Int) = intent<Content<Unit>> {
+    fun removeList(id: Int) = intent<Content<Unit>> {
         onTrigger { todoRepository.removeList(id) }
 
         reducer {
@@ -87,7 +87,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun onCreateButtonClicked(newListName: String) = intent<Content<Unit>> {
+    fun onCreateButtonClicked(newListName: String) = intent<Content<Unit>> {
         onTrigger {
             todoRepository.createList(newListName)
         }
@@ -100,7 +100,7 @@ class ListsScreenStore(
         }
     }
 
-    suspend fun logout() = intent<Content<Unit>> {
+    fun logout() = intent<Content<Unit>> {
         onTrigger {
             loginRepository.logout()
         }
@@ -119,7 +119,6 @@ class ListsScreenStore(
             }
         }
     }
-
 
     override suspend fun onNewState(newState: State<ListsScreenState>) {
         stateCache.set(cacheKey, newState)

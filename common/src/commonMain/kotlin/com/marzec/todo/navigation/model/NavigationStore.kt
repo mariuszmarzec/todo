@@ -13,7 +13,7 @@ class NavigationStore(
     initialState: NavigationState
 ) : Store2<NavigationState>(stateCache.get(cacheKey) ?: initialState) {
 
-    suspend fun next(action: NavigationAction) = intent<Unit> {
+    fun next(action: NavigationAction) = intent<Unit> {
         reducer {
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
@@ -35,7 +35,7 @@ class NavigationStore(
         }
     }
 
-    suspend fun goBack() = intent<Unit> {
+    fun goBack() = intent<Unit> {
         reducer {
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
@@ -53,5 +53,5 @@ class NavigationStore(
     }
 }
 
-suspend fun NavigationStore.next(destination: Destination) =
+fun NavigationStore.next(destination: Destination) =
     next(NavigationAction(destination))

@@ -88,7 +88,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                                     state.data.search
                                 } else "Search",
                                 onValueChange = {
-                                    scope.launch { store.onSearchQueryChanged(it) }
+                                    store.onSearchQueryChanged(it)
                                 }
                             )
                             LaunchedEffect(key1 = state.data.searchFocused) {
@@ -101,7 +101,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                             }
                             if (searchInUse) {
                                 IconButton({
-                                    scope.launch { store.clearSearch() }
+                                    store.clearSearch()
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Clear,
@@ -110,7 +110,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                                 }
                             } else {
                                 IconButton({
-                                    scope.launch { store.activateSearch() }
+                                    store.activateSearch()
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Search,
@@ -128,7 +128,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch { store.addNewTask() }
+                    store.addNewTask()
                 }
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")

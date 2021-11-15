@@ -54,7 +54,7 @@ fun ListsScreen(
         topBar = {
             actionBarProvider.provide(title = "ToDo Listy") {
                 IconButton({
-                    scope.launch { listsScreenStore.logout() }
+                    listsScreenStore.logout()
                 }) {
                     Icon(imageVector = Icons.Default.Lock, contentDescription = "Logout")
                 }
@@ -64,7 +64,7 @@ fun ListsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch { listsScreenStore.addNewList() }
+                    listsScreenStore.addNewList()
                 }
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
@@ -81,23 +81,21 @@ fun ListsScreen(
                                 description = ""
                             )
                         },
-                    ) {
-                        key(it.id) {
+                    ) { item ->
+                        key(item.id) {
                             TextListItemView(
-                                state = it,
+                                state = item,
                                 onClickListener = {
-                                    scope.launch {
-                                        navigationStore.next(
-                                            NavigationAction(
-                                                Destination.Tasks(it.id.toInt())
-                                            )
+                                    navigationStore.next(
+                                        NavigationAction(
+                                            Destination.Tasks(it.id.toInt())
                                         )
-                                    }
+                                    )
                                 }
                             ) {
                                 Box(modifier = Modifier.padding(16.dp)) {
                                     IconButton({
-                                        scope.launch { listsScreenStore.showRemoveListDialog(it.id.toInt()) }
+                                        listsScreenStore.showRemoveListDialog(item.id.toInt())
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
@@ -117,9 +115,9 @@ fun ListsScreen(
                             confirmButton = "Remove",
                             dismissButton = "Cancel",
                             onConfirm = {
-                                scope.launch { listsScreenStore.removeList(dialogState.idToRemove) }
+                                listsScreenStore.removeList(dialogState.idToRemove)
                             },
-                            onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
+                            onDismiss = { listsScreenStore.onDialogDismissed() }
                         )
                     }
                     is DialogState.InputDialog -> {
@@ -129,14 +127,12 @@ fun ListsScreen(
                             confirmButton = "Create",
                             dismissButton = "Cancel",
                             onTextChanged = {
-                                scope.launch { listsScreenStore.onNewListNameChanged(it) }
+                                listsScreenStore.onNewListNameChanged(it)
                             },
                             onConfirm = {
-                                scope.launch {
-                                    listsScreenStore.onCreateButtonClicked(it)
-                                }
+                                listsScreenStore.onCreateButtonClicked(it)
                             },
-                            onDismiss = { scope.launch { listsScreenStore.onDialogDismissed() } }
+                            onDismiss = { listsScreenStore.onDialogDismissed() }
                         )
                     }
                     else -> Dialog.NoDialog

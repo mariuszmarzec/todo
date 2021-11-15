@@ -30,7 +30,7 @@ class LoginStore(
         stateCache.set(cacheKey, newState)
     }
 
-    suspend fun login() = intent<Content<User>> {
+    fun login() = intent<Content<User>> {
         onTrigger(
             isCancellableFlowTrigger = true,
             runSideEffectAfterCancel = true
@@ -60,13 +60,13 @@ class LoginStore(
         }
     }
 
-    suspend fun onLoginChanged(login: String) = intent<Unit> {
+    fun onLoginChanged(login: String) = intent<Unit> {
         reducer {
             state.reduceData { copy(login = login) }
         }
     }
 
-    suspend fun onPasswordChanged(password: String) = intent<Unit> {
+    fun onPasswordChanged(password: String) = intent<Unit> {
         reducer {
             state.reduceData { copy(password = password) }
         }

@@ -65,7 +65,7 @@ fun AddSubTaskScreen(
                 ) {
                     Spacer(Modifier.size(16.dp))
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextButton({ scope.launch { store.onAddSubTaskClick() } }) {
+                        TextButton({ store.onAddSubTaskClick() }) {
                             Text("Create new subtask")
                         }
                     }
@@ -79,17 +79,15 @@ fun AddSubTaskScreen(
                                     description = it.subTasks.firstOrNull()?.description?.lines()?.first() ?: ""
                                 )
                             },
-                        ) {
-                            key(it.id) {
+                        ) { item ->
+                            key(item.id) {
                                 Row(Modifier.fillMaxWidth()) {
-                                    TextListItemView(state = it,
+                                    TextListItemView(state = item,
                                         onClickListener = {
-                                            scope.launch {
-                                                store.goToSubtaskDetails(it.id)
-                                            }
+                                            store.goToSubtaskDetails(it.id)
                                         }) {
                                         IconButton({
-                                            scope.launch { store.pinSubtask(it.id) }
+                                            store.pinSubtask(item.id)
                                         }) {
                                             Icon(imageVector = Icons.Default.Add, contentDescription = "Pin")
                                         }

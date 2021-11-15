@@ -3,10 +3,10 @@ package com.marzec.todo.screen.taskdetails.model
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentAsSideAction
-import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
@@ -15,8 +15,6 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import com.marzec.todo.delegates.dialog.DialogDelegate
-import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.view.DialogState
 
 class TaskDetailsStore(
@@ -34,7 +32,7 @@ class TaskDetailsStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
-    suspend fun loadDetails() = intent<Content<Task>> {
+    fun loadDetails() = intent<Content<Task>> {
         onTrigger(isCancellableFlowTrigger = true) {
             todoRepository.observeTask(listId, taskId)
         }
@@ -45,7 +43,7 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun edit() = intent<Unit> {
+    fun edit() = intent<Unit> {
         sideEffect {
             state.ifDataAvailable {
                 navigationStore.next(Destination.AddNewTask(listId, taskId, task.parentTaskId))
@@ -53,7 +51,7 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun addSubTask() = intent<Unit> {
+    fun addSubTask() = intent<Unit> {
         sideEffect {
             state.ifDataAvailable {
                 navigationStore.next(Destination.AddSubTask(listId, taskId))
@@ -65,7 +63,7 @@ class TaskDetailsStore(
         stateCache.set(cacheKey, newState)
     }
 
-    suspend fun unpinSubtask(id: String) = intent<Content<Unit>> {
+    fun unpinSubtask(id: String) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
@@ -81,19 +79,19 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun goToSubtaskDetails(id: String) = sideEffectIntent {
+    fun goToSubtaskDetails(id: String) = sideEffectIntent {
         navigationStore.next(Destination.TaskDetails(listId, id.toInt()))
     }
 
-    suspend fun showRemoveTaskDialog() =
+    fun showRemoveTaskDialog() =
         delegate(dialogDelegate.showRemoveDialogWithCheckBox(taskId))
 
-    suspend fun showRemoveSubTaskDialog(subtaskId: String) =
+    fun showRemoveSubTaskDialog(subtaskId: String) =
         delegate(dialogDelegate.showRemoveTaskDialog(subtaskId.toInt()))
 
-    suspend fun hideDialog() = delegate(dialogDelegate.closeDialog())
+    fun hideDialog() = delegate(dialogDelegate.closeDialog())
 
-    suspend fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
+    fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 if (dialogDelegate.isRemoveWithCheckBoxChecked(this)) {
@@ -120,7 +118,7 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun moveToTop(id: String) = intent<Content<Unit>> {
+    fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 val maxPriority = task.subTasks.maxOf { it.priority }
@@ -140,7 +138,7 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun moveToBottom(id: String) = intent<Content<Unit>> {
+    fun moveToBottom(id: String) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 val minPriority = task.subTasks.minOf { it.priority }
@@ -160,19 +158,19 @@ class TaskDetailsStore(
         }
     }
 
-    suspend fun copyDescription() = sideEffectIntent {
+    fun copyDescription() = sideEffectIntent {
         state.ifDataAvailable {
             copyToClipBoardHelper.copy(task.description)
         }
     }
 
-    suspend fun openUrls(urls: List<String>) = delegate(urlDelegate.openUrls(urls))
+    fun openUrls(urls: List<String>) = delegate(urlDelegate.openUrls(urls))
 
-    suspend fun openUrl(url: String) = delegate(urlDelegate.openUrl(url))
+    fun openUrl(url: String) = delegate(urlDelegate.openUrl(url))
 
-    suspend fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
+    fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
 
-    suspend fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
+    fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
         onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }
     }
 }
