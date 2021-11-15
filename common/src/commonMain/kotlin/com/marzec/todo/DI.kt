@@ -27,7 +27,7 @@ import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.todo.screen.addsubtask.AddSubTaskScreen
-import com.marzec.todo.screen.addsubtask.model.AddSubTaskState
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.screen.lists.ListsScreen
 import com.marzec.todo.screen.lists.ListsScreenState
@@ -214,7 +214,7 @@ object DI {
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = AddSubTaskState.INITIAL,
+            initialState = AddSubTaskData.INITIAL,
             listId = listId,
             taskId = taskId
         )

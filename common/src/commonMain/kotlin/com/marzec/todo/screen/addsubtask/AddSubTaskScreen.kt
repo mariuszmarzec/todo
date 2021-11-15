@@ -27,13 +27,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.screen.addsubtask.model.AddSubTaskState
+import com.marzec.mvi.State
+import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddSubTaskScreen(
@@ -43,7 +42,7 @@ fun AddSubTaskScreen(
 
     val scope = rememberCoroutineScope()
 
-    val state: AddSubTaskState by store.state.collectAsState()
+    val state: State<AddSubTaskData> by store.state.collectAsState()
 
     LaunchedEffect(Unit) {
         store.init(scope) {
@@ -57,7 +56,7 @@ fun AddSubTaskScreen(
         }
     ) {
         when (val state = state) {
-            is AddSubTaskState.Data -> {
+            is State.Data -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -72,7 +71,7 @@ fun AddSubTaskScreen(
                     Spacer(Modifier.size(16.dp))
                     LazyColumn {
                         items(
-                            items = state.tasks.map {
+                            items = state.data.tasks.map {
                                 TextListItem(
                                     id = it.id.toString(),
                                     name = it.description.lines().first(),
@@ -98,10 +97,10 @@ fun AddSubTaskScreen(
                     }
                 }
             }
-            is AddSubTaskState.Loading -> {
+            is State.Loading -> {
                 Text(text = "Loading")
             }
-            is AddSubTaskState.Error -> {
+            is State.Error -> {
                 Text(text = state.message)
             }
         }

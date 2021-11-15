@@ -1,10 +1,10 @@
 package com.marzec.todo.screen.addsubtask.model
 
+import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.reduceContentNoChanges
+import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.extensions.asInstance
-import com.marzec.todo.extensions.asInstanceAndReturn
-import com.marzec.todo.extensions.asInstanceAndReturnOther
-import com.marzec.todo.extensions.getMessage
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
@@ -13,18 +13,17 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.mapData
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class AddSubTaskStore(
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
-    initialState: AddSubTaskState,
+    initialState: State<AddSubTaskData>,
     private val todoRepository: TodoRepository,
     private val listId: Int,
     private val taskId: Int
-) : Store2<AddSubTaskState>(
+) : Store2<State<AddSubTaskData>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
@@ -37,10 +36,8 @@ class AddSubTaskStore(
             }
         }
         reducer {
-            when (val content = resultNonNull()) {
-                is Content.Data -> state.reduceData(content.data)
-                is Content.Loading -> AddSubTaskState.Loading(state.tasks)
-                is Content.Error -> AddSubTaskState.Error(state.tasks, content.getMessage())
+            state.reduceDataWithContent(resultNonNull()) { tasks ->
+                this?.copy(tasks  = tasks) ?: AddSubTaskData.DEFAULT
             }
         }
 
@@ -62,7 +59,7 @@ class AddSubTaskStore(
 
     fun pinSubtask(id: String) = intent<Content<Unit>> {
         onTrigger {
-            state.asInstanceAndReturnOther<AddSubTaskState.Data, Flow<Content<Unit>>?> {
+            state.ifDataAvailable {
                 tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
                     todoRepository.updateTask(
                         taskId = id.toInt(),
@@ -76,11 +73,7 @@ class AddSubTaskStore(
         }
 
         reducer {
-            when (val content = resultNonNull()) {
-                is Content.Data -> state.reduceData(state.tasks)
-                is Content.Loading -> AddSubTaskState.Loading(state.tasks)
-                is Content.Error -> AddSubTaskState.Error(state.tasks, content.getMessage())
-            }
+            state.reduceContentNoChanges(resultNonNull())
         }
 
         sideEffect {
@@ -90,13 +83,7 @@ class AddSubTaskStore(
         }
     }
 
-    override suspend fun onNewState(newState: AddSubTaskState) {
+    override suspend fun onNewState(newState: State<AddSubTaskData>) {
         stateCache.set(cacheKey, newState)
     }
 }
-
-private fun AddSubTaskState.reduceData(tasks: List<Task>): AddSubTaskState =
-    this.asInstanceAndReturnOther<
-            AddSubTaskState.Data,
-            AddSubTaskState
-            > { AddSubTaskState.Data(tasks) } ?: AddSubTaskState.Data(tasks)
