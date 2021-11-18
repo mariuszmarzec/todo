@@ -1,7 +1,6 @@
 package com.marzec.todo.repository
 
 import com.marzec.todo.Api
-import com.marzec.todo.DI
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.toDomain
 import com.marzec.todo.cache.Cache
@@ -9,7 +8,6 @@ import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.network.Content
-import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.asContent
 import com.marzec.todo.network.asContentFlow
@@ -17,11 +15,12 @@ import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.network.mapData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
@@ -140,7 +139,7 @@ class TodoRepository(
             } else {
                 Content.Loading()
             }
-            combine(
+            merge(
                 flow {
                     emit(initial)
                     val callResult = networkCall()
@@ -150,15 +149,9 @@ class TodoRepository(
                         memoryCache.put(key, callResult.data)
                     }
                 },
-                memoryCache.observe<T>(key)
-            ) { networkCall, cache ->
-                if (cache != null) {
-                    Content.Data(cache)
-                } else {
-                    networkCall
-                }
-            }.flowOn(dispatcher)
-        }
+                memoryCache.observe<T>(key).filterNotNull().map { Content.Data(it) }
+            )
+        }.flowOn(dispatcher)
 
     private fun asContentWithListUpdate(request: suspend () -> Unit) =
         asContentFlow(request)

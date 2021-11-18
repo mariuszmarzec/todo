@@ -127,8 +127,9 @@ class AddNewTaskStore(
     private suspend fun IntentBuilder.IntentContext<State<AddNewTaskState>, Content<Unit>>.navigateOutAfterCall() {
         result?.ifDataSuspend {
             state.ifDataAvailable(blockOnLoading = false) {
-                val destination = if (parentTaskId != null) {
-                    Destination.TaskDetails(listId, parentTaskId)
+                val taskIdToShow = parentTaskId ?: taskId
+                val destination = if (taskIdToShow != null) {
+                    Destination.TaskDetails(listId, taskIdToShow)
                 } else {
                     Destination.Tasks(listId)
                 }
