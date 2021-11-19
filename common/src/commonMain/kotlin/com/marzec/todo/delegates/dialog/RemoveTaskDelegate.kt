@@ -42,19 +42,23 @@ class RemoveTaskDelegate<DATA : WithTasks<DATA>>(
         state.ifDataAvailable {
             val idToRemove = id.toInt()
             val taskToRemove = taskById(idToRemove)
-            val intent = when {
+            when {
                 taskToRemove.subTasks.isNotEmpty() -> {
-                    dialogDelegate.showRemoveDialogWithCheckBox(idToRemove)
+                    store.delegate(dialogDelegate.showRemoveDialogWithCheckBox(idToRemove))
                 }
                 taskToRemove.description.length > 80 ||
                 taskToRemove.description.urls().isNotEmpty() -> {
-                    dialogDelegate.showRemoveTaskDialog(idToRemove)
+                    store.delegate(dialogDelegate.showRemoveTaskDialog(idToRemove))
                 }
                 else -> {
-                    removeTask(idToRemove)
+                    (store as? StoreWithTaskRemove)?.removeTask(idToRemove)
+                        ?: store.delegate(removeTask(idToRemove))
                 }
             }
-            store.delegate(intent)
         }
     }
+}
+
+interface StoreWithTaskRemove {
+    fun removeTask(idToRemove: Int)
 }

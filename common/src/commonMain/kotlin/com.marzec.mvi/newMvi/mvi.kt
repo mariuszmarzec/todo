@@ -41,17 +41,21 @@ open class Store2<State : Any>(private val defaultState: State) {
         scope.launch {
             actions.onSubscription { initialAction() }
                 .flatMapMerge { intent ->
-                debug("actions flatMapMerge intent: $intent")
-                val currentState = _state.value
-                val flow = intent.onTrigger(currentState) ?: flowOf(null)
-                flow.map {
-                    debug("actions onTrigger state: ${intent.state} result: $it")
-                    intent.copy(state = currentState, result = it, sideEffect = intent.sideEffect)
-                }.makeCancellableIfNeeded(intent.isCancellableFlowTrigger)
-            }.collect {
-                debug("actions collect intent: $it")
-                _intentContextFlow.emit(it)
-            }
+                    debug("actions flatMapMerge intent: $intent")
+                    val currentState = _state.value
+                    val flow = intent.onTrigger(currentState) ?: flowOf(null)
+                    flow.map {
+                        debug("actions onTrigger state: ${intent.state} result: $it")
+                        intent.copy(
+                            state = currentState,
+                            result = it,
+                            sideEffect = intent.sideEffect
+                        )
+                    }.makeCancellableIfNeeded(intent.isCancellableFlowTrigger)
+                }.collect {
+                    debug("actions collect intent: $it")
+                    _intentContextFlow.emit(it)
+                }
         }
         scope.launch {
             _intentContextFlow
@@ -111,8 +115,10 @@ open class Store2<State : Any>(private val defaultState: State) {
         actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
     }
 
-    fun <Result : Any> delegate(intent: Intent2<State, Result>) = scope.launch {
-        actions.emit(intent)
+    fun <Result : Any> delegate(intent: Intent2<State, Result>) {
+        scope.launch {
+            actions.emit(intent)
+        }
     }
 
     fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) =
@@ -141,14 +147,13 @@ data class Intent2<State, out Result : Any>(
 )
 
 @Suppress("UNCHECKED_CAST")
-class IntentBuilder<State : Any, Result : Any> {
-
-    private var onTrigger: suspend (stateParam: State) -> Flow<Result>? = { _ -> null }
-    private var reducer: suspend (result: Any?, stateParam: State) -> State =
-        { _, stateParam -> stateParam }
-    private var sideEffect: (suspend (result: Any?, state: State) -> Unit)? = null
-    private var isCancellableFlowTrigger: Boolean = false
+class IntentBuilder<State : Any, Result : Any>(
+    private var onTrigger: suspend (stateParam: State) -> Flow<Result>? = { _ -> null },
+    private var reducer: suspend (result: Any?, stateParam: State) -> State = { _, stateParam -> stateParam },
+    private var sideEffect: (suspend (result: Any?, state: State) -> Unit)? = null,
+    private var isCancellableFlowTrigger: Boolean = false,
     private var runSideEffectAfterCancel: Boolean = false
+) {
 
     fun onTrigger(
         isCancellableFlowTrigger: Boolean = false,
@@ -197,13 +202,13 @@ class IntentBuilder<State : Any, Result : Any> {
     }
 }
 
-fun <State : Any, Result : Any> IntentBuilder<State, Result>.oneShotTrigger(
-    action: suspend IntentBuilder.IntentContext<State, Result>.() -> Result
-): IntentBuilder<State, Result> {
-    onTrigger {
-        flow {
-            emit(action())
-        }
-    }
-    return this
-}
+fun <State : Any, Result : Any> Intent2<State, Result>.rebuild(
+    buildFun: IntentBuilder<State, Result>.(Intent2<State, Result>) -> Unit
+) =
+    IntentBuilder(
+        onTrigger = onTrigger,
+        reducer = reducer,
+        sideEffect = sideEffect,
+        isCancellableFlowTrigger = isCancellableFlowTrigger,
+        runSideEffectAfterCancel = runSideEffectAfterCancel
+    ).apply { buildFun(this@rebuild) }.build()

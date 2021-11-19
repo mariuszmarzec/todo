@@ -192,6 +192,7 @@ object DI {
         taskId = taskId,
         copyToClipBoardHelper = copyToClipBoardHelper,
         dialogDelegate = provideDialogDelegate(),
+        removeTaskDelegate = RemoveTaskDelegate(provideDialogDelegate(), provideTodoRepository()),
         urlDelegate = UrlDelegate(openUrlHelper, provideDialogDelegate())
     )
 
