@@ -8,6 +8,7 @@ import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
@@ -28,7 +29,8 @@ class TasksStore(
     val todoRepository: TodoRepository,
     val listId: Int,
     private val openUrlHelper: OpenUrlHelper,
-    private val dialogDelegate: DialogDelegate<TasksScreenState>
+    private val dialogDelegate: DialogDelegate<TasksScreenState>,
+    private val removeTaskDelegate: RemoveTaskDelegate<TasksScreenState>
 ) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
 ) {
@@ -66,23 +68,7 @@ class TasksStore(
 
     fun hideDialog() = delegate(dialogDelegate.closeDialog())
 
-    fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                if (dialogDelegate.isRemoveWithCheckBoxChecked(this)) {
-                    todoRepository.removeTaskWithSubtasks(tasks.first { it.id == idToRemove })
-                } else {
-                    todoRepository.removeTask(idToRemove)
-                }
-            }
-        }
-
-        reducer {
-            state.reduceContentAsSideAction(resultNonNull()) {
-                copy(dialog = DialogState.NoDialog)
-            }
-        }
-    }
+    fun removeTask(idToRemove: Int) = delegate(removeTaskDelegate.removeTask(idToRemove))
 
     override suspend fun onNewState(newState: State<TasksScreenState>) {
         stateCache.set(cacheKey, newState)

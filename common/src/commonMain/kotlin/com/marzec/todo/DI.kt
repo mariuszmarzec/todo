@@ -7,6 +7,7 @@ import com.marzec.todo.cache.FileCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
@@ -116,7 +117,11 @@ object DI {
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE,
             openUrlHelper = openUrlHelper,
-            dialogDelegate = DialogDelegate()
+            dialogDelegate = DialogDelegate(),
+            removeTaskDelegate = RemoveTaskDelegate(
+                DialogDelegate(),
+                provideTodoRepository()
+            )
         )
     }
 
