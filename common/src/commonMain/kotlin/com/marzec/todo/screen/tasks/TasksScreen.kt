@@ -214,7 +214,7 @@ private fun TaskScreenData(
                             )
                         }
                         IconButton({
-                            scope.launch { store.showRemoveDialog(it.id) }
+                            scope.launch { store.onRemoveButtonClick(it.id) }
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -245,6 +245,20 @@ private fun TaskScreenData(
                     checkBoxLabel = "Remove with all sub-tasks",
                     onCheckedChange = {
                         scope.launch { store.onRemoveWithSubTasksChange() }
+                    }
+                )
+            )
+        }
+        is DialogState.RemoveDialog -> {
+            DialogBox(
+                state = Dialog.TwoOptionsDialog(
+                    title = "Remove task",
+                    message = "Do you really want to remove this task?",
+                    confirmButton = "Yes",
+                    dismissButton = "No",
+                    onDismiss = { scope.launch { store.hideDialog() } },
+                    onConfirm = {
+                        scope.launch { store.removeTask(dialog.idToRemove) }
                     }
                 )
             )

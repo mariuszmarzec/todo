@@ -35,6 +35,10 @@ class TasksStore(
     stateCache.get(cacheKey) ?: initialState
 ) {
 
+    init {
+        removeTaskDelegate.init(this)
+    }
+
     fun loadList() = intent<Content<ToDoList>> {
         onTrigger {
             todoRepository.observeList(listId)
@@ -63,8 +67,7 @@ class TasksStore(
         }
     }
 
-    fun showRemoveDialog(id: String) =
-        delegate(dialogDelegate.showRemoveDialogWithCheckBox(id.toInt()))
+    fun onRemoveButtonClick(id: String) = delegate(removeTaskDelegate.onRemoveButtonClick(id))
 
     fun hideDialog() = delegate(dialogDelegate.closeDialog())
 
