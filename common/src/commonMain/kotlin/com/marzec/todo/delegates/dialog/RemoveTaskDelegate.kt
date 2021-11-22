@@ -23,7 +23,7 @@ class RemoveTaskDelegate<DATA : WithTasks<DATA>>(
     fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                if (dialogDelegate.isRemoveWithCheckBoxChecked(this)) {
+                if (isRemoveWithCheckBoxChecked(this)) {
                     todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
                 } else {
                     todoRepository.removeTask(idToRemove)
@@ -37,6 +37,10 @@ class RemoveTaskDelegate<DATA : WithTasks<DATA>>(
             }
         }
     }
+
+    private fun isRemoveWithCheckBoxChecked(
+        data: DATA
+    ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
 
     fun onRemoveButtonClick(id: String) = sideEffectIntent {
         state.ifDataAvailable {

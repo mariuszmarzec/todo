@@ -53,8 +53,4 @@ class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
             }
         }
     }
-
-    fun isRemoveWithCheckBoxChecked(
-        data: DATA
-    ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
 }
