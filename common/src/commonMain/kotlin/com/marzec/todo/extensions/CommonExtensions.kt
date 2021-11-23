@@ -1,7 +1,10 @@
 package com.marzec.todo.extensions
 
+import com.marzec.mvi.newMvi.Store2
 import com.marzec.todo.api.TaskDto
+import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.model.Task
+import kotlin.properties.Delegates
 
 const val EMPTY_STRING = ""
 
@@ -31,4 +34,11 @@ fun List<TaskDto>.flatMapTaskDto(tasks: MutableList<TaskDto> = mutableListOf()):
         it.subTasks.flatMapTaskDto(tasks)
     }
     return tasks
+}
+
+@Suppress("unchecked_cast")
+fun <STATE : Any> Store2<STATE>.delegates(vararg delegates: Any) {
+    delegates.forEach {
+        (it as StoreDelegate<STATE>).init(this@delegates)
+    }
 }

@@ -1,17 +1,17 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Intent2
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.newMvi.rebuild
 import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
+import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
-import com.marzec.todo.delegates.dialog.StoreWithTaskRemove
 import com.marzec.todo.delegates.dialog.UrlDelegate
+import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.extensions.asInstance
+import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
@@ -30,15 +30,20 @@ class TaskDetailsStore(
     private val listId: Int,
     private val taskId: Int,
     private val copyToClipBoardHelper: CopyToClipBoardHelper,
-    private val dialogDelegate: DialogDelegate<TaskDetailsState>,
-    private val removeTaskDelegate: RemoveTaskDelegate<TaskDetailsState>,
+    private val dialogDelegate: DialogDelegate,
+    private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate<TaskDetailsState>
 ) : Store2<State<TaskDetailsState>>(
     stateCache.get(cacheKey) ?: initialState
-), StoreWithTaskRemove {
+), RemoveTaskDelegate by removeTaskDelegate,
+    DialogDelegate by dialogDelegate {
 
     init {
-        removeTaskDelegate.init(this)
+        delegates(
+            removeTaskDelegate,
+            urlDelegate,
+            dialogDelegate
+        )
     }
 
     fun loadDetails() = intent<Content<Task>> {
@@ -93,29 +98,38 @@ class TaskDetailsStore(
     }
 
     fun showRemoveTaskDialog() =
-        delegate(removeTaskDelegate.onRemoveButtonClick(taskId.toString()))
+        removeTaskDelegate.onRemoveButtonClick(taskId.toString())
 
     fun showRemoveSubTaskDialog(subtaskId: String) =
-        delegate(removeTaskDelegate.onRemoveButtonClick(subtaskId))
+        removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
-    fun hideDialog() = delegate(dialogDelegate.closeDialog())
+    fun hideDialog() = dialogDelegate.closeDialog()
 
-    override fun removeTask(idToRemove: Int) = delegate(
-        removeTaskDelegate.removeTask(idToRemove).rebuild { intent ->
-            onTrigger {
-                intent.onTrigger(state)
-                    ?.cancelFlowsIf { it is Content.Data && idToRemove == taskId }
-            }
-
-            sideEffect {
-                resultNonNull().asInstance<Content.Data<Unit>> {
-                    if (idToRemove == taskId) {
-                        navigationStore.goBack()
-                    }
+    override fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                if ((dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true) {
+                    todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
+                } else {
+                    todoRepository.removeTask(idToRemove)
                 }
             }
         }
-    )
+
+        reducer {
+            state.reduceContentAsSideAction(resultNonNull()) {
+                copyWithDialog(dialog = DialogState.NoDialog)
+            }
+        }
+
+        sideEffect {
+            resultNonNull().asInstance<Content.Data<Unit>> {
+                if (idToRemove == taskId) {
+                    navigationStore.goBack()
+                }
+            }
+        }
+    }
 
     fun moveToTop(id: String) = intent<Content<Unit>> {
         onTrigger {
@@ -163,11 +177,9 @@ class TaskDetailsStore(
         }
     }
 
-    fun openUrls(urls: List<String>) = delegate(urlDelegate.openUrls(urls))
+    fun openUrls(urls: List<String>) = urlDelegate.openUrls(urls)
 
-    fun openUrl(url: String) = delegate(urlDelegate.openUrl(url))
-
-    fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
+    fun openUrl(url: String) = urlDelegate.openUrl(url)
 
     fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
         onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }

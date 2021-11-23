@@ -236,7 +236,7 @@ private fun TaskScreenData(
                         message = "Do you really want to remove this task?",
                         confirmButton = "Yes",
                         dismissButton = "No",
-                        onDismiss = { scope.launch { store.hideDialog() } },
+                        onDismiss = { scope.launch { store.closeDialog() } },
                         onConfirm = {
                             scope.launch { store.removeTask(dialog.idToRemove) }
                         }
@@ -256,7 +256,7 @@ private fun TaskScreenData(
                     message = "Do you really want to remove this task?",
                     confirmButton = "Yes",
                     dismissButton = "No",
-                    onDismiss = { scope.launch { store.hideDialog() } },
+                    onDismiss = { scope.launch { store.closeDialog() } },
                     onConfirm = {
                         scope.launch { store.removeTask(dialog.idToRemove) }
                     }

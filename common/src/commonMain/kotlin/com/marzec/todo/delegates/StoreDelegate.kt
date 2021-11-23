@@ -1,16 +1,20 @@
 package com.marzec.todo.delegates
 
-import com.marzec.mvi.newMvi.Intent2
 import com.marzec.mvi.newMvi.IntentBuilder
+import com.marzec.mvi.newMvi.Store2
 
 open class StoreDelegate<State : Any> {
 
-    fun <RESULT : Any> intent(buildFun: IntentBuilder<State, RESULT>.() -> Unit): Intent2<State, RESULT> =
-        IntentBuilder<State, RESULT>().apply { buildFun() }.build()
+    private lateinit var store: Store2<State>
+
+    open fun init(store: Store2<State>) {
+        this.store = store
+    }
+
+    fun <RESULT : Any> intent(buildFun: IntentBuilder<State, RESULT>.() -> Unit) =
+        store.intent(buildFun)
 
     fun sideEffectIntent(
         func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit
-    ): Intent2<State, Unit> = IntentBuilder<State, Unit>().apply {
-        sideEffect(func)
-    }.build()
+    ) = store.sideEffectIntent(func)
 }

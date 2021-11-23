@@ -9,18 +9,21 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
 
-class RemoveTaskDelegate<DATA : WithTasks<DATA>>(
-    private val dialogDelegate: DialogDelegate<DATA>,
+class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
     private val todoRepository: TodoRepository
-) : StoreDelegate<State<DATA>>() {
+) : StoreDelegate<State<DATA>>(), RemoveTaskDelegate {
 
-    private lateinit var store: Store2<State<DATA>>
+    private lateinit var removeTaskDelegate: RemoveTaskDelegate
+    private lateinit var dialogDelegate: DialogDelegate
 
-    fun init(store: Store2<State<DATA>>) {
-        this.store = store
+    @Suppress("Unchecked_Cast")
+    override fun init(store: Store2<State<DATA>>) {
+        super.init(store)
+        removeTaskDelegate = store as RemoveTaskDelegate
+        dialogDelegate = store as DialogDelegate
     }
 
-    fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
+    override fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
                 if (isRemoveWithCheckBoxChecked(this)) {
@@ -42,27 +45,27 @@ class RemoveTaskDelegate<DATA : WithTasks<DATA>>(
         data: DATA
     ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
 
-    fun onRemoveButtonClick(id: String) = sideEffectIntent {
+    override fun onRemoveButtonClick(id: String) = sideEffectIntent {
         state.ifDataAvailable {
             val idToRemove = id.toInt()
             val taskToRemove = taskById(idToRemove)
             when {
                 taskToRemove.subTasks.isNotEmpty() -> {
-                    store.delegate(dialogDelegate.showRemoveDialogWithCheckBox(idToRemove))
+                    dialogDelegate.showRemoveDialogWithCheckBox(idToRemove)
                 }
                 taskToRemove.description.length > 80 ||
                 taskToRemove.description.urls().isNotEmpty() -> {
-                    store.delegate(dialogDelegate.showRemoveTaskDialog(idToRemove))
+                    dialogDelegate.showRemoveTaskDialog(idToRemove)
                 }
                 else -> {
-                    (store as? StoreWithTaskRemove)?.removeTask(idToRemove)
-                        ?: store.delegate(removeTask(idToRemove))
+                    removeTaskDelegate.removeTask(idToRemove)
                 }
             }
         }
     }
 }
 
-interface StoreWithTaskRemove {
+interface RemoveTaskDelegate {
     fun removeTask(idToRemove: Int)
+    fun onRemoveButtonClick(id: String)
 }

@@ -6,9 +6,11 @@ import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.extensions.asInstanceAndReturn
 import com.marzec.todo.view.DialogState
 
-class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
+class DialogDelegateImpl<DATA : WithDialog<DATA>> :
+    StoreDelegate<State<DATA>>(),
+    DialogDelegate {
 
-    fun closeDialog() = intent<Unit> {
+    override fun closeDialog() = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(DialogState.NoDialog)
@@ -16,7 +18,7 @@ class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
         }
     }
 
-    fun showRemoveDialogWithCheckBox(idToRemove: Int) = intent<Unit> {
+    override fun showRemoveDialogWithCheckBox(idToRemove: Int) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(dialog = DialogState.RemoveDialogWithCheckBox(idToRemove))
@@ -24,7 +26,7 @@ class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
         }
     }
 
-    fun showRemoveTaskDialog(id: Int) = intent<Unit> {
+    override fun showRemoveTaskDialog(id: Int) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(
@@ -34,7 +36,7 @@ class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
         }
     }
 
-    fun onRemoveWithSubTasksChange() = intent<Unit> {
+    override fun onRemoveWithSubTasksChange() = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(
@@ -46,11 +48,19 @@ class DialogDelegate<DATA : WithDialog<DATA>> : StoreDelegate<State<DATA>>() {
         }
     }
 
-    fun showSelectUrlDialog(urls: List<String>) = intent<Unit> {
+    override fun showSelectUrlDialog(urls: List<String>) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(dialog = DialogState.SelectOptionsDialog(urls))
             }
         }
     }
+}
+
+interface DialogDelegate {
+    fun closeDialog()
+    fun showRemoveDialogWithCheckBox(idToRemove: Int)
+    fun showRemoveTaskDialog(id: Int)
+    fun onRemoveWithSubTasksChange()
+    fun showSelectUrlDialog(urls: List<String>)
 }

@@ -2,14 +2,18 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.todo.delegates.dialog.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
+import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.extensions.EMPTY_STRING
+import com.marzec.todo.extensions.asInstance
+import com.marzec.todo.extensions.delegates
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
@@ -19,7 +23,7 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import com.marzec.todo.view.DialogState
+import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 
 class TasksStore(
     private val navigationStore: NavigationStore,
@@ -29,14 +33,17 @@ class TasksStore(
     val todoRepository: TodoRepository,
     val listId: Int,
     private val openUrlHelper: OpenUrlHelper,
-    private val dialogDelegate: DialogDelegate<TasksScreenState>,
-    private val removeTaskDelegate: RemoveTaskDelegate<TasksScreenState>
+    private val dialogDelegate: DialogDelegate,
+    private val removeTaskDelegate: RemoveTaskDelegate
 ) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
-) {
+), RemoveTaskDelegate by removeTaskDelegate, DialogDelegate by dialogDelegate {
 
     init {
-        removeTaskDelegate.init(this)
+        delegates(
+            removeTaskDelegate,
+            dialogDelegate
+        )
     }
 
     fun loadList() = intent<Content<ToDoList>> {
@@ -66,12 +73,6 @@ class TasksStore(
             navigationStore.next(Destination.AddNewTask(listId, null, null))
         }
     }
-
-    fun onRemoveButtonClick(id: String) = delegate(removeTaskDelegate.onRemoveButtonClick(id))
-
-    fun hideDialog() = delegate(dialogDelegate.closeDialog())
-
-    fun removeTask(idToRemove: Int) = delegate(removeTaskDelegate.removeTask(idToRemove))
 
     override suspend fun onNewState(newState: State<TasksScreenState>) {
         stateCache.set(cacheKey, newState)
@@ -160,6 +161,4 @@ class TasksStore(
             }
         }
     }
-
-    fun onRemoveWithSubTasksChange() = delegate(dialogDelegate.onRemoveWithSubTasksChange())
 }

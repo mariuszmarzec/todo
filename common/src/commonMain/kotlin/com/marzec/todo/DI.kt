@@ -6,9 +6,9 @@ import com.marzec.todo.cache.Cache
 import com.marzec.todo.cache.FileCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
-import com.marzec.todo.delegates.dialog.DialogDelegate
-import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
-import com.marzec.todo.delegates.dialog.UrlDelegate
+import com.marzec.todo.delegates.dialog.DialogDelegateImpl
+import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
+import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationEntry
@@ -117,9 +117,8 @@ object DI {
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE,
             openUrlHelper = openUrlHelper,
-            dialogDelegate = DialogDelegate(),
-            removeTaskDelegate = RemoveTaskDelegate(
-                DialogDelegate(),
+            dialogDelegate = DialogDelegateImpl<TasksScreenState>(),
+            removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(
                 provideTodoRepository()
             )
         )
@@ -191,12 +190,10 @@ object DI {
         listId = listId,
         taskId = taskId,
         copyToClipBoardHelper = copyToClipBoardHelper,
-        dialogDelegate = provideDialogDelegate(),
-        removeTaskDelegate = RemoveTaskDelegate(provideDialogDelegate(), provideTodoRepository()),
-        urlDelegate = UrlDelegate(openUrlHelper, provideDialogDelegate())
+        dialogDelegate = DialogDelegateImpl<TaskDetailsState>(),
+        removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(provideTodoRepository()),
+        urlDelegate = UrlDelegateImpl(openUrlHelper, DialogDelegateImpl<TaskDetailsState>())
     )
-
-    private fun provideDialogDelegate(): DialogDelegate<TaskDetailsState> = DialogDelegate()
 
     @Composable
     private fun provideAddSubTaskScreen(listId: Int, taskId: Int, cacheKey: String) {

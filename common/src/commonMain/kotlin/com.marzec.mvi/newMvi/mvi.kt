@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -111,8 +110,10 @@ open class Store2<State : Any>(private val defaultState: State) {
         }
     }
 
-    fun <Result : Any> intent(buildFun: IntentBuilder<State, Result>.() -> Unit) = scope.launch {
-        actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
+    fun <Result : Any> intent(buildFun: IntentBuilder<State, Result>.() -> Unit) {
+        scope.launch {
+            actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
+        }
     }
 
     fun <Result : Any> delegate(intent: Intent2<State, Result>) {
@@ -121,10 +122,11 @@ open class Store2<State : Any>(private val defaultState: State) {
         }
     }
 
-    fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) =
+    fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
         scope.launch {
             actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
         }
+    }
 
     open suspend fun onNewState(newState: State) = Unit
 
