@@ -23,20 +23,18 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
         dialogDelegate = store as DialogDelegate
     }
 
-    override fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                if (isRemoveWithCheckBoxChecked(this)) {
-                    todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
-                } else {
-                    todoRepository.removeTask(idToRemove)
-                }
-            }
-        }
+    override fun removeTask(idToRemove: Int) = sideEffectIntent {
+        dialogDelegate.closeDialog()
 
-        reducer {
-            state.reduceContentAsSideAction(resultNonNull()) {
-                copyWithDialog(dialog = DialogState.NoDialog)
+        intent<Content<Unit>> {
+            onTrigger {
+                state.ifDataAvailable {
+                    if (isRemoveWithCheckBoxChecked(this)) {
+                        todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
+                    } else {
+                        todoRepository.removeTask(idToRemove)
+                    }
+                }
             }
         }
     }

@@ -32,7 +32,6 @@ import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
-import kotlinx.coroutines.launch
 
 @Composable
 fun ListsScreen(
@@ -117,7 +116,7 @@ fun ListsScreen(
                             onConfirm = {
                                 listsScreenStore.removeList(dialogState.idToRemove)
                             },
-                            onDismiss = { listsScreenStore.onDialogDismissed() }
+                            onDismiss = { listsScreenStore.closeDialog() }
                         )
                     }
                     is DialogState.InputDialog -> {
@@ -132,7 +131,7 @@ fun ListsScreen(
                             onConfirm = {
                                 listsScreenStore.onCreateButtonClicked(it)
                             },
-                            onDismiss = { listsScreenStore.onDialogDismissed() }
+                            onDismiss = { listsScreenStore.closeDialog() }
                         )
                     }
                     else -> Dialog.NoDialog

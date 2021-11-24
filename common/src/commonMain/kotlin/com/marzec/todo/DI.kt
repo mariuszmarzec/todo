@@ -274,7 +274,8 @@ object DI {
         cacheKey = cacheKey,
         initialState = provideListScreenDefaultState(),
         navigationStore = navigationStore,
-        loginRepository = loginRepository
+        loginRepository = loginRepository,
+        dialogDelegate = DialogDelegateImpl<ListsScreenState>()
     )
 
     private fun provideListScreenDefaultState(): State<ListsScreenState> {

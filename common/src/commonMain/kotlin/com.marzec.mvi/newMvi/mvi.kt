@@ -116,12 +116,6 @@ open class Store2<State : Any>(private val defaultState: State) {
         }
     }
 
-    fun <Result : Any> delegate(intent: Intent2<State, Result>) {
-        scope.launch {
-            actions.emit(intent)
-        }
-    }
-
     fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
         scope.launch {
             actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())

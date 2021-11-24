@@ -242,7 +242,7 @@ fun TaskDetailsScreen(
                                 message = "Do you really want to remove this task?",
                                 confirmButton = "Yes",
                                 dismissButton = "No",
-                                onDismiss = { store.hideDialog() },
+                                onDismiss = { store.closeDialog() },
                                 onConfirm = {
                                     store.removeTask(dialog.idToRemove)
                                 }
@@ -258,7 +258,7 @@ fun TaskDetailsScreen(
                                     message = "Do you really want to remove this task?",
                                     confirmButton = "Yes",
                                     dismissButton = "No",
-                                    onDismiss = { store.hideDialog() },
+                                    onDismiss = { store.closeDialog() },
                                     onConfirm = {
                                         store.removeTask(dialog.idToRemove)
                                     }
@@ -282,7 +282,7 @@ fun TaskDetailsScreen(
                                             name = EMPTY_STRING
                                         )
                                     },
-                                onDismiss = { store.hideDialog() },
+                                onDismiss = { store.closeDialog() },
                                 onItemClicked = { id ->
                                     scope.launch {
                                         store.openUrl(dialog.items[id.toInt()] as String)

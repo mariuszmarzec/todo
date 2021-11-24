@@ -5,11 +5,9 @@ import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
-import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
@@ -103,29 +101,25 @@ class TaskDetailsStore(
     fun showRemoveSubTaskDialog(subtaskId: String) =
         removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
-    fun hideDialog() = dialogDelegate.closeDialog()
+    override fun removeTask(idToRemove: Int) = sideEffectIntent {
+        closeDialog()
 
-    override fun removeTask(idToRemove: Int) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                if ((dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true) {
-                    todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
-                } else {
-                    todoRepository.removeTask(idToRemove)
+        intent<Content<Unit>> {
+            onTrigger {
+                state.ifDataAvailable {
+                    if ((dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true) {
+                        todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
+                    } else {
+                        todoRepository.removeTask(idToRemove)
+                    }
                 }
             }
-        }
 
-        reducer {
-            state.reduceContentAsSideAction(resultNonNull()) {
-                copyWithDialog(dialog = DialogState.NoDialog)
-            }
-        }
-
-        sideEffect {
-            resultNonNull().asInstance<Content.Data<Unit>> {
-                if (idToRemove == taskId) {
-                    navigationStore.goBack()
+            sideEffect {
+                resultNonNull().asInstance<Content.Data<Unit>> {
+                    if (idToRemove == taskId) {
+                        navigationStore.goBack()
+                    }
                 }
             }
         }
