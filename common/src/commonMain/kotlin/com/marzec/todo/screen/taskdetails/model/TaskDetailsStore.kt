@@ -37,6 +37,7 @@ class TaskDetailsStore(
 ) : Store2<State<TaskDetailsState>>(
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
+    UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate {
 
     init {
@@ -152,10 +153,6 @@ class TaskDetailsStore(
             copyToClipBoardHelper.copy(task.description)
         }
     }
-
-    fun openUrls(urls: List<String>) = urlDelegate.openUrls(urls)
-
-    fun openUrl(url: String) = urlDelegate.openUrl(url)
 
     fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
         onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }

@@ -189,7 +189,7 @@ private fun TaskScreenData(
                                 ?.urlToOpen() != null
                         ) {
                             IconButton({
-                                scope.launch { store.openUrl(it.id) }
+                                scope.launch { store.openUrlForTask(it.id.toInt()) }
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.ExitToApp,

@@ -8,6 +8,7 @@ import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
+import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.extensions.urlToOpen
@@ -27,19 +28,22 @@ class TasksStore(
     initialState: State<TasksScreenState>,
     val todoRepository: TodoRepository,
     val listId: Int,
-    private val openUrlHelper: OpenUrlHelper,
+    private val urlDelegate: UrlDelegate,
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate
 ) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
-), RemoveTaskDelegate by removeTaskDelegate, DialogDelegate by dialogDelegate {
+), RemoveTaskDelegate by removeTaskDelegate,
+    UrlDelegate by urlDelegate,
+    DialogDelegate by dialogDelegate {
 
     init {
         delegates(
             removeTaskDelegate,
             dialogDelegate,
-            changePriorityDelegate
+            changePriorityDelegate,
+            urlDelegate
         )
     }
 
@@ -91,12 +95,6 @@ class TasksStore(
                 newPriority = tasks.minOf { it.priority }.dec()
             )
         }
-    }
-
-    fun openUrl(taskId: String) = sideEffectIntent {
-        state.data?.tasks?.firstOrNull { task -> task.id == taskId.toInt() }
-            ?.urlToOpen()
-            ?.let { openUrlHelper.open(it) }
     }
 
     fun onSearchQueryChanged(query: String) = intent<Unit> {

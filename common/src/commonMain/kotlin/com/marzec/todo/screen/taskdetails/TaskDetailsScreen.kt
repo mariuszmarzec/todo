@@ -178,7 +178,6 @@ fun TaskDetailsScreen(
                                             }
                                         }
                                     ) {
-                                        // TODO REMOVE THIS LOGIC
                                         val urlToOpen =
                                             state.data.task.subTasks.firstOrNull { task -> task.id == it.id.toInt() }
                                                 ?.urlToOpen()

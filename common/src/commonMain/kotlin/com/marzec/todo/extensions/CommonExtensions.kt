@@ -17,7 +17,7 @@ inline fun <reified T: Any, R> Any.asInstanceAndReturnOther(action: T.() -> R) =
 @Suppress("unchecked_cast")
 inline fun <reified T: Any> Any.asInstanceAndReturn(action: T.() -> T) = (this as? T)?.action()
 
-fun Task.urlToOpen(): String? = subTasks.firstOrNull()?.description?.urls()?.firstOrNull()
+fun Task.urlToOpen(): String? = subTasks.firstOrNull()?.urlToOpen()
     ?: description.urls().firstOrNull()
 
 fun List<Task>.flatMapTask(tasks: MutableList<Task> = mutableListOf()): List<Task> {
