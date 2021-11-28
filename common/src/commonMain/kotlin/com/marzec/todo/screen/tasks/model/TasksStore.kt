@@ -2,17 +2,13 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.OpenUrlHelper
-import com.marzec.todo.delegates.StoreDelegate
+import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
-import com.marzec.todo.delegates.dialog.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
-import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.extensions.EMPTY_STRING
-import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
@@ -23,7 +19,6 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
-import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 
 class TasksStore(
     private val navigationStore: NavigationStore,
@@ -34,7 +29,8 @@ class TasksStore(
     val listId: Int,
     private val openUrlHelper: OpenUrlHelper,
     private val dialogDelegate: DialogDelegate,
-    private val removeTaskDelegate: RemoveTaskDelegate
+    private val removeTaskDelegate: RemoveTaskDelegate,
+    private val changePriorityDelegate: ChangePriorityDelegate
 ) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate, DialogDelegate by dialogDelegate {
@@ -42,7 +38,8 @@ class TasksStore(
     init {
         delegates(
             removeTaskDelegate,
-            dialogDelegate
+            dialogDelegate,
+            changePriorityDelegate
         )
     }
 
@@ -78,43 +75,21 @@ class TasksStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun moveToTop(id: String) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                val maxPriority = tasks.maxOf { it.priority }
-                tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    todoRepository.updateTask(
-                        taskId = id.toInt(),
-                        description = task.description,
-                        parentTaskId = task.parentTaskId,
-                        priority = maxPriority.inc(),
-                        isToDo = task.isToDo
-                    )
-                }
-            }
-        }
-        reducer {
-            state.reduceContentNoChanges(resultNonNull())
+    fun moveToTop(id: String) = sideEffectIntent {
+        state.ifDataAvailable {
+            changePriorityDelegate.changePriority(
+                id = id.toInt(),
+                newPriority = tasks.maxOf { it.priority }.inc()
+            )
         }
     }
 
-    fun moveToBottom(id: String) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                val minPriority = tasks.minOf { it.priority }
-                tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    todoRepository.updateTask(
-                        taskId = id.toInt(),
-                        description = task.description,
-                        parentTaskId = task.parentTaskId,
-                        priority = minPriority.dec(),
-                        isToDo = task.isToDo
-                    )
-                }
-            }
-        }
-        reducer {
-            state.reduceContentNoChanges(resultNonNull())
+    fun moveToBottom(id: String) = sideEffectIntent {
+        state.ifDataAvailable {
+            changePriorityDelegate.changePriority(
+                id = id.toInt(),
+                newPriority = tasks.minOf { it.priority }.dec()
+            )
         }
     }
 

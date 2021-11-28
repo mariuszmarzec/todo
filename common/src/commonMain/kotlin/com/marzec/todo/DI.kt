@@ -6,6 +6,7 @@ import com.marzec.todo.cache.Cache
 import com.marzec.todo.cache.FileCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -15,9 +16,9 @@ import com.marzec.todo.navigation.model.NavigationEntry
 import com.marzec.todo.navigation.model.NavigationState
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.network.ApiDataSource
+import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.LocalDataSource
-import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.preferences.MemoryPreferences
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
@@ -120,6 +121,9 @@ object DI {
             dialogDelegate = DialogDelegateImpl<TasksScreenState>(),
             removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(
                 provideTodoRepository()
+            ),
+            changePriorityDelegate = ChangePriorityDelegateImpl<TasksScreenState>(
+                provideTodoRepository()
             )
         )
     }
@@ -192,7 +196,13 @@ object DI {
         copyToClipBoardHelper = copyToClipBoardHelper,
         dialogDelegate = DialogDelegateImpl<TaskDetailsState>(),
         removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(provideTodoRepository()),
-        urlDelegate = UrlDelegateImpl(openUrlHelper, DialogDelegateImpl<TaskDetailsState>())
+        urlDelegate = UrlDelegateImpl<TaskDetailsState>(
+            openUrlHelper,
+            DialogDelegateImpl<TaskDetailsState>()
+        ),
+        changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
+            provideTodoRepository()
+        )
     )
 
     @Composable

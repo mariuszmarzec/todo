@@ -5,6 +5,8 @@ import com.marzec.mvi.newMvi.Store2
 import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
+import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
+import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
@@ -30,7 +32,8 @@ class TaskDetailsStore(
     private val copyToClipBoardHelper: CopyToClipBoardHelper,
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
-    private val urlDelegate: UrlDelegate<TaskDetailsState>
+    private val urlDelegate: UrlDelegate,
+    private val changePriorityDelegate: ChangePriorityDelegate
 ) : Store2<State<TaskDetailsState>>(
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
@@ -40,7 +43,8 @@ class TaskDetailsStore(
         delegates(
             removeTaskDelegate,
             urlDelegate,
-            dialogDelegate
+            dialogDelegate,
+            changePriorityDelegate
         )
     }
 
@@ -125,43 +129,21 @@ class TaskDetailsStore(
         }
     }
 
-    fun moveToTop(id: String) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                val maxPriority = task.subTasks.maxOf { it.priority }
-                task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    todoRepository.updateTask(
-                        taskId = id.toInt(),
-                        description = task.description,
-                        parentTaskId = task.parentTaskId,
-                        priority = maxPriority.inc(),
-                        isToDo = task.isToDo
-                    )
-                }
-            }
-        }
-        reducer {
-            state.reduceContentAsSideAction(resultNonNull())
+    fun moveToTop(id: String) = sideEffectIntent {
+        state.ifDataAvailable {
+            changePriorityDelegate.changePriority(
+                id = id.toInt(),
+                newPriority = task.subTasks.maxOf { it.priority }.inc()
+            )
         }
     }
 
-    fun moveToBottom(id: String) = intent<Content<Unit>> {
-        onTrigger {
-            state.ifDataAvailable {
-                val minPriority = task.subTasks.minOf { it.priority }
-                task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
-                    todoRepository.updateTask(
-                        taskId = id.toInt(),
-                        description = task.description,
-                        parentTaskId = task.parentTaskId,
-                        priority = minPriority.dec(),
-                        isToDo = task.isToDo
-                    )
-                }
-            }
-        }
-        reducer {
-            state.reduceContentAsSideAction(resultNonNull())
+    fun moveToBottom(id: String) = sideEffectIntent {
+        state.ifDataAvailable {
+            changePriorityDelegate.changePriority(
+                id = id.toInt(),
+                newPriority = task.subTasks.minOf { it.priority }.dec()
+            )
         }
     }
 

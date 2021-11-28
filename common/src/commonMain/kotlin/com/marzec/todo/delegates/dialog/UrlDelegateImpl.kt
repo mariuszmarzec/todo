@@ -4,7 +4,7 @@ import com.marzec.mvi.State
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.StoreDelegate
 
-interface UrlDelegate<DATA : WithDialog<DATA>> {
+interface UrlDelegate {
     fun openUrls(urls: List<String>)
     fun openUrl(url: String)
     fun showSelectUrlDialog(urls: List<String>)
@@ -13,7 +13,7 @@ interface UrlDelegate<DATA : WithDialog<DATA>> {
 class UrlDelegateImpl<DATA : WithDialog<DATA>>(
     private val openUrlHelper: OpenUrlHelper,
     private val dialogDelegate: DialogDelegate
-) : StoreDelegate<State<DATA>>(), UrlDelegate<DATA> {
+) : StoreDelegate<State<DATA>>(), UrlDelegate {
 
     override fun openUrls(urls: List<String>) =
         if (urls.size == 1) {
