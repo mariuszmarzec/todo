@@ -2,12 +2,8 @@ package com.marzec.todo.screen.tasks
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -16,26 +12,18 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
 import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.urlToOpen
@@ -45,6 +33,8 @@ import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
+import com.marzec.todo.view.SearchView
+import com.marzec.todo.view.SearchViewState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
@@ -66,59 +56,16 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
             actionBarProvider.provide(title = "Tasks") {
                 when (val state = state) {
                     is State.Data<TasksScreenState> -> {
-                        Row(
-                            Modifier.wrapContentWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            val focusManager = LocalFocusManager.current
-                            val focusRequester = remember { FocusRequester() }
-                            val searchInUse =
-                                state.data.searchFocused || state.data.search.isNotEmpty()
-                            BasicTextField(
-                                modifier = Modifier
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged { scope.launch {
-                                        store.onSearchFocusChanged(it.isFocused) }
-                                    }
-                                    .widthIn(min = 200.dp, max = 300.dp)
-                                    .padding(0.dp),
-                                singleLine = true,
-                                value = if (searchInUse) {
-                                    state.data.search
-                                } else "Search",
-                                onValueChange = {
-                                    store.onSearchQueryChanged(it)
-                                }
+                        SearchView(
+                            SearchViewState(
+                                focused = state.data.search.focused,
+                                value = state.data.search.value,
+                                onFocusChanged = { isFocused -> store.onSearchFocusChanged(isFocused) },
+                                onSearchQueryChanged = { value -> store.onSearchQueryChanged(value) },
+                                onClearButtonClick = { store.clearSearch() },
+                                onActivateSearchButtonClick = { store.activateSearch() }
                             )
-                            LaunchedEffect(key1 = state.data.searchFocused) {
-                                if (state.data.searchFocused) {
-                                    focusRequester.requestFocus()
-                                } else {
-                                    focusManager.clearFocus()
-
-                                }
-                            }
-                            if (searchInUse) {
-                                IconButton({
-                                    store.clearSearch()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = "Clear search"
-                                    )
-                                }
-                            } else {
-                                IconButton({
-                                    store.activateSearch()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Search,
-                                        contentDescription = "Activate search"
-                                    )
-                                }
-                            }
-                        }
+                        )
                     }
                     else -> Unit
                 }
@@ -156,7 +103,7 @@ private fun TaskScreenData(
     val scope = rememberCoroutineScope()
 
     LazyColumn {
-        val searchQuery = state.data.search.trim().split(" ")
+        val searchQuery = state.data.search.value.trim().split(" ")
         items(
             items = state.data.tasks.filter { task ->
                 searchQuery == listOf(EMPTY_STRING) || searchQuery.all {

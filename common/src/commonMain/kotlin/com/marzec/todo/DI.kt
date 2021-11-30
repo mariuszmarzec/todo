@@ -9,6 +9,7 @@ import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
+import com.marzec.todo.delegates.dialog.SearchDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
@@ -124,7 +125,8 @@ object DI {
             ),
             changePriorityDelegate = ChangePriorityDelegateImpl<TasksScreenState>(
                 provideTodoRepository()
-            )
+            ),
+            searchDelegate = SearchDelegateImpl<TasksScreenState>()
         )
     }
 

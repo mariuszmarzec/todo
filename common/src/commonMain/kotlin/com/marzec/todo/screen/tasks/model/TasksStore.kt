@@ -2,16 +2,13 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
-import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
+import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
-import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.delegates
-import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
@@ -31,19 +28,22 @@ class TasksStore(
     private val urlDelegate: UrlDelegate,
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
-    private val changePriorityDelegate: ChangePriorityDelegate
+    private val changePriorityDelegate: ChangePriorityDelegate,
+    private val searchDelegate: SearchDelegate
 ) : Store2<State<TasksScreenState>>(
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
-    DialogDelegate by dialogDelegate {
+    DialogDelegate by dialogDelegate,
+    SearchDelegate by searchDelegate {
 
     init {
         delegates(
             removeTaskDelegate,
             dialogDelegate,
             changePriorityDelegate,
-            urlDelegate
+            urlDelegate,
+            searchDelegate
         )
     }
 
@@ -94,44 +94,6 @@ class TasksStore(
                 id = id.toInt(),
                 newPriority = tasks.minOf { it.priority }.dec()
             )
-        }
-    }
-
-    fun onSearchQueryChanged(query: String) = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copy(search = query)
-            }
-        }
-    }
-
-    fun clearSearch() = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copy(
-                    search = EMPTY_STRING,
-                    searchFocused = false
-                )
-            }
-        }
-    }
-
-    fun activateSearch() = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copy(
-                    search = EMPTY_STRING,
-                    searchFocused = true
-                )
-            }
-        }
-    }
-
-    fun onSearchFocusChanged(focused: Boolean) = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copy(searchFocused = focused)
-            }
         }
     }
 }
