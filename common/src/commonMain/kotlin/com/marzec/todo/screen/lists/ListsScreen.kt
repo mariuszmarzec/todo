@@ -15,14 +15,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
+import com.marzec.todo.extensions.collectState
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationAction
 import com.marzec.todo.navigation.model.NavigationStore
@@ -39,14 +37,9 @@ fun ListsScreen(
     actionBarProvider: ActionBarProvider,
     listsScreenStore: ListsScreenStore
 ) {
-    val scope = rememberCoroutineScope()
 
-    val state: State<ListsScreenState> by listsScreenStore.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        listsScreenStore.init(scope) {
-            listsScreenStore.initialLoad()
-        }
+    val state: State<ListsScreenState> by listsScreenStore.collectState {
+        listsScreenStore.initialLoad()
     }
 
     Scaffold(

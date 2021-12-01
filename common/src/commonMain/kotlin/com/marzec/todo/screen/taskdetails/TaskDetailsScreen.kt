@@ -30,29 +30,25 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
 import com.marzec.todo.extensions.EMPTY_STRING
+import com.marzec.todo.extensions.collectState
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
-import com.marzec.todo.screen.tasks.collectState
 import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
-import kotlinx.coroutines.launch
 
 @Composable
 fun TaskDetailsScreen(

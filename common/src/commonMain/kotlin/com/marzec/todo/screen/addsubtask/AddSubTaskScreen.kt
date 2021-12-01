@@ -19,15 +19,13 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
+import com.marzec.todo.extensions.collectState
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.view.ActionBarProvider
@@ -40,14 +38,8 @@ fun AddSubTaskScreen(
     actionBarProvider: ActionBarProvider
 ) {
 
-    val scope = rememberCoroutineScope()
-
-    val state: State<AddSubTaskData> by store.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        store.init(scope) {
-            store.initialLoad()
-        }
+    val state: State<AddSubTaskData> by store.collectState {
+        store.initialLoad()
     }
 
     Scaffold(

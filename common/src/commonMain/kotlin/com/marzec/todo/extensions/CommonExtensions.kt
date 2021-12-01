@@ -10,7 +10,6 @@ import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.model.Task
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.properties.Delegates
 
 const val EMPTY_STRING = ""
 
@@ -52,7 +51,7 @@ fun <STATE : Any> Store2<STATE>.delegates(vararg delegates: Any) {
 @Composable
 fun <T: Any> Store2<T>.collectState(
     context: CoroutineContext = EmptyCoroutineContext,
-    onStoreInitAction: suspend () -> Unit
+    onStoreInitAction: suspend () -> Unit = { }
 ): androidx.compose.runtime.State<T> {
     val scope = rememberCoroutineScope()
 

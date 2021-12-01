@@ -23,18 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
+import com.marzec.todo.extensions.collectState
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 
 @Composable
 fun LoginScreen(loginStore: LoginStore) {
-    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        loginStore.init(scope)
-    }
-
-    val state: State<LoginData> by loginStore.state.collectAsState()
+    val state: State<LoginData> by loginStore.collectState()
 
     when (val state = state) {
         is State.Data -> {
@@ -68,7 +64,9 @@ private fun LoginScreen(
     error: String
 ) {
     Column(
-        modifier = Modifier.background(Color.White).fillMaxSize(),
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

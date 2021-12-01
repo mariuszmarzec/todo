@@ -12,19 +12,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
-import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.extensions.collectState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.todo.view.ActionBarProvider
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddNewTaskScreen(
@@ -32,14 +28,8 @@ fun AddNewTaskScreen(
     actionBarProvider: ActionBarProvider
 ) {
 
-    val scope = rememberCoroutineScope()
-
-    val state: State<AddNewTaskState> by store.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        store.init(scope) {
-            store.initialLoad()
-        }
+    val state: State<AddNewTaskState> by store.collectState() {
+        store.initialLoad()
     }
 
     Scaffold(
