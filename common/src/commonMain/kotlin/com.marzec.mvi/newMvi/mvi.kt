@@ -34,7 +34,7 @@ open class Store2<State : Any>(private val defaultState: State) {
 
     private var pause = MutableStateFlow(false)
 
-    private lateinit var scope: CoroutineScope
+    private var scope: CoroutineScope? = null
 
     suspend fun init(scope: CoroutineScope, initialAction: suspend () -> Unit = {}) {
         this.scope = scope
@@ -107,19 +107,19 @@ open class Store2<State : Any>(private val defaultState: State) {
         }
 
     protected fun cancelFlows() {
-        scope.launch {
+        scope?.launch {
             pause.emit(true)
         }
     }
 
     fun <Result : Any> intent(buildFun: IntentBuilder<State, Result>.() -> Unit) {
-        scope.launch {
+        scope?.launch {
             actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
         }
     }
 
     fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
-        scope.launch {
+        scope?.launch {
             actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
         }
     }

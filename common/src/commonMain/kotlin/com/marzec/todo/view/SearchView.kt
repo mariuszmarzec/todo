@@ -20,23 +20,15 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import com.marzec.todo.delegates.dialog.SearchDelegate
 
 data class SearchState(
     val value: String,
     val focused: Boolean
 )
 
-data class SearchViewState(
-    val value: String,
-    val focused: Boolean,
-    val onFocusChanged: (Boolean) -> Unit,
-    val onSearchQueryChanged: (String) -> Unit,
-    val onClearButtonClick: () -> Unit,
-    val onActivateSearchButtonClick: () -> Unit
-)
-
 @Composable
-fun SearchView(state: SearchViewState) {
+fun SearchView(state: SearchState, searchDelegate: SearchDelegate) {
     Row(
         Modifier.wrapContentWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -49,25 +41,24 @@ fun SearchView(state: SearchViewState) {
             modifier = Modifier
                 .focusRequester(focusRequester)
                 .onFocusChanged {
-                    state.onFocusChanged.invoke(it.isFocused)
+                    searchDelegate.onSearchFocusChanged(it.isFocused)
                 }
                 .widthIn(min = 200.dp, max = 300.dp)
                 .padding(0.dp),
             singleLine = true,
             value = if (searchInUse) state.value else "Search",
-            onValueChange = { state.onSearchQueryChanged(it) }
+            onValueChange = { searchDelegate.onSearchQueryChanged(it) }
         )
         LaunchedEffect(key1 = state.focused) {
             if (state.focused) {
                 focusRequester.requestFocus()
             } else {
                 focusManager.clearFocus()
-
             }
         }
         if (searchInUse) {
             IconButton({
-                state.onClearButtonClick()
+                searchDelegate.clearSearch()
             }) {
                 Icon(
                     imageVector = Icons.Default.Clear,
@@ -76,7 +67,7 @@ fun SearchView(state: SearchViewState) {
             }
         } else {
             IconButton({
-                state.onActivateSearchButtonClick()
+                searchDelegate.activateSearch()
             }) {
                 Icon(
                     imageVector = Icons.Default.Search,

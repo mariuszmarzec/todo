@@ -1,6 +1,8 @@
 package com.marzec.todo
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.mvi.State
 import com.marzec.todo.cache.Cache
 import com.marzec.todo.cache.FileCache
@@ -104,6 +106,7 @@ object DI {
 
     @Composable
     private fun provideTasksScreen(listId: Int, cacheKey: String) {
+        val scope = rememberCoroutineScope()
         TasksScreen(
             store = provideTasksStore(listId = listId, cacheKey = cacheKey),
             actionBarProvider = provideActionBarProvider()

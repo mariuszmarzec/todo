@@ -21,6 +21,7 @@ interface WithSearch<DATA> {
 }
 
 class SearchDelegateImpl<DATA : WithSearch<DATA>> : StoreDelegate<State<DATA>>(), SearchDelegate {
+
     override fun onSearchQueryChanged(query: String) = intent<Unit> {
         reducer {
             state.reduceData {

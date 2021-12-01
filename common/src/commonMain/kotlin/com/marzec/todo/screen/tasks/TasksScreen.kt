@@ -33,13 +33,13 @@ import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.SearchView
-import com.marzec.todo.view.SearchViewState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 import kotlinx.coroutines.launch
 
 @Composable
 fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
+
     val state: State<TasksScreenState> by store.collectState {
         store.loadList()
     }
@@ -49,16 +49,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
             actionBarProvider.provide(title = "Tasks") {
                 when (val state = state) {
                     is State.Data<TasksScreenState> -> {
-                        SearchView(
-                            SearchViewState(
-                                focused = state.data.search.focused,
-                                value = state.data.search.value,
-                                onFocusChanged = { isFocused -> store.onSearchFocusChanged(isFocused) },
-                                onSearchQueryChanged = { value -> store.onSearchQueryChanged(value) },
-                                onClearButtonClick = { store.clearSearch() },
-                                onActivateSearchButtonClick = { store.activateSearch() }
-                            )
-                        )
+                        SearchView(state.data.search, store)
                     }
                     else -> Unit
                 }
