@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
                 DI.navigationScope = rememberCoroutineScope()
 
-                DI.navigationStore = DI.provideNavigationStore()
+                DI.navigationStore = DI.provideNavigationStore(rememberCoroutineScope())
 
                 HomeScreen(DI.navigationStore)
             }

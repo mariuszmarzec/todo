@@ -18,7 +18,10 @@ import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
-open class Store2<State : Any>(private val defaultState: State) {
+open class Store2<State : Any>(
+    private val scope: CoroutineScope,
+    private val defaultState: State
+) {
 
     private val actions =
         MutableSharedFlow<Intent2<State, Any>>(extraBufferCapacity = 10)
@@ -34,10 +37,7 @@ open class Store2<State : Any>(private val defaultState: State) {
 
     private var pause = MutableStateFlow(false)
 
-    private var scope: CoroutineScope? = null
-
-    suspend fun init(scope: CoroutineScope, initialAction: suspend () -> Unit = {}) {
-        this.scope = scope
+    suspend fun init(initialAction: suspend () -> Unit = {}) {
         pause.emit(false)
         scope.launch {
             actions.onSubscription { initialAction() }
@@ -107,19 +107,19 @@ open class Store2<State : Any>(private val defaultState: State) {
         }
 
     protected fun cancelFlows() {
-        scope?.launch {
+        scope.launch {
             pause.emit(true)
         }
     }
 
     fun <Result : Any> intent(buildFun: IntentBuilder<State, Result>.() -> Unit) {
-        scope?.launch {
+        scope.launch {
             actions.emit(IntentBuilder<State, Result>().apply { buildFun() }.build())
         }
     }
 
     fun sideEffectIntent(func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit) {
-        scope?.launch {
+        scope.launch {
             actions.emit(IntentBuilder<State, Unit>().apply { sideEffect(func) }.build())
         }
     }

@@ -58,10 +58,6 @@ fun main() {
     DI.client = httpClient
     DI.ioDispatcher = Dispatchers.IO
 
-    DI.navigationStore = runBlocking {
-        DI.provideNavigationStore()
-    }
-
     application {
         Window(
             ::exitApplication,
@@ -69,6 +65,10 @@ fun main() {
             state = rememberWindowState(width = 700.dp, height = 768.dp)
         ) {
             DI.navigationScope = rememberCoroutineScope()
+
+            DI.navigationStore = runBlocking {
+                DI.provideNavigationStore(DI.navigationScope)
+            }
 
             HomeScreen(DI.navigationStore)
         }

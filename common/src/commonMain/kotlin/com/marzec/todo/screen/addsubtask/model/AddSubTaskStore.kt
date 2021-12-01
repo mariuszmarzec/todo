@@ -13,9 +13,11 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.mapData
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 
 class AddSubTaskStore(
+    scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
@@ -24,7 +26,7 @@ class AddSubTaskStore(
     private val listId: Int,
     private val taskId: Int
 ) : Store2<State<AddSubTaskData>>(
-    stateCache.get(cacheKey) ?: initialState
+    scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
     fun initialLoad() = intent<Content<List<Task>>> {

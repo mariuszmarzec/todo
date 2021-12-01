@@ -53,11 +53,10 @@ fun <T: Any> Store2<T>.collectState(
     context: CoroutineContext = EmptyCoroutineContext,
     onStoreInitAction: suspend () -> Unit = { }
 ): androidx.compose.runtime.State<T> {
-    val scope = rememberCoroutineScope()
 
     val state = state.collectAsState(state.value, context)
     LaunchedEffect(key1 = identifier) {
-        init(scope) {
+        init {
             onStoreInitAction()
         }
     }

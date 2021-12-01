@@ -13,17 +13,19 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 class LoginStore(
+    scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val stateCache: Preferences,
     private val cacheKey: String,
     initialState: State<LoginData>,
     private val loginRepository: LoginRepository
 ) : Store2<State<LoginData>>(
-    stateCache.get(cacheKey) ?: initialState
+    scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
     override suspend fun onNewState(newState: State<LoginData>) {

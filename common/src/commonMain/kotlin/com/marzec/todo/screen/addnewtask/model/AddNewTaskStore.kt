@@ -15,15 +15,17 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
+import kotlinx.coroutines.CoroutineScope
 
 class AddNewTaskStore(
+    scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
     initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
 ) : Store2<State<AddNewTaskState>>(
-    stateCache.get(cacheKey) ?: initialState
+    scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
     fun initialLoad() = intent<Content<Task>> {

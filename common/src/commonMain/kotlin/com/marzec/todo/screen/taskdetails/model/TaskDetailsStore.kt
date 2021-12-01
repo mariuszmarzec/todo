@@ -20,8 +20,10 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import kotlinx.coroutines.CoroutineScope
 
 class TaskDetailsStore(
+    scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
@@ -35,7 +37,7 @@ class TaskDetailsStore(
     private val urlDelegate: UrlDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate
 ) : Store2<State<TaskDetailsState>>(
-    stateCache.get(cacheKey) ?: initialState
+    scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate {

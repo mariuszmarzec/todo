@@ -106,15 +106,23 @@ object DI {
 
     @Composable
     private fun provideTasksScreen(listId: Int, cacheKey: String) {
-        val scope = rememberCoroutineScope()
         TasksScreen(
-            store = provideTasksStore(listId = listId, cacheKey = cacheKey),
+            store = provideTasksStore(
+                scope = rememberCoroutineScope(),
+                listId = listId,
+                cacheKey = cacheKey
+            ),
             actionBarProvider = provideActionBarProvider()
         )
     }
 
-    private fun provideTasksStore(listId: Int, cacheKey: String): TasksStore {
+    private fun provideTasksStore(
+        scope: CoroutineScope,
+        listId: Int,
+        cacheKey: String
+    ): TasksStore {
         return TasksStore(
+            scope = scope,
             navigationStore = navigationStore,
             listId = listId,
             todoRepository = provideTodoRepository(),
@@ -142,6 +150,7 @@ object DI {
     ) {
         AddNewTaskScreen(
             provideAddNewTaskStore(
+                scope = rememberCoroutineScope(),
                 listId = listId,
                 taskId = taskId,
                 parentTaskId = parentTaskId,
@@ -152,12 +161,14 @@ object DI {
     }
 
     private fun provideAddNewTaskStore(
+        scope: CoroutineScope,
         listId: Int,
         taskId: Int?,
         parentTaskId: Int?,
         cacheKey: String
     ): AddNewTaskStore {
         return AddNewTaskStore(
+            scope = scope,
             navigationStore = navigationStore,
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
@@ -176,6 +187,7 @@ object DI {
     private fun provideTaskDetailsScreen(listId: Int, taskId: Int, cacheKey: String) {
         TaskDetailsScreen(
             store = provideTaskDetailsStore(
+                scope = rememberCoroutineScope(),
                 listId = listId,
                 taskId = taskId,
                 cacheKey = cacheKey
@@ -185,10 +197,12 @@ object DI {
     }
 
     private fun provideTaskDetailsStore(
+        scope: CoroutineScope,
         listId: Int,
         taskId: Int,
         cacheKey: String
     ): TaskDetailsStore = TaskDetailsStore(
+        scope = scope,
         navigationStore = navigationStore,
         todoRepository = provideTodoRepository(),
         stateCache = preferences,
@@ -209,6 +223,7 @@ object DI {
     private fun provideAddSubTaskScreen(listId: Int, taskId: Int, cacheKey: String) {
         AddSubTaskScreen(
             store = provideAddSubTaskStore(
+                scope = rememberCoroutineScope(),
                 listId = listId,
                 taskId = taskId,
                 cacheKey = cacheKey
@@ -218,11 +233,13 @@ object DI {
     }
 
     private fun provideAddSubTaskStore(
+        scope: CoroutineScope,
         listId: Int,
         taskId: Int,
         cacheKey: String
     ): AddSubTaskStore {
         return AddSubTaskStore(
+            scope = scope,
             navigationStore = navigationStore,
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
@@ -239,7 +256,9 @@ object DI {
 
     lateinit var navigationStore: NavigationStore
 
-    fun provideNavigationStore(): NavigationStore {
+    fun provideNavigationStore(
+        scope: CoroutineScope
+    ): NavigationStore {
         val authToken = runBlocking {
             fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
         }
@@ -256,6 +275,7 @@ object DI {
             ) @Composable { _, it -> provideListScreen(it) }
         }
         return NavigationStore(
+            scope = scope,
             router = ROUTER,
             stateCache = preferences,
             cacheKey = navigationStoreCacheKey,
@@ -273,12 +293,19 @@ object DI {
         ListsScreen(
             navigationStore = navigationStore,
             actionBarProvider = provideActionBarProvider(),
-            listsScreenStore = provideListScreenStore(cacheKey = cacheKey)
+            listsScreenStore = provideListScreenStore(
+                scope = rememberCoroutineScope(),
+                cacheKey = cacheKey
+            )
         )
     }
 
     @Composable
-    private fun provideListScreenStore(cacheKey: String) = ListsScreenStore(
+    private fun provideListScreenStore(
+        scope: CoroutineScope,
+        cacheKey: String
+    ) = ListsScreenStore(
+        scope = scope,
         todoRepository = provideTodoRepository(),
         stateCache = preferences,
         cacheKey = cacheKey,
@@ -294,7 +321,12 @@ object DI {
 
     @Composable
     private fun provideLoginScreen(cacheKey: String) =
-        LoginScreen(loginStore = provideLoginStore(cacheKey))
+        LoginScreen(
+            loginStore = provideLoginStore(
+                scope = rememberCoroutineScope(),
+                cacheKey = cacheKey
+            )
+        )
 
     lateinit var client: HttpClient
 
@@ -306,7 +338,11 @@ object DI {
         )
     }
 
-    fun provideLoginStore(cacheKey: String): LoginStore = LoginStore(
+    fun provideLoginStore(
+        scope: CoroutineScope,
+        cacheKey: String
+    ): LoginStore = LoginStore(
+        scope = scope,
         navigationStore = navigationStore,
         loginRepository = loginRepository,
         stateCache = preferences,

@@ -17,8 +17,10 @@ import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
+import kotlinx.coroutines.CoroutineScope
 
 class TasksStore(
+    scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
@@ -31,6 +33,7 @@ class TasksStore(
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val searchDelegate: SearchDelegate
 ) : Store2<State<TasksScreenState>>(
+    scope,
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,

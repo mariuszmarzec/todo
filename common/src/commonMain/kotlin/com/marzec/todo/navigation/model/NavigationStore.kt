@@ -4,14 +4,16 @@ import androidx.compose.runtime.Composable
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.todo.preferences.Preferences
 import kotlin.reflect.KClass
+import kotlinx.coroutines.CoroutineScope
 
 class NavigationStore(
     private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
+    scope: CoroutineScope,
     private val stateCache: Preferences,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState
-) : Store2<NavigationState>(stateCache.get(cacheKey) ?: initialState) {
+) : Store2<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
     fun next(action: NavigationAction) = intent<Unit> {
         reducer {

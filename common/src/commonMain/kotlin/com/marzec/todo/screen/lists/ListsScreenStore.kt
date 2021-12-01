@@ -20,8 +20,10 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import kotlinx.coroutines.CoroutineScope
 
 class ListsScreenStore(
+    scope: CoroutineScope,
     private val cacheKey: String,
     private val stateCache: Preferences,
     initialState: State<ListsScreenState>,
@@ -30,7 +32,7 @@ class ListsScreenStore(
     private val loginRepository: LoginRepository,
     private val dialogDelegate: DialogDelegate
 ) : Store2<State<ListsScreenState>>(
-    stateCache.get(cacheKey) ?: initialState
+    scope, stateCache.get(cacheKey) ?: initialState
 ), DialogDelegate by dialogDelegate {
 
     init {
