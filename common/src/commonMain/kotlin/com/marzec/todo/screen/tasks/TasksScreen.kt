@@ -25,7 +25,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.marzec.mvi.State
+import com.marzec.mvi.newMvi.Store2
 import com.marzec.todo.extensions.EMPTY_STRING
+import com.marzec.todo.extensions.collectState
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
@@ -37,18 +39,14 @@ import com.marzec.todo.view.SearchView
 import com.marzec.todo.view.SearchViewState
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.launch
 
 @Composable
 fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
-    val scope = rememberCoroutineScope()
-
-    val state: State<TasksScreenState> by store.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        store.init(this) {
-            store.loadList()
-        }
+    val state: State<TasksScreenState> by store.collectState {
+        store.loadList()
     }
 
     Scaffold(

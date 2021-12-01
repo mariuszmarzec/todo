@@ -30,6 +30,8 @@ open class Store2<State : Any>(private val defaultState: State) {
     val state: StateFlow<State>
         get() = _state
 
+    open val identifier: Any = Unit
+
     private var pause = MutableStateFlow(false)
 
     private lateinit var scope: CoroutineScope

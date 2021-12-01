@@ -25,8 +25,6 @@ import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(loginStore: LoginStore) {
@@ -42,7 +40,6 @@ fun LoginScreen(loginStore: LoginStore) {
         is State.Data -> {
             LoginScreen(
                 login = state.data.login,
-                scope = scope,
                 loginStore = loginStore,
                 password = state.data.password,
                 error = ""
@@ -55,7 +52,6 @@ fun LoginScreen(loginStore: LoginStore) {
         is State.Error -> {
             LoginScreen(
                 login = state.data?.login.orEmpty(),
-                scope = scope,
                 loginStore = loginStore,
                 password = state.data?.password.orEmpty(),
                 error = state.message
@@ -67,7 +63,6 @@ fun LoginScreen(loginStore: LoginStore) {
 @Composable
 private fun LoginScreen(
     login: String,
-    scope: CoroutineScope,
     loginStore: LoginStore,
     password: String,
     error: String

@@ -37,6 +37,9 @@ class TasksStore(
     DialogDelegate by dialogDelegate,
     SearchDelegate by searchDelegate {
 
+    override val identifier: String
+        get() = cacheKey
+
     init {
         delegates(
             removeTaskDelegate,

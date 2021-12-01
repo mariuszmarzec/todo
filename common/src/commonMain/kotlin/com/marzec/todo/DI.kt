@@ -172,8 +172,6 @@ object DI {
     @Composable
     private fun provideTaskDetailsScreen(listId: Int, taskId: Int, cacheKey: String) {
         TaskDetailsScreen(
-            listId = listId,
-            taskId = taskId,
             store = provideTaskDetailsStore(
                 listId = listId,
                 taskId = taskId,

@@ -45,6 +45,7 @@ import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
+import com.marzec.todo.screen.tasks.collectState
 import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
@@ -55,18 +56,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TaskDetailsScreen(
-    listId: Int,
-    taskId: Int,
     store: TaskDetailsStore,
     actionBarProvider: ActionBarProvider
 ) {
-
-    val scope = rememberCoroutineScope()
-
-    val state: State<TaskDetailsState> by store.state.collectAsState()
-
-    LaunchedEffect(listId, taskId) {
-        store.init(scope) { store.loadDetails() }
+    val state: State<TaskDetailsState> by store.collectState {
+        store.loadDetails()
     }
 
     Scaffold(
@@ -173,9 +167,7 @@ fun TaskDetailsScreen(
                                     TextListItemView(
                                         state = it,
                                         onClickListener = {
-                                            scope.launch {
-                                                store.goToSubtaskDetails(it.id)
-                                            }
+                                            store.goToSubtaskDetails(it.id)
                                         }
                                     ) {
                                         val urlToOpen =
@@ -283,9 +275,7 @@ fun TaskDetailsScreen(
                                     },
                                 onDismiss = { store.closeDialog() },
                                 onItemClicked = { id ->
-                                    scope.launch {
-                                        store.openUrl(dialog.items[id.toInt()] as String)
-                                    }
+                                    store.openUrl(dialog.items[id.toInt()] as String)
                                 }
                             )
                         )

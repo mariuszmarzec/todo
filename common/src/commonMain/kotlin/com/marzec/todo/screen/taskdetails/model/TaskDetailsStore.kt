@@ -40,6 +40,8 @@ class TaskDetailsStore(
     UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate {
 
+    override val identifier: String
+        get() = cacheKey
     init {
         delegates(
             removeTaskDelegate,

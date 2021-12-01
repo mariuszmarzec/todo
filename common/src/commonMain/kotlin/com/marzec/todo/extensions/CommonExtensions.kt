@@ -1,9 +1,15 @@
 package com.marzec.todo.extensions
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.mvi.newMvi.Store2
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.model.Task
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.properties.Delegates
 
 const val EMPTY_STRING = ""
@@ -41,4 +47,20 @@ fun <STATE : Any> Store2<STATE>.delegates(vararg delegates: Any) {
     delegates.forEach {
         (it as StoreDelegate<STATE>).init(this@delegates)
     }
+}
+
+@Composable
+fun <T: Any> Store2<T>.collectState(
+    context: CoroutineContext = EmptyCoroutineContext,
+    onStoreInitAction: suspend () -> Unit
+): androidx.compose.runtime.State<T> {
+    val scope = rememberCoroutineScope()
+
+    val state = state.collectAsState(state.value, context)
+    LaunchedEffect(key1 = identifier) {
+        init(scope) {
+            onStoreInitAction()
+        }
+    }
+    return state
 }
