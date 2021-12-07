@@ -2,11 +2,9 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
-import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
@@ -84,12 +82,12 @@ class TaskDetailsStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun unpinSubtask(id: String) = intent<Content<Unit>> {
+    fun unpinSubtask(id: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                task.subTasks.firstOrNull { id.toInt() == it.id }?.let { task ->
+                task.subTasks.firstOrNull { id == it.id }?.let { task ->
                     todoRepository.updateTask(
-                        taskId = id.toInt(),
+                        taskId = id,
                         description = task.description,
                         parentTaskId = null,
                         priority = task.priority,
@@ -100,14 +98,14 @@ class TaskDetailsStore(
         }
     }
 
-    fun goToSubtaskDetails(id: String) = sideEffectIntent {
-        navigationStore.next(Destination.TaskDetails(listId, id.toInt()))
+    fun goToSubtaskDetails(id: Int) = sideEffectIntent {
+        navigationStore.next(Destination.TaskDetails(listId, id))
     }
 
     fun showRemoveTaskDialog() =
-        removeTaskDelegate.onRemoveButtonClick(taskId.toString())
+        removeTaskDelegate.onRemoveButtonClick(taskId)
 
-    fun showRemoveSubTaskDialog(subtaskId: String) =
+    fun showRemoveSubTaskDialog(subtaskId: Int) =
         removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
     override fun removeTask(idToRemove: Int) = sideEffectIntent {
@@ -134,19 +132,19 @@ class TaskDetailsStore(
         }
     }
 
-    fun moveToTop(id: String) = sideEffectIntent {
+    fun moveToTop(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
-                id = id.toInt(),
+                id = id,
                 newPriority = task.subTasks.maxOf { it.priority }.inc()
             )
         }
     }
 
-    fun moveToBottom(id: String) = sideEffectIntent {
+    fun moveToBottom(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
-                id = id.toInt(),
+                id = id,
                 newPriority = task.subTasks.minOf { it.priority }.dec()
             )
         }

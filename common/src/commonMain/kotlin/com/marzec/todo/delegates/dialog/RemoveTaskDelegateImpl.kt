@@ -2,7 +2,6 @@ package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.State
 import com.marzec.mvi.newMvi.Store2
-import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.network.Content
@@ -43,20 +42,19 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
         data: DATA
     ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
 
-    override fun onRemoveButtonClick(id: String) = sideEffectIntent {
+    override fun onRemoveButtonClick(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
-            val idToRemove = id.toInt()
-            val taskToRemove = taskById(idToRemove)
+            val taskToRemove = taskById(id)
             when {
                 taskToRemove.subTasks.isNotEmpty() -> {
-                    dialogDelegate.showRemoveDialogWithCheckBox(idToRemove)
+                    dialogDelegate.showRemoveDialogWithCheckBox(id)
                 }
                 taskToRemove.description.length > 80 ||
                 taskToRemove.description.urls().isNotEmpty() -> {
-                    dialogDelegate.showRemoveTaskDialog(idToRemove)
+                    dialogDelegate.showRemoveTaskDialog(id)
                 }
                 else -> {
-                    removeTaskDelegate.removeTask(idToRemove)
+                    removeTaskDelegate.removeTask(id)
                 }
             }
         }
@@ -65,5 +63,5 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
 
 interface RemoveTaskDelegate {
     fun removeTask(idToRemove: Int)
-    fun onRemoveButtonClick(id: String)
+    fun onRemoveButtonClick(id: Int)
 }

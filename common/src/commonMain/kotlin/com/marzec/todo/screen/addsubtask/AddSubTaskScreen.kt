@@ -25,10 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
+import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.collectState
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.view.ActionBarProvider
+import com.marzec.todo.view.TaskListView
 import com.marzec.todo.view.TextListItem
 import com.marzec.todo.view.TextListItemView
 
@@ -61,32 +63,14 @@ fun AddSubTaskScreen(
                         }
                     }
                     Spacer(Modifier.size(16.dp))
-                    LazyColumn {
-                        items(
-                            items = state.data.tasks.map {
-                                TextListItem(
-                                    id = it.id.toString(),
-                                    name = it.description.lines().first(),
-                                    description = it.subTasks.firstOrNull()?.description?.lines()?.first() ?: ""
-                                )
-                            },
-                        ) { item ->
-                            key(item.id) {
-                                Row(Modifier.fillMaxWidth()) {
-                                    TextListItemView(state = item,
-                                        onClickListener = {
-                                            store.goToSubtaskDetails(it.id)
-                                        }) {
-                                        IconButton({
-                                            store.pinSubtask(item.id)
-                                        }) {
-                                            Icon(imageVector = Icons.Default.Add, contentDescription = "Pin")
-                                        }
-                                    }
-                                }
-                            }
+                    TaskListView(
+                        tasks = state.data.tasks,
+                        showButtonsInColumns = false,
+                        onClickListener = { },
+                        onUnpinButtonClick = {
+                            store.pinSubtask(it)
                         }
-                    }
+                    )
                 }
             }
             is State.Loading -> {

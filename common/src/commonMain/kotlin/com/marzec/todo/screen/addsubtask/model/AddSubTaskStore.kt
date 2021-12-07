@@ -54,16 +54,12 @@ class AddSubTaskStore(
         )
     }
 
-    fun goToSubtaskDetails(id: String) = sideEffectIntent {
-        navigationStore.next(Destination.TaskDetails(listId, id.toInt()))
-    }
-
-    fun pinSubtask(id: String) = intent<Content<Unit>> {
+    fun pinSubtask(id: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                tasks.firstOrNull { id.toInt() == it.id }?.let { task ->
+                tasks.firstOrNull { id == it.id }?.let { task ->
                     todoRepository.updateTask(
-                        taskId = id.toInt(),
+                        taskId = id,
                         description = task.description,
                         parentTaskId = taskId,
                         priority = task.priority,

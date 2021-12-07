@@ -1,31 +1,18 @@
 package com.marzec.todo.screen.tasks
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import com.marzec.mvi.State
 import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.collectState
-import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
@@ -33,8 +20,7 @@ import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.SearchView
-import com.marzec.todo.view.TextListItem
-import com.marzec.todo.view.TextListItemView
+import com.marzec.todo.view.TaskListView
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,78 +71,32 @@ private fun TaskScreenData(
     store: TasksStore
 ) {
     val scope = rememberCoroutineScope()
+    val searchQuery = state.data.search.value.trim().split(" ")
 
-    LazyColumn {
-        val searchQuery = state.data.search.value.trim().split(" ")
-        items(
-            items = state.data.tasks.filter { task ->
-                searchQuery == listOf(EMPTY_STRING) || searchQuery.all {
-                    task.description.contains(
-                        it,
-                        ignoreCase = true
-                    )
-                }
-            }.map {
-                TextListItem(
-                    id = it.id.toString(),
-                    name = it.description.lines().first(),
-                    description = it.subTasks.firstOrNull()?.description?.lines()
-                        ?.first() ?: ""
+    TaskListView(
+        tasks = state.data.tasks.filter { task ->
+            searchQuery == listOf(EMPTY_STRING) || searchQuery.all {
+                task.description.contains(
+                    it,
+                    ignoreCase = true
                 )
-            },
-        ) {
-            key(it.id) {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextListItemView(state = it, onClickListener = {
-                        scope.launch {
-                            store.onListItemClicked(it.id)
-                        }
-                    }) {
-                        // TODO REMOVE THIS LOGIC
-                        if (state.data.tasks.firstOrNull { task -> task.id == it.id.toInt() }
-                                ?.urlToOpen() != null
-                        ) {
-                            IconButton({
-                                scope.launch { store.openUrlForTask(it.id.toInt()) }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.ExitToApp,
-                                    contentDescription = "Open url"
-                                )
-                            }
-                        }
-                        IconButton({
-                            scope.launch { store.moveToTop(it.id) }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowUp,
-                                contentDescription = "Move to top"
-                            )
-                        }
-                        IconButton({
-                            scope.launch { store.moveToBottom(it.id) }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Move to bottom"
-                            )
-                        }
-                        IconButton({
-                            scope.launch { store.onRemoveButtonClick(it.id) }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Remove"
-                            )
-                        }
-                    }
-                }
             }
-        }
-    }
+        },
+        showButtonsInColumns = false,
+        onClickListener = {
+            store.onListItemClicked(it)
+        },
+        onOpenUrlClick = { store.openUrl(it) },
+        onMoveToTopClick = { store.moveToTop(it) },
+        onMoveToBottomClick = {
+            store.moveToBottom(it)
+        },
+        onRemoveButtonClick = {
+            store.onRemoveButtonClick(it)
+        },
+        onUnpinButtonClick = null
+    )
+
     val dialog = state.data.dialog
     when (dialog) {
         is DialogState.RemoveDialogWithCheckBox -> {

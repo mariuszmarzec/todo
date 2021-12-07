@@ -71,8 +71,8 @@ class TasksStore(
         }
     }
 
-    fun onListItemClicked(id: String) = sideEffectIntent {
-        navigationStore.next(Destination.TaskDetails(listId, id.toInt()))
+    fun onListItemClicked(id: Int) = sideEffectIntent {
+        navigationStore.next(Destination.TaskDetails(listId, id))
     }
 
     fun addNewTask() = sideEffectIntent {
@@ -85,19 +85,19 @@ class TasksStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun moveToTop(id: String) = sideEffectIntent {
+    fun moveToTop(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
-                id = id.toInt(),
+                id = id,
                 newPriority = tasks.maxOf { it.priority }.inc()
             )
         }
     }
 
-    fun moveToBottom(id: String) = sideEffectIntent {
+    fun moveToBottom(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
-                id = id.toInt(),
+                id = id,
                 newPriority = tasks.minOf { it.priority }.dec()
             )
         }

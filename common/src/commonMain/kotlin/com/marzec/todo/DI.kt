@@ -67,7 +67,7 @@ object DI {
     lateinit var memoryCache: Cache
 
     lateinit var fileCache: FileCache
-    var quickCacheEnabled: Boolean = true
+    var quickCacheEnabled: Boolean = false
 
     val navigationStoreCacheKey by lazy {
         cacheKeyProvider()
