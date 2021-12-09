@@ -29,13 +29,14 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
     val state: State<TasksScreenState> by store.collectState {
         store.loadList()
     }
+    val stateValue = state
 
     Scaffold(
         topBar = {
             actionBarProvider.provide(title = "Tasks") {
-                when (val state = state) {
+                when (stateValue) {
                     is State.Data<TasksScreenState> -> {
-                        SearchView(state.data.search, store)
+                        SearchView(stateValue.data.search, store)
                     }
                     else -> Unit
                 }
@@ -51,15 +52,15 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
             }
         }) {
-        when (val state = state) {
+        when (stateValue) {
             is State.Data -> {
-                TaskScreenData(state, store)
+                TaskScreenData(stateValue, store)
             }
             is State.Loading -> {
                 Text(text = "Loading")
             }
             is State.Error -> {
-                Text(text = state.message)
+                Text(text = stateValue.message)
             }
         }
     }
