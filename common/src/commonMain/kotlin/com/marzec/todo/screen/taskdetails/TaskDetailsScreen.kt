@@ -157,6 +157,12 @@ fun TaskDetailsScreen(
                         },
                         onUnpinButtonClick = {
                             store.unpinSubtask(it)
+                        },
+                        onCheckClick = {
+                            store.markAsChecked(it)
+                        },
+                        onUncheckClick = {
+                            store.markAsToDo(it)
                         }
                     )
                 }

@@ -42,6 +42,7 @@ class TaskDetailsStore(
 
     override val identifier: String
         get() = cacheKey
+
     init {
         delegates(
             removeTaskDelegate,
@@ -158,5 +159,35 @@ class TaskDetailsStore(
 
     fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
         onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }
+    }
+
+    fun markAsChecked(id: Int) = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                val task = taskById(id)
+                todoRepository.updateTask(
+                    taskId = task.id,
+                    description = task.description,
+                    parentTaskId = task.parentTaskId,
+                    priority = task.priority,
+                    isToDo = false
+                )
+            }
+        }
+    }
+
+    fun markAsToDo(id: Int) = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                val task = taskById(id)
+                todoRepository.updateTask(
+                    taskId = task.id,
+                    description = task.description,
+                    parentTaskId = task.parentTaskId,
+                    priority = task.priority,
+                    isToDo = true
+                )
+            }
+        }
     }
 }
