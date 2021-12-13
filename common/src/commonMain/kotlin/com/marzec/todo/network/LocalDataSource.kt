@@ -75,7 +75,10 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                     task?.let { remainedTasks.remove(task) }
                     task
                 }
-                .sortedWith(compareByDescending(TaskDto::priority).thenBy(TaskDto::modifiedTime))
+                .sortedWith(
+                    compareByDescending(TaskDto::isToDo).thenByDescending(TaskDto::priority)
+                        .thenBy(TaskDto::modifiedTime)
+                )
 
             val tasks = tasksWithoutSubtasks.map { task ->
                 task.copy(subTasks = getSubTasks(remainedTasks, task))
@@ -96,7 +99,10 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         subtasks.map { task -> task.copy(subTasks = getSubTasks(remainedTasks, task)) }
     } else {
         emptyList()
-    }.sortedWith(compareByDescending(TaskDto::priority).thenBy(TaskDto::modifiedTime))
+    }.sortedWith(
+        compareByDescending(TaskDto::isToDo).thenByDescending(TaskDto::priority)
+            .thenBy(TaskDto::modifiedTime)
+    )
 
 
     override suspend fun removeList(id: Int) = update {
@@ -109,7 +115,11 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     override suspend fun createToDoList(title: String) = update {
         val newListId = localData.lists.size
         localData = localData.copy(
-            lists = localData.lists + ToDoListDto(id = newListId, title = title, tasks = emptyList()),
+            lists = localData.lists + ToDoListDto(
+                id = newListId,
+                title = title,
+                tasks = emptyList()
+            ),
             listIdToTaskIds = localData.listIdToTaskIds + (newListId to emptyList())
         )
     }
