@@ -5,6 +5,7 @@ Backend for project: https://github.com/mariuszmarzec/fiteo/tree/master/common/s
 
 # Configuration
 
+local.properties:
 ```properties
 storePassword=<STORE_PASSWORD>
 keyAlias=<ALIAS>
