@@ -8,25 +8,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.sharp.Check
-import androidx.compose.material.icons.sharp.CheckCircle
-import androidx.compose.material.icons.twotone.AddCircle
-import androidx.compose.material.icons.twotone.Build
-import androidx.compose.material.icons.twotone.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 
@@ -74,6 +67,7 @@ fun TaskListView(
                 ) {
                     TextListItemView(
                         listItem.item,
+                        backgroundColor = if (listItem.isToDo) Color.White else Color.LightGray,
                         onClickListener = {
                             onClickListener(it.id.toInt())
                         }
