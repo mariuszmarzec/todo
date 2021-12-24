@@ -1,4 +1,3 @@
-import org.gradle.api.artifacts.Dependency
 
 val kotlinVersion = "1.5.31"
 val ktorVersion = "1.4.3"
@@ -8,7 +7,7 @@ val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
 val coroutinesVersion = "1.5.2"
 val androidActivityXVersion = "1.3.0-alpha02"
-val androidGradlepluginVersion = "7.1.0-beta04"
+val androidGradlepluginVersion = "7.1.0-beta05"
 val buildkonfigVersion = "0.11.0"
 val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
