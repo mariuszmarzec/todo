@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
@@ -26,6 +27,7 @@ import com.marzec.todo.model.Task
 private data class TaskListItem(
     val id: Int,
     val item: TextListItem,
+    val pinned: Boolean,
     val isToDo: Boolean,
     val urlToOpen: String?
 )
@@ -39,7 +41,7 @@ fun TaskListView(
     onMoveToTopClick: ((Int) -> Unit)? = null,
     onMoveToBottomClick: ((Int) -> Unit)? = null,
     onRemoveButtonClick: ((Int) -> Unit)? = null,
-    onUnpinButtonClick: ((Int) -> Unit)? = null,
+    onPinButtonClick: ((Int) -> Unit)? = null,
     onCheckClick: ((Int) -> Unit)? = null,
     onUncheckClick: ((Int) -> Unit)? = null
 ) {
@@ -55,7 +57,8 @@ fun TaskListView(
                             ?.first() ?: ""
                     ),
                     urlToOpen = it.urlToOpen(),
-                    isToDo = it.isToDo
+                    isToDo = it.isToDo,
+                    pinned = it.parentTaskId != null
                 )
             },
         ) { listItem ->
@@ -88,8 +91,9 @@ fun TaskListView(
                             Column {
                                 ManageButtons(
                                     id,
+                                    pinned = listItem.pinned,
                                     onRemoveButtonClick,
-                                    onUnpinButtonClick
+                                    onPinButtonClick
                                 )
                             }
                         } else {
@@ -101,7 +105,12 @@ fun TaskListView(
                                 onUncheckClick
                             )
                             MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
-                            ManageButtons(id, onRemoveButtonClick, onUnpinButtonClick)
+                            ManageButtons(
+                                id = id,
+                                pinned = listItem.pinned,
+                                onRemoveButtonClick = onRemoveButtonClick,
+                                onPinButtonClick = onPinButtonClick
+                            )
                         }
                     }
                 }
@@ -185,8 +194,9 @@ private fun MoveButtons(
 @Composable
 private fun ManageButtons(
     id: Int,
+    pinned: Boolean,
     onRemoveButtonClick: ((Int) -> Unit)?,
-    onUnpinButtonClick: ((Int) -> Unit)?
+    onPinButtonClick: ((Int) -> Unit)?
 ) {
     onRemoveButtonClick?.let { onClick ->
         IconButton({ onClick(id) }) {
@@ -196,10 +206,10 @@ private fun ManageButtons(
             )
         }
     }
-    onUnpinButtonClick?.let { onClick ->
+    onPinButtonClick?.let { onClick ->
         IconButton({ onClick(id) }) {
             Icon(
-                imageVector = Icons.Default.Clear,
+                imageVector = if (pinned) Icons.Default.Clear else Icons.Default.Add,
                 contentDescription = "Unpin"
             )
         }

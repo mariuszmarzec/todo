@@ -94,7 +94,7 @@ private fun TaskScreenData(
         onRemoveButtonClick = {
             store.onRemoveButtonClick(it)
         },
-        onUnpinButtonClick = null
+        onPinButtonClick = null
     )
 
     val dialog = state.data.dialog

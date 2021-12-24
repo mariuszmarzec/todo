@@ -155,7 +155,7 @@ fun TaskDetailsScreen(
                         onRemoveButtonClick = {
                             store.showRemoveSubTaskDialog(it)
                         },
-                        onUnpinButtonClick = {
+                        onPinButtonClick = {
                             store.unpinSubtask(it)
                         },
                         onCheckClick = {
