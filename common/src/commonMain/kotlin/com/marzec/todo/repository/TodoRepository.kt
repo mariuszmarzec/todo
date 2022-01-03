@@ -134,7 +134,7 @@ class TodoRepository(
     ): Flow<Content<T>> =
         withContext(dispatcher) {
             val cached = memoryCache.observe<T>(key).firstOrNull()
-            val initial = if (cached != null) {
+            val initial: Content<T> = if (cached != null) {
                 Content.Data(cached)
             } else {
                 Content.Loading()
@@ -149,7 +149,7 @@ class TodoRepository(
                         memoryCache.put(key, callResult.data)
                     }
                 },
-                memoryCache.observe<T>(key).filterNotNull().map { Content.Data(it) }
+                memoryCache.observe<T>(key).filterNotNull().map { Content.Data(it) as Content<T> }
             )
         }.flowOn(dispatcher)
 

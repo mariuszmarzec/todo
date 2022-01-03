@@ -102,7 +102,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
         *kotlinOptions.freeCompilerArgs.toTypedArray(),
         "-Xallow-jvm-ir-dependencies",
         "-Xskip-prerelease-check")
-    kotlinOptions.useIR = true
 }
 
 buildkonfig {

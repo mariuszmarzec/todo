@@ -1,5 +1,5 @@
 
-val kotlinVersion = "1.5.31"
+val kotlinVersion = "1.6.10"
 val ktorVersion = "1.4.3"
 val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
@@ -12,7 +12,7 @@ val buildkonfigVersion = "0.11.0"
 val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
 
-private val composePluginVersion = "1.0.0-beta3"
+private val composePluginVersion = "1.0.1"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {
