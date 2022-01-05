@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.login.model
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.todo.model.User
@@ -24,7 +24,7 @@ class LoginStore(
     private val cacheKey: String,
     initialState: State<LoginData>,
     private val loginRepository: LoginRepository
-) : Store2<State<LoginData>>(
+) : Store3<State<LoginData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
@@ -32,15 +32,15 @@ class LoginStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun login() = intent<Content<User>> {
-        onTrigger(
-            isCancellableFlowTrigger = true,
-            runSideEffectAfterCancel = true
-        ) {
+    fun login() = intent<Content<User>>("login") {
+        onTrigger {
             state.ifDataAvailable {
                 loginRepository.login(login, password)
-                    .cancelFlowsIf { it is Content.Data }
             }
+        }
+
+        cancelTrigger(runSideEffectAfterCancel = true) {
+            resultNonNull() is Content.Data
         }
 
         reducer {

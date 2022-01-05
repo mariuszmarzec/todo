@@ -2,7 +2,7 @@ package com.marzec.todo.screen.lists
 
 import com.marzec.mvi.State
 import com.marzec.mvi.mapData
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.delegates.dialog.DialogDelegate
@@ -31,7 +31,7 @@ class ListsScreenStore(
     private val navigationStore: NavigationStore,
     private val loginRepository: LoginRepository,
     private val dialogDelegate: DialogDelegate
-) : Store2<State<ListsScreenState>>(
+) : Store3<State<ListsScreenState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), DialogDelegate by dialogDelegate {
 
@@ -79,7 +79,7 @@ class ListsScreenStore(
         }
     }
 
-    fun removeList(id: Int) = sideEffectIntent {
+    fun removeList(id: Int) = sideEffect {
         closeDialog()
 
         intent<Content<Unit>> {
@@ -91,7 +91,7 @@ class ListsScreenStore(
         }
     }
 
-    fun onCreateButtonClicked(newListName: String) = sideEffectIntent {
+    fun onCreateButtonClicked(newListName: String) = sideEffect {
         closeDialog()
 
         intent<Content<Unit>> {

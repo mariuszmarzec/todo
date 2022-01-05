@@ -1,7 +1,7 @@
 package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.extensions.urlToOpen
@@ -21,7 +21,7 @@ class UrlDelegateImpl<DATA : WithTasks<DATA>>(
     private lateinit var urlDelegatedStore: UrlDelegate
     private lateinit var dialogDelegatedStore: DialogDelegate
 
-    override fun init(store: Store2<State<DATA>>) {
+    override fun init(store: Store3<State<DATA>>) {
         super.init(store)
         urlDelegatedStore = store as UrlDelegate
         dialogDelegatedStore = store as DialogDelegate
@@ -34,7 +34,7 @@ class UrlDelegateImpl<DATA : WithTasks<DATA>>(
             dialogDelegatedStore.showSelectUrlDialog(urls)
         }
 
-    override fun openUrl(url: String) = sideEffectIntent {
+    override fun openUrl(url: String) = sideEffect {
         openUrlHelper.open(url)
     }
 
@@ -42,7 +42,7 @@ class UrlDelegateImpl<DATA : WithTasks<DATA>>(
         task.urlToOpen()?.let { openUrl(it) }
     }
 
-    override fun openUrlForTask(id: Int) = sideEffectIntent {
+    override fun openUrlForTask(id: Int) = sideEffect {
         state.ifDataAvailable {
             urlDelegatedStore.openUrlForTask(taskById(id))
         }

@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
@@ -19,6 +19,7 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 
 class TaskDetailsStore(
     scope: CoroutineScope,
@@ -34,7 +35,7 @@ class TaskDetailsStore(
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate
-) : Store2<State<TaskDetailsState>>(
+) : Store3<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
@@ -52,8 +53,8 @@ class TaskDetailsStore(
         )
     }
 
-    fun loadDetails() = intent<Content<Task>> {
-        onTrigger(isCancellableFlowTrigger = true) {
+    fun loadDetails() = intent<Content<Task>>("loadDetails") {
+        onTrigger {
             todoRepository.observeTask(listId, taskId)
         }
         reducer {
@@ -99,7 +100,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun goToSubtaskDetails(id: Int) = sideEffectIntent {
+    fun goToSubtaskDetails(id: Int) = sideEffect {
         navigationStore.next(Destination.TaskDetails(listId, id))
     }
 
@@ -109,7 +110,7 @@ class TaskDetailsStore(
     fun showRemoveSubTaskDialog(subtaskId: Int) =
         removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
-    override fun removeTask(idToRemove: Int) = sideEffectIntent {
+    override fun removeTask(idToRemove: Int) = sideEffect {
         closeDialog()
 
         intent<Content<Unit>> {
@@ -133,7 +134,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun moveToTop(id: Int) = sideEffectIntent {
+    fun moveToTop(id: Int) = sideEffect {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,
@@ -142,7 +143,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun moveToBottom(id: Int) = sideEffectIntent {
+    fun moveToBottom(id: Int) = sideEffect {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,
@@ -151,7 +152,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun copyDescription() = sideEffectIntent {
+    fun copyDescription() = sideEffect {
         state.ifDataAvailable {
             copyToClipBoardHelper.copy(task.description)
         }

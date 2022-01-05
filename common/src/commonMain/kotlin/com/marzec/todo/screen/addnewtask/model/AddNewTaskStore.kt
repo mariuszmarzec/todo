@@ -1,8 +1,8 @@
 package com.marzec.todo.screen.addnewtask.model
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.IntentBuilder
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.IntentBuilder
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
@@ -24,7 +24,7 @@ class AddNewTaskStore(
     private val stateCache: Preferences,
     initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
-) : Store2<State<AddNewTaskState>>(
+) : Store3<State<AddNewTaskState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
@@ -61,11 +61,8 @@ class AddNewTaskStore(
         }
     }
 
-    fun addNewTask() = intent<Content<Unit>> {
-        onTrigger(
-            isCancellableFlowTrigger = true,
-            runSideEffectAfterCancel = true
-        ) {
+    fun addNewTask() = intent<Content<Unit>>("addNewTask") {
+        onTrigger {
             state.ifDataAvailable {
                 val taskId = taskId
                 if (taskId != null) {
@@ -83,8 +80,12 @@ class AddNewTaskStore(
                         parentTaskId,
                         highestPriorityAsDefault
                     )
-                }.cancelFlowsIf { it is Content.Data }
+                }
             }
+        }
+
+        cancelTrigger(runSideEffectAfterCancel = true) {
+            resultNonNull() is Content.Data
         }
 
         reducer {
@@ -96,19 +97,20 @@ class AddNewTaskStore(
         }
     }
 
-    fun addManyTasks() = intent<Content<Unit>> {
-        onTrigger(
-            isCancellableFlowTrigger = true,
-            runSideEffectAfterCancel = true
-        ) {
+    fun addManyTasks() = intent<Content<Unit>>("addManyTasks") {
+        onTrigger {
             state.ifDataAvailable {
                 todoRepository.addNewTasks(
                     listId = listId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     parentTaskId = parentTaskId,
                     descriptions = description.split("\n")
-                ).cancelFlowsIf { it is Content.Data }
+                )
             }
+        }
+
+        cancelTrigger(runSideEffectAfterCancel = true) {
+            resultNonNull() is Content.Data
         }
 
         reducer {

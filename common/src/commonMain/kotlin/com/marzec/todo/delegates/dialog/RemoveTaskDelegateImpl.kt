@@ -1,7 +1,7 @@
 package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.extensions.urls
 import com.marzec.todo.network.Content
@@ -16,13 +16,13 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
     private lateinit var dialogDelegate: DialogDelegate
 
     @Suppress("Unchecked_Cast")
-    override fun init(store: Store2<State<DATA>>) {
+    override fun init(store: Store3<State<DATA>>) {
         super.init(store)
         removeTaskDelegate = store as RemoveTaskDelegate
         dialogDelegate = store as DialogDelegate
     }
 
-    override fun removeTask(idToRemove: Int) = sideEffectIntent {
+    override fun removeTask(idToRemove: Int) = sideEffect {
         dialogDelegate.closeDialog()
 
         intent<Content<Unit>> {
@@ -42,7 +42,7 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
         data: DATA
     ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
 
-    override fun onRemoveButtonClick(id: Int) = sideEffectIntent {
+    override fun onRemoveButtonClick(id: Int) = sideEffect {
         state.ifDataAvailable {
             val taskToRemove = taskById(id)
             when {

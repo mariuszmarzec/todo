@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.model.Task
@@ -42,14 +42,14 @@ fun List<TaskDto>.flatMapTaskDto(tasks: MutableList<TaskDto> = mutableListOf()):
 }
 
 @Suppress("unchecked_cast")
-fun <STATE : Any> Store2<STATE>.delegates(vararg delegates: Any) {
+fun <STATE : Any> Store3<STATE>.delegates(vararg delegates: Any) {
     delegates.forEach {
         (it as StoreDelegate<STATE>).init(this@delegates)
     }
 }
 
 @Composable
-fun <T: Any> Store2<T>.collectState(
+fun <T: Any> Store3<T>.collectState(
     context: CoroutineContext = EmptyCoroutineContext,
     onStoreInitAction: suspend () -> Unit = { }
 ): androidx.compose.runtime.State<T> {

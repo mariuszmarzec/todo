@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
@@ -32,7 +32,7 @@ class TasksStore(
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val searchDelegate: SearchDelegate
-) : Store2<State<TasksScreenState>>(
+) : Store3<State<TasksScreenState>>(
     scope,
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
@@ -71,11 +71,11 @@ class TasksStore(
         }
     }
 
-    fun onListItemClicked(id: Int) = sideEffectIntent {
+    fun onListItemClicked(id: Int) = sideEffect {
         navigationStore.next(Destination.TaskDetails(listId, id))
     }
 
-    fun addNewTask() = sideEffectIntent {
+    fun addNewTask() = sideEffect {
         state.asData {
             navigationStore.next(Destination.AddNewTask(listId, null, null))
         }
@@ -85,7 +85,7 @@ class TasksStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun moveToTop(id: Int) = sideEffectIntent {
+    fun moveToTop(id: Int) = sideEffect {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,
@@ -94,7 +94,7 @@ class TasksStore(
         }
     }
 
-    fun moveToBottom(id: Int) = sideEffectIntent {
+    fun moveToBottom(id: Int) = sideEffect {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,

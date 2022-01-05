@@ -1,7 +1,6 @@
 package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.IntentBuilder
 import com.marzec.mvi.reduceData
 import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.extensions.asInstanceAndReturn

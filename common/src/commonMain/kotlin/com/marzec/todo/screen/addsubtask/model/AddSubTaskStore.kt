@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.addsubtask.model
 
 import com.marzec.mvi.State
-import com.marzec.mvi.newMvi.Store2
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.extensions.asInstance
@@ -25,7 +25,7 @@ class AddSubTaskStore(
     private val todoRepository: TodoRepository,
     private val listId: Int,
     private val taskId: Int
-) : Store2<State<AddSubTaskData>>(
+) : Store3<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
@@ -44,7 +44,7 @@ class AddSubTaskStore(
         }
     }
 
-    fun onAddSubTaskClick() = sideEffectIntent {
+    fun onAddSubTaskClick() = sideEffect {
         navigationStore.next(
             Destination.AddNewTask(
                 listId = listId,
