@@ -21,6 +21,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.marzec.todo.extensions.descriptionWithProgress
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 
@@ -52,7 +53,7 @@ fun TaskListView(
                     id = it.id,
                     item = TextListItem(
                         id = it.id.toString(),
-                        name = it.description.lines().first(),
+                        name = it.descriptionWithProgress,
                         description = it.subTasks.firstOrNull()?.description?.lines()
                             ?.first() ?: ""
                     ),
