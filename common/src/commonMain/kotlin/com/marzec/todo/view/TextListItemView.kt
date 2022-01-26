@@ -1,7 +1,9 @@
 package com.marzec.todo.view
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,18 +21,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TextListItemView(
     state: TextListItem,
     backgroundColor: Color = Color.White,
-    onClickListener: (TextListItem) -> Unit,
+    onLongClickListener: ((TextListItem) -> Unit)? = null,
+    onClickListener: ((TextListItem) -> Unit)? = null,
     rightContent: @Composable () -> Unit = { }
 ) {
     Box(
         Modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .clickable { onClickListener(state) }
+            .let {
+                val onLong = onLongClickListener?.let {
+                    { it.invoke(state) }
+                }
+                val onClick = onClickListener?.let {
+                    { it.invoke(state) }
+                } ?: { }
+                if (onLongClickListener != null || onClickListener != null) {
+                    it.combinedClickable(onLongClick = onLong, onClick = onClick)
+                } else {
+                    it
+                }
+            }
     ) {
         Row(
             Modifier
