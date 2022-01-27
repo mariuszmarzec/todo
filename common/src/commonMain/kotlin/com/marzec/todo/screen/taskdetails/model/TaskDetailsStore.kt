@@ -63,7 +63,12 @@ class TaskDetailsStore(
         }
         reducer {
             state.reduceDataWithContent(resultNonNull()) { result ->
-                TaskDetailsState(result, DialogState.NoDialog, this?.selected.orEmpty())
+                val taskIds = result.subTasks.map { it.id }.toSet()
+                TaskDetailsState(
+                    task = result,
+                    dialog = DialogState.NoDialog,
+                    selected = this?.selected?.filter { it in taskIds }?.toSet().orEmpty()
+                )
             }
         }
     }
