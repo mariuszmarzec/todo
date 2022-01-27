@@ -53,6 +53,7 @@ fun AddSubTaskScreen(
                     Spacer(Modifier.size(16.dp))
                     TaskListView(
                         tasks = state.data.tasks,
+                        selected = emptySet(),
                         showButtonsInColumns = false,
                         onClickListener = { },
                         onPinButtonClick = {

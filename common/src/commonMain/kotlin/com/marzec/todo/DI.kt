@@ -12,6 +12,8 @@ import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.SearchDelegateImpl
+import com.marzec.todo.delegates.dialog.SelectionDelegate
+import com.marzec.todo.delegates.dialog.SelectionDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.logger.Logger
 import com.marzec.todo.navigation.model.Destination
@@ -216,7 +218,8 @@ object DI {
         urlDelegate = UrlDelegateImpl<TaskDetailsState>(openUrlHelper),
         changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
             provideTodoRepository()
-        )
+        ),
+        selectionDelegate = SelectionDelegateImpl<TaskDetailsState>()
     )
 
     @Composable

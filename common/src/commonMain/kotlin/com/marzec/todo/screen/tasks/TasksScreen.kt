@@ -82,6 +82,7 @@ private fun TaskScreenData(
                 )
             }
         },
+        selected = emptySet(),
         showButtonsInColumns = false,
         onClickListener = {
             store.onListItemClicked(it)

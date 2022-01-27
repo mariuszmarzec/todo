@@ -62,3 +62,7 @@ fun <T: Any> Store3<T>.collectState(
     }
     return state
 }
+
+fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
+
+fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()

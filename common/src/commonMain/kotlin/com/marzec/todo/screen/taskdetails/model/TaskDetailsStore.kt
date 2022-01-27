@@ -7,6 +7,7 @@ import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
+import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.delegates
@@ -34,12 +35,14 @@ class TaskDetailsStore(
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
-    private val changePriorityDelegate: ChangePriorityDelegate
+    private val changePriorityDelegate: ChangePriorityDelegate,
+    private val selectionDelegate: SelectionDelegate
 ) : Store3<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
-    DialogDelegate by dialogDelegate {
+    DialogDelegate by dialogDelegate,
+    SelectionDelegate by selectionDelegate {
 
     override val identifier: String
         get() = cacheKey
@@ -49,7 +52,8 @@ class TaskDetailsStore(
             removeTaskDelegate,
             urlDelegate,
             dialogDelegate,
-            changePriorityDelegate
+            changePriorityDelegate,
+            selectionDelegate
         )
     }
 
@@ -59,7 +63,7 @@ class TaskDetailsStore(
         }
         reducer {
             state.reduceDataWithContent(resultNonNull()) { result ->
-                TaskDetailsState(result, DialogState.NoDialog)
+                TaskDetailsState(result, DialogState.NoDialog, this?.selected.orEmpty())
             }
         }
     }

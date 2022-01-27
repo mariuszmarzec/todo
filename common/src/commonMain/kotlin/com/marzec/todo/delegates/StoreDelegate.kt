@@ -2,6 +2,7 @@ package com.marzec.todo.delegates
 
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.Store3
+import kotlin.experimental.ExperimentalTypeInference
 
 open class StoreDelegate<State : Any> {
 
@@ -11,7 +12,8 @@ open class StoreDelegate<State : Any> {
         this.store = store
     }
 
-    fun <RESULT : Any> intent(buildFun: IntentBuilder<State, RESULT>.() -> Unit) =
+    @OptIn(ExperimentalTypeInference::class)
+    fun <RESULT : Any> intent(@BuilderInference buildFun: IntentBuilder<State, RESULT>.() -> Unit) =
         store.intent(buildFun)
 
     fun sideEffect(

@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import com.marzec.todo.extensions.descriptionWithProgress
+import com.marzec.todo.extensions.ifFalse
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 
@@ -32,6 +33,7 @@ private data class TaskListItem(
 @Composable
 fun TaskListView(
     tasks: List<Task>,
+    selected: Set<Int>,
     showButtonsInColumns: Boolean,
     onClickListener: (Int) -> Unit,
     onOpenUrlClick: ((String) -> Unit)? = null,
@@ -40,8 +42,10 @@ fun TaskListView(
     onRemoveButtonClick: ((Int) -> Unit)? = null,
     onPinButtonClick: ((Int) -> Unit)? = null,
     onCheckClick: ((Int) -> Unit)? = null,
-    onUncheckClick: ((Int) -> Unit)? = null
+    onUncheckClick: ((Int) -> Unit)? = null,
+    onSelectedChange: ((Int) -> Unit)? = null,
 ) {
+    val selectionModeEnabled = selected.isNotEmpty()
     LazyColumn {
         items(
             items = tasks.map {
@@ -60,17 +64,26 @@ fun TaskListView(
             },
         ) { listItem ->
             val id = listItem.id
+            val selected = id in selected
             key(id) {
-                CheckableRow(
-                    checkable = true,
-                    checked = false,
-                    onCheckedChange = { }
+                SelectableRow(
+                    backgroundColor = when {
+                        selected -> Color.Gray
+                        !listItem.isToDo -> Color.LightGray
+                        else -> Color.White
+                    },
+                    selectable = selectionModeEnabled,
+                    selected = selected,
+                    onSelectedChange = { onSelectedChange?.invoke(id) }
                 ) {
                     TextListItemView(
-                        listItem.item,
-                        backgroundColor = if (listItem.isToDo) Color.White else Color.LightGray,
-                        onClickListener = {
-                            onClickListener(it.id.toInt())
+                        state = listItem.item,
+                        backgroundColor = Color.Transparent,
+                        onLongClickListener = selectionModeEnabled.ifFalse {
+                            onSelectedChange?.let { { it(id) } }
+                        },
+                        onClickListener = selectionModeEnabled.ifFalse {
+                            { onClickListener(it.id.toInt()) }
                         }
                     ) {
                         if (showButtonsInColumns) {

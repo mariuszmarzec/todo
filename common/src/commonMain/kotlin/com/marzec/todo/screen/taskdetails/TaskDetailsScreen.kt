@@ -139,6 +139,7 @@ fun TaskDetailsScreen(
                     Spacer(Modifier.size(16.dp))
                     TaskListView(
                         tasks = state.data.task.subTasks,
+                        selected = state.data.selected,
                         showButtonsInColumns = true,
                         onClickListener = {
                             store.goToSubtaskDetails(it)
@@ -163,6 +164,9 @@ fun TaskDetailsScreen(
                         },
                         onUncheckClick = {
                             store.markAsToDo(it)
+                        },
+                        onSelectedChange = {
+                            store.onSelectedChange(it)
                         }
                     )
                 }
