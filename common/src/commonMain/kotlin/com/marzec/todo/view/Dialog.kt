@@ -64,6 +64,11 @@ sealed class DialogState {
         val checked: Boolean = false
     ): DialogState()
 
+    data class RemoveSelectedDialogWithCheckBox(
+        val idsToRemove: List<Int>,
+        val checked: Boolean = false
+    ): DialogState()
+
     data class InputDialog(
         val inputField: String,
     ): DialogState()

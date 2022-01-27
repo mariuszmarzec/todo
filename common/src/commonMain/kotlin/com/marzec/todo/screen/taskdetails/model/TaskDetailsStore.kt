@@ -212,4 +212,18 @@ class TaskDetailsStore(
             }
         }
     }
+
+    fun unpinSubtasks() = sideEffect {
+        state.ifDataAvailable {
+            task.subTasks.forEach {
+                unpinSubtask(it.id)
+            }
+        }
+    }
+
+    fun showRemoveSelectedSubTasksDialog() = sideEffect {
+        state.ifDataAvailable {
+            showRemoveSubTasksDialog(selected.toList())
+        }
+    }
 }

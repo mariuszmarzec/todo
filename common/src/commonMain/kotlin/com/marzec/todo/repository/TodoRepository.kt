@@ -98,12 +98,29 @@ class TodoRepository(
             dataSource.removeTask(taskId)
         }
 
+    suspend fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            taskIds.forEach {
+                dataSource.removeTask(it)
+            }
+        }
+
     fun removeTaskWithSubtasks(task: Task): Flow<Content<Unit>> =
         asContentWithListUpdate {
             task.subTasks.flatMapTask().forEach {
                 dataSource.removeTask(it.id)
             }
             dataSource.removeTask(task.id)
+        }
+
+    fun removeTasksWithSubtasks(tasks: List<Task>): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            tasks.forEach { task ->
+                task.subTasks.flatMapTask().forEach {
+                    dataSource.removeTask(it.id)
+                }
+                dataSource.removeTask(task.id)
+            }
         }
 
     fun removeList(id: Int): Flow<Content<Unit>> =

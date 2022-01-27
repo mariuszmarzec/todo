@@ -59,9 +59,20 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
             }
         }
     }
+
+    override fun showRemoveSubTasksDialog(ids: List<Int>) = sideEffect {
+        state.ifDataAvailable {
+            intent {
+                onTrigger {
+                    todoRepository.removeTasks(ids)
+                }
+            }
+        }
+    }
 }
 
 interface RemoveTaskDelegate {
     fun removeTask(idToRemove: Int)
     fun onRemoveButtonClick(id: Int)
+    fun showRemoveSubTasksDialog(ids: List<Int>)
 }

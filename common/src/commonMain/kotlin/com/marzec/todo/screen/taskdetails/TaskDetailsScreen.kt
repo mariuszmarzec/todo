@@ -21,6 +21,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
@@ -57,6 +58,10 @@ fun TaskDetailsScreen(
     Scaffold(
         topBar = {
             actionBarProvider.provide("Task details") {
+                val subTasksCount = state.data?.task?.subTasks?.size ?: 0
+                val selectedCount = state.data?.selected?.count() ?: 0
+                val selectionModeEnabled =
+                    state is State.Data<TaskDetailsState> && selectedCount > 0
                 IconButton({
                     store.edit()
                 }) {
@@ -65,14 +70,15 @@ fun TaskDetailsScreen(
                         contentDescription = "Edit"
                     )
                 }
-                Spacer(Modifier.size(16.dp))
-                IconButton({
-                    store.showRemoveTaskDialog()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove"
-                    )
+                if (!selectionModeEnabled) {
+                    IconButton({
+                        store.showRemoveTaskDialog()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Remove"
+                        )
+                    }
                 }
                 if ((state.data?.task?.description?.lines()?.size ?: 0) > 1) {
                     IconButton({
@@ -86,8 +92,6 @@ fun TaskDetailsScreen(
                         )
                     }
                 }
-                val subTasksCount = state.data?.task?.subTasks?.size ?: 0
-                val selectedCount = state.data?.selected?.count() ?: 0
                 if (state is State.Data<TaskDetailsState> && subTasksCount > 0) {
                     val selected = subTasksCount == selectedCount
                     Checkbox(
@@ -96,6 +100,24 @@ fun TaskDetailsScreen(
                             store.onAllSelectClicked()
                         }
                     )
+                }
+                if (selectionModeEnabled) {
+                    IconButton({
+                        store.showRemoveSelectedSubTasksDialog()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Remove"
+                        )
+                    }
+                    IconButton({
+                        store.unpinSubtasks()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Unpin all"
+                        )
+                    }
                 }
             }
         },
