@@ -12,10 +12,28 @@ interface WithSelection<DATA> {
 
 interface SelectionDelegate {
     fun onSelectedChange(id: Int)
+    fun selectAll(ids: List<Int>)
+    fun deselectAll(ids: List<Int>)
 }
 
 class SelectionDelegateImpl<DATA : WithSelection<DATA>> : StoreDelegate<State<DATA>>(),
     SelectionDelegate {
+
+    override fun selectAll(ids: List<Int>) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copyWithSelection(selected + ids.toSet())
+            }
+        }
+    }
+
+    override fun deselectAll(ids: List<Int>) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copyWithSelection(selected - ids.toSet())
+            }
+        }
+    }
 
     override fun onSelectedChange(id: Int) = intent<Unit> {
         reducer {

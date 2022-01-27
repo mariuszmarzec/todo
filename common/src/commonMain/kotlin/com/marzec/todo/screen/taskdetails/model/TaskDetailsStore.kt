@@ -2,6 +2,7 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
+import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
@@ -197,6 +198,17 @@ class TaskDetailsStore(
                     priority = task.priority,
                     isToDo = true
                 )
+            }
+        }
+    }
+
+    fun onAllSelectClicked() = sideEffect {
+        state.ifDataAvailable {
+            val ids = task.subTasks.map { it.id }
+            if (selected.size == task.subTasks.size) {
+                deselectAll(ids)
+            } else {
+                selectAll(ids)
             }
         }
     }

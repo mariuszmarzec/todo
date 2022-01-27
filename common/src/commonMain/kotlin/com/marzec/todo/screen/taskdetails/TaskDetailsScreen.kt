@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.Checkbox
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -19,6 +20,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
@@ -83,6 +85,17 @@ fun TaskDetailsScreen(
                             contentDescription = "Explode"
                         )
                     }
+                }
+                val subTasksCount = state.data?.task?.subTasks?.size ?: 0
+                val selectedCount = state.data?.selected?.count() ?: 0
+                if (state is State.Data<TaskDetailsState> && subTasksCount > 0) {
+                    val selected = subTasksCount == selectedCount
+                    Checkbox(
+                        checked = selected,
+                        onCheckedChange = {
+                            store.onAllSelectClicked()
+                        }
+                    )
                 }
             }
         },
