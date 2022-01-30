@@ -110,7 +110,7 @@ private fun TaskScreenData(
                         dismissButton = "No",
                         onDismiss = { scope.launch { store.closeDialog() } },
                         onConfirm = {
-                            scope.launch { store.removeTask(dialog.idToRemove) }
+                            scope.launch { store.removeTask(dialog.idsToRemove) }
                         }
                     ),
                     checked = dialog.checked,
@@ -130,7 +130,7 @@ private fun TaskScreenData(
                     dismissButton = "No",
                     onDismiss = { scope.launch { store.closeDialog() } },
                     onConfirm = {
-                        scope.launch { store.removeTask(dialog.idToRemove) }
+                        scope.launch { store.removeTask(dialog.idsToRemove) }
                     }
                 )
             )

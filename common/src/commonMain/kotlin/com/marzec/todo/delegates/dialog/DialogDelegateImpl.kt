@@ -18,19 +18,19 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
         }
     }
 
-    override fun showRemoveDialogWithCheckBox(idToRemove: Int) = intent<Unit> {
+    override fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>) = intent<Unit> {
         reducer {
             state.reduceData {
-                copyWithDialog(dialog = DialogState.RemoveDialogWithCheckBox(idToRemove))
+                copyWithDialog(dialog = DialogState.RemoveDialogWithCheckBox(idsToRemove))
             }
         }
     }
 
-    override fun showRemoveTaskDialog(id: Int) = intent<Unit> {
+    override fun showRemoveTaskDialog(idsToRemove: List<Int>) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(
-                    dialog = DialogState.RemoveDialog(idToRemove = id)
+                    dialog = DialogState.RemoveDialog(idsToRemove)
                 )
             }
         }
@@ -59,8 +59,8 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
 
 interface DialogDelegate {
     fun closeDialog()
-    fun showRemoveDialogWithCheckBox(idToRemove: Int)
-    fun showRemoveTaskDialog(id: Int)
+    fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>)
+    fun showRemoveTaskDialog(idsToRemove: List<Int>)
     fun onRemoveWithSubTasksChange()
     fun showSelectUrlDialog(urls: List<String>)
 }

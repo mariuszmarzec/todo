@@ -20,7 +20,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -224,12 +223,16 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState) {
             DialogBox(
                 state = Dialog.TwoOptionsDialog(
                     title = "Remove task",
-                    message = "Do you really want to remove this task?",
+                    message = if (dialog.idsToRemove.size > 1) {
+                        "Do you really want to remove this tasks?"
+                    } else {
+                        "Do you really want to remove this task?"
+                    },
                     confirmButton = "Yes",
                     dismissButton = "No",
                     onDismiss = { store.closeDialog() },
                     onConfirm = {
-                        store.removeTask(dialog.idToRemove)
+                        store.removeTask(dialog.idsToRemove)
                     }
                 )
             )
@@ -240,12 +243,16 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState) {
                 state = Dialog.TwoOptionsDialogWithCheckbox(
                     twoOptionsDialog = Dialog.TwoOptionsDialog(
                         title = "Remove task",
-                        message = "Do you really want to remove this task?",
+                        message = if (dialog.idsToRemove.size > 1) {
+                            "Do you really want to remove this tasks?"
+                        } else {
+                            "Do you really want to remove this task?"
+                        },
                         confirmButton = "Yes",
                         dismissButton = "No",
                         onDismiss = { store.closeDialog() },
                         onConfirm = {
-                            store.removeTask(dialog.idToRemove)
+                            store.removeTask(dialog.idsToRemove)
                         }
                     ),
                     checked = dialog.checked,

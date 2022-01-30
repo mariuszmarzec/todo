@@ -1,5 +1,6 @@
 package com.marzec.todo.delegates.dialog
 
+import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.todo.delegates.StoreDelegate
@@ -22,49 +23,33 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
         dialogDelegate = store as DialogDelegate
     }
 
-    override fun removeTask(idToRemove: Int) = sideEffect {
+    override fun removeTask(idsToRemove: List<Int>) = sideEffect {
         dialogDelegate.closeDialog()
 
-        intent<Content<Unit>> {
-            onTrigger {
-                state.ifDataAvailable {
-                    if (isRemoveWithCheckBoxChecked(this)) {
-                        todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
-                    } else {
-                        todoRepository.removeTask(idToRemove)
-                    }
-                }
-            }
+        intent {
+            removeTaskOnTrigger(todoRepository, idsToRemove)
         }
     }
 
-    private fun isRemoveWithCheckBoxChecked(
-        data: DATA
-    ): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true
+    override fun onRemoveButtonClick(id: Int) {
+        onRemoveButtonClick(listOf(id))
+    }
 
-    override fun onRemoveButtonClick(id: Int) = sideEffect {
+    override fun onRemoveButtonClick(ids: List<Int>) = sideEffect {
         state.ifDataAvailable {
-            val taskToRemove = taskById(id)
+            val tasksToRemove = ids.map { taskById(it) }
             when {
-                taskToRemove.subTasks.isNotEmpty() -> {
-                    dialogDelegate.showRemoveDialogWithCheckBox(id)
+                tasksToRemove.any { it.subTasks.isNotEmpty() } -> {
+                    dialogDelegate.showRemoveDialogWithCheckBox(ids)
                 }
-                taskToRemove.description.length > 80 ||
-                taskToRemove.description.urls().isNotEmpty() -> {
-                    dialogDelegate.showRemoveTaskDialog(id)
+                tasksToRemove.size > 1 || tasksToRemove.any {
+                    it.description.length > 80 ||
+                            it.description.urls().isNotEmpty()
+                } -> {
+                    dialogDelegate.showRemoveTaskDialog(ids)
                 }
                 else -> {
-                    removeTaskDelegate.removeTask(id)
-                }
-            }
-        }
-    }
-
-    override fun showRemoveSubTasksDialog(ids: List<Int>) = sideEffect {
-        state.ifDataAvailable {
-            intent {
-                onTrigger {
-                    todoRepository.removeTasks(ids)
+                    removeTaskDelegate.removeTask(ids)
                 }
             }
         }
@@ -72,7 +57,38 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
 }
 
 interface RemoveTaskDelegate {
-    fun removeTask(idToRemove: Int)
+    fun removeTask(idsToRemove: List<Int>)
     fun onRemoveButtonClick(id: Int)
-    fun showRemoveSubTasksDialog(ids: List<Int>)
+    fun onRemoveButtonClick(ids: List<Int>)
 }
+
+fun <DATA : WithTasks<DATA>> IntentBuilder<State<DATA>, Content<Unit>>.removeTaskOnTrigger(
+    todoRepository: TodoRepository,
+    idsToRemove: List<Int>
+) {
+    onTrigger {
+        state.ifDataAvailable {
+            val isRemoveWithCheckBoxChecked = isRemoveWithCheckBoxChecked(this)
+
+            if (idsToRemove.size > 1) {
+                if (isRemoveWithCheckBoxChecked) {
+                    todoRepository.removeTasksWithSubtasks(
+                        idsToRemove.map { taskById(it) }
+                    )
+                } else {
+                    todoRepository.removeTasks(idsToRemove)
+                }
+            } else {
+                if (isRemoveWithCheckBoxChecked) {
+                    todoRepository.removeTaskWithSubtasks(taskById(idsToRemove.first()))
+                } else {
+                    todoRepository.removeTask(idsToRemove.first())
+                }
+            }
+        }
+    }
+}
+
+private fun <DATA : WithTasks<DATA>> isRemoveWithCheckBoxChecked(
+    data: DATA
+): Boolean = (data.dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true

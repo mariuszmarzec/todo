@@ -62,7 +62,7 @@ class ListsScreenStore(
     fun showRemoveListDialog(id: Int) = intent<Unit> {
         reducer {
             state.mapData {
-                it.copy(dialog = DialogState.RemoveDialog(id))
+                it.copy(dialog = DialogState.RemoveDialog(listOf(id)))
             }
         }
     }

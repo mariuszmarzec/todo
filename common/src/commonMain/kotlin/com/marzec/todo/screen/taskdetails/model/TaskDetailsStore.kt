@@ -2,7 +2,6 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
-import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
@@ -10,6 +9,7 @@ import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
+import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
@@ -21,7 +21,6 @@ import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 
 class TaskDetailsStore(
     scope: CoroutineScope,
@@ -120,23 +119,15 @@ class TaskDetailsStore(
     fun showRemoveSubTaskDialog(subtaskId: Int) =
         removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
-    override fun removeTask(idToRemove: Int) = sideEffect {
+    override fun removeTask(idsToRemove: List<Int>) = sideEffect {
         closeDialog()
 
-        intent<Content<Unit>> {
-            onTrigger {
-                state.ifDataAvailable {
-                    if ((dialog as? DialogState.RemoveDialogWithCheckBox)?.checked == true) {
-                        todoRepository.removeTaskWithSubtasks(taskById(idToRemove))
-                    } else {
-                        todoRepository.removeTask(idToRemove)
-                    }
-                }
-            }
+        intent {
+            removeTaskOnTrigger(todoRepository, idsToRemove)
 
             sideEffect {
                 resultNonNull().asInstance<Content.Data<Unit>> {
-                    if (idToRemove == taskId) {
+                    if (idsToRemove.first() == taskId) {
                         navigationStore.goBack()
                     }
                 }
@@ -223,7 +214,7 @@ class TaskDetailsStore(
 
     fun showRemoveSelectedSubTasksDialog() = sideEffect {
         state.ifDataAvailable {
-            showRemoveSubTasksDialog(selected.toList())
+            onRemoveButtonClick(selected.toList())
         }
     }
 }

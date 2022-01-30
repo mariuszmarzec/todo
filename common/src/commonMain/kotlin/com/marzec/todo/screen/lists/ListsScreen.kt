@@ -107,7 +107,7 @@ fun ListsScreen(
                             confirmButton = "Remove",
                             dismissButton = "Cancel",
                             onConfirm = {
-                                listsScreenStore.removeList(dialogState.idToRemove)
+                                listsScreenStore.removeList(dialogState.idsToRemove.first())
                             },
                             onDismiss = { listsScreenStore.closeDialog() }
                         )
