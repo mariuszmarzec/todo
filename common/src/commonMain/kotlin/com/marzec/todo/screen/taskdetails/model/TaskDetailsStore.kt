@@ -217,4 +217,11 @@ class TaskDetailsStore(
             onRemoveButtonClick(selected.toList())
         }
     }
+
+    fun removeDoneTasks() = sideEffect {
+        state.ifDataAvailable {
+            val ids = task.subTasks.filterNot { it.isToDo }.map { it.id }
+            onRemoveButtonClick(ids)
+        }
+    }
 }
