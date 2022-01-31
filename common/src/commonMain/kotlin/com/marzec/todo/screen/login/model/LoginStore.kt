@@ -51,9 +51,9 @@ class LoginStore(
             resultNonNull().ifDataSuspend {
                 navigationStore.next(
                     NavigationAction(
-                        Destination.Lists,
+                        Destination.Tasks,
                         options = NavigationOptions(
-                            popTo = Destination.Lists,
+                            popTo = Destination.Tasks,
                             popToInclusive = true
                         )
                     )

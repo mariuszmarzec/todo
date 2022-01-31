@@ -13,7 +13,6 @@ data class NavigationOptions(
 sealed class Destination {
 
     object Login : Destination()
-    object Lists : Destination()
     object Tasks : Destination()
     data class AddNewTask(
         val taskToEditId: Int?,
