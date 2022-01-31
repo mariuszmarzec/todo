@@ -29,7 +29,6 @@ class TaskDetailsStore(
     private val stateCache: Preferences,
     initialState: State<TaskDetailsState>,
     private val todoRepository: TodoRepository,
-    private val listId: Int,
     private val taskId: Int,
     private val copyToClipBoardHelper: CopyToClipBoardHelper,
     private val dialogDelegate: DialogDelegate,
@@ -59,7 +58,7 @@ class TaskDetailsStore(
 
     fun loadDetails() = intent<Content<Task>>("loadDetails") {
         onTrigger {
-            todoRepository.observeTask(listId, taskId)
+            todoRepository.observeTask(taskId)
         }
         reducer {
             state.reduceDataWithContent(resultNonNull()) { result ->
@@ -76,7 +75,7 @@ class TaskDetailsStore(
     fun edit() = intent<Unit> {
         sideEffect {
             state.ifDataAvailable {
-                navigationStore.next(Destination.AddNewTask(listId, taskId, task.parentTaskId))
+                navigationStore.next(Destination.AddNewTask(taskId, task.parentTaskId))
             }
         }
     }
@@ -84,7 +83,7 @@ class TaskDetailsStore(
     fun addSubTask() = intent<Unit> {
         sideEffect {
             state.ifDataAvailable {
-                navigationStore.next(Destination.AddSubTask(listId, taskId))
+                navigationStore.next(Destination.AddSubTask(taskId))
             }
         }
     }
@@ -110,7 +109,7 @@ class TaskDetailsStore(
     }
 
     fun goToSubtaskDetails(id: Int) = sideEffect {
-        navigationStore.next(Destination.TaskDetails(listId, id))
+        navigationStore.next(Destination.TaskDetails(id))
     }
 
     fun showRemoveTaskDialog() =
@@ -160,7 +159,7 @@ class TaskDetailsStore(
     }
 
     fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
-        onTrigger { todoRepository.addNewTasks(listId, false, taskId, tasks) }
+        onTrigger { todoRepository.addNewTasks(false, taskId, tasks) }
     }
 
     fun markAsChecked(id: Int) = intent<Content<Unit>> {

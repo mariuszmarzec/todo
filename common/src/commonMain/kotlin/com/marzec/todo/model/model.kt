@@ -2,13 +2,11 @@ package com.marzec.todo.model
 
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
-import com.marzec.todo.api.ToDoListDto
 import com.marzec.todo.api.UpdateTaskDto
 import kotlinx.datetime.LocalDateTime
 
 data class Task(
     val id: Int,
-    val listId: Int,
     val description: String,
     val addedTime: LocalDateTime,
     val modifiedTime: LocalDateTime,
@@ -16,18 +14,6 @@ data class Task(
     val subTasks: List<Task>,
     val isToDo: Boolean,
     val priority: Int
-)
-
-data class ToDoList(
-    val id: Int,
-    val title: String,
-    val tasks: List<Task>
-)
-
-fun ToDoList.toDto() = ToDoListDto(
-    id = id,
-    title = title,
-    tasks = tasks.map { it.toDto() }
 )
 
 fun Task.toDto(): TaskDto = TaskDto(
@@ -41,14 +27,13 @@ fun Task.toDto(): TaskDto = TaskDto(
     priority = priority
 )
 
-fun TaskDto.toDomain(listId: Int): Task = Task(
+fun TaskDto.toDomain(): Task = Task(
     id = this.id,
-    listId = listId,
     description = description,
     addedTime = LocalDateTime.parse(addedTime),
     modifiedTime = LocalDateTime.parse(modifiedTime),
     parentTaskId = parentTaskId,
-    subTasks = subTasks.map { it.toDomain(listId) },
+    subTasks = subTasks.map { it.toDomain() },
     isToDo = isToDo,
     priority = priority
 )

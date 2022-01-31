@@ -10,7 +10,6 @@ import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
-import com.marzec.todo.model.ToDoList
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.navigation.model.next
@@ -26,7 +25,6 @@ class TasksStore(
     private val stateCache: Preferences,
     initialState: State<TasksScreenState>,
     val todoRepository: TodoRepository,
-    val listId: Int,
     private val urlDelegate: UrlDelegate,
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
@@ -53,15 +51,15 @@ class TasksStore(
         )
     }
 
-    fun loadList() = intent<Content<ToDoList>> {
+    fun loadList() = intent<Content<List<Task>>> {
         onTrigger {
-            todoRepository.observeList(listId)
+            todoRepository.observeLists()
         }
 
         reducer {
             state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) { result ->
                 copy(
-                    tasks = result.data.tasks.sortedWith(
+                    tasks = result.data.sortedWith(
                         compareByDescending(Task::priority).thenBy(
                             Task::modifiedTime
                         )
@@ -72,12 +70,12 @@ class TasksStore(
     }
 
     fun onListItemClicked(id: Int) = sideEffect {
-        navigationStore.next(Destination.TaskDetails(listId, id))
+        navigationStore.next(Destination.TaskDetails(id))
     }
 
     fun addNewTask() = sideEffect {
         state.asData {
-            navigationStore.next(Destination.AddNewTask(listId, null, null))
+            navigationStore.next(Destination.AddNewTask(null, null))
         }
     }
 

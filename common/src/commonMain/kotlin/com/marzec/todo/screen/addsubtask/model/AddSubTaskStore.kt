@@ -23,7 +23,6 @@ class AddSubTaskStore(
     private val stateCache: Preferences,
     initialState: State<AddSubTaskData>,
     private val todoRepository: TodoRepository,
-    private val listId: Int,
     private val taskId: Int
 ) : Store3<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
@@ -31,9 +30,9 @@ class AddSubTaskStore(
 
     fun initialLoad() = intent<Content<List<Task>>> {
         onTrigger {
-            todoRepository.observeList(listId).map { content ->
-                content.mapData { toDoList ->
-                    toDoList.tasks.filterNot { it.id == taskId }
+            todoRepository.observeLists().map { content ->
+                content.mapData { tasks ->
+                    tasks.filterNot { it.id == taskId }
                 }
             }
         }
@@ -47,7 +46,6 @@ class AddSubTaskStore(
     fun onAddSubTaskClick() = sideEffect {
         navigationStore.next(
             Destination.AddNewTask(
-                listId = listId,
                 taskToEditId = null,
                 parentTaskId = taskId
             )

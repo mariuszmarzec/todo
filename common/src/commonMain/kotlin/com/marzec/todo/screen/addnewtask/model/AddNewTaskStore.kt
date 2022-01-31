@@ -32,7 +32,7 @@ class AddNewTaskStore(
         onTrigger {
             state.ifDataAvailable {
                 taskId?.let {
-                    todoRepository.observeTask(listId, it)
+                    todoRepository.observeTask(it)
                 }
             }
         }
@@ -40,12 +40,11 @@ class AddNewTaskStore(
             result?.let {
                 state.reduceDataWithContent(
                     result = resultNonNull(),
-                    defaultData = AddNewTaskState.initial(0, null, null)
+                    defaultData = AddNewTaskState.initial(0, null)
                 ) { result ->
                     copy(
                         taskId = result.data.id,
                         parentTaskId = result.data.parentTaskId,
-                        listId = result.data.listId,
                         description = result.data.description,
                         priority = result.data.priority,
                         isToDo = result.data.isToDo
@@ -75,7 +74,6 @@ class AddNewTaskStore(
                     )
                 } else {
                     todoRepository.addNewTask(
-                        listId,
                         description,
                         parentTaskId,
                         highestPriorityAsDefault
@@ -101,7 +99,6 @@ class AddNewTaskStore(
         onTrigger {
             state.ifDataAvailable {
                 todoRepository.addNewTasks(
-                    listId = listId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     parentTaskId = parentTaskId,
                     descriptions = description.split("\n")
@@ -133,9 +130,9 @@ class AddNewTaskStore(
             state.ifDataAvailable(blockOnLoading = false) {
                 val taskIdToShow = parentTaskId ?: taskId
                 val destination = if (taskIdToShow != null) {
-                    Destination.TaskDetails(listId, taskIdToShow)
+                    Destination.TaskDetails(taskIdToShow)
                 } else {
-                    Destination.Tasks(listId)
+                    Destination.Tasks
                 }
                 navigationStore.next(
                     NavigationAction(

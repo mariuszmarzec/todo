@@ -2,9 +2,9 @@ package com.marzec.todo.network
 
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.api.ToDoListDto
-import com.marzec.todo.api.toDomain
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.cache.Cache
+import com.marzec.todo.model.toDomain
 
 class CompositeDataSource(
     private val localDataSource: LocalDataSource,
@@ -20,22 +20,14 @@ class CompositeDataSource(
         removeTask(taskId)
     }
 
-    override suspend fun getTodoLists(): List<ToDoListDto> {
-        val todoLists = apiDataSource.getTodoLists()
+    override suspend fun getTasks(): List<TaskDto> {
+        val todoLists = apiDataSource.getTasks()
         localDataSource.init(todoLists)
         return todoLists
     }
 
-    override suspend fun removeList(id: Int) = update {
-        removeList(id)
-    }
-
-    override suspend fun createToDoList(title: String) = update {
-        createToDoList(title)
-    }
-
-    override suspend fun addNewTask(listId: Int, createTaskDto: CreateTaskDto) = update {
-        addNewTask(listId, createTaskDto)
+    override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
+        addNewTask(createTaskDto)
     }
 
     override suspend fun updateTask(
@@ -55,6 +47,6 @@ class CompositeDataSource(
     }
 
     private suspend fun updateMemory() {
-        memoryCache.put(Api.Todo.TODO_LISTS, localDataSource.getTodoLists().map { it.toDomain() })
+        memoryCache.put(Api.Todo.TASKS, localDataSource.getTasks().map { it.toDomain() })
     }
 }

@@ -1,9 +1,9 @@
 package com.marzec.todo.network
 
 import com.marzec.todo.Api
+import com.marzec.todo.Api.Todo.ADD_TASKS
 import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.api.CreateTodoListDto
-import com.marzec.todo.api.ToDoListDto
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
@@ -18,18 +18,10 @@ class ApiDataSource(
         client.delete<Unit>(Api.Todo.removeTask(taskId))
     }
 
-    override suspend fun getTodoLists() = client.get<List<ToDoListDto>>(Api.Todo.TODO_LISTS)
+    override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS)
 
-    override suspend fun removeList(id: Int): Unit =
-        client.delete(Api.Todo.removeList(id))
-
-    override suspend fun createToDoList(title: String) =
-        client.post<Unit>(Api.Todo.TODO_LIST) {
-            body = CreateTodoListDto(title = title)
-        }
-
-    override suspend fun addNewTask(listId: Int, createTaskDto: CreateTaskDto) {
-        client.post<Unit>(Api.Todo.createTask(listId)) {
+    override suspend fun addNewTask(createTaskDto: CreateTaskDto) {
+        client.post<Unit>(ADD_TASKS) {
             body = createTaskDto
         }
     }

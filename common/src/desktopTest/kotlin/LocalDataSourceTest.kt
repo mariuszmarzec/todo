@@ -24,7 +24,7 @@ internal class LocalDataSourceTest {
 
         dataSource.removeTask(0)
 
-        assertEquals(listOf(todoListDto), dataSource.getTodoLists())
+        assertEquals(listOf(todoListDto), dataSource.getTasks())
     }
 
     @Test
@@ -38,7 +38,7 @@ internal class LocalDataSourceTest {
 
         assertEquals(
             listOf(todoListDto.copy(tasks = listOf(stubTaskDto(id = 1, "subtask 1")))),
-            dataSource.getTodoLists()
+            dataSource.getTasks()
         )
     }
 }

@@ -2,11 +2,10 @@ package com.marzec.todo.repository
 
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.api.toDomain
 import com.marzec.todo.cache.Cache
 import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Task
-import com.marzec.todo.model.ToDoList
+import com.marzec.todo.model.toDomain
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.asContent
@@ -30,33 +29,25 @@ class TodoRepository(
     private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun observeLists(): Flow<Content<List<ToDoList>>> = getListsCacheFirst()
+    suspend fun observeLists(): Flow<Content<List<Task>>> = getTasksCacheFirst()
 
-    suspend fun observeList(listId: Int): Flow<Content<ToDoList>> =
-        getListsCacheFirst().map { content ->
-            content.mapData { lists -> lists.first { it.id == listId } }
-        }
-
-    suspend fun observeTask(listId: Int, taskId: Int): Flow<Content<Task>> =
-        getListsCacheFirst().map { content ->
-            content.mapData { lists ->
-                lists.first {
-                    it.id == listId
-                }.tasks.flatMapTask().first {
+    suspend fun observeTask(taskId: Int): Flow<Content<Task>> =
+        getTasksCacheFirst().map { content ->
+            content.mapData { tasks ->
+                tasks.flatMapTask().first {
                     it.id == taskId
                 }
             }
         }
 
     suspend fun addNewTask(
-        listId: Int,
         description: String,
         parentTaskId: Int? = null,
         highestPriorityAsDefault: Boolean
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.addNewTask(
-                listId, CreateTaskDto(
+                CreateTaskDto(
                     description = description,
                     parentTaskId = parentTaskId,
                     highestPriorityAsDefault = highestPriorityAsDefault
@@ -65,7 +56,6 @@ class TodoRepository(
         }
 
     suspend fun addNewTasks(
-        listId: Int,
         highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
         descriptions: List<String>
@@ -73,7 +63,7 @@ class TodoRepository(
         asContentWithListUpdate {
             descriptions.forEach {
                 dataSource.addNewTask(
-                    listId, CreateTaskDto(
+                    CreateTaskDto(
                         description = it,
                         parentTaskId = parentTaskId,
                         highestPriorityAsDefault = highestPriorityAsDefault
@@ -123,26 +113,18 @@ class TodoRepository(
             }
         }
 
-    fun removeList(id: Int): Flow<Content<Unit>> =
-        asContentWithListUpdate { dataSource.removeList(id) }
-
-    suspend fun createList(title: String): Flow<Content<Unit>> =
-        asContentWithListUpdate {
-            dataSource.createToDoList(title)
-        }
-
-    private suspend fun getListsCacheFirst() =
-        cacheCall(Api.Todo.TODO_LISTS) {
+    private suspend fun getTasksCacheFirst() =
+        cacheCall(Api.Todo.TASKS) {
             asContent {
-                dataSource.getTodoLists()
+                dataSource.getTasks()
                     .map { it.toDomain() }
             }
         }
 
     private suspend fun refreshListsCache() = asContent {
-        dataSource.getTodoLists().map { it.toDomain() }
+        dataSource.getTasks().map { it.toDomain() }
     }.ifDataSuspend {
-        memoryCache.put(Api.Todo.TODO_LISTS, data)
+        memoryCache.put(Api.Todo.TASKS, data)
     }
 
     private suspend fun <T : Any> cacheCall(

@@ -36,9 +36,6 @@ import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.todo.screen.addsubtask.AddSubTaskScreen
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
-import com.marzec.todo.screen.lists.ListsScreen
-import com.marzec.todo.screen.lists.ListsScreenState
-import com.marzec.todo.screen.lists.ListsScreenStore
 import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
@@ -82,15 +79,13 @@ object DI {
             (@Composable (destination: Destination, cacheKey: String) -> Unit)
             > = mapOf(
         Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
-        Destination.Lists::class to @Composable { _, cacheKey -> provideListScreen(cacheKey) },
         Destination.Tasks::class to @Composable { destination, cacheKey ->
             destination as Destination.Tasks
-            provideTasksScreen(destination.listId, cacheKey)
+            provideTasksScreen(cacheKey)
         },
         Destination.AddNewTask::class to @Composable { destination, cacheKey ->
             destination as Destination.AddNewTask
             provideAddNewTaskScreen(
-                listId = destination.listId,
                 taskId = destination.taskToEditId,
                 parentTaskId = destination.parentTaskId,
                 cacheKey
@@ -98,20 +93,19 @@ object DI {
         },
         Destination.TaskDetails::class to @Composable { destination, cacheKey ->
             destination as Destination.TaskDetails
-            provideTaskDetailsScreen(destination.listId, destination.taskId, cacheKey)
+            provideTaskDetailsScreen(destination.taskId, cacheKey)
         },
         Destination.AddSubTask::class to @Composable { destination, cacheKey ->
             destination as Destination.AddSubTask
-            provideAddSubTaskScreen(destination.listId, destination.taskId, cacheKey)
+            provideAddSubTaskScreen(destination.taskId, cacheKey)
         }
     )
 
     @Composable
-    private fun provideTasksScreen(listId: Int, cacheKey: String) {
+    private fun provideTasksScreen(cacheKey: String) {
         TasksScreen(
             store = provideTasksStore(
                 scope = rememberCoroutineScope(),
-                listId = listId,
                 cacheKey = cacheKey
             ),
             actionBarProvider = provideActionBarProvider()
@@ -120,13 +114,11 @@ object DI {
 
     private fun provideTasksStore(
         scope: CoroutineScope,
-        listId: Int,
         cacheKey: String
     ): TasksStore {
         return TasksStore(
             scope = scope,
             navigationStore = navigationStore,
-            listId = listId,
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
@@ -145,7 +137,6 @@ object DI {
 
     @Composable
     private fun provideAddNewTaskScreen(
-        listId: Int,
         taskId: Int?,
         parentTaskId: Int?,
         cacheKey: String
@@ -153,7 +144,6 @@ object DI {
         AddNewTaskScreen(
             provideAddNewTaskStore(
                 scope = rememberCoroutineScope(),
-                listId = listId,
                 taskId = taskId,
                 parentTaskId = parentTaskId,
                 cacheKey = cacheKey
@@ -164,7 +154,6 @@ object DI {
 
     private fun provideAddNewTaskStore(
         scope: CoroutineScope,
-        listId: Int,
         taskId: Int?,
         parentTaskId: Int?,
         cacheKey: String
@@ -177,7 +166,6 @@ object DI {
             cacheKey = cacheKey,
             initialState = State.Data(
                 AddNewTaskState.initial(
-                    listId = listId,
                     taskId = taskId,
                     parentTaskId = parentTaskId
                 )
@@ -186,11 +174,10 @@ object DI {
     }
 
     @Composable
-    private fun provideTaskDetailsScreen(listId: Int, taskId: Int, cacheKey: String) {
+    private fun provideTaskDetailsScreen(taskId: Int, cacheKey: String) {
         TaskDetailsScreen(
             store = provideTaskDetailsStore(
                 scope = rememberCoroutineScope(),
-                listId = listId,
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
@@ -200,7 +187,6 @@ object DI {
 
     private fun provideTaskDetailsStore(
         scope: CoroutineScope,
-        listId: Int,
         taskId: Int,
         cacheKey: String
     ): TaskDetailsStore = TaskDetailsStore(
@@ -210,7 +196,6 @@ object DI {
         stateCache = preferences,
         cacheKey = cacheKey,
         initialState = TaskDetailsState.INITIAL,
-        listId = listId,
         taskId = taskId,
         copyToClipBoardHelper = copyToClipBoardHelper,
         dialogDelegate = DialogDelegateImpl<TaskDetailsState>(),
@@ -223,11 +208,10 @@ object DI {
     )
 
     @Composable
-    private fun provideAddSubTaskScreen(listId: Int, taskId: Int, cacheKey: String) {
+    private fun provideAddSubTaskScreen(taskId: Int, cacheKey: String) {
         AddSubTaskScreen(
             store = provideAddSubTaskStore(
                 scope = rememberCoroutineScope(),
-                listId = listId,
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
@@ -237,7 +221,6 @@ object DI {
 
     private fun provideAddSubTaskStore(
         scope: CoroutineScope,
-        listId: Int,
         taskId: Int,
         cacheKey: String
     ): AddSubTaskStore {
@@ -248,7 +231,6 @@ object DI {
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = AddSubTaskData.INITIAL,
-            listId = listId,
             taskId = taskId
         )
     }
@@ -273,9 +255,9 @@ object DI {
             ) @Composable { _, it -> provideLoginScreen(it) }
         } else {
             NavigationEntry(
-                Destination.Lists,
+                Destination.Tasks,
                 cacheKeyProvider()
-            ) @Composable { _, it -> provideListScreen(it) }
+            ) @Composable { _, it -> provideTasksScreen(it) }
         }
         return NavigationStore(
             scope = scope,
@@ -289,37 +271,6 @@ object DI {
                 )
             )
         )
-    }
-
-    @Composable
-    private fun provideListScreen(cacheKey: String) {
-        ListsScreen(
-            navigationStore = navigationStore,
-            actionBarProvider = provideActionBarProvider(),
-            listsScreenStore = provideListScreenStore(
-                scope = rememberCoroutineScope(),
-                cacheKey = cacheKey
-            )
-        )
-    }
-
-    @Composable
-    private fun provideListScreenStore(
-        scope: CoroutineScope,
-        cacheKey: String
-    ) = ListsScreenStore(
-        scope = scope,
-        todoRepository = provideTodoRepository(),
-        stateCache = preferences,
-        cacheKey = cacheKey,
-        initialState = provideListScreenDefaultState(),
-        navigationStore = navigationStore,
-        loginRepository = loginRepository,
-        dialogDelegate = DialogDelegateImpl<ListsScreenState>()
-    )
-
-    private fun provideListScreenDefaultState(): State<ListsScreenState> {
-        return State.Data(ListsScreenState.INITIAL)
     }
 
     @Composable
@@ -403,12 +354,10 @@ object Api {
     object Todo {
         val BASE = "$HOST/todo/api/1"
 
-        val TODO_LISTS = "$BASE/lists"
-        val TODO_LIST = "$BASE/list"
-        fun createTask(listId: Int) = "$BASE/list/$listId/tasks"
+        val TASKS = "$BASE/tasks"
+        val ADD_TASKS = "$BASE/tasks"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
-        fun removeList(listId: Int) = "$BASE/list/$listId"
     }
 
     object Headers {

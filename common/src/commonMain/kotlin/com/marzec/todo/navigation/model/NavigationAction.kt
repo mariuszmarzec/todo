@@ -14,13 +14,12 @@ sealed class Destination {
 
     object Login : Destination()
     object Lists : Destination()
-    data class Tasks(val listId: Int) : Destination()
+    object Tasks : Destination()
     data class AddNewTask(
-        val listId: Int,
         val taskToEditId: Int?,
         val parentTaskId: Int?
     ) : Destination()
 
-    data class TaskDetails(val listId: Int, val taskId: Int) : Destination()
-    data class AddSubTask(val listId: Int, val taskId: Int) : Destination()
+    data class TaskDetails(val taskId: Int) : Destination()
+    data class AddSubTask(val taskId: Int) : Destination()
 }
