@@ -131,7 +131,7 @@ class TaskDetailsStore(
     override fun removeTask(idsToRemove: List<Int>) = sideEffect {
         closeDialog()
 
-        intent {
+        intent<Content<Unit>> {
             removeTaskOnTrigger(todoRepository, idsToRemove)
 
             sideEffect {
