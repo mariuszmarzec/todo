@@ -31,6 +31,8 @@ data class TaskDetailsState(
 
     override fun copyWithSearch(search: SearchState): TaskDetailsState = copy(search = search)
 
+    override fun allIds(): Set<Int> = task.subTasks.map { it.id }.toSet()
+
     companion object {
         val INITIAL = State.Loading<TaskDetailsState>()
     }

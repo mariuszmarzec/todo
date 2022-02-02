@@ -4,12 +4,15 @@ import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.extensions.asInstance
+import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.model.Destination
 import com.marzec.todo.navigation.model.NavigationStore
 import com.marzec.todo.navigation.model.next
 import com.marzec.todo.network.Content
+import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.network.mapData
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
@@ -23,10 +26,15 @@ class AddSubTaskStore(
     private val stateCache: Preferences,
     initialState: State<AddSubTaskData>,
     private val todoRepository: TodoRepository,
-    private val taskId: Int
+    private val taskId: Int,
+    selectionDelegate: SelectionDelegate
 ) : Store3<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
-) {
+), SelectionDelegate by selectionDelegate {
+
+    init {
+        delegates(selectionDelegate)
+    }
 
     fun initialLoad() = intent<Content<List<Task>>> {
         onTrigger {
@@ -55,13 +63,11 @@ class AddSubTaskStore(
     fun pinSubtask(id: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
+                val newParentTaskId = taskId
                 tasks.firstOrNull { id == it.id }?.let { task ->
-                    todoRepository.updateTask(
-                        taskId = id,
-                        description = task.description,
-                        parentTaskId = taskId,
-                        priority = task.priority,
-                        isToDo = task.isToDo
+                    todoRepository.pinTask(
+                        task = task,
+                        parentTaskId = newParentTaskId,
                     )
                 }
             }
@@ -80,5 +86,30 @@ class AddSubTaskStore(
 
     override suspend fun onNewState(newState: State<AddSubTaskData>) {
         stateCache.set(cacheKey, newState)
+    }
+
+    fun onPinAllSelectedClicked() = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.pinAllTask(
+                    tasks = tasks.filter { it.id in selected },
+                    parentTaskId = taskId
+                )
+            }
+        }
+
+        cancelTrigger(runSideEffectAfterCancel = true) {
+            resultNonNull() is Content.Data
+        }
+
+        reducer {
+            state.reduceContentNoChanges(resultNonNull())
+        }
+
+        sideEffect {
+            resultNonNull().ifDataSuspend {
+                navigationStore.goBack()
+            }
+        }
     }
 }

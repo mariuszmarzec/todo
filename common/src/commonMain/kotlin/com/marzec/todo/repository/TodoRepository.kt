@@ -83,6 +83,37 @@ class TodoRepository(
             dataSource.updateTask(taskId, description, parentTaskId, priority, isToDo)
         }
 
+    suspend fun pinTask(
+        task: Task,
+        parentTaskId: Int?
+    ): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.updateTask(
+                taskId = task.id,
+                description = task.description,
+                parentTaskId = parentTaskId,
+                priority = task.priority,
+                isToDo = task.isToDo
+            )
+        }
+
+
+    suspend fun pinAllTask(
+        tasks: List<Task>,
+        parentTaskId: Int?
+    ): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            tasks.forEach { task ->
+                dataSource.updateTask(
+                    taskId = task.id,
+                    description = task.description,
+                    parentTaskId = parentTaskId,
+                    priority = task.priority,
+                    isToDo = task.isToDo
+                )
+            }
+        }
+
     suspend fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.removeTask(taskId)

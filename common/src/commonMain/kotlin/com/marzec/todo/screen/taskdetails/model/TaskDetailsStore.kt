@@ -201,17 +201,6 @@ class TaskDetailsStore(
         }
     }
 
-    fun onAllSelectClicked() = sideEffect {
-        state.ifDataAvailable {
-            val ids = task.subTasks.map { it.id }
-            if (selected.size == task.subTasks.size) {
-                deselectAll(ids)
-            } else {
-                selectAll(ids)
-            }
-        }
-    }
-
     fun unpinSubtasks() = sideEffect {
         state.ifDataAvailable {
             task.subTasks.forEach {

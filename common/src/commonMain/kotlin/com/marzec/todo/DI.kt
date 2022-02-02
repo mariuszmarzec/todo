@@ -232,7 +232,8 @@ object DI {
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = AddSubTaskData.INITIAL,
-            taskId = taskId
+            taskId = taskId,
+            selectionDelegate = SelectionDelegateImpl<AddSubTaskData>()
         )
     }
 
