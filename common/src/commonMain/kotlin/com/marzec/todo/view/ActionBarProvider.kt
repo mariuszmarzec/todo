@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class ActionBarProvider(private val store: NavigationStore) {
     @Composable
-    fun provide(title: String, rightContent: @Composable () -> Unit = { }) {
+    fun provide(title: String = "", rightContent: @Composable () -> Unit = { }) {
         ActionBar(store = store, title = title, rightContent)
     }
 }
@@ -44,7 +44,7 @@ private fun ActionBar(
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
             }
         }
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         Text(text = title)
 
         Row(

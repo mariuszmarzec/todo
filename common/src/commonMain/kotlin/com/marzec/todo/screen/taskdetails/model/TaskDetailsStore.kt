@@ -2,6 +2,7 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
+import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
@@ -171,17 +172,10 @@ class TaskDetailsStore(
         onTrigger { todoRepository.addNewTasks(false, taskId, tasks) }
     }
 
-    fun markAsChecked(id: Int) = intent<Content<Unit>> {
+    fun markAsDone(id: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                val task = taskById(id)
-                todoRepository.updateTask(
-                    taskId = task.id,
-                    description = task.description,
-                    parentTaskId = task.parentTaskId,
-                    priority = task.priority,
-                    isToDo = false
-                )
+                todoRepository.markAsDone(taskById(id))
             }
         }
     }
@@ -189,14 +183,7 @@ class TaskDetailsStore(
     fun markAsToDo(id: Int) = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                val task = taskById(id)
-                todoRepository.updateTask(
-                    taskId = task.id,
-                    description = task.description,
-                    parentTaskId = task.parentTaskId,
-                    priority = task.priority,
-                    isToDo = true
-                )
+                todoRepository.markAsToDo(taskById(id))
             }
         }
     }
@@ -220,5 +207,25 @@ class TaskDetailsStore(
             val ids = task.subTasks.filterNot { it.isToDo }.map { it.id }
             onRemoveButtonClick(ids)
         }
+    }
+
+    fun markSelectedAsTodo() = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.markAsToDo(task.subTasks.filter { it.id in selected })
+            }
+        }
+
+        reducer { state.reduceContentNoChanges(resultNonNull()) }
+    }
+
+    fun markSelectedAsDone() = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.markAsDone(task.subTasks.filter { it.id in selected })
+            }
+        }
+
+        reducer { state.reduceContentNoChanges(resultNonNull()) }
     }
 }

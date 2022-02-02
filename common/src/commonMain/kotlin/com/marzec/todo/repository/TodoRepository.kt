@@ -83,6 +83,56 @@ class TodoRepository(
             dataSource.updateTask(taskId, description, parentTaskId, priority, isToDo)
         }
 
+    suspend fun markAsDone(task: Task): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.updateTask(
+                taskId = task.id,
+                description = task.description,
+                parentTaskId = task.parentTaskId,
+                priority = task.priority,
+                isToDo = false
+            )
+        }
+
+
+    suspend fun markAsDone(tasks: List<Task>): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            tasks.forEach { task ->
+                dataSource.updateTask(
+                    taskId = task.id,
+                    description = task.description,
+                    parentTaskId = task.parentTaskId,
+                    priority = task.priority,
+                    isToDo = false
+                )
+            }
+        }
+
+        suspend fun markAsToDo(task: Task): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.updateTask(
+                taskId = task.id,
+                description = task.description,
+                parentTaskId = task.parentTaskId,
+                priority = task.priority,
+                isToDo = true
+            )
+        }
+
+
+    suspend fun markAsToDo(tasks: List<Task>): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            tasks.forEach { task ->
+                dataSource.updateTask(
+                    taskId = task.id,
+                    description = task.description,
+                    parentTaskId = task.parentTaskId,
+                    priority = task.priority,
+                    isToDo = true
+                )
+            }
+        }
+
     suspend fun pinTask(
         task: Task,
         parentTaskId: Int?
@@ -98,7 +148,7 @@ class TodoRepository(
         }
 
 
-    suspend fun pinAllTask(
+    suspend fun pinAllTasks(
         tasks: List<Task>,
         parentTaskId: Int?
     ): Flow<Content<Unit>> =

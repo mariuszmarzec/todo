@@ -16,7 +16,6 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MenuDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -32,9 +31,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -64,24 +60,17 @@ fun TaskDetailsScreen(
 
     Scaffold(
         topBar = {
-            actionBarProvider.provide("Task details") {
-                val subTasksCount = state.data?.task?.subTasks?.size ?: 0
-                val selectedCount = state.data?.selected?.count() ?: 0
-                val selectionModeEnabled =
-                    state is State.Data<TaskDetailsState> && selectedCount > 0
-
+            actionBarProvider.provide {
                 state.ifDataAvailable {
                     SearchView(search, store)
-                }
-                IconButton({
-                    store.edit()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
-                }
-                if (!selectionModeEnabled) {
+                    IconButton({
+                        store.edit()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit"
+                        )
+                    }
                     IconButton({
                         store.showRemoveTaskDialog()
                     }) {
@@ -90,59 +79,17 @@ fun TaskDetailsScreen(
                             contentDescription = "Remove"
                         )
                     }
-                }
-                if ((state.data?.task?.description?.lines()?.size ?: 0) > 1) {
-                    IconButton({
-                        store.explodeIntoTasks(
-                            state.data?.task?.description?.lines().orEmpty()
-                        )
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.List,
-                            contentDescription = "Explode"
-                        )
-                    }
-                }
-                if (selectionModeEnabled) {
-                    IconButton({
-                        store.showRemoveSelectedSubTasksDialog()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Remove"
-                        )
-                    }
-                    IconButton({
-                        store.unpinSubtasks()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Unpin all"
-                        )
-                    }
-                }
-                if (state.data?.task?.subTasks?.any { !it.isToDo } == true) {
-                    IconButton({
-                        store.removeDoneTasks()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = "Remove"
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Remove"
-                        )
-                    }
-                }
-                if (state is State.Data<TaskDetailsState> && subTasksCount > 0) {
-                    val selected = subTasksCount == selectedCount
-                    Checkbox(
-                        checked = selected,
-                        onCheckedChange = {
-                            store.onAllSelectClicked()
+                    if (task.description.lines().size > 1) {
+                        IconButton({
+                            store.explodeIntoTasks(task.description.lines())
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.List,
+                                contentDescription = "Explode"
+                            )
                         }
-                    )
+                    }
+
                 }
             }
         },
@@ -164,6 +111,76 @@ fun TaskDetailsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
+
+                    val subTasksCount = state.data.task.subTasks.size
+                    val selectedCount = state.data.selected.count()
+                    val selectionModeEnabled = selectedCount > 0
+                    if (subTasksCount > 0) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (selectionModeEnabled) {
+                                IconButton({
+                                    store.markSelectedAsTodo()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Mark selected as to do"
+                                    )
+                                }
+                                IconButton({
+                                    store.markSelectedAsDone()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Mark selected as done"
+                                    )
+                                }
+
+                                IconButton({
+                                    store.showRemoveSelectedSubTasksDialog()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Remove"
+                                    )
+                                }
+                                IconButton({
+                                    store.unpinSubtasks()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Unpin all"
+                                    )
+                                }
+                            }
+                            if (state.data.task.subTasks.any { !it.isToDo }) {
+                                IconButton({
+                                    store.removeDoneTasks()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Delete,
+                                        contentDescription = "Remove"
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Remove"
+                                    )
+                                }
+                            }
+                            Checkbox(
+                                checked = subTasksCount == selectedCount,
+                                onCheckedChange = {
+                                    store.onAllSelectClicked()
+                                }
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier
                             .padding(all = 16.dp)
@@ -179,7 +196,6 @@ fun TaskDetailsScreen(
                         }
                         val urls = state.data.task.description.urls()
                         if (urls.isNotEmpty()) {
-                            Spacer(Modifier.size(16.dp))
                             IconButton({
                                 store.openUrls(urls)
                             }) {
@@ -189,7 +205,6 @@ fun TaskDetailsScreen(
                                 )
                             }
                         }
-                        Spacer(Modifier.size(16.dp))
                         IconButton({
                             store.copyDescription()
                         }) {
@@ -221,7 +236,7 @@ fun TaskDetailsScreen(
                             store.unpinSubtask(it)
                         },
                         onCheckClick = {
-                            store.markAsChecked(it)
+                            store.markAsDone(it)
                         },
                         onUncheckClick = {
                             store.markAsToDo(it)

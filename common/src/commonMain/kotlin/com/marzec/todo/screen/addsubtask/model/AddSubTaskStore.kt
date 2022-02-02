@@ -88,10 +88,10 @@ class AddSubTaskStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun onPinAllSelectedClicked() = intent<Content<Unit>> {
+    fun onPinAllSelectedClicked() = intent<Content<Unit>>("pinAllSelected") {
         onTrigger {
             state.ifDataAvailable {
-                todoRepository.pinAllTask(
+                todoRepository.pinAllTasks(
                     tasks = tasks.filter { it.id in selected },
                     parentTaskId = taskId
                 )
