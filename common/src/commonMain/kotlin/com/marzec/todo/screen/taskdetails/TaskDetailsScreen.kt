@@ -103,15 +103,6 @@ fun TaskDetailsScreen(
                         )
                     }
                 }
-                if (state is State.Data<TaskDetailsState> && subTasksCount > 0) {
-                    val selected = subTasksCount == selectedCount
-                    Checkbox(
-                        checked = selected,
-                        onCheckedChange = {
-                            store.onAllSelectClicked()
-                        }
-                    )
-                }
                 if (selectionModeEnabled) {
                     IconButton({
                         store.showRemoveSelectedSubTasksDialog()
@@ -143,7 +134,15 @@ fun TaskDetailsScreen(
                             contentDescription = "Remove"
                         )
                     }
-
+                }
+                if (state is State.Data<TaskDetailsState> && subTasksCount > 0) {
+                    val selected = subTasksCount == selectedCount
+                    Checkbox(
+                        checked = selected,
+                        onCheckedChange = {
+                            store.onAllSelectClicked()
+                        }
+                    )
                 }
             }
         },
