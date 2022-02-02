@@ -66,3 +66,15 @@ fun <T: Any> Store3<T>.collectState(
 fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
 
 fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
+
+fun List<Task>.filterWithSearch(search: String): List<Task> {
+    val searchQuery = search.trim().split(" ")
+    return filter { task ->
+        searchQuery == listOf(EMPTY_STRING) || searchQuery.all {
+            task.description.contains(
+                it,
+                ignoreCase = true
+            )
+        }
+    }
+}

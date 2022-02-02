@@ -49,6 +49,7 @@ import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
+import com.marzec.todo.view.SearchView
 import com.marzec.todo.view.TaskListView
 import com.marzec.todo.view.TextListItem
 
@@ -68,6 +69,10 @@ fun TaskDetailsScreen(
                 val selectedCount = state.data?.selected?.count() ?: 0
                 val selectionModeEnabled =
                     state is State.Data<TaskDetailsState> && selectedCount > 0
+
+                state.ifDataAvailable {
+                    SearchView(search, store)
+                }
                 IconButton({
                     store.edit()
                 }) {
@@ -195,6 +200,7 @@ fun TaskDetailsScreen(
                     Spacer(Modifier.size(16.dp))
                     TaskListView(
                         tasks = state.data.task.subTasks,
+                        search = state.data.search.value,
                         selected = state.data.selected,
                         showButtonsInColumns = true,
                         onClickListener = {

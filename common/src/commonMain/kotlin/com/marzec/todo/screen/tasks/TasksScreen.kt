@@ -13,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.mvi.State
 import com.marzec.todo.extensions.EMPTY_STRING
 import com.marzec.todo.extensions.collectState
+import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.view.ActionBarProvider
@@ -71,17 +72,10 @@ private fun TaskScreenData(
     store: TasksStore
 ) {
     val scope = rememberCoroutineScope()
-    val searchQuery = state.data.search.value.trim().split(" ")
 
     TaskListView(
-        tasks = state.data.tasks.filter { task ->
-            searchQuery == listOf(EMPTY_STRING) || searchQuery.all {
-                task.description.contains(
-                    it,
-                    ignoreCase = true
-                )
-            }
-        },
+        tasks = state.data.tasks,
+        search = state.data.search.value,
         selected = emptySet(),
         showButtonsInColumns = false,
         onClickListener = {

@@ -204,7 +204,8 @@ object DI {
         changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
             provideTodoRepository()
         ),
-        selectionDelegate = SelectionDelegateImpl<TaskDetailsState>()
+        selectionDelegate = SelectionDelegateImpl<TaskDetailsState>(),
+        searchDelegate = SearchDelegateImpl<TaskDetailsState>()
     )
 
     @Composable

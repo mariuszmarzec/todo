@@ -7,6 +7,7 @@ import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
+import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
@@ -20,6 +21,7 @@ import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
+import com.marzec.todo.view.SearchState
 import kotlinx.coroutines.CoroutineScope
 
 class TaskDetailsStore(
@@ -35,13 +37,15 @@ class TaskDetailsStore(
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
-    private val selectionDelegate: SelectionDelegate
+    private val selectionDelegate: SelectionDelegate,
+    private val searchDelegate: SearchDelegate
 ) : Store3<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate,
-    SelectionDelegate by selectionDelegate {
+    SelectionDelegate by selectionDelegate,
+    SearchDelegate by searchDelegate {
 
     override val identifier: String
         get() = cacheKey
@@ -52,7 +56,8 @@ class TaskDetailsStore(
             urlDelegate,
             dialogDelegate,
             changePriorityDelegate,
-            selectionDelegate
+            selectionDelegate,
+            searchDelegate
         )
     }
 
@@ -66,7 +71,11 @@ class TaskDetailsStore(
                 TaskDetailsState(
                     task = result,
                     dialog = DialogState.NoDialog,
-                    selected = this?.selected?.filter { it in taskIds }?.toSet().orEmpty()
+                    selected = this?.selected?.filter { it in taskIds }?.toSet().orEmpty(),
+                    search = SearchState(
+                        value = "",
+                        focused = false
+                    )
                 )
             }
         }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import com.marzec.todo.extensions.descriptionWithProgress
+import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.todo.extensions.ifFalse
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
@@ -33,6 +34,7 @@ private data class TaskListItem(
 @Composable
 fun TaskListView(
     tasks: List<Task>,
+    search: String = "",
     selected: Set<Int>,
     showButtonsInColumns: Boolean,
     onClickListener: (Int) -> Unit,
@@ -48,7 +50,9 @@ fun TaskListView(
     val selectionModeEnabled = selected.isNotEmpty()
     LazyColumn {
         items(
-            items = tasks.map {
+            items = tasks
+            .filterWithSearch(search)
+            .map {
                 TaskListItem(
                     id = it.id,
                     item = TextListItem(
