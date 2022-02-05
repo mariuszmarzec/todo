@@ -13,3 +13,10 @@ val Task.descriptionWithProgress: String
         }
         return description + progress
     }
+
+val Task.subDescription: String
+    get() = subTasks
+        .firstOrNull()
+        ?.description
+        ?.lines()
+        ?.first()?.takeIf { it != it.urls().firstOrNull() } ?: ""

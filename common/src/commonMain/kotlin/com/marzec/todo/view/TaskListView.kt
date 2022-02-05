@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import com.marzec.todo.extensions.descriptionWithProgress
 import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.todo.extensions.ifFalse
+import com.marzec.todo.extensions.subDescription
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
 
@@ -58,8 +59,7 @@ fun TaskListView(
                     item = TextListItem(
                         id = it.id.toString(),
                         name = it.descriptionWithProgress,
-                        description = it.subTasks.firstOrNull()?.description?.lines()
-                            ?.first() ?: ""
+                        description = it.subDescription
                     ),
                     urlToOpen = it.urlToOpen(),
                     isToDo = it.isToDo,
