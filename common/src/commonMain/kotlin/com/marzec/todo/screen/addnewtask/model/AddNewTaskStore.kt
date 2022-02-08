@@ -7,10 +7,10 @@ import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.model.Task
-import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationAction
-import com.marzec.todo.navigation.model.NavigationOptions
-import com.marzec.todo.navigation.model.NavigationStore
+import com.marzec.todo.navigation.Destination
+import com.marzec.todo.navigation.NavigationAction
+import com.marzec.todo.navigation.NavigationOptions
+import com.marzec.todo.navigation.NavigationStore
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.preferences.Preferences

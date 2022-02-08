@@ -1,4 +1,4 @@
-package com.marzec.todo.navigation.model
+package com.marzec.todo.navigation
 
 data class NavigationAction(
     val destination: Destination,

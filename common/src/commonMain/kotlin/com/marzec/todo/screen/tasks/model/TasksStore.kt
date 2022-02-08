@@ -10,9 +10,9 @@ import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
-import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.navigation.model.next
+import com.marzec.todo.navigation.Destination
+import com.marzec.todo.navigation.NavigationStore
+import com.marzec.todo.navigation.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository

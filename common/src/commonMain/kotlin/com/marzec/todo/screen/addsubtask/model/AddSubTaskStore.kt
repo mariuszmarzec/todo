@@ -8,9 +8,9 @@ import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.delegates
 import com.marzec.todo.model.Task
-import com.marzec.todo.navigation.model.Destination
-import com.marzec.todo.navigation.model.NavigationStore
-import com.marzec.todo.navigation.model.next
+import com.marzec.todo.navigation.Destination
+import com.marzec.todo.navigation.NavigationStore
+import com.marzec.todo.navigation.next
 import com.marzec.todo.network.Content
 import com.marzec.todo.network.ifDataSuspend
 import com.marzec.todo.network.mapData

@@ -1,10 +1,8 @@
 package com.marzec.todo
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.Window
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.marzec.todo.cache.FileCacheImpl
@@ -16,13 +14,12 @@ import com.marzec.todo.network.httpClient
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
 import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
+import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-
-import java.awt.datatransfer.StringSelection
-import java.net.URI
 
 @ExperimentalCoroutinesApi
 fun main() {

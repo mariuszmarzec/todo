@@ -1,4 +1,4 @@
-package com.marzec.todo.navigation.model
+package com.marzec.todo.navigation
 
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.Store3
