@@ -1,8 +1,8 @@
-package com.marzec.todo.navigation
+package com.marzec.navigation
 
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.Store3
-import com.marzec.todo.preferences.Preferences
+import com.marzec.preferences.Preferences
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 

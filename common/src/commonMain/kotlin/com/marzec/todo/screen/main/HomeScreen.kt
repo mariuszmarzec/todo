@@ -2,9 +2,9 @@ package com.marzec.todo.screen.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import com.marzec.todo.extensions.collectState
-import com.marzec.todo.navigation.NavigationState
-import com.marzec.todo.navigation.NavigationStore
+import com.marzec.mvi.collectState
+import com.marzec.navigation.NavigationState
+import com.marzec.navigation.NavigationStore
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {

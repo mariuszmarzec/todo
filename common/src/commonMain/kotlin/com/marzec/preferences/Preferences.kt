@@ -1,4 +1,4 @@
-package com.marzec.todo.preferences
+package com.marzec.preferences
 
 interface Preferences {
     fun set(key: String, value: Any)

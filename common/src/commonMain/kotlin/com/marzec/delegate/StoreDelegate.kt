@@ -1,4 +1,4 @@
-package com.marzec.todo.delegates
+package com.marzec.delegate
 
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.Store3
@@ -19,4 +19,11 @@ open class StoreDelegate<State : Any> {
     fun sideEffect(
         func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit
     ) = store.sideEffect(func)
+}
+
+@Suppress("unchecked_cast")
+fun <STATE : Any> Store3<STATE>.delegates(vararg delegates: Any) {
+    delegates.forEach {
+        (it as StoreDelegate<STATE>).init(this@delegates)
+    }
 }

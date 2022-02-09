@@ -5,12 +5,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.marzec.todo.cache.FileCacheImpl
-import com.marzec.todo.cache.MemoryCache
+import com.marzec.cache.FileCacheImpl
+import com.marzec.cache.MemoryCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
-import com.marzec.todo.logger.Logger
-import com.marzec.todo.network.httpClient
+import com.marzec.logger.Logger
+import com.marzec.network.httpClient
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
 import java.awt.Toolkit
@@ -24,7 +24,7 @@ import kotlinx.serialization.json.Json
 @ExperimentalCoroutinesApi
 fun main() {
 
-    DI.logger = object : Logger {
+    Logger.logger = object : Logger {
         override fun log(tag: String, message: String) {
             println("$tag: $message")
         }

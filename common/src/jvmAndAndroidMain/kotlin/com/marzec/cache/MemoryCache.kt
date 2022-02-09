@@ -1,5 +1,6 @@
-package com.marzec.todo.cache
+package com.marzec.cache
 
+import com.marzec.cache.Cache
 import java.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

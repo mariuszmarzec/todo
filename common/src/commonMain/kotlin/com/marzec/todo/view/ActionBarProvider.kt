@@ -16,7 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.marzec.todo.navigation.NavigationStore
+import com.marzec.navigation.NavigationStore
 import kotlinx.coroutines.launch
 
 class ActionBarProvider(private val store: NavigationStore) {

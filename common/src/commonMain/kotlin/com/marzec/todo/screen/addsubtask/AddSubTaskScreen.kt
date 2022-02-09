@@ -15,17 +15,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
-import com.marzec.todo.extensions.collectState
+import com.marzec.mvi.collectState
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
-import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.view.ActionBarProvider
 import com.marzec.todo.view.TaskListView
 

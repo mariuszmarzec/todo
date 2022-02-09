@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
-import com.marzec.todo.extensions.collectState
+import com.marzec.mvi.collectState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.todo.view.ActionBarProvider
@@ -28,7 +28,7 @@ fun AddNewTaskScreen(
     actionBarProvider: ActionBarProvider
 ) {
 
-    val state: State<AddNewTaskState> by store.collectState() {
+    val state: State<AddNewTaskState> by store.collectState {
         store.initialLoad()
     }
 

@@ -5,11 +5,11 @@ import com.marzec.todo.PreferencesKeys
 import com.marzec.todo.api.LoginRequestDto
 import com.marzec.todo.api.UserDto
 import com.marzec.todo.api.toDomain
-import com.marzec.todo.cache.FileCache
-import com.marzec.todo.cache.putTyped
+import com.marzec.cache.FileCache
+import com.marzec.cache.putTyped
 import com.marzec.todo.model.User
-import com.marzec.todo.network.Content
-import com.marzec.todo.network.asContentFlow
+import com.marzec.content.Content
+import com.marzec.content.asContentFlow
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post

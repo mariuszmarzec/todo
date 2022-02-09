@@ -7,13 +7,13 @@ import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.todo.model.Task
-import com.marzec.todo.navigation.Destination
-import com.marzec.todo.navigation.NavigationAction
-import com.marzec.todo.navigation.NavigationOptions
-import com.marzec.todo.navigation.NavigationStore
-import com.marzec.todo.network.Content
-import com.marzec.todo.network.ifDataSuspend
-import com.marzec.todo.preferences.Preferences
+import com.marzec.navigation.Destination
+import com.marzec.navigation.NavigationAction
+import com.marzec.navigation.NavigationOptions
+import com.marzec.navigation.NavigationStore
+import com.marzec.content.Content
+import com.marzec.content.ifDataSuspend
+import com.marzec.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 

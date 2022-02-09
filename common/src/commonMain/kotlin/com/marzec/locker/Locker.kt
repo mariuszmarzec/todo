@@ -1,4 +1,4 @@
-package com.marzec.todo.common
+package com.marzec.locker
 
 expect class Locker() {
 

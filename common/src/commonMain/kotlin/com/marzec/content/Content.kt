@@ -1,6 +1,7 @@
-package com.marzec.todo.network
+package com.marzec.content
 
 import com.marzec.todo.DI
+import com.marzec.todo.extensions.getMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -43,3 +44,5 @@ fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
 
 suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) =
     (this as? Content.Data)?.action()
+
+fun <T> Content.Error<T>.getMessage(): String = exception.message.orEmpty()

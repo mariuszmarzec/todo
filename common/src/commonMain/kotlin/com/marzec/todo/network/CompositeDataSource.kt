@@ -3,7 +3,7 @@ package com.marzec.todo.network
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
-import com.marzec.todo.cache.Cache
+import com.marzec.cache.Cache
 import com.marzec.todo.model.toDomain
 
 class CompositeDataSource(

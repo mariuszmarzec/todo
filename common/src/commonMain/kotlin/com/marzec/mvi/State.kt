@@ -2,7 +2,7 @@ package com.marzec.mvi
 
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.asInstanceAndReturnOther
-import com.marzec.todo.network.Content
+import com.marzec.content.Content
 
 sealed class State<T>(open val data: T?) {
 

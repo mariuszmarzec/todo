@@ -2,9 +2,10 @@ package com.marzec.todo
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import com.marzec.cache.Cache
+import com.marzec.cache.FileCache
+import com.marzec.logger.Logger
 import com.marzec.mvi.State
-import com.marzec.todo.cache.Cache
-import com.marzec.todo.cache.FileCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
@@ -13,17 +14,16 @@ import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.SearchDelegateImpl
 import com.marzec.todo.delegates.dialog.SelectionDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
-import com.marzec.todo.logger.Logger
-import com.marzec.todo.navigation.Destination
-import com.marzec.todo.navigation.NavigationEntry
-import com.marzec.todo.navigation.NavigationState
-import com.marzec.todo.navigation.NavigationStore
+import com.marzec.navigation.Destination
+import com.marzec.navigation.NavigationEntry
+import com.marzec.navigation.NavigationState
+import com.marzec.navigation.NavigationStore
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.LocalDataSource
-import com.marzec.todo.preferences.MemoryPreferences
-import com.marzec.todo.preferences.Preferences
+import com.marzec.preferences.MemoryPreferences
+import com.marzec.preferences.Preferences
 import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.LoginRepositoryImpl
 import com.marzec.todo.repository.LoginRepositoryMock
@@ -55,7 +55,9 @@ import kotlinx.serialization.builtins.serializer
 
 object DI {
 
-    lateinit var logger: Logger
+    val logger: Logger by lazy {
+        Logger.logger
+    }
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
     var ioDispatcher: CoroutineDispatcher = Dispatchers.Default

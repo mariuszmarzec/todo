@@ -2,8 +2,8 @@ package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceContentAsSideAction
-import com.marzec.todo.delegates.StoreDelegate
-import com.marzec.todo.network.Content
+import com.marzec.delegate.StoreDelegate
+import com.marzec.content.Content
 import com.marzec.todo.repository.TodoRepository
 
 interface ChangePriorityDelegate {

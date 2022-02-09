@@ -7,11 +7,11 @@ import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.datastore.preferences.createDataStore
 import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.logger.Logger
-import com.marzec.todo.view.cache.PreferencesCache
+import com.marzec.logger.Logger
+import com.marzec.cache.PreferencesCache
 import kotlinx.coroutines.Dispatchers
-import com.marzec.todo.network.httpClient
-import com.marzec.todo.cache.MemoryCache
+import com.marzec.network.httpClient
+import com.marzec.cache.MemoryCache
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
@@ -22,7 +22,7 @@ class ToDoApplication : Application() {
 
         DI.quickCacheEnabled = false
 
-        DI.logger = object : Logger {
+        Logger.logger = object : Logger {
             override fun log(tag: String, message: String) {
                 Log.d(tag, message)
             }

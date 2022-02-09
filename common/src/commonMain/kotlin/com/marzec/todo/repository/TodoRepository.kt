@@ -2,16 +2,16 @@ package com.marzec.todo.repository
 
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.cache.Cache
+import com.marzec.cache.Cache
 import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.toDomain
-import com.marzec.todo.network.Content
+import com.marzec.content.Content
 import com.marzec.todo.network.DataSource
-import com.marzec.todo.network.asContent
-import com.marzec.todo.network.asContentFlow
-import com.marzec.todo.network.ifDataSuspend
-import com.marzec.todo.network.mapData
+import com.marzec.content.asContent
+import com.marzec.content.asContentFlow
+import com.marzec.content.ifDataSuspend
+import com.marzec.content.mapData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull

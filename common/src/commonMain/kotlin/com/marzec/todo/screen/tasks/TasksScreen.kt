@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.mvi.State
 import com.marzec.todo.extensions.EMPTY_STRING
-import com.marzec.todo.extensions.collectState
+import com.marzec.mvi.collectState
 import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore

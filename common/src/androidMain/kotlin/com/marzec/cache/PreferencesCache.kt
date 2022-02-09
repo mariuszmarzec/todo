@@ -1,11 +1,11 @@
-package com.marzec.todo.view.cache
+package com.marzec.cache
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.core.remove
 import androidx.datastore.preferences.core.toMutablePreferences
-import com.marzec.todo.cache.FileCache
+import com.marzec.cache.FileCache
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

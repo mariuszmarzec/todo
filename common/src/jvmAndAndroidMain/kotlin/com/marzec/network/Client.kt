@@ -1,10 +1,10 @@
-package com.marzec.todo.network
+package com.marzec.network
 
 import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
-import com.marzec.todo.cache.getTyped
-import com.marzec.todo.cache.putTyped
+import com.marzec.cache.getTyped
+import com.marzec.cache.putTyped
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.defaultRequest

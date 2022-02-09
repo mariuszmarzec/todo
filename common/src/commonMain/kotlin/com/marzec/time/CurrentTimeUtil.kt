@@ -1,4 +1,4 @@
-package com.marzec.todo.common
+package com.marzec.time
 
 import java.time.Clock
 import java.time.LocalDate

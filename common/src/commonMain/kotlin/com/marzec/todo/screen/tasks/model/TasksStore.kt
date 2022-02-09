@@ -8,13 +8,13 @@ import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
-import com.marzec.todo.extensions.delegates
+import com.marzec.delegate.delegates
 import com.marzec.todo.model.Task
-import com.marzec.todo.navigation.Destination
-import com.marzec.todo.navigation.NavigationStore
-import com.marzec.todo.navigation.next
-import com.marzec.todo.network.Content
-import com.marzec.todo.preferences.Preferences
+import com.marzec.navigation.Destination
+import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.next
+import com.marzec.content.Content
+import com.marzec.preferences.Preferences
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 

@@ -1,15 +1,7 @@
 package com.marzec.todo.extensions
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import com.marzec.mvi.Store3
 import com.marzec.todo.api.TaskDto
-import com.marzec.todo.delegates.StoreDelegate
 import com.marzec.todo.model.Task
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 const val EMPTY_STRING = ""
 
@@ -39,28 +31,6 @@ fun List<TaskDto>.flatMapTaskDto(tasks: MutableList<TaskDto> = mutableListOf()):
         it.subTasks.flatMapTaskDto(tasks)
     }
     return tasks
-}
-
-@Suppress("unchecked_cast")
-fun <STATE : Any> Store3<STATE>.delegates(vararg delegates: Any) {
-    delegates.forEach {
-        (it as StoreDelegate<STATE>).init(this@delegates)
-    }
-}
-
-@Composable
-fun <T: Any> Store3<T>.collectState(
-    context: CoroutineContext = EmptyCoroutineContext,
-    onStoreInitAction: suspend () -> Unit = { }
-): androidx.compose.runtime.State<T> {
-
-    val state = state.collectAsState(state.value, context)
-    LaunchedEffect(key1 = identifier) {
-        init {
-            onStoreInitAction()
-        }
-    }
-    return state
 }
 
 fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
