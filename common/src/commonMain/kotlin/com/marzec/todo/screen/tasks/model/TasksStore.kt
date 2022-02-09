@@ -14,7 +14,11 @@ import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.content.Content
+import com.marzec.content.ifDataSuspend
+import com.marzec.navigation.NavigationAction
+import com.marzec.navigation.NavigationOptions
 import com.marzec.preferences.Preferences
+import com.marzec.todo.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 
@@ -24,7 +28,8 @@ class TasksStore(
     private val cacheKey: String,
     private val stateCache: Preferences,
     initialState: State<TasksScreenState>,
-    val todoRepository: TodoRepository,
+    private val todoRepository: TodoRepository,
+    private val loginRepository: LoginRepository,
     private val urlDelegate: UrlDelegate,
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
@@ -98,6 +103,26 @@ class TasksStore(
                 id = id,
                 newPriority = tasks.minOf { it.priority }.dec()
             )
+        }
+    }
+
+    fun logout() = intent<Content<Unit>> {
+        onTrigger {
+            loginRepository.logout()
+        }
+
+        sideEffect {
+            resultNonNull().ifDataSuspend {
+                navigationStore.next(
+                    NavigationAction(
+                        destination = Destination.Login,
+                        NavigationOptions(
+                            Destination.Login,
+                            popToInclusive = true
+                        )
+                    )
+                )
+            }
         }
     }
 }

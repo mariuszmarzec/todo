@@ -120,6 +120,7 @@ object DI {
             scope = scope,
             navigationStore = navigationStore,
             todoRepository = provideTodoRepository(),
+            loginRepository = loginRepository,
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE,

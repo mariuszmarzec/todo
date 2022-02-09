@@ -3,10 +3,12 @@ package com.marzec.todo.screen.tasks
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,6 +41,11 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                         SearchView(state.data.search, store)
                     }
                     else -> Unit
+                }
+                IconButton({
+                    store.logout()
+                }) {
+                    Icon(imageVector = Icons.Default.Lock, contentDescription = "Logout")
                 }
             }
         },
