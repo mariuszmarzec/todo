@@ -14,6 +14,7 @@ buildscript {
         classpath(Dependency.composeGradlePlugin)
         classpath(Dependency.buildKonfigPlugin)
         classpath(Dependency.detektPlugin)
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
     }
 }
 

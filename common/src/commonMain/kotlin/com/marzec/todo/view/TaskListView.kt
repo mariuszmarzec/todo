@@ -19,7 +19,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import com.marzec.todo.extensions.descriptionWithProgress
 import com.marzec.todo.extensions.filterWithSearch
-import com.marzec.todo.extensions.ifFalse
+import com.marzec.extensions.ifFalse
 import com.marzec.todo.extensions.subDescription
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task

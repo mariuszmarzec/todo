@@ -10,7 +10,7 @@ import com.marzec.cache.MemoryCache
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.logger.Logger
-import com.marzec.network.httpClient
+import com.marzec.network.createHttpClient
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
 import java.awt.Toolkit
@@ -52,7 +52,7 @@ fun main() {
         override fun open(url: String) = Desktop.getDesktop().browse(URI(url))
     }
 
-    DI.client = httpClient
+    DI.client = createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
     DI.ioDispatcher = Dispatchers.IO
 
     application {

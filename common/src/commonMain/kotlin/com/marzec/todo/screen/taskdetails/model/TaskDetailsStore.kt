@@ -12,7 +12,7 @@ import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
-import com.marzec.todo.extensions.asInstance
+import com.marzec.extensions.asInstance
 import com.marzec.delegate.delegates
 import com.marzec.todo.model.Task
 import com.marzec.navigation.Destination

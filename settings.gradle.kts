@@ -9,3 +9,4 @@ include(":common")
 include(":app")
 include(":desktop")
 rootProject.name = "Todo"
+include(":multiplatformUtils")

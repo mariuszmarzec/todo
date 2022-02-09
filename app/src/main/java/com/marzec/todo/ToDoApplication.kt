@@ -10,7 +10,7 @@ import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.logger.Logger
 import com.marzec.cache.PreferencesCache
 import kotlinx.coroutines.Dispatchers
-import com.marzec.network.httpClient
+import com.marzec.network.createHttpClient
 import com.marzec.cache.MemoryCache
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -42,7 +42,7 @@ class ToDoApplication : Application() {
             }
         }
 
-        DI.client = httpClient
+        DI.client = createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
         DI.ioDispatcher = Dispatchers.IO
     }
 }

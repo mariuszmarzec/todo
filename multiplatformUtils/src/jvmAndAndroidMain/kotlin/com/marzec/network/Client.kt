@@ -1,8 +1,6 @@
 package com.marzec.network
 
-import com.marzec.todo.Api
-import com.marzec.todo.DI
-import com.marzec.todo.PreferencesKeys
+import com.marzec.cache.FileCache
 import com.marzec.cache.getTyped
 import com.marzec.cache.putTyped
 import io.ktor.client.HttpClient
@@ -16,7 +14,11 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 
-val httpClient = HttpClient(OkHttp) {
+fun createHttpClient(
+    fileCache: FileCache,
+    authorizationHeader: String,
+    preferencesHeaderKey: String
+) = HttpClient(OkHttp) {
     install(JsonFeature) {
         serializer = KotlinxSerializer()
     }
@@ -30,19 +32,19 @@ val httpClient = HttpClient(OkHttp) {
         addNetworkInterceptor(object : Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
                 var request = chain.request()
-                runBlocking { DI.fileCache.getTyped<String>(PreferencesKeys.AUTHORIZATION) }?.let { authForRequest ->
+                runBlocking { fileCache.getTyped<String>(preferencesHeaderKey) }?.let { authForRequest ->
                     request = request.newBuilder()
-                        .addHeader(Api.Headers.AUTHORIZATION, authForRequest)
+                        .addHeader(authorizationHeader, authForRequest)
                         .build()
                 }
 
                 val response = chain.proceed(request)
-                val authorization = response.headers[Api.Headers.AUTHORIZATION]
+                val authorization = response.headers[authorizationHeader]
                 if (authorization != null) {
-                    runBlocking { DI.fileCache.putTyped(PreferencesKeys.AUTHORIZATION, authorization) }
+                    runBlocking { fileCache.putTyped(preferencesHeaderKey, authorization) }
                 } else {
                     if (response.code == HTTP_STATUS_UNAUTHORIZED) {
-                        runBlocking { DI.fileCache.putTyped<String>(PreferencesKeys.AUTHORIZATION, null) }
+                        runBlocking { fileCache.putTyped<String>(preferencesHeaderKey, null) }
                     }
                 }
                 return response

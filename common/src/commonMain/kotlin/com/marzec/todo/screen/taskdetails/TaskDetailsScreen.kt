@@ -36,9 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
-import com.marzec.todo.extensions.EMPTY_STRING
+import com.marzec.extensions.EMPTY_STRING
 import com.marzec.mvi.collectState
-import com.marzec.todo.extensions.urls
+import com.marzec.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.view.ActionBarProvider

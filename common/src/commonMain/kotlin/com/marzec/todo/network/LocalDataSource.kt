@@ -9,7 +9,7 @@ import com.marzec.locker.Locker
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
 import com.marzec.todo.extensions.flatMapTaskDto
-import com.marzec.todo.extensions.replaceIf
+import com.marzec.extensions.replaceIf
 import kotlinx.serialization.Serializable
 
 @Serializable

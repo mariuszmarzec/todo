@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="multiplatformUtils-desktop">
+    <output-path>$PROJECT_DIR$/multiplatformUtils/build/libs</output-path>
+    <root id="archive" name="multiplatformUtils-desktop.jar">
+      <element id="module-output" name="Todo.multiplatformUtils.desktopMain" />
+    </root>
+  </artifact>
+</component>

@@ -13,7 +13,7 @@ import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
 import com.marzec.todo.delegates.dialog.SelectionDelegate
-import com.marzec.todo.extensions.asInstance
+import com.marzec.extensions.asInstance
 import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope

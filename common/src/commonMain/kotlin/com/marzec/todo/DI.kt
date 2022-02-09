@@ -338,8 +338,6 @@ object PreferencesKeys {
 
 object Api {
 
-    const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
-
     val HOST = if (BuildKonfig.ENVIRONMENT == "p") {
         BuildKonfig.PROD_API_URL
     } else {

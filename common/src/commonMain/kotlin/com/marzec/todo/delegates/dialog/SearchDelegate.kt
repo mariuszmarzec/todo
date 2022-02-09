@@ -3,7 +3,7 @@ package com.marzec.todo.delegates.dialog
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
 import com.marzec.delegate.StoreDelegate
-import com.marzec.todo.extensions.EMPTY_STRING
+import com.marzec.extensions.EMPTY_STRING
 import com.marzec.todo.view.SearchState
 
 interface SearchDelegate {

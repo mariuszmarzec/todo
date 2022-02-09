@@ -3,7 +3,7 @@ package com.marzec.todo.delegates.dialog
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
 import com.marzec.delegate.StoreDelegate
-import com.marzec.todo.extensions.asInstanceAndReturn
+import com.marzec.extensions.asInstanceAndReturn
 import com.marzec.todo.view.DialogState
 
 class DialogDelegateImpl<DATA : WithDialog<DATA>> :

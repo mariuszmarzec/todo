@@ -4,7 +4,7 @@ import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.delegate.StoreDelegate
-import com.marzec.todo.extensions.urls
+import com.marzec.extensions.urls
 import com.marzec.content.Content
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState

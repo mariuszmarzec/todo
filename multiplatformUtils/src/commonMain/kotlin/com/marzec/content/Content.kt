@@ -1,7 +1,6 @@
 package com.marzec.content
 
-import com.marzec.todo.DI
-import com.marzec.todo.extensions.getMessage
+import com.marzec.logger.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -16,7 +15,7 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     return try {
         Content.Data(request())
     } catch (expected: Exception) {
-        DI.logger.log("Content:", expected.message.toString())
+        Logger.log("Content:", expected.message.toString())
         Content.Error(expected)
     }
 }
@@ -26,7 +25,7 @@ fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
         try {
             emit(Content.Data(request()))
         } catch (expected: Exception) {
-            DI.logger.log("Content:", expected.message.toString())
+            Logger.log("Content:", expected.message.toString())
             emit(Content.Error<T>(expected))
         }
     }

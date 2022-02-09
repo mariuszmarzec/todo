@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
+const val DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
 object CurrentTimeUtil {
 
@@ -22,4 +23,4 @@ fun currentTime(): LocalDateTime = LocalDateTime.now(CurrentTimeUtil.clock)
 fun currentMillis(): Long =
     LocalDateTime.now(CurrentTimeUtil.clock).toInstant(OffsetDateTime.now().offset).toEpochMilli()
 
-expect fun LocalDateTime.formatDate(): String
+expect fun LocalDateTime.formatDate(dateFormat: String = DEFAULT_DATE_FORMAT): String
