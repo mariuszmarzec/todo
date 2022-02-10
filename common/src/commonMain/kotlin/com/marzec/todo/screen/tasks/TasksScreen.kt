@@ -1,5 +1,11 @@
 package com.marzec.todo.screen.tasks
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Button
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -12,6 +18,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.tasks.model.TasksScreenState
@@ -65,7 +73,19 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                 Text(text = "Loading")
             }
             is State.Error -> {
-                Text(text = state.message)
+                Column (modifier = Modifier.fillMaxSize()) {
+                    Text(text = state.message)
+
+                    Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                        Button(
+                            modifier = Modifier.align(Alignment.Center),
+                            onClick = {
+                                store.loadList()
+                            }) {
+                            Text("Try again")
+                        }
+                    }
+                }
             }
         }
     }
