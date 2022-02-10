@@ -6,13 +6,14 @@ import com.marzec.todo.model.Task
 const val EMPTY_STRING = ""
 
 @Suppress("unchecked_cast")
-inline fun <reified T: Any> Any.asInstance(action: T.() -> Unit) = (this as? T)?.action()
+inline fun <reified T : Any> Any.asInstance(action: T.() -> Unit) = (this as? T)?.action()
 
 @Suppress("unchecked_cast")
-inline fun <reified T: Any, R> Any.asInstanceAndReturnOther(action: T.() -> R) = (this as? T)?.action()
+inline fun <reified T : Any, R> Any.asInstanceAndReturnOther(action: T.() -> R) =
+    (this as? T)?.action()
 
 @Suppress("unchecked_cast")
-inline fun <reified T: Any> Any.asInstanceAndReturn(action: T.() -> T) = (this as? T)?.action()
+inline fun <reified T : Any> Any.asInstanceAndReturn(action: T.() -> T) = (this as? T)?.action()
 
 fun Task.urlToOpen(): String? = subTasks.firstOrNull()?.urlToOpen()
     ?: description.urls().firstOrNull()
@@ -47,4 +48,17 @@ fun List<Task>.filterWithSearch(search: String): List<Task> {
             )
         }
     }
+}
+
+fun List<Task>.findRootIdOrNull(taskId: Int): Int {
+    val parentTaskId = findParentIdForTask(taskId)
+    return if (parentTaskId != null) {
+        findRootIdOrNull(parentTaskId)
+    } else {
+        taskId
+    }
+}
+
+fun List<Task>.findParentIdForTask(taskId: Int): Int? = taskId.let {
+    flatMapTask().firstOrNull { it.id == taskId }?.parentTaskId
 }

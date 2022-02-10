@@ -14,6 +14,8 @@ import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
 import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.extensions.asInstance
+import com.marzec.logger.Logger
+import com.marzec.todo.extensions.findRootIdOrNull
 import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +42,8 @@ class AddSubTaskStore(
         onTrigger {
             todoRepository.observeLists().map { content ->
                 content.mapData { tasks ->
-                    tasks.filterNot { it.id == taskId }
+                    val rootId = tasks.findRootIdOrNull(taskId)
+                    tasks.filterNot { it.id == rootId }
                 }
             }
         }

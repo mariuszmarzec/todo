@@ -26,6 +26,10 @@ class ToDoApplication : Application() {
             override fun log(tag: String, message: String) {
                 Log.d(tag, message)
             }
+
+            override fun log(tag: String, message: String, t: Throwable) {
+                Log.e(tag, message, t)
+            }
         }
 
         DI.memoryCache = MemoryCache()

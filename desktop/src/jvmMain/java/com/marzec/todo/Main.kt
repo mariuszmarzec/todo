@@ -28,6 +28,11 @@ fun main() {
         override fun log(tag: String, message: String) {
             println("$tag: $message")
         }
+
+        override fun log(tag: String, message: String, t: Throwable) {
+            println("$tag: $message")
+            t.printStackTrace()
+        }
     }
 
     DI.memoryCache = MemoryCache()

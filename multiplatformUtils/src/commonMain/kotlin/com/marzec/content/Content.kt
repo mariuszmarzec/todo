@@ -15,7 +15,7 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
     return try {
         Content.Data(request())
     } catch (expected: Exception) {
-        Logger.log("Content", expected.message.toString())
+        Logger.log("Content", expected.message.toString(), expected)
         Content.Error(expected)
     }
 }
@@ -25,7 +25,7 @@ fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
         try {
             emit(Content.Data(request()))
         } catch (expected: Exception) {
-            Logger.log("Content", expected.message.toString())
+            Logger.log("Content", expected.message.toString(), expected)
             emit(Content.Error<T>(expected))
         }
     }
