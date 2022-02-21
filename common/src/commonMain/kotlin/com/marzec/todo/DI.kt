@@ -24,9 +24,9 @@ import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.LocalDataSource
 import com.marzec.preferences.MemoryPreferences
 import com.marzec.preferences.Preferences
-import com.marzec.todo.repository.LoginRepository
-import com.marzec.todo.repository.LoginRepositoryImpl
-import com.marzec.todo.repository.LoginRepositoryMock
+import com.marzec.repository.LoginRepository
+import com.marzec.repository.LoginRepositoryImpl
+import com.marzec.repository.LoginRepositoryMock
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
@@ -291,7 +291,10 @@ object DI {
         if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(
             client,
             ioDispatcher,
-            fileCache
+            fileCache,
+            Api.Login.LOGIN,
+            Api.Login.LOGOUT,
+            PreferencesKeys.AUTHORIZATION
         )
     }
 

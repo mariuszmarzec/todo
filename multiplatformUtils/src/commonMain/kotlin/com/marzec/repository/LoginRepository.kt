@@ -1,13 +1,11 @@
-package com.marzec.todo.repository
+package com.marzec.repository
 
-import com.marzec.todo.Api
-import com.marzec.todo.PreferencesKeys
-import com.marzec.todo.api.LoginRequestDto
-import com.marzec.todo.api.UserDto
-import com.marzec.todo.api.toDomain
+import com.marzec.api.LoginRequestDto
+import com.marzec.api.UserDto
+import com.marzec.api.toDomain
 import com.marzec.cache.FileCache
 import com.marzec.cache.putTyped
-import com.marzec.todo.model.User
+import com.marzec.model.User
 import com.marzec.content.Content
 import com.marzec.content.asContentFlow
 import io.ktor.client.HttpClient
@@ -37,12 +35,15 @@ class LoginRepositoryMock : LoginRepository {
 class LoginRepositoryImpl(
     private val client: HttpClient,
     private val dispatcher: CoroutineDispatcher,
-    private val fileCache: FileCache
+    private val fileCache: FileCache,
+    private val loginApiUrl: String,
+    private val logoutApiUrl: String,
+    private val authorizationPreferencesKey: String,
 ) : LoginRepository {
 
     override suspend fun login(login: String, password: String): Flow<Content<User>> =
         asContentFlow {
-            client.post<UserDto>(Api.Login.LOGIN) {
+            client.post<UserDto>(loginApiUrl) {
                 contentType(ContentType.Application.Json)
                 body = LoginRequestDto(login, password)
             }.toDomain()
@@ -50,7 +51,7 @@ class LoginRepositoryImpl(
 
     override suspend fun logout(): Flow<Content<Unit>> =
         asContentFlow {
-            client.get<Unit>(Api.Login.LOGOUT)
-            fileCache.putTyped<String>(PreferencesKeys.AUTHORIZATION, null)
+            client.get<Unit>(logoutApiUrl)
+            fileCache.putTyped<String>(authorizationPreferencesKey, null)
         }.flowOn(dispatcher)
 }

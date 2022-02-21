@@ -1,6 +1,6 @@
-package com.marzec.todo.api
+package com.marzec.api
 
-import com.marzec.todo.model.User
+import com.marzec.model.User
 import kotlinx.serialization.Serializable
 
 @Serializable

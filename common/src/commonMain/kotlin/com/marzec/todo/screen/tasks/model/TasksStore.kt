@@ -18,7 +18,7 @@ import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.model.Task
-import com.marzec.todo.repository.LoginRepository
+import com.marzec.repository.LoginRepository
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 
