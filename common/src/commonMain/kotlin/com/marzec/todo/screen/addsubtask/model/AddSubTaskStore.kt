@@ -4,19 +4,18 @@ import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.delegate.delegates
+import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceDataWithContent
-import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
 import com.marzec.todo.delegates.dialog.SelectionDelegate
-import com.marzec.extensions.asInstance
-import com.marzec.logger.Logger
 import com.marzec.todo.extensions.findRootIdOrNull
 import com.marzec.todo.model.Task
+import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
@@ -56,7 +55,7 @@ class AddSubTaskStore(
 
     fun onAddSubTaskClick() = sideEffect {
         navigationStore.next(
-            Destination.AddNewTask(
+            TodoDestination.AddNewTask(
                 taskToEditId = null,
                 parentTaskId = taskId
             )

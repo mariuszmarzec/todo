@@ -10,15 +10,4 @@ data class NavigationOptions(
     val popToInclusive: Boolean
 )
 
-sealed class Destination {
-
-    object Login : Destination()
-    object Tasks : Destination()
-    data class AddNewTask(
-        val taskToEditId: Int?,
-        val parentTaskId: Int?
-    ) : Destination()
-
-    data class TaskDetails(val taskId: Int) : Destination()
-    data class AddSubTask(val taskId: Int) : Destination()
-}
+interface Destination

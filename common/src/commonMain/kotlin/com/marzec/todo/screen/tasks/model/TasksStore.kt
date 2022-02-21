@@ -6,19 +6,19 @@ import com.marzec.delegate.delegates
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceDataWithContent
-import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
+import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.model.Task
-import com.marzec.repository.LoginRepository
+import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 
@@ -75,12 +75,12 @@ class TasksStore(
     }
 
     fun onListItemClicked(id: Int) = sideEffect {
-        navigationStore.next(Destination.TaskDetails(id))
+        navigationStore.next(TodoDestination.TaskDetails(id))
     }
 
     fun addNewTask() = sideEffect {
         state.asData {
-            navigationStore.next(Destination.AddNewTask(null, null))
+            navigationStore.next(TodoDestination.AddNewTask(null, null))
         }
     }
 
@@ -115,9 +115,9 @@ class TasksStore(
             resultNonNull().ifDataSuspend {
                 navigationStore.next(
                     NavigationAction(
-                        destination = Destination.Login,
+                        destination = TodoDestination.Login,
                         NavigationOptions(
-                            Destination.Login,
+                            TodoDestination.Login,
                             popToInclusive = true
                         )
                     )

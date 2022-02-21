@@ -1,19 +1,19 @@
 package com.marzec.todo.screen.addnewtask.model
 
-import com.marzec.mvi.State
+import com.marzec.content.Content
+import com.marzec.content.ifDataSuspend
 import com.marzec.mvi.IntentBuilder
+import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
-import com.marzec.todo.model.Task
-import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
-import com.marzec.content.Content
-import com.marzec.content.ifDataSuspend
 import com.marzec.preferences.Preferences
+import com.marzec.todo.model.Task
+import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
 
@@ -130,9 +130,9 @@ class AddNewTaskStore(
             state.ifDataAvailable(blockOnLoading = false) {
                 val taskIdToShow = parentTaskId ?: taskId
                 val destination = if (taskIdToShow != null) {
-                    Destination.TaskDetails(taskIdToShow)
+                    TodoDestination.TaskDetails(taskIdToShow)
                 } else {
-                    Destination.Tasks
+                    TodoDestination.Tasks
                 }
                 navigationStore.next(
                     NavigationAction(

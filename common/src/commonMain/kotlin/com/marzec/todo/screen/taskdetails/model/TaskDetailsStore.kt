@@ -1,9 +1,15 @@
 package com.marzec.todo.screen.taskdetails.model
 
+import com.marzec.content.Content
+import com.marzec.delegate.delegates
+import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.next
+import com.marzec.preferences.Preferences
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
@@ -12,14 +18,8 @@ import com.marzec.todo.delegates.dialog.SearchDelegate
 import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
-import com.marzec.extensions.asInstance
-import com.marzec.delegate.delegates
 import com.marzec.todo.model.Task
-import com.marzec.navigation.Destination
-import com.marzec.navigation.NavigationStore
-import com.marzec.navigation.next
-import com.marzec.content.Content
-import com.marzec.preferences.Preferences
+import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
 import com.marzec.todo.view.SearchState
@@ -85,7 +85,7 @@ class TaskDetailsStore(
     fun edit() = intent<Unit> {
         sideEffect {
             state.ifDataAvailable {
-                navigationStore.next(Destination.AddNewTask(taskId, task.parentTaskId))
+                navigationStore.next(TodoDestination.AddNewTask(taskId, task.parentTaskId))
             }
         }
     }
@@ -93,7 +93,7 @@ class TaskDetailsStore(
     fun addSubTask() = intent<Unit> {
         sideEffect {
             state.ifDataAvailable {
-                navigationStore.next(Destination.AddSubTask(taskId))
+                navigationStore.next(TodoDestination.AddSubTask(taskId))
             }
         }
     }
@@ -119,7 +119,7 @@ class TaskDetailsStore(
     }
 
     fun goToSubtaskDetails(id: Int) = sideEffect {
-        navigationStore.next(Destination.TaskDetails(id))
+        navigationStore.next(TodoDestination.TaskDetails(id))
     }
 
     fun showRemoveTaskDialog() =

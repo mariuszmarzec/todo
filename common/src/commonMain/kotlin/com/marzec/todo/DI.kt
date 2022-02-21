@@ -6,6 +6,7 @@ import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
 import com.marzec.logger.Logger
 import com.marzec.mvi.State
+import com.marzec.navigation.Destination
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
@@ -14,7 +15,7 @@ import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.SearchDelegateImpl
 import com.marzec.todo.delegates.dialog.SelectionDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
-import com.marzec.navigation.Destination
+import com.marzec.todo.navigation.TodoDestination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
@@ -78,25 +79,25 @@ object DI {
             out Destination>,
             (@Composable (destination: Destination, cacheKey: String) -> Unit)
             > = mapOf(
-        Destination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
-        Destination.Tasks::class to @Composable { destination, cacheKey ->
-            destination as Destination.Tasks
+        TodoDestination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
+        TodoDestination.Tasks::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.Tasks
             provideTasksScreen(cacheKey)
         },
-        Destination.AddNewTask::class to @Composable { destination, cacheKey ->
-            destination as Destination.AddNewTask
+        TodoDestination.AddNewTask::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.AddNewTask
             provideAddNewTaskScreen(
                 taskId = destination.taskToEditId,
                 parentTaskId = destination.parentTaskId,
                 cacheKey
             )
         },
-        Destination.TaskDetails::class to @Composable { destination, cacheKey ->
-            destination as Destination.TaskDetails
+        TodoDestination.TaskDetails::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.TaskDetails
             provideTaskDetailsScreen(destination.taskId, cacheKey)
         },
-        Destination.AddSubTask::class to @Composable { destination, cacheKey ->
-            destination as Destination.AddSubTask
+        TodoDestination.AddSubTask::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.AddSubTask
             provideAddSubTaskScreen(destination.taskId, cacheKey)
         }
     )
@@ -253,12 +254,12 @@ object DI {
 
         val defaultScreen = if (authToken.isNullOrEmpty()) {
             NavigationEntry(
-                Destination.Login,
+                TodoDestination.Login,
                 cacheKeyProvider()
             ) @Composable { _, it -> provideLoginScreen(it) }
         } else {
             NavigationEntry(
-                Destination.Tasks,
+                TodoDestination.Tasks,
                 cacheKeyProvider()
             ) @Composable { _, it -> provideTasksScreen(it) }
         }

@@ -1,18 +1,18 @@
 package com.marzec.todo.screen.login.model
 
+import com.marzec.content.Content
+import com.marzec.content.ifDataSuspend
+import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
-import com.marzec.model.User
-import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
-import com.marzec.content.Content
-import com.marzec.content.ifDataSuspend
 import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
+import com.marzec.todo.navigation.TodoDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -51,9 +51,9 @@ class LoginStore(
             resultNonNull().ifDataSuspend {
                 navigationStore.next(
                     NavigationAction(
-                        Destination.Tasks,
+                        TodoDestination.Tasks,
                         options = NavigationOptions(
-                            popTo = Destination.Tasks,
+                            popTo = TodoDestination.Tasks,
                             popToInclusive = true
                         )
                     )
