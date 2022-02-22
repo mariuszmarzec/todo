@@ -1,10 +1,9 @@
-package com.marzec.todo.delegates.dialog
+package com.marzec.delegate
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
-import com.marzec.delegate.StoreDelegate
 import com.marzec.extensions.EMPTY_STRING
-import com.marzec.todo.view.SearchState
+import com.marzec.view.SearchState
 
 interface SearchDelegate {
     fun onSearchQueryChanged(query: String)

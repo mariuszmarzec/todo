@@ -14,7 +14,7 @@ import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
-import com.marzec.todo.delegates.dialog.SearchDelegate
+import com.marzec.delegate.SearchDelegate
 import com.marzec.todo.delegates.dialog.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
@@ -22,7 +22,7 @@ import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.view.DialogState
-import com.marzec.todo.view.SearchState
+import com.marzec.view.SearchState
 import kotlinx.coroutines.CoroutineScope
 
 class TaskDetailsStore(

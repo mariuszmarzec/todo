@@ -2,13 +2,11 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.mvi.State
 import com.marzec.todo.model.Task
-import com.marzec.todo.delegates.dialog.WithDialog
-import com.marzec.todo.delegates.dialog.WithSearch
+import com.marzec.delegate.WithSearch
 import com.marzec.todo.delegates.dialog.WithSelection
 import com.marzec.todo.delegates.dialog.WithTasks
-import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.view.DialogState
-import com.marzec.todo.view.SearchState
+import com.marzec.view.SearchState
 
 data class TaskDetailsState(
     val task: Task,
