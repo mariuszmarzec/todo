@@ -24,7 +24,7 @@ import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
-import com.marzec.todo.view.ActionBarProvider
+import com.marzec.view.ActionBarProvider
 import com.marzec.todo.view.TaskListView
 
 @Composable

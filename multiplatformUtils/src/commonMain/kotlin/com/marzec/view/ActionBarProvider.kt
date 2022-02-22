@@ -1,4 +1,4 @@
-package com.marzec.todo.view
+package com.marzec.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

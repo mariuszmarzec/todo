@@ -44,7 +44,7 @@ import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.todo.screen.tasks.TasksScreen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
-import com.marzec.todo.view.ActionBarProvider
+import com.marzec.view.ActionBarProvider
 import io.ktor.client.HttpClient
 import kotlin.random.Random
 import kotlin.reflect.KClass

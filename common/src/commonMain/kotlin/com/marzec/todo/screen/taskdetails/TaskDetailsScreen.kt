@@ -41,7 +41,7 @@ import com.marzec.mvi.collectState
 import com.marzec.extensions.urls
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
-import com.marzec.todo.view.ActionBarProvider
+import com.marzec.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState

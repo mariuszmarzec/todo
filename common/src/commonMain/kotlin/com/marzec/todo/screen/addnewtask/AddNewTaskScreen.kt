@@ -20,7 +20,7 @@ import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
-import com.marzec.todo.view.ActionBarProvider
+import com.marzec.view.ActionBarProvider
 
 @Composable
 fun AddNewTaskScreen(
