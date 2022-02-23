@@ -1,35 +1,27 @@
 package com.marzec.todo.screen.tasks
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
-import com.marzec.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
 import com.marzec.todo.view.DialogState
-import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
+import com.marzec.view.ActionBarProvider
+import com.marzec.view.ScreenWithLoading
+import com.marzec.view.SearchView
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,28 +57,11 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
             }
         }) {
-        when (val state = state) {
-            is State.Data -> {
-                TaskScreenData(state, store)
-            }
-            is State.Loading -> {
-                Text(text = "Loading")
-            }
-            is State.Error -> {
-                Column (modifier = Modifier.fillMaxSize()) {
-                    Text(text = state.message)
-
-                    Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                        Button(
-                            modifier = Modifier.align(Alignment.Center),
-                            onClick = {
-                                store.loadList()
-                            }) {
-                            Text("Try again")
-                        }
-                    }
-                }
-            }
+        ScreenWithLoading(
+            state = state,
+            onReloadClick = { store.loadList() }
+        ) {
+            TaskScreenData(it, store)
         }
     }
 }
