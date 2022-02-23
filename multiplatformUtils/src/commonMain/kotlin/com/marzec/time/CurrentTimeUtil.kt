@@ -5,6 +5,8 @@ import java.time.LocalDate
 import kotlinx.datetime.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 
 const val DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
@@ -24,4 +26,5 @@ fun currentTime(): LocalDateTime = java.time.LocalDateTime.now(CurrentTimeUtil.c
 fun currentMillis(): Long =
     java.time.LocalDateTime.now(CurrentTimeUtil.clock).toInstant(OffsetDateTime.now().offset).toEpochMilli()
 
-expect fun LocalDateTime.formatDate(dateFormat: String = DEFAULT_DATE_FORMAT): String
+fun LocalDateTime.formatDate(dateFormat: String = DEFAULT_DATE_FORMAT): String =
+    toJavaLocalDateTime().format(DateTimeFormatter.ofPattern(dateFormat))
