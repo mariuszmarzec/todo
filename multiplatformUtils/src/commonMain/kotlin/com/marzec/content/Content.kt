@@ -44,4 +44,10 @@ fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
 suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) =
     (this as? Content.Data)?.action()
 
+suspend fun <T> Content<T>.ifFinished(action: suspend Content<T>.() -> Unit) {
+    if (this !is Content.Loading) {
+        action()
+    }
+}
+
 fun <T> Content.Error<T>.getMessage(): String = exception.message.orEmpty()
