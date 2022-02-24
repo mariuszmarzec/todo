@@ -11,6 +11,7 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -20,7 +21,11 @@ fun createHttpClient(
     preferencesHeaderKey: String
 ) = HttpClient(OkHttp) {
     install(JsonFeature) {
-        serializer = KotlinxSerializer()
+        serializer = KotlinxSerializer(
+            Json(KotlinxSerializer.DefaultJson) {
+                ignoreUnknownKeys = true
+            }
+        )
     }
 
     defaultRequest {
