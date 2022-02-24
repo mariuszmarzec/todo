@@ -3,7 +3,7 @@ package com.marzec.todo.delegates.dialog
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
 import com.marzec.delegate.StoreDelegate
-import com.marzec.todo.extensions.toggle
+import com.marzec.extensions.toggle
 
 interface WithSelection<DATA> {
     val selected: Set<Int>
