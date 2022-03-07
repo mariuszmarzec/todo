@@ -5,12 +5,13 @@ val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
-val coroutinesVersion = "1.5.2"
+val coroutinesVersion = "1.6.0"
 val androidActivityXVersion = "1.3.0-alpha02"
 val androidGradlepluginVersion = "7.3.0-alpha01"
 val buildkonfigVersion = "0.11.0"
 val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
+val atomicfuVersion = "0.17.1"
 
 private val composePluginVersion = "1.0.1"
 private val dateTimeVersion = "0.1.1"
@@ -40,6 +41,8 @@ object Dependency {
     val androidMaterial = "com.google.android.material:material:$materialVersion"
 
     val kotlinDateTime = "org.jetbrains.kotlinx:kotlinx-datetime:$dateTimeVersion"
+    val atomicPlugin = "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfuVersion"
+    val atomic = "org.jetbrains.kotlinx:atomicfu-common:$atomicfuVersion"
 }
 
 object Config {

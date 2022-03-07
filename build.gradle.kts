@@ -14,6 +14,7 @@ buildscript {
         classpath(Dependency.composeGradlePlugin)
         classpath(Dependency.buildKonfigPlugin)
         classpath(Dependency.detektPlugin)
+        classpath(Dependency.atomicPlugin)
     }
 }
 

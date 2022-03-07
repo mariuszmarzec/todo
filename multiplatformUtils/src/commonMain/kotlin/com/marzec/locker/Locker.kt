@@ -1,8 +1,17 @@
 package com.marzec.locker
 
-expect class Locker() {
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 
-    fun lock()
+class Locker {
 
-    fun unlock()
+    private val locker = reentrantLock()
+
+    fun lock() = locker.lock()
+
+    fun unlock() = locker.unlock()
+
+    fun tryLock(): Boolean = locker.tryLock()
+
+    fun <T> withLock(block: () -> T) = locker.withLock(block)
 }
