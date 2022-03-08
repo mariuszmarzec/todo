@@ -42,7 +42,6 @@ object Dependency {
 
     val kotlinDateTime = "org.jetbrains.kotlinx:kotlinx-datetime:$dateTimeVersion"
     val atomicPlugin = "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfuVersion"
-    val atomic = "org.jetbrains.kotlinx:atomicfu-common:$atomicfuVersion"
 }
 
 object Config {
