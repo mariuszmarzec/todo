@@ -15,8 +15,8 @@ import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
-import com.marzec.todo.view.Dialog
-import com.marzec.todo.view.DialogBox
+import com.marzec.view.Dialog
+import com.marzec.view.DialogBox
 import com.marzec.delegate.DialogState
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.ActionBarProvider
