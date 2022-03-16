@@ -1,5 +1,6 @@
 package com.marzec.todo.delegates.dialog
 
+import com.marzec.delegate.WithDialog
 import com.marzec.todo.model.Task
 
 interface WithTasks<T> : WithDialog<T> {

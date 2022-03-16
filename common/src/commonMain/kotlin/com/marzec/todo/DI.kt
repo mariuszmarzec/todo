@@ -10,7 +10,7 @@ import com.marzec.navigation.Destination
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
-import com.marzec.todo.delegates.dialog.DialogDelegateImpl
+import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.todo.delegates.dialog.SelectionDelegateImpl

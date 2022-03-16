@@ -14,7 +14,7 @@ import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
-import com.marzec.todo.delegates.dialog.DialogDelegate
+import com.marzec.delegate.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.model.Task

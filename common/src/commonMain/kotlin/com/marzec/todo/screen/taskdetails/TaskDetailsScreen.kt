@@ -44,7 +44,7 @@ import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
 import com.marzec.view.ActionBarProvider
 import com.marzec.todo.view.Dialog
 import com.marzec.todo.view.DialogBox
-import com.marzec.todo.view.DialogState
+import com.marzec.delegate.DialogState
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
 import com.marzec.todo.view.TextListItem

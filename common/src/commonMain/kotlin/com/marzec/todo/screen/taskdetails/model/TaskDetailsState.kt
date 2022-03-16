@@ -5,7 +5,7 @@ import com.marzec.todo.model.Task
 import com.marzec.delegate.WithSearch
 import com.marzec.todo.delegates.dialog.WithSelection
 import com.marzec.todo.delegates.dialog.WithTasks
-import com.marzec.todo.view.DialogState
+import com.marzec.delegate.DialogState
 import com.marzec.view.SearchState
 
 data class TaskDetailsState(

@@ -12,7 +12,7 @@ data class TaskDto(
     val subTasks: List<TaskDto>,
     val isToDo: Boolean,
     val priority: Int,
-    val schedulerDto: SchedulerDto?
+    val schedulerDto: SchedulerDto? = null
 )
 
 @Serializable

@@ -1,5 +1,6 @@
 package com.marzec.todo.delegates.dialog
 
+import com.marzec.delegate.DialogDelegate
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.todo.common.OpenUrlHelper

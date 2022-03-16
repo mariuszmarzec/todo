@@ -5,7 +5,7 @@ import com.marzec.delegate.WithSearch
 import com.marzec.todo.delegates.dialog.WithTasks
 import com.marzec.extensions.EMPTY_STRING
 import com.marzec.todo.model.Task
-import com.marzec.todo.view.DialogState
+import com.marzec.delegate.DialogState
 import com.marzec.view.SearchState
 
 data class TasksScreenState(

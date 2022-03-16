@@ -6,8 +6,9 @@ import com.marzec.mvi.Store3
 import com.marzec.delegate.StoreDelegate
 import com.marzec.extensions.urls
 import com.marzec.content.Content
+import com.marzec.delegate.DialogDelegate
+import com.marzec.delegate.DialogState
 import com.marzec.todo.repository.TodoRepository
-import com.marzec.todo.view.DialogState
 
 class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
     private val todoRepository: TodoRepository
