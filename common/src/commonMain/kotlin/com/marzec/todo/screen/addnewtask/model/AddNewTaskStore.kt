@@ -5,6 +5,7 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
+import com.marzec.mvi.mapData
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
@@ -12,10 +13,13 @@ import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.Preferences
+import com.marzec.time.currentTime
+import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.datetime.LocalDateTime
 
 class AddNewTaskStore(
     scope: CoroutineScope,
@@ -146,5 +150,25 @@ class AddNewTaskStore(
 
     override suspend fun onNewState(newState: State<AddNewTaskState>) {
         stateCache.set(cacheKey, newState)
+    }
+
+    fun onScheduleButtonClick() = intent<Unit> {
+        reducer {
+            state.mapData {
+                it.copy(
+                    scheduler = Scheduler.OneShot(
+                        10, 5, currentTime(), currentTime()
+                    )
+                )
+            }
+        }
+    }
+
+    fun onRemoveSchedulerButtonClick() = intent<Unit> {
+        reducer {
+            state.mapData {
+                it.copy(scheduler = null)
+            }
+        }
     }
 }
