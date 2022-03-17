@@ -1,6 +1,6 @@
 
 val kotlinVersion = "1.6.10"
-val ktorVersion = "1.4.3"
+val ktorVersion = "1.6.8"
 val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
