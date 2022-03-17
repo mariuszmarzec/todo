@@ -1,8 +1,10 @@
 package com.marzec.todo
 
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.marzec.cache.FileCacheImpl
@@ -40,7 +42,7 @@ fun main() {
     DI.fileCache = FileCacheImpl(
         "todo.cache",
         Json {
-             isLenient = true
+            isLenient = true
         },
         MemoryCache()
     )
@@ -57,14 +59,19 @@ fun main() {
         override fun open(url: String) = Desktop.getDesktop().browse(URI(url))
     }
 
-    DI.client = createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
+    DI.client =
+        createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
     DI.ioDispatcher = Dispatchers.IO
 
     application {
         Window(
             ::exitApplication,
             title = "ToDo",
-            state = rememberWindowState(width = 700.dp, height = 768.dp)
+            state = rememberWindowState(
+                position = WindowPosition(Alignment.Center),
+                width = 700.dp,
+                height = 768.dp
+            )
         ) {
             DI.navigationScope = rememberCoroutineScope()
 
