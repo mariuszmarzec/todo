@@ -152,15 +152,13 @@ class AddNewTaskStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun onScheduleButtonClick() = intent<Unit> {
-        reducer {
-            state.mapData {
-                it.copy(
-                    scheduler = Scheduler.OneShot(
-                        10, 5, currentTime(), currentTime()
-                    )
+    fun onScheduleButtonClick() = sideEffect {
+        state.ifDataAvailable {
+            navigationStore.next(
+                NavigationAction(
+                    TodoDestination.Schedule(scheduler)
                 )
-            }
+            )
         }
     }
 

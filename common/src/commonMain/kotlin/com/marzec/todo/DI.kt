@@ -38,6 +38,9 @@ import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
+import com.marzec.todo.screen.scheduler.SchedulerScreen
+import com.marzec.todo.screen.scheduler.SchedulerData
+import com.marzec.todo.screen.scheduler.SchedulerStore
 import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsStore
@@ -99,7 +102,11 @@ object DI {
         TodoDestination.AddSubTask::class to @Composable { destination, cacheKey ->
             destination as TodoDestination.AddSubTask
             provideAddSubTaskScreen(destination.taskId, cacheKey)
-        }
+        },
+        TodoDestination.Schedule::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.Schedule
+            provideSchedulerScreen(cacheKey)
+        },
     )
 
     @Composable
@@ -236,6 +243,30 @@ object DI {
             initialState = AddSubTaskData.INITIAL,
             taskId = taskId,
             selectionDelegate = SelectionDelegateImpl<AddSubTaskData>()
+        )
+    }  
+    
+    @Composable
+    private fun provideSchedulerScreen(cacheKey: String) {
+        SchedulerScreen(
+            store = provideSchedulerStore(
+                scope = rememberCoroutineScope(),
+                cacheKey = cacheKey
+            ),
+            actionBarProvider = provideActionBarProvider()
+        )
+    }
+
+    private fun provideSchedulerStore(
+        scope: CoroutineScope,
+        cacheKey: String
+    ): SchedulerStore {
+        return SchedulerStore(
+            scope = scope,
+            navigationStore = navigationStore,
+            stateCache = preferences,
+            cacheKey = cacheKey,
+            initialState = SchedulerData.INITIAL
         )
     }
 

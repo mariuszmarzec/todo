@@ -1,5 +1,7 @@
 package com.marzec.todo.navigation
 
+import com.marzec.todo.model.Scheduler
+
 sealed class TodoDestination: com.marzec.navigation.Destination {
 
     object Login : TodoDestination()
@@ -11,4 +13,5 @@ sealed class TodoDestination: com.marzec.navigation.Destination {
 
     data class TaskDetails(val taskId: Int) : TodoDestination()
     data class AddSubTask(val taskId: Int) : TodoDestination()
+    data class Schedule(val scheduler: Scheduler? = null) : TodoDestination()
 }
