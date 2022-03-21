@@ -23,6 +23,8 @@ import com.marzec.extensions.ifFalse
 import com.marzec.todo.extensions.subDescription
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
+import com.marzec.view.TextListItem
+import com.marzec.view.TextListItemView
 
 private data class TaskListItem(
     val id: Int,

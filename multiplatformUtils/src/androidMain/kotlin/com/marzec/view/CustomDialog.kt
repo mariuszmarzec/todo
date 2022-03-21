@@ -1,4 +1,4 @@
-package com.marzec.todo.view
+package com.marzec.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog

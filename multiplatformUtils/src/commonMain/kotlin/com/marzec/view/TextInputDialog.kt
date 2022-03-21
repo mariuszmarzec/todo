@@ -1,4 +1,4 @@
-package com.marzec.todo.view
+package com.marzec.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,20 +8,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
-fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog, content: @Composable () -> Unit = {}) {
+fun TextInputDialog(state: Dialog.TextInputDialog) {
     CustomDialog(
         onDismissRequest = { state.onDismiss() }
     ) {
@@ -32,24 +29,19 @@ fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog, content: @Composable () -> 
                 .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(state.title)
 
             Box(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = state.title,
-                    fontSize = 16.sp,
-                    style = TextStyle.Default.copy(fontWeight = FontWeight.Bold)
-                )
+                TextField(state.inputField, {
+                    state.onTextChanged(it)
+                })
             }
-
-            Text(text = state.message)
-
-            content()
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TextButton(onClick = { state.onConfirm() }) {
+                TextButton(onClick = { state.onConfirm(state.inputField) }) {
                     Text(state.confirmButton)
                 }
                 TextButton(onClick = { state.onDismiss() }) {
@@ -60,17 +52,3 @@ fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog, content: @Composable () -> 
     }
 }
 
-@Composable
-fun TwoOptionsDialogWithCheckbox(state: Dialog.TwoOptionsDialogWithCheckbox) {
-    TwoOptionsDialog(state.twoOptionsDialog) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = state.checked,
-                onCheckedChange = { state.onCheckedChange() }
-            )
-            TextButton({ state.onCheckedChange() }) {
-                Text(state.checkBoxLabel)
-            }
-        }
-    }
-}

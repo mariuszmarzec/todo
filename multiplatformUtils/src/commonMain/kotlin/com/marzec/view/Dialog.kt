@@ -1,4 +1,4 @@
-package com.marzec.todo.view
+package com.marzec.view
 
 import androidx.compose.runtime.Composable
 
@@ -51,26 +51,4 @@ sealed class Dialog {
     ) : Dialog()
 
     object NoDialog: Dialog()
-}
-
-sealed class DialogState {
-
-    data class RemoveDialog(
-        val idsToRemove: List<Int>,
-    ): DialogState()
-
-    data class RemoveDialogWithCheckBox(
-        val idsToRemove: List<Int>,
-        val checked: Boolean = false
-    ): DialogState()
-
-    data class InputDialog(
-        val inputField: String,
-    ): DialogState()
-
-    data class SelectOptionsDialog(
-        val items: List<Any>,
-    ): DialogState()
-
-    object NoDialog: DialogState()
 }

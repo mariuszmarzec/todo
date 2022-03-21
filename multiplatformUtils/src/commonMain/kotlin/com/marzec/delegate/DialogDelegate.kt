@@ -1,10 +1,16 @@
-package com.marzec.todo.delegates.dialog
+package com.marzec.delegate
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
-import com.marzec.delegate.StoreDelegate
 import com.marzec.extensions.asInstanceAndReturn
-import com.marzec.todo.view.DialogState
+
+interface DialogDelegate {
+    fun closeDialog()
+    fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>)
+    fun showRemoveTaskDialog(idsToRemove: List<Int>)
+    fun onRemoveWithSubTasksChange()
+    fun showSelectUrlDialog(urls: List<String>)
+}
 
 class DialogDelegateImpl<DATA : WithDialog<DATA>> :
     StoreDelegate<State<DATA>>(),
@@ -57,10 +63,31 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
     }
 }
 
-interface DialogDelegate {
-    fun closeDialog()
-    fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>)
-    fun showRemoveTaskDialog(idsToRemove: List<Int>)
-    fun onRemoveWithSubTasksChange()
-    fun showSelectUrlDialog(urls: List<String>)
+interface WithDialog<T> {
+
+    val dialog: DialogState
+
+    fun copyWithDialog(dialog: DialogState): T
+}
+
+sealed class DialogState {
+
+    data class RemoveDialog(
+        val idsToRemove: List<Int>,
+    ) : DialogState()
+
+    data class RemoveDialogWithCheckBox(
+        val idsToRemove: List<Int>,
+        val checked: Boolean = false
+    ) : DialogState()
+
+    data class InputDialog(
+        val inputField: String,
+    ) : DialogState()
+
+    data class SelectOptionsDialog(
+        val items: List<Any>,
+    ) : DialogState()
+
+    object NoDialog : DialogState()
 }

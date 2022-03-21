@@ -1,12 +1,15 @@
 package com.marzec.todo.screen.addnewtask.model
 
+import com.marzec.todo.model.Scheduler
+
 data class AddNewTaskState(
     val taskId: Int?,
     val parentTaskId: Int?,
     val priority: Int,
     val isToDo: Boolean,
     val description: String,
-    val highestPriorityAsDefault: Boolean
+    val highestPriorityAsDefault: Boolean,
+    val scheduler: Scheduler? = null
 ) {
 
     companion object {

@@ -1,4 +1,4 @@
-package com.marzec.todo.view
+package com.marzec.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

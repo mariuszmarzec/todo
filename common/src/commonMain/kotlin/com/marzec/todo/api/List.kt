@@ -11,7 +11,8 @@ data class TaskDto(
     val parentTaskId: Int?,
     val subTasks: List<TaskDto>,
     val isToDo: Boolean,
-    val priority: Int
+    val priority: Int,
+    val schedulerDto: SchedulerDto? = null
 )
 
 @Serializable
@@ -19,7 +20,8 @@ data class CreateTaskDto(
     val description: String,
     val parentTaskId: Int? = null,
     val priority: Int? = null,
-    val highestPriorityAsDefault: Boolean? = null
+    val highestPriorityAsDefault: Boolean? = null,
+    val schedulerDto: SchedulerDto? = null
 )
 
 @Serializable
@@ -27,5 +29,19 @@ data class UpdateTaskDto(
     val description: String,
     val parentTaskId: Int? = null,
     val priority: Int,
-    val isToDo: Boolean
+    val isToDo: Boolean,
+    val scheduler: SchedulerDto? = null
+)
+
+@Serializable
+data class SchedulerDto(
+    val hour: Int,
+    val minute: Int,
+    val startDate: String,
+    val lastDate: String,
+    val daysOfWeek: List<Int>,
+    val dayOfMonth: Int,
+    val repeatCount: Int,
+    val repeatInEveryPeriod: Int,
+    val type: String
 )

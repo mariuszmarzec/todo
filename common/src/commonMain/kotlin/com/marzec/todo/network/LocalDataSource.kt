@@ -93,7 +93,8 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             } else {
                 (subTasksOfParentOrTasks(tasks, createTaskDto).minOfOrNull { it.priority }
                     ?: 0) - 1
-            }
+            },
+        schedulerDto = null
     )
 
     private fun subTasksOfParentOrTasks(tasks: List<TaskDto>, createTaskDto: CreateTaskDto) =
