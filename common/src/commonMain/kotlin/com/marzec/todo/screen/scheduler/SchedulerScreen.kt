@@ -14,7 +14,9 @@ fun SchedulerScreen(
     actionBarProvider: ActionBarProvider
 ) {
 
-    val state by store.collectState()
+    val state by store.collectState {
+        store.init()
+    }
 
     Column {
         actionBarProvider.provide("Schedule")

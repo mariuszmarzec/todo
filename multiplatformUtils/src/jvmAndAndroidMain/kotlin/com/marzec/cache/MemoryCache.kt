@@ -27,6 +27,10 @@ class MemoryCache(cacheSize: Int = MAX_CACHE_SIZE) : Cache {
         return cache[key]?.value as? T
     }
 
+    override suspend fun remove(key: String) {
+        cache.remove(key)
+    }
+
     @Suppress("UNCHECKED_CAST")
     override suspend fun <T> observe(key: String): Flow<T?> {
         val state = cache[key] ?: put(
@@ -41,6 +45,6 @@ class MemoryCache(cacheSize: Int = MAX_CACHE_SIZE) : Cache {
     override suspend fun toMap(): Map<String, Any?> = cache.mapValues { it.value.value }
 
     companion object {
-        private const val MAX_CACHE_SIZE = 10
+        private const val MAX_CACHE_SIZE = Int.MAX_VALUE
     }
 }

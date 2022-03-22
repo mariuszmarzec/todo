@@ -38,6 +38,7 @@ fun AddNewTaskScreen(
 
     val state: State<AddNewTaskState> by store.collectState {
         store.initialLoad()
+        store.onSchedulerRequest()
     }
 
     Scaffold(

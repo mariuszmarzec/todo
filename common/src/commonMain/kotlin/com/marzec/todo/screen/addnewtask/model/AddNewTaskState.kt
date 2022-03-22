@@ -9,7 +9,8 @@ data class AddNewTaskState(
     val isToDo: Boolean,
     val description: String,
     val highestPriorityAsDefault: Boolean,
-    val scheduler: Scheduler? = null
+    val scheduler: Scheduler? = null,
+    val fetched: Boolean
 ) {
 
     companion object {
@@ -19,7 +20,8 @@ data class AddNewTaskState(
             description = "",
             priority = 0,
             isToDo = true,
-            highestPriorityAsDefault = false
+            highestPriorityAsDefault = false,
+            fetched = false
         )
     }
 }

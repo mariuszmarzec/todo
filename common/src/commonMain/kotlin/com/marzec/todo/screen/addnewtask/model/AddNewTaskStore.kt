@@ -12,31 +12,36 @@ import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.ResultCache
 import com.marzec.preferences.Preferences
-import com.marzec.time.currentTime
+import com.marzec.todo.extensions.ifFalse
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
+import com.marzec.todo.screen.scheduler.RESULT_KEY_SCHEDULER
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.datetime.LocalDateTime
+import kotlinx.coroutines.flow.filterNotNull
 
 class AddNewTaskStore(
     scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: Preferences,
+    private val resultCache: ResultCache,
     initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
 ) : Store3<State<AddNewTaskState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
-    fun initialLoad() = intent<Content<Task>> {
+    fun initialLoad() = intent<Content<Task>>("load") {
         onTrigger {
             state.ifDataAvailable {
-                taskId?.let {
-                    todoRepository.observeTask(it)
+                fetched.ifFalse {
+                    taskId?.let {
+                        todoRepository.observeTask(it)
+                    }
                 }
             }
         }
@@ -51,10 +56,21 @@ class AddNewTaskStore(
                         parentTaskId = result.data.parentTaskId,
                         description = result.data.description,
                         priority = result.data.priority,
-                        isToDo = result.data.isToDo
+                        isToDo = result.data.isToDo,
+                        fetched = true
                     )
                 }
             } ?: state
+        }
+    }
+
+    fun onSchedulerRequest() = intent("onSchedulerRequest") {
+        onTrigger {
+            resultCache.observe<Scheduler>(cacheKey, RESULT_KEY_SCHEDULER).filterNotNull()
+        }
+
+        reducer {
+            state.reduceData { copy(scheduler = resultNonNull()) }
         }
     }
 

@@ -34,9 +34,9 @@ fun List<TaskDto>.flatMapTaskDto(tasks: MutableList<TaskDto> = mutableListOf()):
     return tasks
 }
 
-fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
+inline fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
 
-fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
+inline fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
 
 fun List<Task>.filterWithSearch(search: String): List<Task> {
     val searchQuery = search.trim().split(" ")

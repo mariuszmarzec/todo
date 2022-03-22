@@ -38,6 +38,7 @@ fun main() {
     }
 
     DI.memoryCache = MemoryCache()
+    DI.resultMemoryCache = MemoryCache()
 
     DI.fileCache = FileCacheImpl(
         "todo.cache",

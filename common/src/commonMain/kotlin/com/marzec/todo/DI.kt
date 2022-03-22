@@ -19,6 +19,7 @@ import com.marzec.todo.navigation.TodoDestination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.ResultCache
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
@@ -68,6 +69,7 @@ object DI {
     lateinit var navigationScope: CoroutineScope
 
     lateinit var memoryCache: Cache
+    lateinit var resultMemoryCache: Cache
 
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = false
@@ -75,6 +77,8 @@ object DI {
     val navigationStoreCacheKey by lazy {
         cacheKeyProvider()
     }
+
+    val resultCache by lazy { ResultCache(resultMemoryCache) }
 
     val preferences: Preferences = MemoryPreferences()
 
@@ -173,6 +177,7 @@ object DI {
             todoRepository = provideTodoRepository(),
             stateCache = preferences,
             cacheKey = cacheKey,
+            resultCache = resultCache,
             initialState = State.Data(
                 AddNewTaskState.initial(
                     taskId = taskId,
@@ -298,6 +303,7 @@ object DI {
             scope = scope,
             router = ROUTER,
             stateCache = preferences,
+            resultCache = resultCache,
             cacheKey = navigationStoreCacheKey,
             cacheKeyProvider = cacheKeyProvider,
             initialState = NavigationState(

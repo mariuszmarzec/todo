@@ -5,11 +5,13 @@ import com.marzec.mvi.Store3
 import com.marzec.preferences.Preferences
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.Serializable
 
 class NavigationStore(
     private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
     scope: CoroutineScope,
     private val stateCache: Preferences,
+    private val resultCache: ResultCache,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState
@@ -37,16 +39,26 @@ class NavigationStore(
         }
     }
 
-    fun goBack() = intent<Unit> {
+    fun goBack(result: Pair<String, Any>? = null) = intent<Unit> {
         reducer {
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
                     if (size > 1) {
-                        removeLast().also { stateCache.remove(it.cacheKey) }
+                        removeLast().also {
+                            stateCache.remove(it.cacheKey)
+                            resultCache.remove(it.cacheKey)
+                        }
                     }
                 }
             )
         }
+        sideEffect {
+            result?.let { resultCache.save(result.first, result.second) }
+        }
+    }
+
+    suspend fun cleanResults(vararg keys: String) {
+        keys.forEach { resultCache.clean(it) }
     }
 
     override suspend fun onNewState(newState: NavigationState) {

@@ -16,6 +16,8 @@ data class SchedulerData(
     }
 }
 
+const val RESULT_KEY_SCHEDULER = "REQUEST_KEY_SCHEDULER"
+
 class SchedulerStore(
     scope: CoroutineScope,
     private val cacheKey: String,
@@ -25,12 +27,14 @@ class SchedulerStore(
 ) : Store3<State<SchedulerData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
+    fun init() = sideEffect { navigationStore.cleanResults(RESULT_KEY_SCHEDULER) }
+
     fun onSaveButtonClick() = sideEffect {
-        Scheduler.OneShot(
+        val scheduler = Scheduler.OneShot(
             10, 5, currentTime(), currentTime()
         )
 
-        navigationStore.goBack()
+        navigationStore.goBack(RESULT_KEY_SCHEDULER to scheduler)
     }
 
     override suspend fun onNewState(newState: State<SchedulerData>) {
