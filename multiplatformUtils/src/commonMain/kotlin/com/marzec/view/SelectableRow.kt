@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -19,6 +20,7 @@ fun SelectableRow(
     selectable: Boolean,
     selected: Boolean,
     onSelectedChange: () -> Unit,
+    checkboxMargin: Dp = 16.dp,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
@@ -36,7 +38,7 @@ fun SelectableRow(
         if (selectable) {
             Checkbox(
                 checked = selected,
-                modifier = Modifier.padding(16.dp, 16.dp, 0.dp, 16.dp),
+                modifier = Modifier.padding(checkboxMargin),
                 onCheckedChange = { onSelectedChange() }
             )
         }
