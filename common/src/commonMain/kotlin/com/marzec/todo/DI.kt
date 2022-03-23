@@ -218,7 +218,7 @@ object DI {
         changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
             provideTodoRepository()
         ),
-        selectionDelegate = SelectionDelegateImpl<TaskDetailsState>(),
+        selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
         searchDelegate = SearchDelegateImpl<TaskDetailsState>()
     )
 
@@ -247,7 +247,7 @@ object DI {
             cacheKey = cacheKey,
             initialState = AddSubTaskData.INITIAL,
             taskId = taskId,
-            selectionDelegate = SelectionDelegateImpl<AddSubTaskData>()
+            selectionDelegate = SelectionDelegateImpl<Int, AddSubTaskData>()
         )
     }  
     

@@ -28,10 +28,10 @@ class AddSubTaskStore(
     initialState: State<AddSubTaskData>,
     private val todoRepository: TodoRepository,
     private val taskId: Int,
-    selectionDelegate: SelectionDelegate
+    selectionDelegate: SelectionDelegate<Int>
 ) : Store3<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
-), SelectionDelegate by selectionDelegate {
+), SelectionDelegate<Int> by selectionDelegate {
 
     init {
         delegates(selectionDelegate)

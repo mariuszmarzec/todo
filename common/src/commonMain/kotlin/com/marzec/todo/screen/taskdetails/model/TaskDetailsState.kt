@@ -14,7 +14,7 @@ data class TaskDetailsState(
     override val selected: Set<Int>,
     override val search: SearchState
 ) : WithTasks<TaskDetailsState>,
-    WithSelection<TaskDetailsState>,
+    WithSelection<Int, TaskDetailsState>,
     WithSearch<TaskDetailsState> {
 
     override fun copyWithDialog(dialog: DialogState): TaskDetailsState = copy(dialog = dialog)

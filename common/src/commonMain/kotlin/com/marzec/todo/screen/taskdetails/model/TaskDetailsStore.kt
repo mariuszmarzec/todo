@@ -38,14 +38,14 @@ class TaskDetailsStore(
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
-    private val selectionDelegate: SelectionDelegate,
+    private val selectionDelegate: SelectionDelegate<Int>,
     private val searchDelegate: SearchDelegate
 ) : Store3<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate,
-    SelectionDelegate by selectionDelegate,
+    SelectionDelegate<Int> by selectionDelegate,
     SearchDelegate by searchDelegate {
 
     override val identifier: String

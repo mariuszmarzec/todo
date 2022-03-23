@@ -7,7 +7,7 @@ import com.marzec.todo.model.Task
 data class AddSubTaskData(
     val tasks: List<Task>,
     override val selected: Set<Int>
-) : WithSelection<AddSubTaskData> {
+) : WithSelection<Int, AddSubTaskData> {
 
     override fun copyWithSelection(selected: Set<Int>): AddSubTaskData = copy(selected = selected)
 

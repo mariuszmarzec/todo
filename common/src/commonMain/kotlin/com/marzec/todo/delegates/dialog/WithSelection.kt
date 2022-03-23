@@ -5,23 +5,23 @@ import com.marzec.mvi.reduceData
 import com.marzec.delegate.StoreDelegate
 import com.marzec.extensions.toggle
 
-interface WithSelection<DATA> {
-    val selected: Set<Int>
-    fun copyWithSelection(selected: Set<Int>): DATA
-    fun allIds(): Set<Int>
+interface WithSelection<SELECT_ITEM, DATA> {
+    val selected: Set<SELECT_ITEM>
+    fun copyWithSelection(selected: Set<SELECT_ITEM>): DATA
+    fun allIds(): Set<SELECT_ITEM>
 }
 
-interface SelectionDelegate {
-    fun onSelectedChange(id: Int)
-    fun selectAll(ids: Set<Int>)
-    fun deselectAll(ids: Set<Int>)
+interface SelectionDelegate<SELECT_ITEM> {
+    fun onSelectedChange(id: SELECT_ITEM)
+    fun selectAll(ids: Set<SELECT_ITEM>)
+    fun deselectAll(ids: Set<SELECT_ITEM>)
     fun onAllSelectClicked()
 }
 
-class SelectionDelegateImpl<DATA : WithSelection<DATA>> : StoreDelegate<State<DATA>>(),
-    SelectionDelegate {
+class SelectionDelegateImpl<SELECT_ITEM, DATA : WithSelection<SELECT_ITEM, DATA>> : StoreDelegate<State<DATA>>(),
+    SelectionDelegate<SELECT_ITEM> {
 
-    override fun selectAll(ids: Set<Int>) = intent<Unit> {
+    override fun selectAll(ids: Set<SELECT_ITEM>) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithSelection(selected + ids.toSet())
@@ -29,7 +29,7 @@ class SelectionDelegateImpl<DATA : WithSelection<DATA>> : StoreDelegate<State<DA
         }
     }
 
-    override fun deselectAll(ids: Set<Int>) = intent<Unit> {
+    override fun deselectAll(ids: Set<SELECT_ITEM>) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithSelection(selected - ids.toSet())
@@ -37,7 +37,7 @@ class SelectionDelegateImpl<DATA : WithSelection<DATA>> : StoreDelegate<State<DA
         }
     }
 
-    override fun onSelectedChange(id: Int) = intent<Unit> {
+    override fun onSelectedChange(id: SELECT_ITEM) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithSelection(selected.toggle(id))
