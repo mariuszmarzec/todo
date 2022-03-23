@@ -85,6 +85,27 @@ fun <T1, T2, R> combineContentsFlows(
 )
 
 @Suppress("unchecked_cast", "MagicNumber")
+fun <T1, T2, T3, R> combineContentsFlows(
+    flow: Flow<Content<T1>>,
+    flow2: Flow<Content<T2>>,
+    flow3: Flow<Content<T3>>,
+    mapData: (T1, T2, T3) -> R
+) = combine(
+    flow = flow,
+    flow2 = flow2,
+    flow3 = flow3,
+    transform = { content1, content2, content3  ->
+        combineContents(content1, content2, content3) { dataList ->
+            mapData(
+                dataList[0] as T1,
+                dataList[1] as T2,
+                dataList[2] as T3
+            )
+        }
+    }
+)
+
+@Suppress("unchecked_cast", "MagicNumber")
 fun <T1, T2, T3, T4, R> combineContentsFlows(
     flow: Flow<Content<T1>>,
     flow2: Flow<Content<T2>>,
