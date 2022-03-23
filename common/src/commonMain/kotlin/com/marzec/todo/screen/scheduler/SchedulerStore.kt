@@ -27,7 +27,6 @@ class SchedulerStore(
 ) : Store3<State<SchedulerData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
-    fun init() = sideEffect { navigationStore.cleanResults(RESULT_KEY_SCHEDULER) }
 
     fun onSaveButtonClick() = sideEffect {
         val scheduler = Scheduler.OneShot(

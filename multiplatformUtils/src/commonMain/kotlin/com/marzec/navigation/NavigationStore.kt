@@ -17,10 +17,14 @@ class NavigationStore(
     initialState: NavigationState
 ) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
-    fun next(action: NavigationAction) = intent<Unit> {
+    fun next(action: NavigationAction, requestId: Int? = null) = intent<Unit> {
         reducer {
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
+                    lastOrNull()?.let { lastEntry ->
+                        resultCache.clean(lastEntry.cacheKey, requestId)
+                    }
+
                     action.options?.let { options ->
                         takeLastWhile { it.destination != options.popTo }.forEach {
                             if (it.destination != options.popTo) {
@@ -55,10 +59,6 @@ class NavigationStore(
         sideEffect {
             result?.let { resultCache.save(result.first, result.second) }
         }
-    }
-
-    suspend fun cleanResults(vararg keys: String) {
-        keys.forEach { resultCache.clean(it) }
     }
 
     override suspend fun onNewState(newState: NavigationState) {
