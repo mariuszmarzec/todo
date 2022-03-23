@@ -13,7 +13,7 @@ import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
-import com.marzec.todo.delegates.dialog.SelectionDelegateImpl
+import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.navigation.NavigationEntry

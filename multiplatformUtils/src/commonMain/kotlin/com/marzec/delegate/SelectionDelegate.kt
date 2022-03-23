@@ -1,4 +1,4 @@
-package com.marzec.todo.delegates.dialog
+package com.marzec.delegate
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData

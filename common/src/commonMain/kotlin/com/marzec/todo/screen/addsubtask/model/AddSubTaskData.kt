@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.addsubtask.model
 
 import com.marzec.mvi.State
-import com.marzec.todo.delegates.dialog.WithSelection
+import com.marzec.delegate.WithSelection
 import com.marzec.todo.model.Task
 
 data class AddSubTaskData(

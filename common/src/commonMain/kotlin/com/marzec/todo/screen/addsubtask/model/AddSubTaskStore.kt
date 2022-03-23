@@ -12,7 +12,7 @@ import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
-import com.marzec.todo.delegates.dialog.SelectionDelegate
+import com.marzec.delegate.SelectionDelegate
 import com.marzec.todo.extensions.findRootIdOrNull
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination

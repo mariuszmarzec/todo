@@ -3,7 +3,7 @@ package com.marzec.todo.screen.taskdetails.model
 import com.marzec.mvi.State
 import com.marzec.todo.model.Task
 import com.marzec.delegate.WithSearch
-import com.marzec.todo.delegates.dialog.WithSelection
+import com.marzec.delegate.WithSelection
 import com.marzec.todo.delegates.dialog.WithTasks
 import com.marzec.delegate.DialogState
 import com.marzec.view.SearchState

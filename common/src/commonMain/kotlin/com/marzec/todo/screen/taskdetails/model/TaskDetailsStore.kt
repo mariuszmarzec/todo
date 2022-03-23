@@ -15,7 +15,7 @@ import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.delegate.SearchDelegate
-import com.marzec.todo.delegates.dialog.SelectionDelegate
+import com.marzec.delegate.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
 import com.marzec.todo.model.Task
