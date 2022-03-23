@@ -2,8 +2,7 @@ package com.marzec.todo.extensions
 
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.model.Task
-
-const val EMPTY_STRING = ""
+import com.marzec.extensions.filterWithSearch
 
 @Suppress("unchecked_cast")
 inline fun <reified T : Any> Any.asInstance(action: T.() -> Unit) = (this as? T)?.action()
@@ -38,16 +37,8 @@ inline fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda(
 
 inline fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
 
-fun List<Task>.filterWithSearch(search: String): List<Task> {
-    val searchQuery = search.trim().split(" ")
-    return filter { task ->
-        searchQuery == listOf(EMPTY_STRING) || searchQuery.all {
-            task.description.contains(
-                it,
-                ignoreCase = true
-            )
-        }
-    }
+fun List<Task>.filterWithSearch(search: String): List<Task> = filterWithSearch(search) {
+    listOf(it.description)
 }
 
 fun List<Task>.findRootIdOrNull(taskId: Int): Int {
