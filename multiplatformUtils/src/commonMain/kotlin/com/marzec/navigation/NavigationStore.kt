@@ -5,7 +5,8 @@ import com.marzec.mvi.Store3
 import com.marzec.preferences.Preferences
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 
 class NavigationStore(
     private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
@@ -59,6 +60,13 @@ class NavigationStore(
         sideEffect {
             result?.let { resultCache.save(result.first, result.second) }
         }
+    }
+
+    suspend fun <T : Any> observe(
+        resultKey: String,
+        requestId: Int? = null
+    ): Flow<T>? = state.value.backStack.lastOrNull()?.let {
+        resultCache.observe<T>(it.cacheKey, resultKey, requestId).filterNotNull()
     }
 
     override suspend fun onNewState(newState: NavigationState) {
