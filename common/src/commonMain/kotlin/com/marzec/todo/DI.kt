@@ -29,6 +29,7 @@ import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
+import com.marzec.todo.model.Scheduler
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
@@ -264,14 +265,15 @@ object DI {
 
     private fun provideSchedulerStore(
         scope: CoroutineScope,
-        cacheKey: String
+        cacheKey: String,
+        scheduler: Scheduler?
     ): SchedulerStore {
         return SchedulerStore(
             scope = scope,
             navigationStore = navigationStore,
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = SchedulerData.INITIAL
+            initialState = SchedulerData.INITIAL.copy(scheduler = scheduler)
         )
     }
 

@@ -19,9 +19,7 @@ class ApiDataSource(
         client.delete<Unit>(Api.Todo.removeTask(taskId))
     }
 
-    override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS).apply {
-        println(this)
-    }
+    override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS)
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) {
         client.post<Unit>(ADD_TASKS) {

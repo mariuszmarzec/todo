@@ -39,4 +39,8 @@ class SchedulerStore(
     override suspend fun onNewState(newState: State<SchedulerData>) {
         stateCache.set(cacheKey, newState)
     }
+
+    fun onHourChanged(hour: Int) {
+        TODO("Not yet implemented")
+    }
 }
