@@ -57,7 +57,8 @@ class AddNewTaskStore(
                         description = result.data.description,
                         priority = result.data.priority,
                         isToDo = result.data.isToDo,
-                        fetched = true
+                        fetched = true,
+                        scheduler = result.data.scheduler
                     )
                 }
             } ?: state
@@ -90,13 +91,15 @@ class AddNewTaskStore(
                         description = description,
                         parentTaskId = parentTaskId,
                         priority = priority,
-                        isToDo = isToDo
+                        isToDo = isToDo,
+                        scheduler = scheduler
                     )
                 } else {
                     todoRepository.addNewTask(
                         description,
                         parentTaskId,
-                        highestPriorityAsDefault
+                        highestPriorityAsDefault,
+                        scheduler
                     )
                 }
             }
@@ -121,7 +124,8 @@ class AddNewTaskStore(
                 todoRepository.addNewTasks(
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     parentTaskId = parentTaskId,
-                    descriptions = description.split("\n")
+                    descriptions = description.split("\n"),
+                    scheduler = scheduler
                 )
             }
         }

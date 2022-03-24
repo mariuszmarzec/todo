@@ -3,6 +3,7 @@ package com.marzec.todo.network
 import com.marzec.todo.Api
 import com.marzec.todo.Api.Todo.ADD_TASKS
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import io.ktor.client.HttpClient
@@ -18,7 +19,9 @@ class ApiDataSource(
         client.delete<Unit>(Api.Todo.removeTask(taskId))
     }
 
-    override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS)
+    override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS).apply {
+        println(this)
+    }
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) {
         client.post<Unit>(ADD_TASKS) {
@@ -31,13 +34,15 @@ class ApiDataSource(
         description: String,
         parentTaskId: Int?,
         priority: Int,
-        isToDo: Boolean
+        isToDo: Boolean,
+        scheduler: SchedulerDto?
     ) = client.patch<Unit>(Api.Todo.updateTask(taskId)) {
         body = UpdateTaskDto(
             description = description,
             parentTaskId = parentTaskId,
             priority = priority,
-            isToDo = isToDo
+            isToDo = isToDo,
+            scheduler = scheduler
         )
     }
 }

@@ -10,8 +10,10 @@ import com.marzec.content.mapData
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.extensions.flatMapTask
+import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.toDomain
+import com.marzec.todo.model.toDto
 import com.marzec.todo.network.DataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -36,15 +38,17 @@ class TodoRepository(
 
     suspend fun addNewTask(
         description: String,
-        parentTaskId: Int? = null,
-        highestPriorityAsDefault: Boolean
+        parentTaskId: Int?,
+        highestPriorityAsDefault: Boolean,
+        scheduler: Scheduler?
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.addNewTask(
                 CreateTaskDto(
                     description = description,
                     parentTaskId = parentTaskId,
-                    highestPriorityAsDefault = highestPriorityAsDefault
+                    highestPriorityAsDefault = highestPriorityAsDefault,
+                    scheduler = scheduler?.toDto()
                 )
             )
         }
@@ -52,7 +56,8 @@ class TodoRepository(
     suspend fun addNewTasks(
         highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
-        descriptions: List<String>
+        descriptions: List<String>,
+        scheduler: Scheduler?
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             descriptions.forEach {
@@ -60,7 +65,8 @@ class TodoRepository(
                     CreateTaskDto(
                         description = it,
                         parentTaskId = parentTaskId,
-                        highestPriorityAsDefault = highestPriorityAsDefault
+                        highestPriorityAsDefault = highestPriorityAsDefault,
+                        scheduler = scheduler?.toDto()
                     )
                 )
             }
@@ -71,10 +77,18 @@ class TodoRepository(
         description: String,
         parentTaskId: Int?,
         priority: Int,
-        isToDo: Boolean
+        isToDo: Boolean,
+        scheduler: Scheduler?
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.updateTask(taskId, description, parentTaskId, priority, isToDo)
+            dataSource.updateTask(
+                taskId = taskId,
+                description = description,
+                parentTaskId = parentTaskId,
+                priority = priority,
+                isToDo = isToDo,
+                scheduler = scheduler?.toDto()
+            )
         }
 
     suspend fun markAsDone(task: Task): Flow<Content<Unit>> =
@@ -84,7 +98,8 @@ class TodoRepository(
                 description = task.description,
                 parentTaskId = task.parentTaskId,
                 priority = task.priority,
-                isToDo = false
+                isToDo = false,
+                scheduler = task.scheduler?.toDto()
             )
         }
 
@@ -97,8 +112,10 @@ class TodoRepository(
                     description = task.description,
                     parentTaskId = task.parentTaskId,
                     priority = task.priority,
-                    isToDo = false
-                )
+                    isToDo = false,
+                    scheduler = task.scheduler?.toDto(),
+
+                    )
             }
         }
 
@@ -109,7 +126,8 @@ class TodoRepository(
                 description = task.description,
                 parentTaskId = task.parentTaskId,
                 priority = task.priority,
-                isToDo = true
+                isToDo = true,
+                scheduler = task.scheduler?.toDto()
             )
         }
 
@@ -122,7 +140,8 @@ class TodoRepository(
                     description = task.description,
                     parentTaskId = task.parentTaskId,
                     priority = task.priority,
-                    isToDo = true
+                    isToDo = true,
+                    scheduler = task.scheduler?.toDto()
                 )
             }
         }
@@ -137,10 +156,10 @@ class TodoRepository(
                 description = task.description,
                 parentTaskId = parentTaskId,
                 priority = task.priority,
-                isToDo = task.isToDo
+                isToDo = task.isToDo,
+                scheduler = task.scheduler?.toDto()
             )
         }
-
 
     suspend fun pinAllTasks(
         tasks: List<Task>,
@@ -153,7 +172,8 @@ class TodoRepository(
                     description = task.description,
                     parentTaskId = parentTaskId,
                     priority = task.priority,
-                    isToDo = task.isToDo
+                    isToDo = task.isToDo,
+                    scheduler = task.scheduler?.toDto()
                 )
             }
         }

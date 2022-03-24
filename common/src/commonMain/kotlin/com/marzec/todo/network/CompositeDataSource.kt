@@ -4,6 +4,7 @@ import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.cache.Cache
+import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.model.toDomain
 
 class CompositeDataSource(
@@ -35,9 +36,10 @@ class CompositeDataSource(
         description: String,
         parentTaskId: Int?,
         priority: Int,
-        isToDo: Boolean
+        isToDo: Boolean,
+        scheduler: SchedulerDto?
     ) = update {
-        updateTask(taskId, description, parentTaskId, priority, isToDo)
+        updateTask(taskId, description, parentTaskId, priority, isToDo, scheduler)
     }
 
     private suspend fun update(action: suspend DataSource.() -> Unit) {

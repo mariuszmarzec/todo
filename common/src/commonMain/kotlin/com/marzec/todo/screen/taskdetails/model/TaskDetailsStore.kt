@@ -111,7 +111,8 @@ class TaskDetailsStore(
                         description = task.description,
                         parentTaskId = null,
                         priority = task.priority,
-                        isToDo = task.isToDo
+                        isToDo = task.isToDo,
+                        scheduler = task.scheduler
                     )
                 }
             }
@@ -169,7 +170,7 @@ class TaskDetailsStore(
     }
 
     fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
-        onTrigger { todoRepository.addNewTasks(false, taskId, tasks) }
+        onTrigger { todoRepository.addNewTasks(false, taskId, tasks, null) }
     }
 
     fun markAsDone(id: Int) = intent<Content<Unit>> {

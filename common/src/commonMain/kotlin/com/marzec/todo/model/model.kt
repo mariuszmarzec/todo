@@ -143,7 +143,7 @@ fun Task.toDto(): TaskDto = TaskDto(
     subTasks = subTasks.map { it.toDto() },
     isToDo = isToDo,
     priority = priority,
-    schedulerDto = scheduler?.toDto()
+    scheduler = scheduler?.toDto()
 )
 
 fun TaskDto.toDomain(): Task = Task(
@@ -155,7 +155,7 @@ fun TaskDto.toDomain(): Task = Task(
     subTasks = subTasks.map { it.toDomain() },
     isToDo = isToDo,
     priority = priority,
-    scheduler = schedulerDto?.toDomain()
+    scheduler = scheduler?.toDomain()
 )
 
 data class CreateTask(
@@ -170,7 +170,7 @@ fun CreateTaskDto.toDomain() = CreateTask(
     description = description,
     parentTaskId = parentTaskId,
     priority = priority,
-    scheduler = schedulerDto?.toDomain()
+    scheduler = scheduler?.toDomain()
 )
 
 fun CreateTask.toDto() = CreateTaskDto(
@@ -178,7 +178,7 @@ fun CreateTask.toDto() = CreateTaskDto(
     parentTaskId = parentTaskId,
     priority = priority,
     highestPriorityAsDefault = highestPriorityAsDefault,
-    schedulerDto = scheduler?.toDto()
+    scheduler = scheduler?.toDto()
 )
 
 data class UpdateTask(

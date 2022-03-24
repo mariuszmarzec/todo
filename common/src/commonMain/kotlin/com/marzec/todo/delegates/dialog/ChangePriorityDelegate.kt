@@ -4,6 +4,7 @@ import com.marzec.mvi.State
 import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.delegate.StoreDelegate
 import com.marzec.content.Content
+import com.marzec.todo.model.toDto
 import com.marzec.todo.repository.TodoRepository
 
 interface ChangePriorityDelegate {
@@ -24,7 +25,8 @@ class ChangePriorityDelegateImpl<DATA : WithTasks<DATA>>(
                         description = task.description,
                         parentTaskId = task.parentTaskId,
                         priority = newPriority,
-                        isToDo = task.isToDo
+                        isToDo = task.isToDo,
+                        scheduler = task.scheduler
                     )
                 }
             }

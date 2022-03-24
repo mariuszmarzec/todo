@@ -10,6 +10,7 @@ import com.marzec.time.formatDate
 import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.extensions.replaceIf
 import com.marzec.locker.Locker
+import com.marzec.todo.api.SchedulerDto
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -86,6 +87,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         parentTaskId = createTaskDto.parentTaskId,
         subTasks = emptyList(),
         isToDo = true,
+        scheduler = createTaskDto.scheduler,
         priority = createTaskDto.priority
             ?: if (createTaskDto.highestPriorityAsDefault == true) {
                 (subTasksOfParentOrTasks(tasks, createTaskDto).maxOfOrNull { it.priority }
@@ -93,8 +95,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             } else {
                 (subTasksOfParentOrTasks(tasks, createTaskDto).minOfOrNull { it.priority }
                     ?: 0) - 1
-            },
-        schedulerDto = null
+            }
     )
 
     private fun subTasksOfParentOrTasks(tasks: List<TaskDto>, createTaskDto: CreateTaskDto) =
@@ -109,7 +110,8 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         description: String,
         parentTaskId: Int?,
         priority: Int,
-        isToDo: Boolean
+        isToDo: Boolean,
+        scheduler: SchedulerDto?
     ) = update {
         localData = localData.copy(
             tasks = localData.tasks.replaceIf(
@@ -121,6 +123,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                         priority = priority,
                         isToDo = isToDo,
                         modifiedTime = currentTime().formatDate(),
+                        scheduler = scheduler
                     )
                 }
             )
