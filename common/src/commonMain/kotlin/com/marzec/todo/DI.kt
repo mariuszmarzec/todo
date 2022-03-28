@@ -41,7 +41,7 @@ import com.marzec.todo.screen.login.LoginScreen
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
 import com.marzec.todo.screen.scheduler.SchedulerScreen
-import com.marzec.todo.screen.scheduler.SchedulerData
+import com.marzec.todo.screen.scheduler.SchedulerState
 import com.marzec.todo.screen.scheduler.SchedulerStore
 import com.marzec.todo.screen.taskdetails.TaskDetailsScreen
 import com.marzec.todo.screen.taskdetails.model.TaskDetailsState
@@ -110,7 +110,7 @@ object DI {
         },
         TodoDestination.Schedule::class to @Composable { destination, cacheKey ->
             destination as TodoDestination.Schedule
-            provideSchedulerScreen(cacheKey)
+            provideSchedulerScreen(cacheKey, destination.scheduler)
         },
     )
 
@@ -253,11 +253,12 @@ object DI {
     }  
     
     @Composable
-    private fun provideSchedulerScreen(cacheKey: String) {
+    private fun provideSchedulerScreen(cacheKey: String, scheduler: Scheduler?) {
         SchedulerScreen(
             store = provideSchedulerStore(
                 scope = rememberCoroutineScope(),
-                cacheKey = cacheKey
+                cacheKey = cacheKey,
+                scheduler = scheduler
             ),
             actionBarProvider = provideActionBarProvider()
         )
@@ -273,7 +274,7 @@ object DI {
             navigationStore = navigationStore,
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = SchedulerData.INITIAL.copy(scheduler = scheduler)
+            initialState = SchedulerState.from(scheduler)
         )
     }
 

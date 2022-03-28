@@ -8,8 +8,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
+import kotlinx.datetime.toLocalDateTime
 
 const val DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
+const val SHORT_DATE_FORMAT = "yyyy-MM-dd"
 
 object CurrentTimeUtil {
 
@@ -28,3 +30,5 @@ fun currentMillis(): Long =
 
 fun LocalDateTime.formatDate(dateFormat: String = DEFAULT_DATE_FORMAT): String =
     toJavaLocalDateTime().format(DateTimeFormatter.ofPattern(dateFormat))
+
+fun String.shortDateToLocalDateTime() = "${this}T00:00:00".toLocalDateTime()

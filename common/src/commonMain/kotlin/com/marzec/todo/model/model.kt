@@ -28,20 +28,20 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         hour = hour,
         minute = minute,
         startDate = startDate.toLocalDateTime(),
-        lastDate = lastDate.toLocalDateTime(),
+        lastDate = lastDate?.toLocalDateTime(),
     )
     Scheduler.Weekly::class.simpleName -> Scheduler.Weekly(
         hour = hour,
         minute = minute,
         startDate = startDate.toLocalDateTime(),
-        lastDate = lastDate.toLocalDateTime(),
+        lastDate = lastDate?.toLocalDateTime(),
         daysOfWeek = daysOfWeek.map { DayOfWeek(it) },
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
     )
     Scheduler.Monthly::class.simpleName -> Scheduler.Monthly(
         hour = hour, minute = minute, startDate = startDate.toLocalDateTime(),
-        lastDate = lastDate.toLocalDateTime(),
+        lastDate = lastDate?.toLocalDateTime(),
         dayOfMonth = dayOfMonth,
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
@@ -53,7 +53,7 @@ sealed class Scheduler(
     open val hour: Int,
     open val minute: Int,
     open val startDate: LocalDateTime,
-    open val lastDate: LocalDateTime,
+    open val lastDate: LocalDateTime?,
     open val repeatCount: Int = DEFAULT_REPEAT_COUNT,
     open val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
 ) {
@@ -61,7 +61,7 @@ sealed class Scheduler(
         override val hour: Int,
         override val minute: Int,
         override val startDate: LocalDateTime,
-        override val lastDate: LocalDateTime,
+        override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
     ) : Scheduler(
@@ -73,7 +73,7 @@ sealed class Scheduler(
         override val minute: Int,
         override val startDate: LocalDateTime,
         val daysOfWeek: List<DayOfWeek>,
-        override val lastDate: LocalDateTime,
+        override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
     ) : Scheduler(
@@ -85,7 +85,7 @@ sealed class Scheduler(
         override val minute: Int,
         override val startDate: LocalDateTime,
         val dayOfMonth: Int,
-        override val lastDate: LocalDateTime,
+        override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
     ) : Scheduler(
@@ -103,7 +103,7 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
         hour = hour,
         minute = minute,
         startDate = startDate.formatDate(),
-        lastDate = lastDate.formatDate(),
+        lastDate = lastDate?.formatDate(),
         daysOfWeek = emptyList(),
         dayOfMonth = 0,
         repeatInEveryPeriod = repeatInEveryPeriod,
@@ -114,7 +114,7 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
         hour = hour,
         minute = minute,
         startDate = startDate.formatDate(),
-        lastDate = lastDate.formatDate(),
+        lastDate = lastDate?.formatDate(),
         daysOfWeek = daysOfWeek.map { it.isoDayNumber },
         dayOfMonth = 0,
         repeatInEveryPeriod = repeatInEveryPeriod,
@@ -125,7 +125,7 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
         hour = hour,
         minute = minute,
         startDate = startDate.formatDate(),
-        lastDate = lastDate.formatDate(),
+        lastDate = lastDate?.formatDate(),
         daysOfWeek = emptyList(),
         dayOfMonth = dayOfMonth,
         repeatInEveryPeriod = repeatInEveryPeriod,
