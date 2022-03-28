@@ -1,5 +1,6 @@
 package com.marzec.todo.screen.addnewtask
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,11 +111,16 @@ fun ScheduleRow(
     onRemoveSchedulerButtonClick: () -> Unit
 ) {
     if (scheduler != null) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.clickable { onScheduleButtonClick() },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton({ onRemoveSchedulerButtonClick() }) {
                 Icon(Icons.Default.Clear, "Remove scheduler")
             }
-            Text(scheduler.description)
+            Text(
+                text = scheduler.description
+            )
         }
     } else {
         Button(onClick = {
