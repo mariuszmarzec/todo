@@ -215,6 +215,5 @@ fun DatePickerView(
                 }
             }
         }
-
     }
 }
