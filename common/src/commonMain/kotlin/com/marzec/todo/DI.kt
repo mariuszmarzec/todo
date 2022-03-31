@@ -291,17 +291,22 @@ object DI {
             fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
         }
 
-        val defaultScreen = if (authToken.isNullOrEmpty()) {
-            NavigationEntry(
-                TodoDestination.Login,
-                cacheKeyProvider()
-            ) @Composable { _, it -> provideLoginScreen(it) }
-        } else {
-            NavigationEntry(
-                TodoDestination.Tasks,
-                cacheKeyProvider()
-            ) @Composable { _, it -> provideTasksScreen(it) }
-        }
+//        val defaultScreen = if (authToken.isNullOrEmpty()) {
+//            NavigationEntry(
+//                TodoDestination.Login,
+//                cacheKeyProvider()
+//            ) @Composable { _, it -> provideLoginScreen(it) }
+//        } else {
+//            NavigationEntry(
+//                TodoDestination.Tasks,
+//                cacheKeyProvider()
+//            ) @Composable { _, it -> provideTasksScreen(it) }
+//        }
+        val defaultScreen = NavigationEntry(
+            TodoDestination.Schedule(),
+            cacheKeyProvider(),
+            @Composable { _, it -> provideSchedulerScreen(it, null) }
+        )
         return NavigationStore(
             scope = scope,
             router = ROUTER,

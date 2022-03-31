@@ -7,20 +7,29 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.marzec.mvi.Store3
 import com.marzec.mvi.collectState
+import com.marzec.time.currentTime
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.SelectableRow
 import com.marzec.view.SpinnerView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 
 @Composable
 fun SchedulerScreen(
@@ -54,10 +63,22 @@ fun SchedulerScreen(
 
         Spacer(Modifier.height(16.dp))
         TextField(
-            label = { Text("start date (yyyy-MM-dd") },
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+
+                    }
+                ) {
+                    Icon(Icons.Default.DateRange, contentDescription = "Date pick")
+                }
+            },
+            label = { Text("start date (yyyy-MM-dd)") },
             value = state.startDate,
             onValueChange = { store.onStartDateChanged(it) }
         )
+
+        DatePickerView()
+
         Spacer(Modifier.height(16.dp))
 
         Row {
@@ -89,8 +110,8 @@ fun SchedulerScreen(
         }
         if (state.type == SchedulerType.Weekly) {
             Row {
-                    DayOfWeek.values().forEach {
-                        Box(Modifier.weight(1/7f)) {
+                DayOfWeek.values().forEach {
+                    Box(Modifier.weight(1 / 7f)) {
                         SelectableRow(
                             Color.White,
                             selected = it in state.daysOfWeek,
@@ -136,5 +157,64 @@ fun SchedulerTypeView(
             onClick = { store.type(schedulerType) }
         )
         Text(schedulerType.toString())
+    }
+}
+
+data class DatePickerState(
+    val year: Int = currentTime().year,
+    val monthInYear: Int = currentTime().monthNumber,
+    val dayInMonth: Int = currentTime().dayOfMonth
+)
+
+class DatePickerStore(
+    scope: CoroutineScope,
+    initialState: DatePickerState
+) : Store3<DatePickerState>(scope, initialState) {
+
+    fun onYearChange(year: Int) = reducerIntent {
+        state.copy(year = year)
+    }
+
+    fun onMonthChange(month: Int) = reducerIntent {
+        state.copy(monthInYear = month)
+    }
+
+    fun onDayChange(day: Int) = reducerIntent {
+        state.copy(dayInMonth = day)
+    }
+}
+
+@Composable
+fun DatePickerView(
+    year: Int = currentTime().year,
+    monthInYear: Int = currentTime().monthNumber,
+    dayInMonth: Int = currentTime().dayOfMonth,
+    store: DatePickerStore = DatePickerStore(
+        scope = rememberCoroutineScope(),
+        initialState = DatePickerState(
+            year, monthInYear, dayInMonth
+        )
+    )
+) {
+    val state by store.collectState()
+
+    val years = (1920..currentTime().year).reversed()
+
+    Column {
+        SpinnerView(
+            items = years.map { it.toString() },
+            selectedItemIndex = years.indexOf(year),
+            onValueChanged = {
+                store.onYearChange(it)
+            }
+        )
+        Row {
+            DayOfWeek.values().map { it.toString().substring(0, 3) }.forEach { dayShortName ->
+                Box(Modifier.weight(1/7f)) {
+                    Text(dayShortName)
+                }
+            }
+        }
+
     }
 }
