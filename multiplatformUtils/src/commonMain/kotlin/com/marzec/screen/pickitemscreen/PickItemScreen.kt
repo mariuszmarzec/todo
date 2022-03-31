@@ -3,6 +3,11 @@ package com.marzec.screen.pickitemscreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -30,11 +35,25 @@ fun <ITEM> PickItemScreen(
             state,
             { store.load() }
         ) { state ->
-            LazyColumn {
-                items(items = state.data.items) { item ->
-                    key(options.mapItemToId(item)) {
-                        options.itemRow(item) {
-                            store.onItemClick(options.mapItemToId(it))
+            Scaffold(
+                floatingActionButton = {
+                    if (options.onAddNavigationAction != null) {
+                        FloatingActionButton(
+                            onClick = {
+                                store.onAddButtonClick()
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add button")
+                        }
+                    }
+                }
+            ) {
+                LazyColumn {
+                    items(items = state.data.items) { item ->
+                        key(options.mapItemToId(item)) {
+                            options.itemRow(item) {
+                                store.onItemClick(options.mapItemToId(it))
+                            }
                         }
                     }
                 }
