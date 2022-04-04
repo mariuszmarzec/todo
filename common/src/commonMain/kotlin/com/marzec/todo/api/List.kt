@@ -38,7 +38,7 @@ data class SchedulerDto(
     val hour: Int,
     val minute: Int,
     val startDate: String,
-    val lastDate: String?,
+    val lastDate: String? = null,
     val daysOfWeek: List<Int>,
     val dayOfMonth: Int,
     val repeatCount: Int,

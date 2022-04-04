@@ -4,32 +4,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
+import com.marzec.delegate.DialogDelegateImpl
+import com.marzec.delegate.SearchDelegateImpl
+import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
 import com.marzec.mvi.State
 import com.marzec.navigation.Destination
-import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.common.OpenUrlHelper
-import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
-import com.marzec.delegate.DialogDelegateImpl
-import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
-import com.marzec.delegate.SearchDelegateImpl
-import com.marzec.delegate.SelectionDelegateImpl
-import com.marzec.todo.delegates.dialog.UrlDelegateImpl
-import com.marzec.todo.navigation.TodoDestination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.ResultCache
-import com.marzec.todo.network.ApiDataSource
-import com.marzec.todo.network.CompositeDataSource
-import com.marzec.todo.network.DataSource
-import com.marzec.todo.network.LocalDataSource
 import com.marzec.preferences.MemoryPreferences
 import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
+import com.marzec.todo.common.CopyToClipBoardHelper
+import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
+import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
+import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.model.Scheduler
+import com.marzec.todo.navigation.TodoDestination
+import com.marzec.todo.network.ApiDataSource
+import com.marzec.todo.network.CompositeDataSource
+import com.marzec.todo.network.DataSource
+import com.marzec.todo.network.LocalDataSource
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
@@ -50,6 +50,10 @@ import com.marzec.todo.screen.tasks.TasksScreen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.view.ActionBarProvider
+import com.marzec.view.DatePickerScreen
+import com.marzec.view.DatePickerState
+import com.marzec.view.DatePickerStore
+import com.marzec.view.WithDateDelegateImpl
 import io.ktor.client.HttpClient
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -57,6 +61,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.builtins.serializer
 
 object DI {
@@ -111,6 +116,10 @@ object DI {
         TodoDestination.Schedule::class to @Composable { destination, cacheKey ->
             destination as TodoDestination.Schedule
             provideSchedulerScreen(cacheKey, destination.scheduler)
+        },
+        TodoDestination.DatePicker::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.DatePicker
+            provideDatePickerScreen(cacheKey, destination.date)
         },
     )
 
@@ -274,7 +283,37 @@ object DI {
             navigationStore = navigationStore,
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = SchedulerState.from(scheduler)
+            initialState = SchedulerState.from(scheduler),
+            dateDelegate = WithDateDelegateImpl<SchedulerState>(
+                navigationStore = navigationStore,
+                datePickerDestinationFactory = { TodoDestination.DatePicker(it) }
+            )
+        )
+    }    
+    
+    @Composable
+    private fun provideDatePickerScreen(cacheKey: String, date: LocalDateTime?) {
+        DatePickerScreen(
+            store = provideDatePickerStore(
+                scope = rememberCoroutineScope(),
+                cacheKey = cacheKey,
+                date = date
+            ),
+            actionBarProvider = provideActionBarProvider()
+        )
+    }
+
+    private fun provideDatePickerStore(
+        scope: CoroutineScope,
+        cacheKey: String,
+        date: LocalDateTime?
+    ): DatePickerStore {
+        return DatePickerStore(
+            scope = scope,
+            navigationStore = navigationStore,
+            stateCache = preferences,
+            cacheKey = cacheKey,
+            initialState = DatePickerState.from(date)
         )
     }
 
@@ -291,22 +330,17 @@ object DI {
             fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
         }
 
-//        val defaultScreen = if (authToken.isNullOrEmpty()) {
-//            NavigationEntry(
-//                TodoDestination.Login,
-//                cacheKeyProvider()
-//            ) @Composable { _, it -> provideLoginScreen(it) }
-//        } else {
-//            NavigationEntry(
-//                TodoDestination.Tasks,
-//                cacheKeyProvider()
-//            ) @Composable { _, it -> provideTasksScreen(it) }
-//        }
-        val defaultScreen = NavigationEntry(
-            TodoDestination.Schedule(),
-            cacheKeyProvider(),
-            @Composable { _, it -> provideSchedulerScreen(it, null) }
-        )
+        val defaultScreen = if (authToken.isNullOrEmpty()) {
+            NavigationEntry(
+                TodoDestination.Login,
+                cacheKeyProvider()
+            ) @Composable { _, it -> provideLoginScreen(it) }
+        } else {
+            NavigationEntry(
+                TodoDestination.Tasks,
+                cacheKeyProvider()
+            ) @Composable { _, it -> provideTasksScreen(it) }
+        }
         return NavigationStore(
             scope = scope,
             router = ROUTER,

@@ -1,5 +1,6 @@
 package com.marzec.todo.screen.scheduler
 
+import com.marzec.delegate.delegates
 import com.marzec.extensions.toggle
 import com.marzec.mvi.Store3
 import com.marzec.navigation.NavigationStore
@@ -8,21 +9,27 @@ import com.marzec.time.currentTime
 import com.marzec.time.formatDate
 import com.marzec.time.shortDateToLocalDateTime
 import com.marzec.todo.model.Scheduler
+import com.marzec.view.DateDelegate
+import com.marzec.view.WithDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toLocalDateTime
 
 data class SchedulerState(
     val hour: Int = 7,
     val minute: Int = 0,
-    val startDate: String = currentTime().formatDate("yyyy-MM-dd"),
+    override val date: LocalDateTime = currentTime(),
     val repeatTimes: Boolean = false,
     val repeatCount: Int = 1,
     val repeatInEveryPeriod: Int = 1,
     val type: SchedulerType = SchedulerType.OneShot,
     val daysOfWeek: List<DayOfWeek> = emptyList(),
     val dayOfMonth: Int = 1
-) {
+) : WithDate<SchedulerState> {
+
+    override fun copyWithDate(date: LocalDateTime): SchedulerState = copy(date = date)
+    
     companion object {
         val INITIAL = SchedulerState()
 
@@ -30,7 +37,7 @@ data class SchedulerState(
             SchedulerState(
                 hour = scheduler.hour,
                 minute = scheduler.minute,
-                startDate = scheduler.startDate.formatDate("yyyy-MM-dd"),
+                date = scheduler.startDate,
                 repeatCount = scheduler.repeatCount,
                 repeatInEveryPeriod = scheduler.repeatInEveryPeriod,
                 type = when (scheduler) {
@@ -56,23 +63,28 @@ class SchedulerStore(
     private val cacheKey: String,
     private val stateCache: Preferences,
     private val navigationStore: NavigationStore,
-    initialState: SchedulerState
+    initialState: SchedulerState,
+    private val dateDelegate: DateDelegate
 ) : Store3<SchedulerState>(
     scope, stateCache.get(cacheKey) ?: initialState
-) {
+), DateDelegate by dateDelegate {
+
+    init {
+        delegates(dateDelegate)
+    }
 
     fun onSaveButtonClick() = sideEffect {
         val scheduler = when (state.type) {
             SchedulerType.OneShot -> Scheduler.OneShot(
                 state.hour,
                 state.minute,
-                state.startDate.shortDateToLocalDateTime(),
+                state.date,
                 lastDate = null
             )
             SchedulerType.Weekly -> Scheduler.Weekly(
                 state.hour,
                 state.minute,
-                state.startDate.shortDateToLocalDateTime(),
+                state.date,
                 lastDate = null,
                 daysOfWeek = state.daysOfWeek,
                 repeatCount = state.repeatCount,
@@ -81,7 +93,7 @@ class SchedulerStore(
             SchedulerType.Monthly -> Scheduler.Monthly(
                 state.hour,
                 state.minute,
-                state.startDate.shortDateToLocalDateTime(),
+                state.date,
                 lastDate = null,
                 dayOfMonth = state.dayOfMonth,
                 repeatCount = state.repeatCount,
@@ -101,10 +113,6 @@ class SchedulerStore(
 
     fun onMinuteChanged(minute: Int) = reducerIntent {
         state.copy(minute = minute)
-    }
-
-    fun onStartDateChanged(startDate: String) = reducerIntent {
-        state.copy(startDate = startDate)
     }
 
     fun onRepeatTimesChanged() = reducerIntent {

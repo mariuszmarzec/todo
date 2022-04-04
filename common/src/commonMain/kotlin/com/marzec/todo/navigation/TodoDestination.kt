@@ -1,6 +1,7 @@
 package com.marzec.todo.navigation
 
 import com.marzec.todo.model.Scheduler
+import kotlinx.datetime.LocalDateTime
 
 sealed class TodoDestination: com.marzec.navigation.Destination {
 
@@ -14,4 +15,5 @@ sealed class TodoDestination: com.marzec.navigation.Destination {
     data class TaskDetails(val taskId: Int) : TodoDestination()
     data class AddSubTask(val taskId: Int) : TodoDestination()
     data class Schedule(val scheduler: Scheduler? = null) : TodoDestination()
+    data class DatePicker(val date: LocalDateTime) : TodoDestination()
 }
