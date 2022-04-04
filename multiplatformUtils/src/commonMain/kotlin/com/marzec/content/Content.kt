@@ -4,6 +4,7 @@ import com.marzec.logger.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 
 sealed class Content<T> {
 
@@ -20,6 +21,15 @@ suspend fun <T> asContent(request: suspend () -> T): Content<T> {
         Content.Error(expected)
     }
 }
+
+suspend fun <T> flowContent(request: suspend () -> Flow<Content<T>>): Flow<Content<T>> {
+    return try {
+        request()
+    } catch (expected: Exception) {
+        flowOf(Content.Error(expected))
+    }
+}
+
 fun <T> asContentFlow(request: suspend () -> T): Flow<Content<T>> {
     return flow {
         emit(Content.Loading())
@@ -94,7 +104,7 @@ fun <T1, T2, T3, R> combineContentsFlows(
     flow = flow,
     flow2 = flow2,
     flow3 = flow3,
-    transform = { content1, content2, content3  ->
+    transform = { content1, content2, content3 ->
         combineContents(content1, content2, content3) { dataList ->
             mapData(
                 dataList[0] as T1,
@@ -155,3 +165,4 @@ fun <T1, T2, T3, T4, T5, R> combineContentsFlows(
         }
     }
 )
+
