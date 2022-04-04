@@ -1,7 +1,14 @@
 package com.marzec.todo
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
 import com.marzec.delegate.DialogDelegateImpl
@@ -10,6 +17,7 @@ import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
 import com.marzec.mvi.State
 import com.marzec.navigation.Destination
+import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
@@ -19,6 +27,10 @@ import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
+import com.marzec.screen.pickitemscreen.PickItemData
+import com.marzec.screen.pickitemscreen.PickItemDataStore
+import com.marzec.screen.pickitemscreen.PickItemOptions
+import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.todo.common.CopyToClipBoardHelper
 import com.marzec.todo.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
@@ -121,6 +133,10 @@ object DI {
             destination as TodoDestination.DatePicker
             provideDatePickerScreen(cacheKey, destination.date)
         },
+        TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
+            destination as TodoDestination.PickItem<*>
+            providePickItemScreen(destination, cacheKey)
+       },
     )
 
     @Composable
@@ -154,7 +170,8 @@ object DI {
             changePriorityDelegate = ChangePriorityDelegateImpl<TasksScreenState>(
                 provideTodoRepository()
             ),
-            searchDelegate = SearchDelegateImpl<TasksScreenState>()
+            searchDelegate = SearchDelegateImpl<TasksScreenState>(),
+            scheduledOptions = provideScheduledOptions()
         )
     }
 
@@ -411,6 +428,50 @@ object DI {
     } else {
         ApiDataSource(client)
     }
+
+    @Composable
+    private fun <ITEM> providePickItemScreen(
+        destination: TodoDestination.PickItem<ITEM>,
+        cacheKey: String
+    ) =
+        PickItemScreen(
+            options = destination.options,
+            store = providePickItemStore(
+                destination.options,
+                scope = rememberCoroutineScope(),
+                cacheKey = cacheKey,
+            ),
+            actionBarProvider = provideActionBarProvider()
+        )
+
+    private fun <ITEM> providePickItemStore(
+        options: PickItemOptions<ITEM>,
+        scope: CoroutineScope,
+        cacheKey: String
+    ): PickItemDataStore<ITEM> = PickItemDataStore(
+        options = options,
+        scope = scope,
+        navigationStore = navigationStore,
+        stateCache = preferences,
+        initialState = PickItemData.initial(),
+        cacheKey = cacheKey
+    )
+
+    private fun provideScheduledOptions() = PickItemOptions(
+        loadData = { provideTodoRepository().observeTasks() },
+        mapItemToId = { it.id.toString() },
+        itemRow = { item, _ ->
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        navigationStore.next(NavigationAction(TodoDestination.TaskDetails(item.id)))
+                    }
+                    .padding(16.dp)
+            ) {
+                Text(item.description)
+            }
+        }
+    )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
 }

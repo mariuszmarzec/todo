@@ -39,7 +39,7 @@ class AddSubTaskStore(
 
     fun initialLoad() = intent<Content<List<Task>>> {
         onTrigger {
-            todoRepository.observeLists().map { content ->
+            todoRepository.observeTasks().map { content ->
                 content.mapData { tasks ->
                     val rootId = tasks.findRootIdOrNull(taskId)
                     tasks.filterNot { it.id == rootId }
