@@ -136,7 +136,7 @@ object DI {
         TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
             destination as TodoDestination.PickItem<*>
             providePickItemScreen(destination, cacheKey)
-       },
+        },
     )
 
     @Composable
@@ -197,22 +197,18 @@ object DI {
         taskId: Int?,
         parentTaskId: Int?,
         cacheKey: String
-    ): AddNewTaskStore {
-        return AddNewTaskStore(
-            scope = scope,
-            navigationStore = navigationStore,
-            todoRepository = provideTodoRepository(),
-            stateCache = preferences,
-            cacheKey = cacheKey,
-            resultCache = resultCache,
-            initialState = State.Data(
-                AddNewTaskState.initial(
-                    taskId = taskId,
-                    parentTaskId = parentTaskId
-                )
-            ),
-        )
-    }
+    ): AddNewTaskStore = AddNewTaskStore(
+        scope = scope,
+        navigationStore = navigationStore,
+        todoRepository = provideTodoRepository(),
+        stateCache = preferences,
+        cacheKey = cacheKey,
+        resultCache = resultCache,
+        initialState = AddNewTaskState.initial(
+            taskId = taskId,
+            parentTaskId = parentTaskId
+        ),
+    )
 
     @Composable
     private fun provideTaskDetailsScreen(taskId: Int, cacheKey: String) {
@@ -276,7 +272,7 @@ object DI {
         selectionDelegate = SelectionDelegateImpl<Int, AddSubTaskData>(),
         searchDelegate = SearchDelegateImpl<AddSubTaskData>()
     )
-    
+
     @Composable
     private fun provideSchedulerScreen(cacheKey: String, scheduler: Scheduler?) {
         SchedulerScreen(
@@ -305,8 +301,8 @@ object DI {
                 datePickerDestinationFactory = { TodoDestination.DatePicker(it) }
             )
         )
-    }    
-    
+    }
+
     @Composable
     private fun provideDatePickerScreen(cacheKey: String, date: LocalDateTime?) {
         DatePickerScreen(

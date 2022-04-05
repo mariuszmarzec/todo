@@ -14,6 +14,7 @@ import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.ResultCache
 import com.marzec.preferences.Preferences
+import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.extensions.ifFalse
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
@@ -29,41 +30,41 @@ class AddNewTaskStore(
     private val cacheKey: String,
     private val stateCache: Preferences,
     private val resultCache: ResultCache,
-    initialState: State<AddNewTaskState>,
+    private val initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
 ) : Store3<State<AddNewTaskState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
-    fun initialLoad() = intent<Content<Task>>("load") {
-        onTrigger {
-            state.ifDataAvailable {
-                fetched.ifFalse {
-                    taskId?.let {
-                        todoRepository.observeTask(it)
+    fun initialLoad() = (stateCache.get(cacheKey) ?: initialState)
+        .asInstance<State.Loading<AddNewTaskState>> {
+            intent<Content<Task>>("load") {
+                onTrigger {
+                    state.ifDataAvailable(blockOnLoading = false) {
+                        taskId?.let {
+                            todoRepository.observeTask(it)
+                        }
                     }
+                }
+                reducer {
+                    result?.let {
+                        state.reduceDataWithContent(
+                            result = resultNonNull(),
+                            defaultData = AddNewTaskState.default(0, null)
+                        ) { result ->
+                            copy(
+                                taskId = result.data.id,
+                                parentTaskId = result.data.parentTaskId,
+                                description = result.data.description,
+                                priority = result.data.priority,
+                                isToDo = result.data.isToDo,
+                                scheduler = result.data.scheduler
+                            )
+                        }
+                    } ?: state
                 }
             }
         }
-        reducer {
-            result?.let {
-                state.reduceDataWithContent(
-                    result = resultNonNull(),
-                    defaultData = AddNewTaskState.initial(0, null)
-                ) { result ->
-                    copy(
-                        taskId = result.data.id,
-                        parentTaskId = result.data.parentTaskId,
-                        description = result.data.description,
-                        priority = result.data.priority,
-                        isToDo = result.data.isToDo,
-                        fetched = true,
-                        scheduler = result.data.scheduler
-                    )
-                }
-            } ?: state
-        }
-    }
 
     fun onSchedulerRequest() = intent("onSchedulerRequest") {
         onTrigger {
