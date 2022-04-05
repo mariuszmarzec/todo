@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -29,8 +28,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.marzec.delegate.StoreDelegate
+import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.collectState
+import com.marzec.mvi.reduceData
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationStore
@@ -266,7 +267,7 @@ interface DateDelegate {
     fun onDatePickerViewClick()
 }
 
-class WithDateDelegateImpl<DATA : WithDate<DATA>>(
+class DateDelegateImpl<DATA : WithDate<DATA>>(
     private val navigationStore: NavigationStore,
     private val datePickerDestinationFactory: (date: LocalDateTime) -> Destination
 ) : StoreDelegate<DATA>(), DateDelegate {
@@ -283,5 +284,27 @@ class WithDateDelegateImpl<DATA : WithDate<DATA>>(
 
     override fun onDatePickerViewClick() = sideEffect {
         navigationStore.next(NavigationAction(datePickerDestinationFactory(state.date)))
+    }
+}
+
+class DateDelegateStateImpl<DATA : WithDate<DATA>>(
+    private val navigationStore: NavigationStore,
+    private val datePickerDestinationFactory: (date: LocalDateTime) -> Destination
+) : StoreDelegate<State<DATA>>(), DateDelegate {
+
+    override fun onDatePickerResult() = intent {
+        onTrigger {
+            navigationStore.observe<LocalDateTime>(RESULT_DATE_PICKER)?.filterNotNull()
+        }
+
+        reducer {
+            result?.let { state.reduceData { copyWithDate(it) } } ?: state
+        }
+    }
+
+    override fun onDatePickerViewClick() = sideEffect {
+        state.ifDataAvailable {
+            navigationStore.next(NavigationAction(datePickerDestinationFactory(date)))
+        }
     }
 }

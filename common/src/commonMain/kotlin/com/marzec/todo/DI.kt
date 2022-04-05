@@ -53,7 +53,7 @@ import com.marzec.view.ActionBarProvider
 import com.marzec.view.DatePickerScreen
 import com.marzec.view.DatePickerState
 import com.marzec.view.DatePickerStore
-import com.marzec.view.WithDateDelegateImpl
+import com.marzec.view.DateDelegateImpl
 import io.ktor.client.HttpClient
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -284,7 +284,7 @@ object DI {
             stateCache = preferences,
             cacheKey = cacheKey,
             initialState = SchedulerState.from(scheduler),
-            dateDelegate = WithDateDelegateImpl<SchedulerState>(
+            dateDelegate = DateDelegateImpl<SchedulerState>(
                 navigationStore = navigationStore,
                 datePickerDestinationFactory = { TodoDestination.DatePicker(it) }
             )
