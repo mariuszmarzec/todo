@@ -87,7 +87,7 @@ class SchedulerStore(
                 state.date,
                 lastDate = null,
                 daysOfWeek = state.daysOfWeek,
-                repeatCount = state.repeatCount,
+                repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
                 repeatInEveryPeriod = state.repeatInEveryPeriod
             )
             SchedulerType.Monthly -> Scheduler.Monthly(
@@ -96,7 +96,7 @@ class SchedulerStore(
                 state.date,
                 lastDate = null,
                 dayOfMonth = state.dayOfMonth,
-                repeatCount = state.repeatCount,
+                repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
                 repeatInEveryPeriod = state.repeatInEveryPeriod
             )
         }
