@@ -3,6 +3,7 @@ package com.marzec.todo.screen.addsubtask.model
 import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
+import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
@@ -28,13 +29,14 @@ class AddSubTaskStore(
     initialState: State<AddSubTaskData>,
     private val todoRepository: TodoRepository,
     private val taskId: Int,
-    selectionDelegate: SelectionDelegate<Int>
+    selectionDelegate: SelectionDelegate<Int>,
+    searchDelegate: SearchDelegate
 ) : Store3<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
-), SelectionDelegate<Int> by selectionDelegate {
+), SelectionDelegate<Int> by selectionDelegate, SearchDelegate by searchDelegate {
 
     init {
-        delegates(selectionDelegate)
+        delegates(selectionDelegate, searchDelegate)
     }
 
     fun initialLoad() = intent<Content<List<Task>>> {
@@ -48,7 +50,7 @@ class AddSubTaskStore(
         }
         reducer {
             state.reduceDataWithContent(resultNonNull()) { tasks ->
-                this?.copy(tasks  = tasks) ?: AddSubTaskData.DEFAULT
+                this?.copy(tasks = tasks) ?: AddSubTaskData.DEFAULT
             }
         }
     }

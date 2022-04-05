@@ -265,18 +265,17 @@ object DI {
         scope: CoroutineScope,
         taskId: Int,
         cacheKey: String
-    ): AddSubTaskStore {
-        return AddSubTaskStore(
-            scope = scope,
-            navigationStore = navigationStore,
-            todoRepository = provideTodoRepository(),
-            stateCache = preferences,
-            cacheKey = cacheKey,
-            initialState = AddSubTaskData.INITIAL,
-            taskId = taskId,
-            selectionDelegate = SelectionDelegateImpl<Int, AddSubTaskData>()
-        )
-    }  
+    ) = AddSubTaskStore(
+        scope = scope,
+        navigationStore = navigationStore,
+        todoRepository = provideTodoRepository(),
+        stateCache = preferences,
+        cacheKey = cacheKey,
+        initialState = AddSubTaskData.INITIAL,
+        taskId = taskId,
+        selectionDelegate = SelectionDelegateImpl<Int, AddSubTaskData>(),
+        searchDelegate = SearchDelegateImpl<AddSubTaskData>()
+    )
     
     @Composable
     private fun provideSchedulerScreen(cacheKey: String, scheduler: Scheduler?) {

@@ -26,6 +26,7 @@ import com.marzec.todo.screen.addsubtask.model.AddSubTaskData
 import com.marzec.todo.screen.addsubtask.model.AddSubTaskStore
 import com.marzec.view.ActionBarProvider
 import com.marzec.todo.view.TaskListView
+import com.marzec.view.SearchView
 
 @Composable
 fun AddSubTaskScreen(
@@ -46,6 +47,7 @@ fun AddSubTaskScreen(
                             val selectedCount = state.data.selected.size
                             val tasksCount = state.data.tasks.size
                             val selected = tasksCount == selectedCount
+                            SearchView(state.data.search, store)
                             if (selectedCount > 0) {
                                 IconButton({
                                     store.onPinAllSelectedClicked()
@@ -85,6 +87,7 @@ fun AddSubTaskScreen(
                     TaskListView(
                         tasks = state.data.tasks,
                         selected = state.data.selected,
+                        search = state.data.search.value,
                         showButtonsInColumns = false,
                         onClickListener = { },
                         onSelectedChange = {
