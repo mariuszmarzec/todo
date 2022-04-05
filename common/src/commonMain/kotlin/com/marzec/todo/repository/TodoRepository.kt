@@ -25,7 +25,7 @@ class TodoRepository(
     private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun observeLists(): Flow<Content<List<Task>>> = getTasksCacheFirst()
+    suspend fun observeTasks(): Flow<Content<List<Task>>> = getTasksCacheFirst()
 
     suspend fun observeTask(taskId: Int): Flow<Content<Task>> =
         getTasksCacheFirst().map { content ->

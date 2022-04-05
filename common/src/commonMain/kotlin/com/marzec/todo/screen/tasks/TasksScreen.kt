@@ -8,6 +8,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +41,12 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                     }
                     else -> Unit
                 }
+                IconButton({
+                    store.onScheduledClick()
+                }) {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Scheduled")
+                }
+
                 IconButton({
                     store.logout()
                 }) {

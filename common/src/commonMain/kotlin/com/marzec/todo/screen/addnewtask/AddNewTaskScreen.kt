@@ -59,11 +59,11 @@ fun AddNewTaskScreen(
                             store.onDescriptionChanged(it)
                         })
                     }
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (state.data.taskId == null) {
+                    if (state.data.taskId == null && state.data.scheduler == null) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Checkbox(
                                 checked = state.data.highestPriorityAsDefault,
                                 onCheckedChange = { store.toggleHighestPriority() }

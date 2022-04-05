@@ -15,6 +15,7 @@ import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
+import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.model.Task
@@ -34,7 +35,8 @@ class TasksStore(
     private val dialogDelegate: DialogDelegate,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
-    private val searchDelegate: SearchDelegate
+    private val searchDelegate: SearchDelegate,
+    private val scheduledOptions: PickItemOptions<Task>
 ) : Store3<State<TasksScreenState>>(
     scope,
     stateCache.get(cacheKey) ?: initialState
@@ -58,7 +60,7 @@ class TasksStore(
 
     fun loadList() = intent<Content<List<Task>>>("loadList") {
         onTrigger {
-            todoRepository.observeLists()
+            todoRepository.observeTasks()
         }
 
         reducer {
@@ -124,5 +126,9 @@ class TasksStore(
                 )
             }
         }
+    }
+
+    fun onScheduledClick() {
+        navigationStore.next(NavigationAction(TodoDestination.PickItem(scheduledOptions)))
     }
 }
