@@ -34,7 +34,8 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
 
     Scaffold(
         topBar = {
-            actionBarProvider.provide(title = "Tasks") {
+            val count = state.data?.tasks?.count()?.let { " ($it)" }.orEmpty()
+            actionBarProvider.provide(title = "Tasks$count") {
                 when (val state = state) {
                     is State.Data<TasksScreenState> -> {
                         SearchView(state.data.search, store)
