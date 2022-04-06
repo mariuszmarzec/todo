@@ -124,7 +124,7 @@ fun TaskDetailsScreen(
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (subTasksCount > 0) {
+                            if (selectedCount > 0) {
                                 Text("($selectedCount/$subTasksCount)")
                             }
                             if (selectionModeEnabled) {
