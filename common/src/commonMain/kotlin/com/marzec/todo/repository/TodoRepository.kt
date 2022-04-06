@@ -25,7 +25,18 @@ class TodoRepository(
     private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun observeTasks(): Flow<Content<List<Task>>> = getTasksCacheFirst()
+    suspend fun observeTasks(): Flow<Content<List<Task>>> = getTasksCacheFirst().map { content ->
+        content.mapData { tasks ->
+            tasks.filter { it.scheduler == null }
+        }
+    }
+
+    suspend fun observeScheduledTasks(): Flow<Content<List<Task>>> =
+        getTasksCacheFirst().map { content ->
+            content.mapData { tasks ->
+                tasks.filter { it.scheduler != null }
+            }
+        }
 
     suspend fun observeTask(taskId: Int): Flow<Content<Task>> =
         getTasksCacheFirst().map { content ->

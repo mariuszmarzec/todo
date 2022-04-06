@@ -453,7 +453,7 @@ object DI {
     )
 
     private fun provideScheduledOptions() = PickItemOptions(
-        loadData = { provideTodoRepository().observeTasks() },
+        loadData = { provideTodoRepository().observeScheduledTasks() },
         mapItemToId = { it.id.toString() },
         itemRow = { item, _ ->
             Row(
