@@ -23,7 +23,7 @@ open class ApiCrudDataSource<MODEL : Any, CREATE : Any, UPDATE : Any>(
     }
     
     suspend fun updateTask(updateDto: UPDATE, id: Int) {
-        client.patch<Unit>("endpointAll/$id") {
+        client.patch<Unit>("$endpointAll/$id") {
             body = updateDto
         }
     }
