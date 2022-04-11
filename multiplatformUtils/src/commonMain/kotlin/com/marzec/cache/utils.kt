@@ -42,8 +42,8 @@ suspend fun <T : Any> cacheCall(
 
 fun asContentWithListUpdate(
     dispatcher: CoroutineDispatcher,
-    request: suspend () -> Unit,
-    refreshCallback: suspend () -> Unit
+    refreshCallback: suspend () -> Unit,
+    request: suspend () -> Unit
 ) =
     asContentFlow(request)
         .onEach {
