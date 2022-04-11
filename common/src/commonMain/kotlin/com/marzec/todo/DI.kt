@@ -15,7 +15,6 @@ import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
-import com.marzec.mvi.State
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationEntry
@@ -448,8 +447,9 @@ object DI {
         scope = scope,
         navigationStore = navigationStore,
         stateCache = preferences,
-        initialState = PickItemData.initial(),
-        cacheKey = cacheKey
+        initialState = PickItemData.initial(options),
+        cacheKey = cacheKey,
+        selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>()
     )
 
     private fun provideScheduledOptions() = PickItemOptions(
