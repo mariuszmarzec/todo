@@ -13,7 +13,7 @@ val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
 val atomicfuVersion = "0.17.1"
 
-private val composePluginVersion = "1.0.1"
+private val composePluginVersion = "1.1.1"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {
