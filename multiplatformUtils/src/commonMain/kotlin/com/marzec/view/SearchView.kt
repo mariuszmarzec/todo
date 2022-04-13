@@ -43,7 +43,7 @@ fun SearchView(state: SearchState, searchDelegate: SearchDelegate) {
                 .onFocusChanged {
                     searchDelegate.onSearchFocusChanged(it.isFocused)
                 }
-                .widthIn(min = 200.dp, max = 300.dp)
+                .widthIn(min = 100.dp, max = 300.dp)
                 .padding(0.dp),
             singleLine = true,
             value = if (searchInUse) state.value else "Search",

@@ -33,6 +33,7 @@ class ToDoApplication : Application() {
         }
 
         DI.memoryCache = MemoryCache()
+        DI.resultMemoryCache = MemoryCache()
 
         DI.fileCache = PreferencesCache(
             createDataStore(name = "user_preferences"),

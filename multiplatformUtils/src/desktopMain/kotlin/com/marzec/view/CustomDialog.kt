@@ -5,7 +5,7 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 actual fun CustomDialog(onDismissRequest: () -> Unit, content: @Composable () -> Unit) {
-    Dialog(onCloseRequest = onDismissRequest) {
+    androidx.compose.ui.window.Dialog(onCloseRequest = onDismissRequest) {
         content()
     }
 }

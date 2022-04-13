@@ -1,5 +1,6 @@
 package com.marzec.screen.pickitemscreen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,7 @@ import com.marzec.mvi.collectState
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.ScreenWithLoading
 import com.marzec.view.SelectableRow
+import androidx.compose.ui.Modifier
 
 @Composable
 fun <ITEM> PickItemScreen(
@@ -32,7 +34,9 @@ fun <ITEM> PickItemScreen(
         store.load()
     }
 
-    Column {
+    Column(
+        modifier = Modifier.background(Color.White)
+    ) {
         actionBarProvider.provide {
             state.ifDataAvailable {
                 if (options.multipleChoice) {
