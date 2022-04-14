@@ -6,7 +6,10 @@ import com.marzec.preferences.Preferences
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 
 class NavigationStore(
     private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
@@ -18,12 +21,12 @@ class NavigationStore(
     initialState: NavigationState
 ) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
-    fun next(action: NavigationAction, requestId: Int? = null) = intent<Unit> {
+    fun next(action: NavigationAction, requestId: Int? = null, secondaryId: Int? = null) = intent<Unit> {
         reducer {
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
                     lastOrNull()?.let { lastEntry ->
-                        resultCache.clean(lastEntry.cacheKey, requestId)
+                        resultCache.clean(lastEntry.cacheKey, requestId, secondaryId)
                     }
 
                     action.options?.let { options ->
@@ -69,6 +72,16 @@ class NavigationStore(
         resultCache.observe<T>(it.cacheKey, resultKey, requestId).filterNotNull()
     }
 
+    suspend fun <T : Any> observeResult(
+        resultKey: String,
+        requestId: Int? = null
+    ): Flow<ResultValue<T>>? = state.value.backStack.lastOrNull()?.let { entry ->
+        resultCache.observe<T>(entry.cacheKey, resultKey, requestId)
+        .filterIsInstance<ResultCacheValue>()
+        .filter { it.data != null }
+        .map { ResultValue(it.id, it.data as T) }
+    }
+
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
         stateCache.set(cacheKey, newState)
@@ -77,3 +90,8 @@ class NavigationStore(
 
 fun NavigationStore.next(destination: Destination) =
     next(NavigationAction(destination))
+
+data class ResultValue<T>(
+    val id: Int,
+    val data: T
+)

@@ -25,7 +25,10 @@ class ResultCache(private val memoryCache: Cache) {
         allKeys().filter { it.resultKey == resultKey }
             .forEach {
                 val stringKey = createKey(it.requesterKey, it.resultKey, it.requestId)
-                memoryCache.put(stringKey, value)
+                val valueToSave = (memoryCache.get<Any>(stringKey) as? ResultCacheValue)?.copy(
+                    data = value
+                ) ?: value
+                memoryCache.put(stringKey, valueToSave)
             }
     }
 
@@ -36,7 +39,7 @@ class ResultCache(private val memoryCache: Cache) {
         }
     }
 
-    suspend fun clean(requesterKey: String, excludeRequestId: Int? = null) {
+    suspend fun clean(requesterKey: String, excludeRequestId: Int? = null, secondaryId: Int?) {
         val keys = allKeys()
             .filter { it.requesterKey == requesterKey }
 
@@ -50,10 +53,18 @@ class ResultCache(private val memoryCache: Cache) {
                 val stringKey = createKey(it.requesterKey, it.resultKey, it.requestId)
                 memoryCache.remove(stringKey)
             }
+
+        if (excludeRequestId != null && secondaryId != null) {
+            val resultKey = allKeys().first()
+            memoryCache.put(createKey(resultKey), ResultCacheValue(id = secondaryId, data = null))
+        }
     }
 
     private suspend fun allKeys() =
         memoryCache.toMap().keys.map { Json.decodeFromString<ResultKey>(it) }
+
+    private fun createKey(resultKey: ResultKey): String =
+        Json.encodeToString(resultKey)
 
     private fun createKey(requesterKey: String, resultKey: String, requestId: Int?): String =
         Json.encodeToString(ResultKey(requesterKey, resultKey, requestId))
@@ -64,4 +75,9 @@ private data class ResultKey(
     val requesterKey: String,
     val resultKey: String,
     val requestId: Int? = null
+)
+
+internal data class ResultCacheValue(
+    val id: Int,
+    val data: Any?
 )
