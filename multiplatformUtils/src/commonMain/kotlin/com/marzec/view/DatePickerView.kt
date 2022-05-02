@@ -180,7 +180,7 @@ fun DatePickerScreen(
             }
             SpinnerView(items = months.map {
                 time(
-                    state.dayInMonth,
+                    1,
                     it,
                     state.year
                 ).formatDate("MMM")
