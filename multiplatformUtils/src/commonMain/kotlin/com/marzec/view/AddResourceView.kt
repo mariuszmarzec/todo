@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-private fun AddResourceView(
+fun AddResourceView(
     showEmptyState: Boolean,
     onClick: () -> Unit,
     onRemoveAllButtonClick: () -> Unit,

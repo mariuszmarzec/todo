@@ -13,18 +13,20 @@ import com.marzec.preferences.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-data class PickItemOptions<ITEM>(
+data class PickItemOptions<ITEM: Any>(
     val loadData: suspend () -> Flow<Content<List<ITEM>>>,
     val mapItemToId: (ITEM) -> String,
     val itemRow: @Composable (item: ITEM, onItemClick: (ITEM) -> Unit) -> Unit,
     val onAddNavigationAction: (() -> NavigationAction)? = null,
     val multipleChoice: Boolean = false,
+    val returnIdOnly: Boolean = true,
     val selected: Set<String> = emptySet()
 )
 
 const val RESULT_PICKER_ITEM_ID = "RESULT_PICKER_ITEM_ID"
+const val RESULT_PICKER_ITEM = "RESULT_PICKER_ITEM"
 
-class PickItemDataStore<ITEM>(
+class PickItemDataStore<ITEM : Any>(
     private val options: PickItemOptions<ITEM>,
     private val navigationStore: NavigationStore,
     scope: CoroutineScope,
@@ -52,13 +54,26 @@ class PickItemDataStore<ITEM>(
         }
     }
 
-    fun onItemClick(id: String) = sideEffect {
-        navigationStore.goBack(RESULT_PICKER_ITEM_ID to id)
+    fun onItemClick(item: ITEM) {
+        sideEffect {
+            if (options.returnIdOnly) {
+                navigationStore.goBack(RESULT_PICKER_ITEM_ID to options.mapItemToId(item))
+            } else {
+                state.ifDataAvailable {
+                    navigationStore.goBack(RESULT_PICKER_ITEM to item)
+                }
+            }
+        }
     }
 
     fun onConfirmClick() = sideEffect {
         state.ifDataAvailable {
-            navigationStore.goBack(RESULT_PICKER_ITEM_ID to selected.toList())
+            if (options.returnIdOnly) {
+                navigationStore.goBack(RESULT_PICKER_ITEM_ID to selected.toList())
+            } else {
+                val selectedItems = items.filter { options.mapItemToId(it) in selected }
+                navigationStore.goBack(RESULT_PICKER_ITEM to selectedItems)
+            }
         }
     }
 

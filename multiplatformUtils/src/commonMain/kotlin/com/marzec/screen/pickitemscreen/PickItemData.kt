@@ -3,7 +3,7 @@ package com.marzec.screen.pickitemscreen
 import com.marzec.delegate.WithSelection
 import com.marzec.mvi.State
 
-data class PickItemData<ITEM>(
+data class PickItemData<ITEM: Any>(
     val options: PickItemOptions<ITEM>,
     val items: List<ITEM>,
     override val selected: Set<String>
@@ -15,13 +15,13 @@ data class PickItemData<ITEM>(
     override fun allIds(): Set<String> = items.map { options.mapItemToId(it) }.toSet()
 
     companion object {
-        fun <ITEM> default(options: PickItemOptions<ITEM>) = PickItemData(
+        fun <ITEM: Any> default(options: PickItemOptions<ITEM>) = PickItemData(
             options = options,
             items = emptyList(),
             selected = emptySet()
         )
 
-        fun <ITEM> initial(
+        fun <ITEM: Any> initial(
             options: PickItemOptions<ITEM>
         ) = State.Data(
             default(options).copy(selected = options.selected)

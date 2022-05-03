@@ -24,7 +24,7 @@ import com.marzec.view.SelectableRow
 import androidx.compose.ui.Modifier
 
 @Composable
-fun <ITEM> PickItemScreen(
+fun <ITEM : Any> PickItemScreen(
     options: PickItemOptions<ITEM>,
     store: PickItemDataStore<ITEM>,
     actionBarProvider: ActionBarProvider
@@ -86,7 +86,7 @@ fun <ITEM> PickItemScreen(
                                 onSelectedChange = { store.onSelectedChange(id) },
                             ) {
                                 options.itemRow(item) {
-                                    store.onItemClick(options.mapItemToId(it))
+                                    store.onItemClick(it)
                                 }
                             }
                         }
