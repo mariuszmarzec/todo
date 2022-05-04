@@ -18,7 +18,8 @@ fun AddResourceView(
     onClick: () -> Unit,
     onRemoveAllButtonClick: () -> Unit,
     clearButtonContentDescription: String,
-    label: String
+    label: String,
+    emptyLabel: String
 ) {
     if (!showEmptyState) {
         Row(
@@ -36,7 +37,7 @@ fun AddResourceView(
         Button(onClick = {
             onClick()
         }) {
-            Text(label)
+            Text(emptyLabel)
         }
     }
 }
