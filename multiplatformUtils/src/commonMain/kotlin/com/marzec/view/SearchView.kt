@@ -25,7 +25,11 @@ import com.marzec.delegate.SearchDelegate
 data class SearchState(
     val value: String,
     val focused: Boolean
-)
+) {
+    companion object {
+        val DEFAULT = SearchState(value = "", focused = false)
+    }
+}
 
 @Composable
 fun SearchView(state: SearchState, searchDelegate: SearchDelegate) {

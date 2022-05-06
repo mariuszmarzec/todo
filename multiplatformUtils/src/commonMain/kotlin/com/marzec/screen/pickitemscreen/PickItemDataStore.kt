@@ -2,6 +2,7 @@ package com.marzec.screen.pickitemscreen
 
 import androidx.compose.runtime.Composable
 import com.marzec.content.Content
+import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.SelectionDelegate
 import com.marzec.delegate.delegates
 import com.marzec.mvi.State
@@ -13,14 +14,15 @@ import com.marzec.preferences.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-data class PickItemOptions<ITEM: Any>(
+data class PickItemOptions<ITEM : Any>(
     val loadData: suspend () -> Flow<Content<List<ITEM>>>,
     val mapItemToId: (ITEM) -> String,
     val itemRow: @Composable (item: ITEM, onItemClick: (ITEM) -> Unit) -> Unit,
     val onAddNavigationAction: (() -> NavigationAction)? = null,
     val multipleChoice: Boolean = false,
     val returnIdOnly: Boolean = true,
-    val selected: Set<String> = emptySet()
+    val selected: Set<String> = emptySet(),
+    val stringsToCompare: ((ITEM) -> List<String>)? = null
 )
 
 const val RESULT_PICKER_ITEM_ID = "RESULT_PICKER_ITEM_ID"
@@ -33,13 +35,14 @@ class PickItemDataStore<ITEM : Any>(
     private val stateCache: Preferences,
     initialState: State<PickItemData<ITEM>>,
     private val cacheKey: String,
-    private val selectionDelegate: SelectionDelegate<String>
+    private val selectionDelegate: SelectionDelegate<String>,
+    private val searchDelegate: SearchDelegate
 ) : Store3<State<PickItemData<ITEM>>>(
     scope, stateCache.get(cacheKey) ?: initialState
-), SelectionDelegate<String> by selectionDelegate {
+), SelectionDelegate<String> by selectionDelegate, SearchDelegate by searchDelegate {
 
     init {
-        delegates(selectionDelegate)
+        delegates(selectionDelegate, searchDelegate)
     }
 
     fun load() = intent<Content<List<ITEM>>> {

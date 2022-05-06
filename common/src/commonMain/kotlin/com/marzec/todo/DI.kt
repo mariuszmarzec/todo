@@ -133,7 +133,7 @@ object DI {
             provideDatePickerScreen(cacheKey, destination.date)
         },
         TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.PickItem<*>
+            destination as TodoDestination.PickItem<Any>
             providePickItemScreen(destination, cacheKey)
         },
     )
@@ -424,7 +424,7 @@ object DI {
     }
 
     @Composable
-    private fun <ITEM> providePickItemScreen(
+    private fun <ITEM : Any> providePickItemScreen(
         destination: TodoDestination.PickItem<ITEM>,
         cacheKey: String
     ) =
@@ -438,7 +438,7 @@ object DI {
             actionBarProvider = provideActionBarProvider()
         )
 
-    private fun <ITEM> providePickItemStore(
+    private fun <ITEM : Any> providePickItemStore(
         options: PickItemOptions<ITEM>,
         scope: CoroutineScope,
         cacheKey: String
@@ -449,7 +449,8 @@ object DI {
         stateCache = preferences,
         initialState = PickItemData.initial(options),
         cacheKey = cacheKey,
-        selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>()
+        selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>(),
+        searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>()
     )
 
     private fun provideScheduledOptions() = PickItemOptions(
@@ -465,7 +466,8 @@ object DI {
             ) {
                 Text(item.description)
             }
-        }
+        },
+        stringsToCompare = { listOf(it.description) }
     )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)

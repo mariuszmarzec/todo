@@ -17,5 +17,5 @@ sealed class TodoDestination: com.marzec.navigation.Destination {
     data class AddSubTask(val taskId: Int) : TodoDestination()
     data class Schedule(val scheduler: Scheduler? = null) : TodoDestination()
     data class DatePicker(val date: LocalDateTime) : TodoDestination()
-    data class PickItem<ITEM>(val options: PickItemOptions<ITEM>) : TodoDestination()
+    data class PickItem<ITEM : Any>(val options: PickItemOptions<ITEM>) : TodoDestination()
 }

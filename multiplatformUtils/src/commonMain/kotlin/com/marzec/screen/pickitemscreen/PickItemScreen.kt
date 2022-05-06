@@ -22,6 +22,8 @@ import com.marzec.view.ActionBarProvider
 import com.marzec.view.ScreenWithLoading
 import com.marzec.view.SelectableRow
 import androidx.compose.ui.Modifier
+import com.marzec.extensions.filterWithSearch
+import com.marzec.view.SearchView
 
 @Composable
 fun <ITEM : Any> PickItemScreen(
@@ -39,6 +41,9 @@ fun <ITEM : Any> PickItemScreen(
     ) {
         actionBarProvider.provide {
             state.ifDataAvailable {
+                if (options.stringsToCompare != null) {
+                    SearchView(search, store)
+                }
                 if (options.multipleChoice) {
                     Checkbox(
                         checked = selected.size == allIds().size,
@@ -75,8 +80,16 @@ fun <ITEM : Any> PickItemScreen(
                     }
                 }
             ) {
+                val items = state.data.items.let {
+                    val stringsToCompare = options.stringsToCompare
+                    if (stringsToCompare != null) {
+                        it.filterWithSearch(state.data.search.value, stringsToCompare)
+                    } else {
+                        it
+                    }
+                }
                 LazyColumn {
-                    items(items = state.data.items) { item ->
+                    items(items = items) { item ->
                         val id = options.mapItemToId(item)
                         key(id) {
                             SelectableRow(
