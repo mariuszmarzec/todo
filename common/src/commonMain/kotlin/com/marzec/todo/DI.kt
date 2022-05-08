@@ -500,6 +500,7 @@ object Api {
         val ADD_TASKS = "$BASE/tasks"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
+        fun copyTask(taskId: Int) = "$BASE/tasks/$taskId/copy"
     }
 
     object Headers {

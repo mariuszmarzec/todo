@@ -10,6 +10,8 @@ interface DataSource {
 
     suspend fun getTasks(): List<TaskDto>
 
+    suspend fun copyTask(taskId: Int)
+
     suspend fun addNewTask(createTaskDto: CreateTaskDto)
 
     suspend fun updateTask(

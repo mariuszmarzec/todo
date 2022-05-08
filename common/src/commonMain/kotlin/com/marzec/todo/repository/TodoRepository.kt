@@ -219,6 +219,10 @@ class TodoRepository(
             }
         }
 
+    fun copyTask(taskId: Int): Flow<Content<Unit>> = asContentWithListUpdate {
+        dataSource.copyTask(taskId)
+    }
+
     private suspend fun getTasksCacheFirst() =
         cacheCall(Api.Todo.TASKS) {
             asContent {

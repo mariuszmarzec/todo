@@ -27,6 +27,10 @@ class CompositeDataSource(
         return todoLists
     }
 
+    override suspend fun copyTask(taskId: Int) = update {
+        copyTask(taskId)
+    }
+
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
         addNewTask(createTaskDto)
     }

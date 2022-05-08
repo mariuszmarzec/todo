@@ -229,4 +229,14 @@ class TaskDetailsStore(
 
         reducer { state.reduceContentNoChanges(resultNonNull()) }
     }
+
+    fun copyTask() = intent<Content<Unit>>() {
+        onTrigger {
+            todoRepository.copyTask(taskId)
+        }
+
+        sideEffect {
+            navigationStore.goBack()
+        }
+    }
 }

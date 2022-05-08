@@ -21,6 +21,8 @@ class ApiDataSource(
 
     override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS)
 
+    override suspend fun copyTask(taskId: Int) = client.get<Unit>(Api.Todo.copyTask(taskId))
+
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) {
         client.post<Unit>(ADD_TASKS) {
             body = createTaskDto

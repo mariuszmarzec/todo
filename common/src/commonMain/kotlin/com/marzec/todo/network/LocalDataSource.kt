@@ -1,16 +1,16 @@
 package com.marzec.todo.network
 
-import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.api.TaskDto
 import com.marzec.cache.FileCache
 import com.marzec.cache.getTyped
 import com.marzec.cache.putTyped
-import com.marzec.time.currentTime
-import com.marzec.time.formatDate
-import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.extensions.replaceIf
 import com.marzec.locker.Locker
+import com.marzec.time.currentTime
+import com.marzec.time.formatDate
+import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.SchedulerDto
+import com.marzec.todo.api.TaskDto
+import com.marzec.todo.extensions.flatMapTaskDto
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -51,6 +51,16 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         localData.tasks.filter { it.parentTaskId != null }
     } finally {
         lock.unlock()
+    }
+
+    override suspend fun copyTask(taskId: Int) {
+        var taskToCopy: TaskDto? = null
+        update {
+            taskToCopy = localData.tasks.firstOrNull { it.id == taskId }
+        }
+        taskToCopy?.let {
+            addNewTask(it.toCreateTask())
+        }
     }
 
     private fun getSubTasks(
@@ -142,4 +152,12 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         fileCache.putTyped(cacheKey, localData)
     }
 }
+
+private fun TaskDto.toCreateTask() = CreateTaskDto(
+    description = description,
+    parentTaskId = parentTaskId,
+    priority = priority,
+    highestPriorityAsDefault = false,
+    scheduler = scheduler
+)
 

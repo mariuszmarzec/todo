@@ -20,6 +20,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -211,7 +212,12 @@ fun TaskDetailsScreen(
                         IconButton({
                             store.copyDescription()
                         }) {
-                            Icon(imageVector = Icons.Default.Share, contentDescription = "Copy")
+                            Icon(imageVector = Icons.Default.Share, contentDescription = "Copy description")
+                        }
+                        IconButton({
+                            store.copyTask()
+                        }) {
+                            Icon(imageVector = Icons.Default.AddCircle, contentDescription = "Copy description")
                         }
                     }
                     Spacer(Modifier.size(16.dp))
