@@ -19,14 +19,18 @@ fun ImageRow(
     url: String,
     contentDescription: String = "",
     backgroundColor: Color = Color.Transparent,
-    onClick: () -> Unit = { },
+    onClick: (() -> Unit)? = { },
     content: @Composable RowScope.() -> Unit
 ) {
 
     Row(
         modifier = Modifier
             .background(backgroundColor)
-            .clickable { onClick() }
+            .apply {
+                if (onClick != null) {
+                    clickable { onClick() }
+                }
+            }
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
