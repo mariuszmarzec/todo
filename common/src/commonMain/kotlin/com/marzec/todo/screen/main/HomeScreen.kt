@@ -1,7 +1,13 @@
 package com.marzec.todo.screen.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.marzec.mvi.collectState
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
@@ -10,7 +16,11 @@ import com.marzec.navigation.NavigationStore
 fun HomeScreen(navigationStore: NavigationStore) {
     val state: NavigationState by navigationStore.collectState()
 
-    state.backStack.last().apply {
-        screenProvider(destination, cacheKey)
+    Box(
+        modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.White)
+    ) {
+        state.backStack.last().apply {
+            screenProvider(destination, cacheKey)
+        }
     }
 }
