@@ -244,7 +244,5 @@ class TodoRepository(
 
     private fun asContentWithListUpdate(
         request: suspend () -> Unit
-    ) = asContentWithListUpdate(dispatcher, request) {
-        refreshListsCache()
-    }
+    ) = asContentWithListUpdate(dispatcher, ::refreshListsCache, request)
 }
