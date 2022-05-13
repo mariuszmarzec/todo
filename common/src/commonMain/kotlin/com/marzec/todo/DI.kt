@@ -467,7 +467,10 @@ object DI {
                 Text(item.description)
             }
         },
-        stringsToCompare = { listOf(it.description) }
+        stringsToCompare = { listOf(it.description) },
+        onAddNavigationAction = {
+            NavigationAction(TodoDestination.AddNewTask(taskToEditId = null, parentTaskId = null))
+        }
     )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)

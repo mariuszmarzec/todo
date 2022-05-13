@@ -154,17 +154,20 @@ class AddNewTaskStore(
         result?.ifDataSuspend {
             state.ifDataAvailable(blockOnLoading = false) {
                 val taskIdToShow = parentTaskId ?: taskId
-                val destination = if (taskIdToShow != null) {
-                    TodoDestination.TaskDetails(taskIdToShow)
-                } else {
-                    TodoDestination.Tasks
+                when {
+                    taskIdToShow != null -> {
+                        val destination = TodoDestination.TaskDetails(taskIdToShow)
+                        navigationStore.next(
+                            NavigationAction(
+                                destination = destination,
+                                options = NavigationOptions(destination, true)
+                            )
+                        )
+                    }
+                    else -> {
+                        navigationStore.goBack()
+                    }
                 }
-                navigationStore.next(
-                    NavigationAction(
-                        destination = destination,
-                        options = NavigationOptions(destination, true)
-                    )
-                )
             }
         }
     }
