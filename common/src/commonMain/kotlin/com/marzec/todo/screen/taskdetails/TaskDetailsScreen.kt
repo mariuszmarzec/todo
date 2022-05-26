@@ -217,7 +217,7 @@ fun TaskDetailsScreen(
                         IconButton({
                             store.copyTask()
                         }) {
-                            Icon(imageVector = Icons.Default.AddCircle, contentDescription = "Copy description")
+                            Icon(imageVector = Icons.Default.AddCircle, contentDescription = "Copy task")
                         }
                     }
                     Spacer(Modifier.size(16.dp))
