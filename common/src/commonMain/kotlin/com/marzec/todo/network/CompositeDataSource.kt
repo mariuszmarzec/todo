@@ -4,6 +4,7 @@ import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.cache.Cache
+import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.model.toDomain
 
@@ -29,6 +30,10 @@ class CompositeDataSource(
 
     override suspend fun copyTask(taskId: Int) = update {
         copyTask(taskId)
+    }
+
+    override suspend fun markAsToDo(request: MarkAsToDoDto) = update {
+        markAsToDo(request)
     }
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {

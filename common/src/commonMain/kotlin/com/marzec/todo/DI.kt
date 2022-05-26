@@ -501,6 +501,7 @@ object Api {
 
         val TASKS = "$BASE/tasks"
         val ADD_TASKS = "$BASE/tasks"
+        val MARK_AS_TO_DO = "$BASE/tasks/mark-as-to-do"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun copyTask(taskId: Int) = "$BASE/tasks/$taskId/copy"

@@ -3,6 +3,7 @@ package com.marzec.todo.network
 import com.marzec.todo.Api
 import com.marzec.todo.Api.Todo.ADD_TASKS
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
@@ -22,6 +23,12 @@ class ApiDataSource(
     override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS)
 
     override suspend fun copyTask(taskId: Int) = client.get<Unit>(Api.Todo.copyTask(taskId))
+
+    override suspend fun markAsToDo(request: MarkAsToDoDto) {
+        client.post<Unit>(Api.Todo.MARK_AS_TO_DO) {
+            body = request
+        }
+    }
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) {
         client.post<Unit>(ADD_TASKS) {

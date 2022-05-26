@@ -169,22 +169,22 @@ class TaskDetailsStore(
         }
     }
 
-    fun explodeIntoTasks(tasks: List<String>) = intent<Content<Unit>> {
+    fun explodeIntoTasks(tasks: List<String>) = intent {
         onTrigger { todoRepository.addNewTasks(false, taskId, tasks, null) }
     }
 
-    fun markAsDone(id: Int) = intent<Content<Unit>> {
+    fun markAsDone(id: Int) = intent {
         onTrigger {
             state.ifDataAvailable {
-                todoRepository.markAsDone(taskById(id))
+                todoRepository.markAsDone(id)
             }
         }
     }
 
-    fun markAsToDo(id: Int) = intent<Content<Unit>> {
+    fun markAsToDo(id: Int) = intent {
         onTrigger {
             state.ifDataAvailable {
-                todoRepository.markAsToDo(taskById(id))
+                todoRepository.markAsToDo(id)
             }
         }
     }
@@ -213,7 +213,7 @@ class TaskDetailsStore(
     fun markSelectedAsTodo() = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                todoRepository.markAsToDo(task.subTasks.filter { it.id in selected })
+                todoRepository.markAsToDo(selected.toList())
             }
         }
 
@@ -223,14 +223,14 @@ class TaskDetailsStore(
     fun markSelectedAsDone() = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {
-                todoRepository.markAsDone(task.subTasks.filter { it.id in selected })
+                todoRepository.markAsDone(selected.toList())
             }
         }
 
         reducer { state.reduceContentNoChanges(resultNonNull()) }
     }
 
-    fun copyTask() = intent<Content<Unit>>() {
+    fun copyTask() = intent() {
         onTrigger {
             todoRepository.copyTask(taskId)
         }

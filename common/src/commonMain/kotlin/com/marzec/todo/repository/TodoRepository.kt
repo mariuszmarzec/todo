@@ -9,6 +9,7 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
@@ -102,59 +103,46 @@ class TodoRepository(
             )
         }
 
-    suspend fun markAsDone(task: Task): Flow<Content<Unit>> =
+    suspend fun markAsDone(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.updateTask(
-                taskId = task.id,
-                description = task.description,
-                parentTaskId = task.parentTaskId,
-                priority = task.priority,
-                isToDo = false,
-                scheduler = task.scheduler?.toDto()
-            )
-        }
-
-
-    suspend fun markAsDone(tasks: List<Task>): Flow<Content<Unit>> =
-        asContentWithListUpdate {
-            tasks.forEach { task ->
-                dataSource.updateTask(
-                    taskId = task.id,
-                    description = task.description,
-                    parentTaskId = task.parentTaskId,
-                    priority = task.priority,
+            dataSource.markAsToDo(
+                MarkAsToDoDto(
                     isToDo = false,
-                    scheduler = task.scheduler?.toDto(),
-
-                    )
-            }
-        }
-
-    suspend fun markAsToDo(task: Task): Flow<Content<Unit>> =
-        asContentWithListUpdate {
-            dataSource.updateTask(
-                taskId = task.id,
-                description = task.description,
-                parentTaskId = task.parentTaskId,
-                priority = task.priority,
-                isToDo = true,
-                scheduler = task.scheduler?.toDto()
+                    taskIds = listOf(taskId)
+                )
             )
         }
 
 
-    suspend fun markAsToDo(tasks: List<Task>): Flow<Content<Unit>> =
+    suspend fun markAsDone(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            tasks.forEach { task ->
-                dataSource.updateTask(
-                    taskId = task.id,
-                    description = task.description,
-                    parentTaskId = task.parentTaskId,
-                    priority = task.priority,
-                    isToDo = true,
-                    scheduler = task.scheduler?.toDto()
+            dataSource.markAsToDo(
+                MarkAsToDoDto(
+                    isToDo = false,
+                    taskIds = taskIds
                 )
-            }
+            )
+        }
+
+    suspend fun markAsToDo(taskId: Int): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.markAsToDo(
+                MarkAsToDoDto(
+                    isToDo = true,
+                    taskIds = listOf(taskId)
+                )
+            )
+        }
+
+
+    suspend fun markAsToDo(taskIds: List<Int>): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            dataSource.markAsToDo(
+                MarkAsToDoDto(
+                    isToDo = true,
+                    taskIds = taskIds
+                )
+            )
         }
 
     suspend fun pinTask(

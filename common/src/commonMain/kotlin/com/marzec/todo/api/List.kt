@@ -45,3 +45,9 @@ data class SchedulerDto(
     val repeatInEveryPeriod: Int,
     val type: String
 )
+
+@Serializable
+data class MarkAsToDoDto(
+    val isToDo: Boolean,
+    val taskIds: List<Int>,
+)

@@ -8,6 +8,7 @@ import com.marzec.locker.Locker
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.extensions.flatMapTaskDto
@@ -134,6 +135,20 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                         isToDo = isToDo,
                         modifiedTime = currentTime().formatDate(),
                         scheduler = scheduler
+                    )
+                }
+            )
+        )
+    }
+
+    override suspend fun markAsToDo(markAsToDo: MarkAsToDoDto) = update {
+        localData = localData.copy(
+            tasks = localData.tasks.replaceIf(
+                condition = { it.id in markAsToDo.taskIds },
+                replace = { task ->
+                    task.copy(
+                        isToDo = markAsToDo.isToDo,
+                        modifiedTime = currentTime().formatDate(),
                     )
                 }
             )
