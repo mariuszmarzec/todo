@@ -59,7 +59,7 @@ fun AddNewTaskScreen(
                             store.onDescriptionChanged(it)
                         })
                     }
-                    if (state.data.taskId == null && state.data.scheduler == null) {
+                    if (state.data.taskId == null || state.data.scheduler != null) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -91,6 +91,20 @@ fun AddNewTaskScreen(
                             onScheduleButtonClick = { store.onScheduleButtonClick() },
                             onRemoveSchedulerButtonClick = { store.onRemoveSchedulerButtonClick() }
                         )
+                    }
+                    if (state.data.scheduler is Scheduler.OneShot) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = state.data.removeAfterSchedule,
+                                onCheckedChange = { store.toggleRemoveAfterSchedule() }
+                            )
+                            TextButton({ store.toggleRemoveAfterSchedule() }) {
+                                Text("Remove after schedule")
+                            }
+                        }
                     }
                 }
             }

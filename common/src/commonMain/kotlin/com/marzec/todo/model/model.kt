@@ -5,6 +5,7 @@ import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
+import kotlin.reflect.KProperty1
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.isoDayNumber
@@ -29,6 +30,8 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         minute = minute,
         startDate = startDate.toLocalDateTime(),
         lastDate = lastDate?.toLocalDateTime(),
+        highestPriorityAsDefault = highestPriorityAsDefault,
+        removeScheduled = removeScheduled
     )
     Scheduler.Weekly::class.simpleName -> Scheduler.Weekly(
         hour = hour,
@@ -38,6 +41,7 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         daysOfWeek = daysOfWeek.map { DayOfWeek(it) },
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
+        highestPriorityAsDefault = highestPriorityAsDefault
     )
     Scheduler.Monthly::class.simpleName -> Scheduler.Monthly(
         hour = hour, minute = minute, startDate = startDate.toLocalDateTime(),
@@ -45,9 +49,24 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         dayOfMonth = dayOfMonth,
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
+        highestPriorityAsDefault = highestPriorityAsDefault
     )
     else -> throw IllegalArgumentException("Unknown type of scheduler")
 }
+
+val SchedulerDto.highestPriorityAsDefault: Boolean
+    get() = getHighestPriorityAsDefault(options)
+
+val SchedulerDto.removeScheduled: Boolean
+    get() = getRemoveScheduled(options)
+
+fun getHighestPriorityAsDefault(options: Map<String, String>?) =
+    options?.get(Scheduler::highestPriorityAsDefault.name)?.toBooleanStrictOrNull()
+        ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT
+
+fun getRemoveScheduled(options: Map<String, String>?) =
+    options?.get(Scheduler.OneShot::removeScheduled.name)?.toBooleanStrictOrNull()
+        ?: Scheduler.REMOVE_SCHEDULED
 
 sealed class Scheduler(
     open val hour: Int,
@@ -55,7 +74,8 @@ sealed class Scheduler(
     open val startDate: LocalDateTime,
     open val lastDate: LocalDateTime?,
     open val repeatCount: Int = DEFAULT_REPEAT_COUNT,
-    open val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
+    open val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
+    open val highestPriorityAsDefault: Boolean
 ) {
     data class OneShot(
         override val hour: Int,
@@ -63,9 +83,11 @@ sealed class Scheduler(
         override val startDate: LocalDateTime,
         override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
-        override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
+        override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
+        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT,
+        val removeScheduled: Boolean = REMOVE_SCHEDULED
     ) : Scheduler(
-        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod
+        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
     )
 
     data class Weekly(
@@ -75,9 +97,10 @@ sealed class Scheduler(
         val daysOfWeek: List<DayOfWeek>,
         override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
-        override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
+        override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
+        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT
     ) : Scheduler(
-        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod
+        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
     )
 
     data class Monthly(
@@ -87,15 +110,38 @@ sealed class Scheduler(
         val dayOfMonth: Int,
         override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
-        override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD
+        override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
+        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT
     ) : Scheduler(
-        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod
+        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
     )
 
     companion object {
-        val DEFAULT_REPEAT_COUNT = -1
-        val DEFAULT_REPEAT_IN_EVERY_PERIOD = 1
+        const val DEFAULT_REPEAT_COUNT = -1
+        const val DEFAULT_REPEAT_IN_EVERY_PERIOD = 1
+        const val HIGHEST_PRIORITY_AS_DEFAULT = false
+        const val REMOVE_SCHEDULED = false
     }
+}
+
+private fun Scheduler.optionsToMap(): Map<String, String>? =
+    listOfNotNull(
+        takeIfNotDefault(Scheduler::highestPriorityAsDefault, Scheduler.HIGHEST_PRIORITY_AS_DEFAULT)
+    ).toMap()
+        .takeIf { it.isNotEmpty() }
+
+private fun Scheduler.OneShot.optionsToMap(): Map<String, String>? =
+    listOfNotNull(
+        takeIfNotDefault(Scheduler::highestPriorityAsDefault, Scheduler.HIGHEST_PRIORITY_AS_DEFAULT),
+        takeIfNotDefault(Scheduler.OneShot::removeScheduled, Scheduler.REMOVE_SCHEDULED),
+    ).toMap()
+        .takeIf { it.isNotEmpty() }
+
+private fun <RECEIVER, VALUE> RECEIVER.takeIfNotDefault(
+    kProperty: KProperty1<RECEIVER, VALUE>,
+    defaultValue: VALUE
+): Pair<String, String>? {
+    return kProperty.get(this).takeIf { it != defaultValue }?.let { kProperty.name to it.toString() }
 }
 
 fun Scheduler.toDto(): SchedulerDto = when (this) {
@@ -108,7 +154,8 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
         dayOfMonth = 0,
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
-        type = this::class.simpleName.orEmpty()
+        type = this::class.simpleName.orEmpty(),
+        options = optionsToMap()
     )
     is Scheduler.Weekly -> SchedulerDto(
         hour = hour,
@@ -119,7 +166,8 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
         dayOfMonth = 0,
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
-        type = this::class.simpleName.orEmpty()
+        type = this::class.simpleName.orEmpty(),
+        options = optionsToMap()
     )
     is Scheduler.Monthly -> SchedulerDto(
         hour = hour,
@@ -130,7 +178,8 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
         dayOfMonth = dayOfMonth,
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
-        type = this::class.simpleName.orEmpty()
+        type = this::class.simpleName.orEmpty(),
+        options = optionsToMap()
     )
 }
 

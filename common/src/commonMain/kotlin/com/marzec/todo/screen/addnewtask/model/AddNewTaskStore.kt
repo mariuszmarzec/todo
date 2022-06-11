@@ -58,7 +58,9 @@ class AddNewTaskStore(
                                 description = result.data.description,
                                 priority = result.data.priority,
                                 isToDo = result.data.isToDo,
-                                scheduler = result.data.scheduler
+                                scheduler = result.data.scheduler,
+                                highestPriorityAsDefault = result.data.scheduler?.highestPriorityAsDefault ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT,
+                                removeAfterSchedule = (result.data.scheduler as? Scheduler.OneShot)?.removeScheduled ?: Scheduler.REMOVE_SCHEDULED
                             )
                         }
                     } ?: state
@@ -93,14 +95,14 @@ class AddNewTaskStore(
                         parentTaskId = parentTaskId,
                         priority = priority,
                         isToDo = isToDo,
-                        scheduler = scheduler
+                        scheduler = schedulerWithOptions
                     )
                 } else {
                     todoRepository.addNewTask(
                         description,
                         parentTaskId,
                         highestPriorityAsDefault,
-                        scheduler
+                        schedulerWithOptions
                     )
                 }
             }
@@ -126,7 +128,7 @@ class AddNewTaskStore(
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     parentTaskId = parentTaskId,
                     descriptions = description.split("\n"),
-                    scheduler = scheduler
+                    scheduler = schedulerWithOptions
                 )
             }
         }
@@ -147,6 +149,12 @@ class AddNewTaskStore(
     fun toggleHighestPriority() = intent<Unit> {
         reducer {
             state.reduceData { copy(highestPriorityAsDefault = !highestPriorityAsDefault) }
+        }
+    }
+
+    fun toggleRemoveAfterSchedule() = intent<Unit> {
+        reducer {
+            state.reduceData { copy(removeAfterSchedule = !removeAfterSchedule) }
         }
     }
 

@@ -10,8 +10,20 @@ data class AddNewTaskState(
     val isToDo: Boolean,
     val description: String,
     val highestPriorityAsDefault: Boolean,
+    val removeAfterSchedule: Boolean,
     val scheduler: Scheduler? = null
 ) {
+
+    val schedulerWithOptions: Scheduler?
+        get() = when (scheduler) {
+            is Scheduler.Monthly -> scheduler.copy(highestPriorityAsDefault = highestPriorityAsDefault)
+            is Scheduler.OneShot -> scheduler.copy(
+                highestPriorityAsDefault = highestPriorityAsDefault,
+                removeScheduled = removeAfterSchedule
+            )
+            is Scheduler.Weekly -> scheduler.copy(highestPriorityAsDefault = highestPriorityAsDefault)
+            else -> null
+        }
 
     companion object {
 
@@ -25,6 +37,7 @@ data class AddNewTaskState(
             priority = 0,
             isToDo = true,
             highestPriorityAsDefault = false,
+            removeAfterSchedule = false,
         )
 
         fun initial(taskId: Int?, parentTaskId: Int?): State<AddNewTaskState> = taskId?.let {

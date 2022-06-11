@@ -43,7 +43,8 @@ data class SchedulerDto(
     val dayOfMonth: Int,
     val repeatCount: Int,
     val repeatInEveryPeriod: Int,
-    val type: String
+    val type: String,
+    val options: Map<String, String>? = null
 )
 
 @Serializable
