@@ -15,6 +15,8 @@ buildscript {
         classpath(Dependency.buildKonfigPlugin)
         classpath(Dependency.detektPlugin)
         classpath(Dependency.atomicPlugin)
+        // TODO wait for stable 7.3 AGP
+//        classpath(Dependency.googleServices)
     }
 }
 

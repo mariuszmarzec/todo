@@ -1,11 +1,13 @@
 import java.util.Properties
 import java.io.FileInputStream
 
-plugins {
+ plugins {
     id("com.android.application")
     kotlin("android")
     id("org.jetbrains.compose")
     id("io.gitlab.arturbosch.detekt")
+     // TODO wait for stable 7.3 AGP
+//    id("com.google.gms.google-services")
 }
 
 android {
@@ -68,6 +70,7 @@ dependencies {
     implementation(compose.ui)
     implementation(compose.uiTooling)
     implementation(compose.foundation)
+
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {

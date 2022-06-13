@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "792029838130",
+    "project_id": "todo-19118",
+    "storage_bucket": "todo-19118.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:792029838130:android:f041621c1d3fa86577352b",
+        "android_client_info": {
+          "package_name": "com.marzec.todo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "792029838130-k9b8ak9lc8u6r32cukv4f478vqj6po6p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjFRyg1SkYsBKOqktN2N1xEwXhnbo9IXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "792029838130-k9b8ak9lc8u6r32cukv4f478vqj6po6p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

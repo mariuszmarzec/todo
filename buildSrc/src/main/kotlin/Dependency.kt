@@ -12,6 +12,7 @@ val buildkonfigVersion = "0.11.0"
 val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
 val atomicfuVersion = "0.17.1"
+val googleServicesVersion = "4.3.10"
 
 private val composePluginVersion = "1.1.1"
 private val dateTimeVersion = "0.1.1"
@@ -42,6 +43,8 @@ object Dependency {
 
     val kotlinDateTime = "org.jetbrains.kotlinx:kotlinx-datetime:$dateTimeVersion"
     val atomicPlugin = "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfuVersion"
+
+    val googleServices = "com.google.gms:google-services:$googleServicesVersion"
 }
 
 object Config {
