@@ -52,7 +52,6 @@ fun TaskListView(
     onSelectedChange: ((Int) -> Unit)? = null,
 ) {
     val selectionModeEnabled = selected.isNotEmpty()
-    throw IllegalAccessError()
     LazyColumn {
         items(
             items = tasks
