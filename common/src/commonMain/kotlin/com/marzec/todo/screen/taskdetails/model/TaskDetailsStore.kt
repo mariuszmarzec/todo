@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.content.Content
+import com.marzec.content.ifDataSuspend
 import com.marzec.delegate.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
@@ -230,13 +231,15 @@ class TaskDetailsStore(
         reducer { state.reduceContentNoChanges(resultNonNull()) }
     }
 
-    fun copyTask() = intent() {
+    fun copyTask() = intent<Content<Unit>> {
         onTrigger {
             todoRepository.copyTask(taskId)
         }
 
         sideEffect {
-            navigationStore.goBack()
+            resultNonNull().ifDataSuspend {
+                navigationStore.goBack()
+            }
         }
     }
 }
