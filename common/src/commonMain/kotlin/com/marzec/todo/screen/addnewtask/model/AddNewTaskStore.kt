@@ -196,8 +196,8 @@ class AddNewTaskStore(
 
     fun onRemoveSchedulerButtonClick() = intent<Unit> {
         reducer {
-            state.mapData {
-                it.copy(scheduler = null)
+            state.reduceData {
+                copy(scheduler = null)
             }
         }
     }
