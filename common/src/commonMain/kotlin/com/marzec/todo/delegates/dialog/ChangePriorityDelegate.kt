@@ -31,8 +31,5 @@ class ChangePriorityDelegateImpl<DATA : WithTasks<DATA>>(
                 }
             }
         }
-        reducer {
-            state.reduceContentAsSideAction(resultNonNull())
-        }
     }
 }
