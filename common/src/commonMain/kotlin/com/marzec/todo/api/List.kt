@@ -52,3 +52,8 @@ data class MarkAsToDoDto(
     val isToDo: Boolean,
     val taskIds: List<Int>,
 )
+
+@Serializable
+data class RemoveWithSubtasksDto(
+    val removeWithSubtasks: Boolean
+)

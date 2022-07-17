@@ -22,6 +22,10 @@ class CompositeDataSource(
         removeTask(taskId)
     }
 
+    override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) = update {
+        removeTask(taskId, removeSubtasks)
+    }
+
     override suspend fun getTasks(): List<TaskDto> {
         val todoLists = apiDataSource.getTasks()
         localDataSource.init(todoLists)

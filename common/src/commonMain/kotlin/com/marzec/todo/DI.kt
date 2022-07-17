@@ -505,6 +505,7 @@ object Api {
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun copyTask(taskId: Int) = "$BASE/tasks/$taskId/copy"
+        fun removeTaskWithSubtask(taskId: Int) = "$BASE/tasks/$taskId/removeWithSubtasks"
     }
 
     object Headers {

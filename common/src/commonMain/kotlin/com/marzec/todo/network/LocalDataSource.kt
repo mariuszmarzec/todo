@@ -37,14 +37,21 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }
 
     override suspend fun removeTask(taskId: Int) = update {
-        val taskToRemove = localData.tasks.first { it.id == taskId }
-        localData = localData.copy(
-            tasks = localData.tasks.toMutableList().apply { removeIf { it.id == taskId } }
-                .replaceIf(
-                    condition = { task -> task.parentTaskId == taskId },
-                    replace = { it.copy(parentTaskId = taskToRemove.parentTaskId) }
-                )
-        )
+        removeTaskInternal(taskId)
+    }
+
+    override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) = update {
+        if (removeSubtasks) {
+            val taskDto = localData.tasks.first { task -> task.id == taskId }
+            removeTaskWithSubtasks(taskDto)
+        } else {
+            removeTaskInternal(taskId)
+        }
+    }
+
+    private fun removeTaskWithSubtasks(taskDto: TaskDto) {
+        removeTaskInternal(taskDto.id)
+        taskDto.subTasks.forEach { removeTaskWithSubtasks(it) }
     }
 
     override suspend fun getTasks(): List<TaskDto> = try {
@@ -62,6 +69,17 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         taskToCopy?.let {
             addNewTask(it.toCreateTask())
         }
+    }
+
+    private fun removeTaskInternal(taskId: Int) {
+        val taskToRemove = localData.tasks.first { it.id == taskId }
+        localData = localData.copy(
+            tasks = localData.tasks.toMutableList().apply { removeIf { it.id == taskId } }
+                .replaceIf(
+                    condition = { task -> task.parentTaskId == taskId },
+                    replace = { it.copy(parentTaskId = taskToRemove.parentTaskId) }
+                )
+        )
     }
 
     private fun getSubTasks(

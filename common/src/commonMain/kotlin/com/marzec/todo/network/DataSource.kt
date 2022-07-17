@@ -9,6 +9,8 @@ interface DataSource {
 
     suspend fun removeTask(taskId: Int)
 
+    suspend fun removeTask(taskId: Int, removeSubtasks: Boolean)
+
     suspend fun getTasks(): List<TaskDto>
 
     suspend fun copyTask(taskId: Int)
