@@ -21,34 +21,25 @@ class NavigationStore(
     initialState: NavigationState
 ) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
-    fun next(action: NavigationAction, requestId: Int? = null, secondaryId: Int? = null) = intent<Unit> {
-        reducer {
-            state.copy(
-                backStack = state.backStack.toMutableList().apply {
-                    lastOrNull()?.let { lastEntry ->
-                        resultCache.clean(lastEntry.cacheKey, requestId, secondaryId)
+    fun next(action: NavigationAction, requestId: Int? = null, secondaryId: Int? = null) =
+        intent<Unit> {
+            reducer {
+                state.copy(
+                    backStack = state.backStack.toMutableList().apply {
+                        cleanResultCacheForCurrentScreen()
+                        handlePoppingScreens(action)
+                        addNextScreen(action, requestId, secondaryId)
                     }
-
-                    action.options?.let { options ->
-                        takeLastWhile { it.destination != options.popTo }.forEach {
-                            if (it.destination != options.popTo) {
-                                remove(it)
-                                stateCache.remove(it.cacheKey)
-                            }
-                        }
-                        if (options.popToInclusive && lastOrNull()?.destination == options.popTo) {
-                            removeLast().also { stateCache.remove(it.cacheKey) }
-                        }
-                    }
-                    val screenProvider = router.getValue(action.destination::class)
-                    add(NavigationEntry(action.destination, cacheKeyProvider(), screenProvider))
-                }
-            )
+                )
+            }
         }
-    }
 
-    fun goBack(result: Pair<String, Any>? = null) = intent<Unit> {
+    fun goBack(result: Any? = null) = intent<Unit> {
         reducer {
+            val requestKey = state.backStack.last().requestKey
+            if (requestKey != null) {
+                resultCache.save(requestKey, result)
+            }
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
                     if (size > 1) {
@@ -60,27 +51,68 @@ class NavigationStore(
                 }
             )
         }
-        sideEffect {
-            result?.let { resultCache.save(result.first, result.second) }
+    }
+
+    private fun MutableList<NavigationEntry>.addNextScreen(
+        action: NavigationAction,
+        requestId: Int?,
+        secondaryId: Int?
+    ) {
+        val screenProvider = router.getValue(action.destination::class)
+        add(
+            NavigationEntry(
+                destination = action.destination,
+                cacheKey = cacheKeyProvider(),
+                screenProvider = screenProvider,
+                requestKey = requestId?.let {
+                    RequestKey(
+                        requesterKey = last().cacheKey,
+                        requestId = requestId,
+                        options = secondaryId?.let {
+                            mapOf(SECONDARY_ID to it.toString())
+                        } ?: emptyMap()
+                    )
+                }
+            )
+        )
+    }
+
+    private fun MutableList<NavigationEntry>.handlePoppingScreens(
+        action: NavigationAction
+    ) {
+        action.options?.let { options ->
+            takeLastWhile { it.destination != options.popTo }.forEach {
+                if (it.destination != options.popTo) {
+                    remove(it)
+                    stateCache.remove(it.cacheKey)
+                }
+            }
+            if (options.popToInclusive && lastOrNull()?.destination == options.popTo) {
+                removeLast().also { stateCache.remove(it.cacheKey) }
+            }
         }
     }
 
-    suspend fun <T : Any> observe(
-        resultKey: String,
-        requestId: Int? = null
-    ): Flow<T>? = state.value.backStack.lastOrNull()?.let {
-        resultCache.observe<T>(it.cacheKey, resultKey, requestId).filterNotNull()
+    private suspend fun MutableList<NavigationEntry>.cleanResultCacheForCurrentScreen() {
+        lastOrNull()?.let { lastEntry ->
+            lastEntry.requestKey?.let { requestKey -> resultCache.clean(requestKey) }
+        }
     }
 
-    suspend fun <T : Any> observeResult(
-        resultKey: String,
-        requestId: Int? = null
-    ): Flow<ResultValue<T>>? = state.value.backStack.lastOrNull()?.let { entry ->
-        resultCache.observe<T>(entry.cacheKey, resultKey, requestId)
-        .filterIsInstance<ResultCacheValue>()
-        .filter { it.data != null }
-        .map { ResultValue(it.id, it.data as T) }
-    }
+    @Suppress("unchecked_cast")
+    suspend fun <T : Any> observe(requestId: Int): Flow<T>? =
+        state.value.backStack.lastOrNull()?.let {
+            resultCache.observe(it.cacheKey, requestId).map { cache -> cache?.data as? T }
+                .filterNotNull()
+        }
+
+    suspend fun <T : Any> observeResult(requestId: Int): Flow<ResultValue<T>>? =
+        state.value.backStack.lastOrNull()?.let { entry ->
+            resultCache.observe(entry.cacheKey, requestId)
+                .filterIsInstance<ResultCacheValue>()
+                .filter { it.data != null }
+                .map { ResultValue(it.requestKey.secondaryIdValue, it.data as T) }
+        }
 
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
