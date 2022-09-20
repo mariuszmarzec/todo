@@ -6,15 +6,12 @@ import com.marzec.mvi.Store3
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.Preferences
 import com.marzec.time.currentTime
-import com.marzec.time.formatDate
-import com.marzec.time.shortDateToLocalDateTime
 import com.marzec.todo.model.Scheduler
 import com.marzec.view.DateDelegate
 import com.marzec.view.WithDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toLocalDateTime
 
 data class SchedulerState(
     val hour: Int = 7,
@@ -55,8 +52,6 @@ data class SchedulerState(
 enum class SchedulerType {
     OneShot, Weekly, Monthly
 }
-
-const val RESULT_KEY_SCHEDULER = "REQUEST_KEY_SCHEDULER"
 
 class SchedulerStore(
     scope: CoroutineScope,
@@ -100,7 +95,7 @@ class SchedulerStore(
                 repeatInEveryPeriod = state.repeatInEveryPeriod
             )
         }
-        navigationStore.goBack(RESULT_KEY_SCHEDULER to scheduler)
+        navigationStore.goBack(scheduler)
     }
 
     override suspend fun onNewState(newState: SchedulerState) {

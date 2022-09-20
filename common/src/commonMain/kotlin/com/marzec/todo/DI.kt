@@ -199,14 +199,13 @@ object DI {
     ): AddNewTaskStore = AddNewTaskStore(
         scope = scope,
         navigationStore = navigationStore,
-        todoRepository = provideTodoRepository(),
-        stateCache = preferences,
         cacheKey = cacheKey,
-        resultCache = resultCache,
+        stateCache = preferences,
         initialState = AddNewTaskState.initial(
             taskId = taskId,
             parentTaskId = parentTaskId
         ),
+        todoRepository = provideTodoRepository(),
     )
 
     @Composable
