@@ -138,6 +138,7 @@ open class Store3<State : Any>(
             val shouldCancel = intent.cancelTrigger?.invoke(result, _state.value)
             if (shouldCancel == true) {
                 runCancellationAndSideEffectIfNeeded(result, intent)
+                this.cancel()
             } else {
                 _intentContextFlow.emit(
                     intent.copy(
