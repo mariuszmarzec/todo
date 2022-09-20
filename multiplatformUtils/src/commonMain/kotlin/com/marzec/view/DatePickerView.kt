@@ -47,6 +47,8 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.isoDayNumber
 
+const val REQUEST_DATE_PICKER = 142323
+
 @Composable
 fun DatePickerView(
     label: String = "",
@@ -95,8 +97,6 @@ data class DatePickerState(
     }
 }
 
-const val RESULT_DATE_PICKER = "RESULT_DATE_PICKER"
-
 class DatePickerStore(
     scope: CoroutineScope,
     private val navigationStore: NavigationStore,
@@ -120,7 +120,7 @@ class DatePickerStore(
             state.copy(dayInMonth = day)
         }
         sideEffect {
-            navigationStore.goBack(RESULT_DATE_PICKER to state.toLocalDateTime())
+            navigationStore.goBack(state.toLocalDateTime())
         }
     }
 
@@ -274,7 +274,7 @@ class DateDelegateImpl<DATA : WithDate<DATA>>(
 
     override fun onDatePickerResult() = intent {
         onTrigger {
-            navigationStore.observe<LocalDateTime>(RESULT_DATE_PICKER)?.filterNotNull()
+            navigationStore.observe<LocalDateTime>(REQUEST_DATE_PICKER)?.filterNotNull()
         }
 
         reducer {
@@ -283,7 +283,10 @@ class DateDelegateImpl<DATA : WithDate<DATA>>(
     }
 
     override fun onDatePickerViewClick() = sideEffect {
-        navigationStore.next(NavigationAction(datePickerDestinationFactory(state.date)))
+        navigationStore.next(
+            NavigationAction(datePickerDestinationFactory(state.date)),
+            requestId = REQUEST_DATE_PICKER
+        )
     }
 }
 
@@ -294,7 +297,7 @@ class DateDelegateStateImpl<DATA : WithDate<DATA>>(
 
     override fun onDatePickerResult() = intent {
         onTrigger {
-            navigationStore.observe<LocalDateTime>(RESULT_DATE_PICKER)?.filterNotNull()
+            navigationStore.observe<LocalDateTime>(REQUEST_DATE_PICKER)?.filterNotNull()
         }
 
         reducer {
@@ -304,7 +307,10 @@ class DateDelegateStateImpl<DATA : WithDate<DATA>>(
 
     override fun onDatePickerViewClick() = sideEffect {
         state.ifDataAvailable {
-            navigationStore.next(NavigationAction(datePickerDestinationFactory(date)))
+            navigationStore.next(
+                NavigationAction(datePickerDestinationFactory(date)),
+                requestId = REQUEST_DATE_PICKER
+            )
         }
     }
 }

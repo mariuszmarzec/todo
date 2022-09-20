@@ -25,9 +25,6 @@ data class PickItemOptions<ITEM : Any>(
     val stringsToCompare: ((ITEM) -> List<String>)? = null
 )
 
-const val RESULT_PICKER_ITEM_ID = "RESULT_PICKER_ITEM_ID"
-const val RESULT_PICKER_ITEM = "RESULT_PICKER_ITEM"
-
 class PickItemDataStore<ITEM : Any>(
     private val options: PickItemOptions<ITEM>,
     private val navigationStore: NavigationStore,
@@ -60,10 +57,10 @@ class PickItemDataStore<ITEM : Any>(
     fun onItemClick(item: ITEM) {
         sideEffect {
             if (options.returnIdOnly) {
-                navigationStore.goBack(RESULT_PICKER_ITEM_ID to options.mapItemToId(item))
+                navigationStore.goBack(options.mapItemToId(item))
             } else {
                 state.ifDataAvailable {
-                    navigationStore.goBack(RESULT_PICKER_ITEM to item)
+                    navigationStore.goBack(item)
                 }
             }
         }
@@ -72,10 +69,10 @@ class PickItemDataStore<ITEM : Any>(
     fun onConfirmClick() = sideEffect {
         state.ifDataAvailable {
             if (options.returnIdOnly) {
-                navigationStore.goBack(RESULT_PICKER_ITEM_ID to selected.toList())
+                navigationStore.goBack(selected.toList())
             } else {
                 val selectedItems = items.filter { options.mapItemToId(it) in selected }
-                navigationStore.goBack(RESULT_PICKER_ITEM to selectedItems)
+                navigationStore.goBack(selectedItems)
             }
         }
     }
