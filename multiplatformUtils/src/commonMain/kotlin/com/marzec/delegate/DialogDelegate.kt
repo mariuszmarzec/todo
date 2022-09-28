@@ -7,7 +7,7 @@ import com.marzec.extensions.asInstanceAndReturn
 interface DialogDelegate {
     fun closeDialog()
     fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>)
-    fun showRemoveTaskDialog(idsToRemove: List<Int>)
+    fun showRemoveTaskDialog(idsToRemove: List<Int>, id: String = "")
     fun onRemoveWithSubTasksChange()
     fun showSelectUrlDialog(urls: List<String>)
 }
@@ -32,11 +32,11 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
         }
     }
 
-    override fun showRemoveTaskDialog(idsToRemove: List<Int>) = intent<Unit> {
+    override fun showRemoveTaskDialog(idsToRemove: List<Int>, id: String) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(
-                    dialog = DialogState.RemoveDialog(idsToRemove)
+                    dialog = DialogState.RemoveDialog(idsToRemove, id)
                 )
             }
         }
@@ -74,6 +74,7 @@ sealed class DialogState {
 
     data class RemoveDialog(
         val idsToRemove: List<Int>,
+        val id: String = ""
     ) : DialogState()
 
     data class RemoveDialogWithCheckBox(
