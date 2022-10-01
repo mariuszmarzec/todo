@@ -49,7 +49,10 @@ fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog, content: @Composable () -> 
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TextButton(onClick = { state.onConfirm() }) {
+                TextButton(onClick = {
+                    state.onDismiss()
+                    state.onConfirm()
+                }) {
                     Text(state.confirmButton)
                 }
                 TextButton(onClick = { state.onDismiss() }) {

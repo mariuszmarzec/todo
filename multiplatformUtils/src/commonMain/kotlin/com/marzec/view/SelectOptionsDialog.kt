@@ -9,16 +9,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.launch
 
 @Composable
 fun SelectOptionsDialog(state: Dialog.SelectOptionsDialog) {
-    val scope = rememberCoroutineScope()
-
     CustomDialog(
         onDismissRequest = { state.onDismiss() }
     ) {
@@ -42,9 +38,8 @@ fun SelectOptionsDialog(state: Dialog.SelectOptionsDialog) {
                             TextListItemView(
                                 state = it,
                                 onClickListener = {
-                                    scope.launch {
-                                        state.onItemClicked(it.id)
-                                    }
+                                    state.onDismiss()
+                                    state.onItemClicked(it.id)
                                 }
                             )
                         }

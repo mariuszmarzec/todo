@@ -41,7 +41,10 @@ fun TextInputDialog(state: Dialog.TextInputDialog) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TextButton(onClick = { state.onConfirm(state.inputField) }) {
+                TextButton(onClick = {
+                    state.onDismiss()
+                    state.onConfirm(state.inputField)
+                }) {
                     Text(state.confirmButton)
                 }
                 TextButton(onClick = { state.onDismiss() }) {
