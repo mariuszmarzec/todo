@@ -11,6 +11,6 @@ inline fun <reified T: Any, R> Any.asInstanceAndReturnOther(action: T.() -> R) =
 @Suppress("unchecked_cast")
 inline fun <reified T: Any> Any.asInstanceAndReturn(action: T.() -> T) = (this as? T)?.action()
 
-fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
+inline fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
 
-fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
+inline fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
