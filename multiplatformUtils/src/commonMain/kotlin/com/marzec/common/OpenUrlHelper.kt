@@ -1,4 +1,4 @@
-package com.marzec.todo.common
+package com.marzec.common
 
 interface OpenUrlHelper {
     fun open(url: String)

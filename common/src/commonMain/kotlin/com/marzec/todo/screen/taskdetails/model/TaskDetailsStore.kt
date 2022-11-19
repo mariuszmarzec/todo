@@ -11,7 +11,7 @@ import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.preferences.Preferences
-import com.marzec.todo.common.CopyToClipBoardHelper
+import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate

@@ -30,8 +30,8 @@ import com.marzec.screen.pickitemscreen.PickItemData
 import com.marzec.screen.pickitemscreen.PickItemDataStore
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
-import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.common.CopyToClipBoardHelper
+import com.marzec.common.OpenUrlHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl

@@ -9,8 +9,8 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.marzec.cache.FileCacheImpl
 import com.marzec.cache.MemoryCache
-import com.marzec.todo.common.CopyToClipBoardHelper
-import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.common.CopyToClipBoardHelper
+import com.marzec.common.OpenUrlHelper
 import com.marzec.logger.Logger
 import com.marzec.network.createHttpClient
 import com.marzec.todo.screen.main.HomeScreen

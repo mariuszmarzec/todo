@@ -3,7 +3,7 @@ package com.marzec.todo.delegates.dialog
 import com.marzec.delegate.DialogDelegate
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
-import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.common.OpenUrlHelper
 import com.marzec.delegate.StoreDelegate
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task

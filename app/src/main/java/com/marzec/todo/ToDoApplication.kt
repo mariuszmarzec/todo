@@ -6,13 +6,12 @@ import android.content.ClipboardManager
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.datastore.preferences.createDataStore
-import com.marzec.todo.common.CopyToClipBoardHelper
+import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.logger.Logger
 import com.marzec.cache.PreferencesCache
 import kotlinx.coroutines.Dispatchers
 import com.marzec.network.createHttpClient
 import com.marzec.cache.MemoryCache
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 class ToDoApplication : Application() {

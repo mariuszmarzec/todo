@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.rememberCoroutineScope
-import com.marzec.todo.common.OpenUrlHelper
+import com.marzec.common.OpenUrlHelper
 import com.marzec.todo.screen.main.HomeScreen
 import kotlinx.coroutines.launch
 
