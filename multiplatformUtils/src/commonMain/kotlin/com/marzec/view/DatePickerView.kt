@@ -137,7 +137,7 @@ fun DatePickerScreen(
 ) {
     val state by store.collectState()
 
-    val years = (1920..currentTime().year).reversed().toList()
+    val years = (1920..currentTime().year+4).reversed().toList()
     val months = (1..12).toList()
 
     Column(
