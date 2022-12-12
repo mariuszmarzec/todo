@@ -25,10 +25,14 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
     }
 
     override fun removeTask(idsToRemove: List<Int>) = sideEffect {
-        dialogDelegate.closeDialog()
-
         intent {
             removeTaskOnTrigger(todoRepository, idsToRemove)
+
+            sideEffect {
+                if (resultNonNull() is Content.Loading<*>) {
+                    dialogDelegate.closeDialog()
+                }
+            }
         }
     }
 

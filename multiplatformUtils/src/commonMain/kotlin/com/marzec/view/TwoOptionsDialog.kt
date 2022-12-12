@@ -50,7 +50,6 @@ fun TwoOptionsDialog(state: Dialog.TwoOptionsDialog, content: @Composable () -> 
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 TextButton(onClick = {
-                    state.onDismiss()
                     state.onConfirm()
                 }) {
                     Text(state.confirmButton)

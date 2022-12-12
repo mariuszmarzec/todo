@@ -42,7 +42,6 @@ fun TextInputDialog(state: Dialog.TextInputDialog) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 TextButton(onClick = {
-                    state.onDismiss()
                     state.onConfirm(state.inputField)
                 }) {
                     Text(state.confirmButton)

@@ -38,7 +38,6 @@ fun SelectOptionsDialog(state: Dialog.SelectOptionsDialog) {
                             TextListItemView(
                                 state = it,
                                 onClickListener = {
-                                    state.onDismiss()
                                     state.onItemClicked(it.id)
                                 }
                             )

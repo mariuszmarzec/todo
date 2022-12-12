@@ -131,12 +131,14 @@ class TaskDetailsStore(
         removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
     override fun removeTask(idsToRemove: List<Int>) = sideEffect {
-        closeDialog()
-
         intent<Content<Unit>> {
             removeTaskOnTrigger(todoRepository, idsToRemove)
 
             sideEffect {
+                if (resultNonNull() is Content.Loading<*>) {
+                    closeDialog()
+                }
+
                 resultNonNull().asInstance<Content.Data<Unit>> {
                     if (idsToRemove.first() == taskId) {
                         navigationStore.goBack()
