@@ -74,6 +74,8 @@ android {
 
     compileSdkVersion(30)
 
+    namespace = "com.marzec.todo.common"
+
     defaultConfig {
         minSdkVersion(30)
         targetSdkVersion(30)

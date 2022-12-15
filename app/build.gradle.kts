@@ -11,6 +11,8 @@ import java.io.FileInputStream
 }
 
 android {
+    namespace = "com.marzec.todo"
+
     compileSdk = Config.Android.compileSdkVersion
     defaultConfig {
         minSdk = Config.Android.minSdkVersion

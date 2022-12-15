@@ -61,6 +61,8 @@ kotlin {
 
 android {
 
+    namespace = "com.marzec"
+
     compileSdkVersion(30)
 
     defaultConfig {
