@@ -2,7 +2,9 @@ package com.marzec.todo.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
@@ -41,6 +43,7 @@ fun TaskListView(
     search: String = "",
     selected: Set<Int>,
     showButtonsInColumns: Boolean,
+    scrollState: LazyListState = rememberLazyListState(),
     onClickListener: (Int) -> Unit,
     onOpenUrlClick: ((String) -> Unit)? = null,
     onMoveToTopClick: ((Int) -> Unit)? = null,
@@ -52,7 +55,7 @@ fun TaskListView(
     onSelectedChange: ((Int) -> Unit)? = null,
 ) {
     val selectionModeEnabled = selected.isNotEmpty()
-    LazyColumn {
+    LazyColumn(state = scrollState) {
         items(
             items = tasks
             .filterWithSearch(search)

@@ -15,6 +15,7 @@ import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
+import com.marzec.mvi.reduceData
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
@@ -122,6 +123,19 @@ class TasksStore(
                             TodoDestination.Login,
                             popToInclusive = true
                         )
+                    )
+                )
+            }
+        }
+    }
+
+    fun onFinishedScrolling(firstVisibleItemIndex: Int, firstVisibleItemScrollOffset: Int) = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(
+                    scrollState = scrollState.copy(
+                        index = firstVisibleItemIndex,
+                        offset = firstVisibleItemScrollOffset
                     )
                 )
             }

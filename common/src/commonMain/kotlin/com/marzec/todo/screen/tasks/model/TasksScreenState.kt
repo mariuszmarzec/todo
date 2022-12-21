@@ -1,15 +1,16 @@
 package com.marzec.todo.screen.tasks.model
 
-import com.marzec.mvi.State
-import com.marzec.delegate.WithSearch
-import com.marzec.todo.delegates.dialog.WithTasks
-import com.marzec.extensions.EMPTY_STRING
-import com.marzec.todo.model.Task
 import com.marzec.delegate.DialogState
+import com.marzec.delegate.WithSearch
+import com.marzec.extensions.EMPTY_STRING
+import com.marzec.mvi.State
+import com.marzec.todo.delegates.dialog.WithTasks
+import com.marzec.todo.model.Task
 import com.marzec.view.SearchState
 
 data class TasksScreenState(
     val tasks: List<Task>,
+    val scrollState: ScrollListState,
     override val search: SearchState,
     override val dialog: DialogState
 ) : WithTasks<TasksScreenState>, WithSearch<TasksScreenState> {
@@ -25,6 +26,7 @@ data class TasksScreenState(
         val INITIAL_STATE = State.Loading<TasksScreenState>()
         val EMPTY_DATA = TasksScreenState(
             tasks = emptyList(),
+            scrollState = ScrollListState(),
             search = SearchState(
                 value = EMPTY_STRING,
                 focused = false,
@@ -33,3 +35,8 @@ data class TasksScreenState(
         )
     }
 }
+
+data class ScrollListState(
+    val index: Int = 0,
+    val offset: Int = 0
+)
