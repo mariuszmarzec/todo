@@ -1,6 +1,8 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.delegate.DialogState
+import com.marzec.delegate.ScrollListState
+import com.marzec.delegate.WithScrollListState
 import com.marzec.delegate.WithSearch
 import com.marzec.extensions.EMPTY_STRING
 import com.marzec.mvi.State
@@ -10,15 +12,20 @@ import com.marzec.view.SearchState
 
 data class TasksScreenState(
     val tasks: List<Task>,
-    val scrollState: ScrollListState,
+    override val scrollListState: ScrollListState,
     override val search: SearchState,
     override val dialog: DialogState
-) : WithTasks<TasksScreenState>, WithSearch<TasksScreenState> {
+) : WithTasks<TasksScreenState>,
+    WithSearch<TasksScreenState>,
+    WithScrollListState<TasksScreenState> {
 
     override fun copyWithDialog(dialog: DialogState): TasksScreenState = copy(dialog = dialog)
 
     override fun copyWithSearch(search: SearchState): TasksScreenState =
         copy(search = search)
+
+    override fun copyWithScrollListState(scrollListState: ScrollListState) =
+        copy(scrollListState = scrollListState)
 
     override fun taskById(taskId: Int): Task = tasks.first { it.id == taskId }
 
@@ -26,7 +33,7 @@ data class TasksScreenState(
         val INITIAL_STATE = State.Loading<TasksScreenState>()
         val EMPTY_DATA = TasksScreenState(
             tasks = emptyList(),
-            scrollState = ScrollListState(),
+            scrollListState = ScrollListState(),
             search = SearchState(
                 value = EMPTY_STRING,
                 focused = false,
@@ -35,8 +42,3 @@ data class TasksScreenState(
         )
     }
 }
-
-data class ScrollListState(
-    val index: Int = 0,
-    val offset: Int = 0
-)

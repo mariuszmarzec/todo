@@ -32,6 +32,7 @@ import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
+import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -170,6 +171,7 @@ object DI {
                 provideTodoRepository()
             ),
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
+            scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
             scheduledOptions = provideScheduledOptions()
         )
     }

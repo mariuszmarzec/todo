@@ -15,6 +15,7 @@ import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
+import com.marzec.delegate.ScrollDelegate
 import com.marzec.mvi.reduceData
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
@@ -37,6 +38,7 @@ class TasksStore(
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val searchDelegate: SearchDelegate,
+    private val scrollDelegate: ScrollDelegate,
     private val scheduledOptions: PickItemOptions<Task>
 ) : Store3<State<TasksScreenState>>(
     scope,
@@ -44,7 +46,8 @@ class TasksStore(
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate,
-    SearchDelegate by searchDelegate {
+    SearchDelegate by searchDelegate,
+    ScrollDelegate by scrollDelegate {
 
     override val identifier: String
         get() = cacheKey
@@ -55,7 +58,8 @@ class TasksStore(
             dialogDelegate,
             changePriorityDelegate,
             urlDelegate,
-            searchDelegate
+            searchDelegate,
+            scrollDelegate
         )
     }
 
@@ -123,19 +127,6 @@ class TasksStore(
                             TodoDestination.Login,
                             popToInclusive = true
                         )
-                    )
-                )
-            }
-        }
-    }
-
-    fun onFinishedScrolling(firstVisibleItemIndex: Int, firstVisibleItemScrollOffset: Int) = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copy(
-                    scrollState = scrollState.copy(
-                        index = firstVisibleItemIndex,
-                        offset = firstVisibleItemScrollOffset
                     )
                 )
             }

@@ -12,17 +12,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import com.marzec.delegate.DialogState
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
-import com.marzec.view.Dialog
-import com.marzec.view.DialogBox
-import com.marzec.delegate.DialogState
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.ActionBarProvider
+import com.marzec.view.Dialog
+import com.marzec.view.DialogBox
 import com.marzec.view.ScreenWithLoading
 import com.marzec.view.SearchView
 
@@ -33,11 +32,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         store.loadList()
     }
 
-    val listState: LazyListState = rememberLazyListState(state.data?.scrollState?.index ?: 0, state.data?.scrollState?.offset ?: 0)
-
-    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
-        store.onFinishedScrolling(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset)
-    }
+    val listState = rememberScrollState(state, store)
 
     Scaffold(
         topBar = {
