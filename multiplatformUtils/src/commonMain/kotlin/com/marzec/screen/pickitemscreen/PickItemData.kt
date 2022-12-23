@@ -1,16 +1,21 @@
 package com.marzec.screen.pickitemscreen
 
+import com.marzec.delegate.ScrollListState
+import com.marzec.delegate.WithScrollListState
 import com.marzec.delegate.WithSearch
 import com.marzec.delegate.WithSelection
 import com.marzec.mvi.State
 import com.marzec.view.SearchState
 
-data class PickItemData<ITEM: Any>(
+data class PickItemData<ITEM : Any>(
     val options: PickItemOptions<ITEM>,
     val items: List<ITEM>,
     override val selected: Set<String>,
-    override val search: SearchState
-) : WithSelection<String, PickItemData<ITEM>>, WithSearch<PickItemData<ITEM>> {
+    override val search: SearchState,
+    override val scrollListState: ScrollListState
+) : WithSelection<String, PickItemData<ITEM>>,
+    WithSearch<PickItemData<ITEM>>,
+    WithScrollListState<PickItemData<ITEM>> {
 
     override fun copyWithSelection(selected: Set<String>): PickItemData<ITEM> =
         copy(selected = selected)
@@ -19,18 +24,23 @@ data class PickItemData<ITEM: Any>(
 
     override fun copyWithSearch(search: SearchState): PickItemData<ITEM> = copy(search = search)
 
+    override fun copyWithScrollListState(scrollListState: ScrollListState): PickItemData<ITEM> =
+        copy(scrollListState = scrollListState)
+
     companion object {
-        fun <ITEM: Any> default(options: PickItemOptions<ITEM>) = PickItemData(
+        fun <ITEM : Any> default(options: PickItemOptions<ITEM>) = PickItemData(
             options = options,
             items = emptyList(),
             selected = emptySet(),
-            search = SearchState.DEFAULT
+            search = SearchState.DEFAULT,
+            scrollListState = ScrollListState.DEFAULT
         )
 
-        fun <ITEM: Any> initial(
+        fun <ITEM : Any> initial(
             options: PickItemOptions<ITEM>
         ) = State.Data(
             default(options).copy(selected = options.selected)
         )
     }
 }
+

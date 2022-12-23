@@ -42,7 +42,11 @@ interface WithScrollListState<DATA> {
 data class ScrollListState(
     val index: Int = 0,
     val offset: Int = 0
-)
+) {
+    companion object {
+        val DEFAULT: ScrollListState = ScrollListState(index = 0, offset = 0)
+    }
+}
 
 @Composable
 fun <DATA> rememberScrollState(

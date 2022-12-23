@@ -2,6 +2,7 @@ package com.marzec.screen.pickitemscreen
 
 import androidx.compose.runtime.Composable
 import com.marzec.content.Content
+import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.SelectionDelegate
 import com.marzec.delegate.delegates
@@ -33,13 +34,16 @@ class PickItemDataStore<ITEM : Any>(
     initialState: State<PickItemData<ITEM>>,
     private val cacheKey: String,
     private val selectionDelegate: SelectionDelegate<String>,
-    private val searchDelegate: SearchDelegate
+    private val searchDelegate: SearchDelegate,
+    private val scrollDelegate: ScrollDelegate
 ) : Store3<State<PickItemData<ITEM>>>(
     scope, stateCache.get(cacheKey) ?: initialState
-), SelectionDelegate<String> by selectionDelegate, SearchDelegate by searchDelegate {
+), SelectionDelegate<String> by selectionDelegate,
+    SearchDelegate by searchDelegate,
+    ScrollDelegate by scrollDelegate {
 
     init {
-        delegates(selectionDelegate, searchDelegate)
+        delegates(selectionDelegate, searchDelegate, scrollDelegate)
     }
 
     fun load() = intent<Content<List<ITEM>>> {

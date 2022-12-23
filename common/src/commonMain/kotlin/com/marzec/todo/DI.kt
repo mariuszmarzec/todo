@@ -451,7 +451,8 @@ object DI {
         initialState = PickItemData.initial(options),
         cacheKey = cacheKey,
         selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>(),
-        searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>()
+        searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>(),
+        scrollDelegate = ScrollDelegateImpl<PickItemData<ITEM>>()
     )
 
     private fun provideScheduledOptions() = PickItemOptions(

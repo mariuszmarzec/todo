@@ -22,6 +22,7 @@ import com.marzec.view.ActionBarProvider
 import com.marzec.view.ScreenWithLoading
 import com.marzec.view.SelectableRow
 import androidx.compose.ui.Modifier
+import com.marzec.delegate.rememberScrollState
 import com.marzec.extensions.filterWithSearch
 import com.marzec.view.SearchView
 
@@ -35,6 +36,7 @@ fun <ITEM : Any> PickItemScreen(
     val state: State<PickItemData<ITEM>> by store.collectState {
         store.load()
     }
+    val scrollState = rememberScrollState(state, store)
 
     Column(
         modifier = Modifier.background(Color.White)
@@ -88,7 +90,7 @@ fun <ITEM : Any> PickItemScreen(
                         it
                     }
                 }
-                LazyColumn {
+                LazyColumn(state = scrollState) {
                     items(items = items) { item ->
                         val id = options.mapItemToId(item)
                         key(id) {
