@@ -46,6 +46,7 @@ import com.marzec.view.ActionBarProvider
 import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.delegate.DialogState
+import com.marzec.delegate.rememberScrollState
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.TextListItem
@@ -58,6 +59,8 @@ fun TaskDetailsScreen(
     val state: State<TaskDetailsState> by store.collectState {
         store.loadDetails()
     }
+
+    val listState = rememberScrollState(state, store)
 
     Scaffold(
         topBar = {
@@ -225,6 +228,7 @@ fun TaskDetailsScreen(
                         tasks = state.data.task.subTasks,
                         search = state.data.search.value,
                         selected = state.data.selected,
+                        scrollState = listState,
                         showButtonsInColumns = true,
                         onClickListener = {
                             store.goToSubtaskDetails(it)

@@ -23,6 +23,8 @@ import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.delegate.DialogState
+import com.marzec.delegate.ScrollDelegate
+import com.marzec.delegate.ScrollListState
 import com.marzec.view.SearchState
 import kotlinx.coroutines.CoroutineScope
 
@@ -40,13 +42,15 @@ class TaskDetailsStore(
     private val urlDelegate: UrlDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val selectionDelegate: SelectionDelegate<Int>,
-    private val searchDelegate: SearchDelegate
+    private val searchDelegate: SearchDelegate,
+    private val scrollDelegate: ScrollDelegate,
 ) : Store3<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate by dialogDelegate,
     SelectionDelegate<Int> by selectionDelegate,
+    ScrollDelegate by scrollDelegate,
     SearchDelegate by searchDelegate {
 
     override val identifier: String
@@ -59,7 +63,8 @@ class TaskDetailsStore(
             dialogDelegate,
             changePriorityDelegate,
             selectionDelegate,
-            searchDelegate
+            searchDelegate,
+            scrollDelegate
         )
     }
 
@@ -77,7 +82,8 @@ class TaskDetailsStore(
                     search = SearchState(
                         value = "",
                         focused = false
-                    )
+                    ),
+                    scrollListState = this?.scrollListState ?: ScrollListState.DEFAULT
                 )
             }
         }

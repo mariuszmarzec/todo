@@ -6,15 +6,19 @@ import com.marzec.delegate.WithSearch
 import com.marzec.delegate.WithSelection
 import com.marzec.todo.delegates.dialog.WithTasks
 import com.marzec.delegate.DialogState
+import com.marzec.delegate.ScrollListState
+import com.marzec.delegate.WithScrollListState
 import com.marzec.view.SearchState
 
 data class TaskDetailsState(
     val task: Task,
     override val dialog: DialogState,
     override val selected: Set<Int>,
-    override val search: SearchState
+    override val search: SearchState,
+    override val scrollListState: ScrollListState
 ) : WithTasks<TaskDetailsState>,
     WithSelection<Int, TaskDetailsState>,
+    WithScrollListState<TaskDetailsState>,
     WithSearch<TaskDetailsState> {
 
     override fun copyWithDialog(dialog: DialogState): TaskDetailsState = copy(dialog = dialog)
@@ -30,6 +34,9 @@ data class TaskDetailsState(
     override fun copyWithSearch(search: SearchState): TaskDetailsState = copy(search = search)
 
     override fun allIds(): Set<Int> = task.subTasks.map { it.id }.toSet()
+
+    override fun copyWithScrollListState(scrollListState: ScrollListState): TaskDetailsState =
+        copy(scrollListState = scrollListState)
 
     companion object {
         val INITIAL = State.Loading<TaskDetailsState>()

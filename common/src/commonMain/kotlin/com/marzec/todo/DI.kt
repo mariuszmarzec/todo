@@ -242,7 +242,8 @@ object DI {
             provideTodoRepository()
         ),
         selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
-        searchDelegate = SearchDelegateImpl<TaskDetailsState>()
+        searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
+        scrollDelegate = ScrollDelegateImpl<TaskDetailsState>()
     )
 
     @Composable
