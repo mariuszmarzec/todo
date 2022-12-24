@@ -66,6 +66,8 @@ fun AddSubTaskScreen(
                             )
                         }
                     }
+
+                    else -> Unit
                 }
             }
         }

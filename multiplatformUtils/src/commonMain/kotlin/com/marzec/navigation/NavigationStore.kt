@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 class NavigationStore(
-    private val router: Map<KClass<out Destination>, @Composable (destination: Destination, cacheKey: String) -> Unit>,
+    private val router: (Destination) -> @Composable (destination: Destination, cacheKey: String) -> Unit,
     scope: CoroutineScope,
     private val stateCache: Preferences,
     private val resultCache: ResultCache,
@@ -58,7 +58,7 @@ class NavigationStore(
         requestId: Int?,
         secondaryId: Int?
     ) {
-        val screenProvider = router.getValue(action.destination::class)
+        val screenProvider = router(action.destination)
         add(
             NavigationEntry(
                 destination = action.destination,

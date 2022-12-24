@@ -100,44 +100,52 @@ object DI {
 
     val preferences: Preferences = MemoryPreferences()
 
-    private val ROUTER: Map<KClass<
-            out Destination>,
-            (@Composable (destination: Destination, cacheKey: String) -> Unit)
-            > = mapOf(
-        TodoDestination.Login::class to @Composable { _, cacheKey -> provideLoginScreen(cacheKey) },
-        TodoDestination.Tasks::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.Tasks
-            provideTasksScreen(cacheKey)
-        },
-        TodoDestination.AddNewTask::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.AddNewTask
-            provideAddNewTaskScreen(
-                taskId = destination.taskToEditId,
-                parentTaskId = destination.parentTaskId,
-                cacheKey
-            )
-        },
-        TodoDestination.TaskDetails::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.TaskDetails
-            provideTaskDetailsScreen(destination.taskId, cacheKey)
-        },
-        TodoDestination.AddSubTask::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.AddSubTask
-            provideAddSubTaskScreen(destination.taskId, cacheKey)
-        },
-        TodoDestination.Schedule::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.Schedule
-            provideSchedulerScreen(cacheKey, destination.scheduler)
-        },
-        TodoDestination.DatePicker::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.DatePicker
-            provideDatePickerScreen(cacheKey, destination.date)
-        },
-        TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
-            destination as TodoDestination.PickItem<Any>
-            providePickItemScreen(destination, cacheKey)
-        },
-    )
+    private fun router(
+        destination: Destination
+    ): @Composable (destination: Destination, cacheKey: String) -> Unit =
+        when (destination as TodoDestination) {
+            is TodoDestination.AddNewTask -> @Composable { destination, cacheKey ->
+                destination as TodoDestination.AddNewTask
+                provideAddNewTaskScreen(
+                    taskId = destination.taskToEditId,
+                    parentTaskId = destination.parentTaskId,
+                    cacheKey
+                )
+            }
+
+            is TodoDestination.AddSubTask -> @Composable { destination, cacheKey ->
+                destination as TodoDestination.AddSubTask
+                provideAddSubTaskScreen(destination.taskId, cacheKey)
+            }
+
+            is TodoDestination.DatePicker -> @Composable { destination, cacheKey ->
+                destination as TodoDestination.DatePicker
+                provideDatePickerScreen(cacheKey, destination.date)
+            }
+
+            TodoDestination.Login -> @Composable { _, cacheKey ->
+                provideLoginScreen(cacheKey)
+            }
+
+            is TodoDestination.PickItem<*> -> @Composable { destination, cacheKey ->
+                destination as TodoDestination.PickItem<Any>
+                providePickItemScreen(destination, cacheKey)
+            }
+
+            is TodoDestination.Schedule -> @Composable { destination, cacheKey ->
+                destination as TodoDestination.Schedule
+                provideSchedulerScreen(cacheKey, destination.scheduler)
+            }
+
+            is TodoDestination.TaskDetails -> @Composable { destination, cacheKey ->
+                destination as TodoDestination.TaskDetails
+                provideTaskDetailsScreen(destination.taskId, cacheKey)
+            }
+
+            TodoDestination.Tasks -> @Composable { _, cacheKey ->
+                provideTasksScreen(cacheKey)
+            }
+        }
 
     @Composable
     private fun provideTasksScreen(cacheKey: String) {
@@ -356,7 +364,7 @@ object DI {
         }
         return NavigationStore(
             scope = scope,
-            router = ROUTER,
+            router = ::router,
             stateCache = preferences,
             resultCache = resultCache,
             cacheKey = navigationStoreCacheKey,
