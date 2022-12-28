@@ -60,7 +60,7 @@ fun TaskDetailsScreen(
         store.loadDetails()
     }
 
-    val listState = rememberScrollState(state, store)
+    val listState = rememberScrollState(store)
 
     Scaffold(
         topBar = {

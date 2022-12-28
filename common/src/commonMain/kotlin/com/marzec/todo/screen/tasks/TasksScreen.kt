@@ -33,7 +33,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         store.loadList()
     }
 
-    val listState = rememberScrollState(state, store)
+    val listState = rememberScrollState(store)
 
     Scaffold(
         topBar = {

@@ -36,7 +36,7 @@ fun <ITEM : Any> PickItemScreen(
     val state: State<PickItemData<ITEM>> by store.collectState {
         store.load()
     }
-    val scrollState = rememberScrollState(state, store)
+    val scrollState = rememberScrollState(store)
 
     Column(
         modifier = Modifier.background(Color.White)

@@ -1,10 +1,13 @@
 package com.marzec.delegate
 
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import com.marzec.mvi.State
+import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceData
 
 interface ScrollDelegate {
@@ -49,15 +52,17 @@ data class ScrollListState(
 }
 
 @Composable
-fun <DATA> rememberScrollState(
-    state: State<out WithScrollListState<DATA>>,
-    store: ScrollDelegate
-): LazyListState {
-    val listState: LazyListState = rememberLazyListState(
-        state.data?.scrollListState?.index ?: 0,
-        state.data?.scrollListState?.offset ?: 0
-    )
+fun rememberScrollState(store: ScrollDelegate): LazyListState {
+    val store3 by rememberUpdatedState(store as Store3<*>)
+    val updatedIdentifier by rememberUpdatedState(store3.identifier)
 
+    val listState: LazyListState = remember(updatedIdentifier) {
+        val state = store3.state.value as State<out WithScrollListState<*>>
+        LazyListState(
+            state.data?.scrollListState?.index ?: 0,
+            state.data?.scrollListState?.offset ?: 0
+        )
+    }
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
         store.onFinishedScrolling(
             listState.firstVisibleItemIndex,
