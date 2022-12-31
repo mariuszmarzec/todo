@@ -33,13 +33,6 @@ class ResultCache(private val memoryCache: Cache) {
         }
     }
 
-    suspend fun clean(requesterKey: RequestKey) {
-        allKeys().filter { it.requesterKey == requesterKey.requesterKey }.forEach {
-            val stringKey = createKey(requesterKey)
-            memoryCache.remove(stringKey)
-        }
-    }
-
     private suspend fun allKeys() =
         memoryCache.toMap().keys.map { Json.decodeFromString<ResultKey>(it) }
 

@@ -94,9 +94,7 @@ class NavigationStore(
     }
 
     private suspend fun MutableList<NavigationEntry>.cleanResultCacheForCurrentScreen() {
-        lastOrNull()?.let { lastEntry ->
-            lastEntry.requestKey?.let { requestKey -> resultCache.clean(requestKey) }
-        }
+        lastOrNull()?.cacheKey?.let { requesterKey -> resultCache.remove(requesterKey) }
     }
 
     @Suppress("unchecked_cast")
