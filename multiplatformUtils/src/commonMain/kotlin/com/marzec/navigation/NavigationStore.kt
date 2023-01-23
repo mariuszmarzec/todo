@@ -108,7 +108,7 @@ class NavigationStore(
         state.value.backStack.lastOrNull()?.let { entry ->
             resultCache.observe(entry.cacheKey, requestId)
                 .filterIsInstance<ResultCacheValue>()
-                .filter { it.data != null }
+                .filter { it.data != null && it.requestKey.secondaryId != null }
                 .map { ResultValue(it.requestKey.secondaryIdValue, it.data as T) }
         }
 
