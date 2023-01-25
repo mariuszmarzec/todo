@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">backend-env.eba-m3k3s2rm.us-east-2.elasticbeanstalk.com</domain>
+        <domain includeSubdomains="true">backend-env.eba-6skitumy.eu-central-1.elasticbeanstalk.com</domain>
     </domain-config>
 </network-security-config>

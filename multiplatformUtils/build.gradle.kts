@@ -48,6 +48,7 @@ kotlin {
                 api("androidx.datastore:datastore-preferences:${datastore_version}")
                 api("androidx.datastore:datastore:${datastore_version}")
 
+                implementation(Dependency.imageLoader)
             }
         }
         named("desktopMain") {
@@ -63,11 +64,11 @@ android {
 
     namespace = "com.marzec"
 
-    compileSdkVersion(30)
 
     defaultConfig {
-        minSdkVersion(30)
-        targetSdkVersion(30)
+        compileSdkVersion(33)
+        minSdk = 30
+        targetSdkVersion(33)
     }
 
     compileOptions {

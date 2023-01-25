@@ -13,6 +13,7 @@ val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
 val atomicfuVersion = "0.17.1"
 val googleServicesVersion = "4.3.10"
+val glideVersion = "1.0.0-alpha.1"
 
 private val composePluginVersion = "1.2.0"
 private val dateTimeVersion = "0.1.1"
@@ -45,14 +46,16 @@ object Dependency {
     val atomicPlugin = "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfuVersion"
 
     val googleServices = "com.google.gms:google-services:$googleServicesVersion"
+
+    val imageLoader = "com.github.bumptech.glide:compose:$glideVersion"
 }
 
 object Config {
     object Android {
-        val compileSdkVersion = 31
+        val compileSdkVersion = 33
         val applicationId = "com.marzec.todo"
         val minSdkVersion = 30
-        val targetSdkVersion = 31
+        val targetSdkVersion = 33
         val versionCode = 1
         val versionName = "1.0"
     }
