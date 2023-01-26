@@ -23,7 +23,8 @@ data class PickItemOptions<ITEM : Any>(
     val multipleChoice: Boolean = false,
     val returnIdOnly: Boolean = true,
     val selected: Set<String> = emptySet(),
-    val stringsToCompare: ((ITEM) -> List<String>)? = null
+    val stringsToCompare: ((ITEM) -> List<String>)? = null,
+    val groupByHeader: ((ITEM) -> String)? = null
 )
 
 class PickItemDataStore<ITEM : Any>(
