@@ -3,6 +3,7 @@ package com.marzec.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -36,19 +37,21 @@ private fun ActionBar(
 
     val state by store.state.collectAsState()
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         if (state.backStack.size > 1) {
             IconButton({
-                scope.launch { store.goBack() }
+                store.goBack()
             }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = title)
+        Text(
+            modifier = Modifier.weight(1f),
+            text = title,
+        )
 
         Row(
-            modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.End
         ) {
             rightContent()

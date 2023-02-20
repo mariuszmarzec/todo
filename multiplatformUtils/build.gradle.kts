@@ -43,12 +43,12 @@ kotlin {
                 api("androidx.appcompat:appcompat:1.1.0")
                 api("androidx.core:core-ktx:1.3.1")
                 api(Dependency.ktorOkHttpClient)
+                implementation(Dependency.imageLoader)
 
                 // data store
                 api("androidx.datastore:datastore-preferences:${datastore_version}")
                 api("androidx.datastore:datastore:${datastore_version}")
 
-                implementation(Dependency.imageLoader)
             }
         }
         named("desktopMain") {
@@ -64,11 +64,11 @@ android {
 
     namespace = "com.marzec"
 
+    compileSdkVersion(30)
 
     defaultConfig {
-        compileSdkVersion(33)
-        minSdk = 30
-        targetSdkVersion(33)
+        minSdkVersion(30)
+        targetSdkVersion(30)
     }
 
     compileOptions {

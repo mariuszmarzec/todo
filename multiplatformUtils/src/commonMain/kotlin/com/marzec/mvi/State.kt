@@ -86,3 +86,14 @@ fun <T, R> State<T>.reduceContentAsSideAction(
             }
         }
     }
+
+fun <T, R> State<T>.reduceContentToLoadingWithNoChanges(result: Content<R>?): State<T> =
+    when (result) {
+        is Content.Data -> State.Loading(data)
+        is Content.Loading -> State.Loading(data)
+        is Content.Error -> State.Error(
+            data,
+            result.exception.message.orEmpty()
+        )
+        else -> this
+    }

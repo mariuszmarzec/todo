@@ -38,3 +38,5 @@ interface ImageLoader {
         override fun toImageBitmap(bytes: ByteArray): ImageBitmap = imageLoader.toImageBitmap(bytes)
     }
 }
+
+open class CompositeImageLoader(private val imageLoader: ImageLoader) : ImageLoader by imageLoader
