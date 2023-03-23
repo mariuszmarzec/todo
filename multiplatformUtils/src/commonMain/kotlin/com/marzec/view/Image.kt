@@ -17,12 +17,11 @@ expect fun Image(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     placeholderColor: Color = Color.Gray,
+    animationEnabled: Boolean = false
 )
 
 interface ImageLoader {
-    suspend fun loadPicture(url: String): Flow<ImageBitmap?>
-
-    fun toImageBitmap(bytes: ByteArray): ImageBitmap
+    suspend fun loadPicture(url: String): Flow<Image?>
 
     companion object : ImageLoader {
 
@@ -32,11 +31,14 @@ interface ImageLoader {
 
         lateinit var imageLoader: ImageLoader
 
-        override suspend fun loadPicture(url: String): Flow<ImageBitmap?> =
+        override suspend fun loadPicture(url: String): Flow<Image?> =
             imageLoader.loadPicture(url)
-
-        override fun toImageBitmap(bytes: ByteArray): ImageBitmap = imageLoader.toImageBitmap(bytes)
     }
 }
 
 open class CompositeImageLoader(private val imageLoader: ImageLoader) : ImageLoader by imageLoader
+
+data class Image(
+    val bytes: ByteArray,
+    val extension: String
+)

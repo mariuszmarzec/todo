@@ -41,7 +41,8 @@ fun ImageRow(
             url = url,
             modifier = Modifier.width(48.dp).height(48.dp),
             contentDescription = contentDescription,
-            contentScale = ContentScale.Inside
+            contentScale = ContentScale.Inside,
+            animationEnabled = false
         )
         content()
     }

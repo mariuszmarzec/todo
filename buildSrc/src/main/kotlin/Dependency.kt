@@ -1,6 +1,7 @@
 
 val kotlinVersion = "1.7.10"
 val ktorVersion = "1.6.8"
+val okHttpClientVersion = "4.10.0"
 val serializationVersion = "1.0.1"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
@@ -26,6 +27,7 @@ object Dependency {
     val ktorClient = "io.ktor:ktor-client-core:$ktorVersion"
     val ktorOkHttpClient = "io.ktor:ktor-client-okhttp:$ktorVersion"
     val ktorSerialization = "io.ktor:ktor-client-serialization-jvm:$ktorVersion"
+    val okHttpClientLogger = "com.squareup.okhttp3:logging-interceptor:$okHttpClientVersion"
 
     val androidBuildPlugin = "com.android.tools.build:gradle:${androidGradlepluginVersion}"
     val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"

@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import org.jetbrains.compose.animatedimage.animate
 import kotlin.String
-import com.marzec.mvi.State as Result
 
 const val IMAGES_DIR = "images"
 
@@ -23,13 +23,15 @@ actual fun Image(
     modifier: Modifier,
     contentScale: ContentScale,
     placeholderColor: Color,
+    animationEnabled: Boolean
 ) {
     ImageInternal(
         url,
         contentDescription,
         modifier,
         contentScale,
-        ColorPainter(placeholderColor)
+        ColorPainter(placeholderColor),
+        animationEnabled = animationEnabled
     )
 }
 
@@ -41,13 +43,14 @@ private fun ImageInternal(
     contentScale: ContentScale = ContentScale.Fit,
     placeholder: Painter = ColorPainter(Color.Gray),
     imageLoader: ImageLoader = ImageLoader.imageLoader,
+    animationEnabled: Boolean = true
 ) {
-    val image by loadNetworkImage(url, imageLoader)
+    val image = loadImage(url, imageLoader, animationEnabled)
 
-    if (image is Result.Data<ImageBitmap>) {
+    if (image != null) {
         Image(
             modifier = modifier,
-            bitmap = image.data!!,
+            bitmap = image,
             contentDescription = contentDescription,
             contentScale = contentScale
         )
@@ -61,18 +64,30 @@ private fun ImageInternal(
 }
 
 @Composable
-fun loadNetworkImage(
+fun loadImage(
+    url: String,
+    imageLoader: ImageLoader,
+    animationEnabled: Boolean
+): ImageBitmap? {
+    val image by loadImageState(url, imageLoader)
+
+    return image?.let {
+        if (animationEnabled && it.isAnimated()) {
+            it.toAnimatedImage().animate()
+        }
+        else {
+            it.bytes.toImageBitmap()
+        }
+    }
+}
+
+@Composable
+fun loadImageState(
     url: String,
     imageLoader: ImageLoader
-): State<Result<ImageBitmap>> =
-    produceState<Result<ImageBitmap>>(initialValue = Result.Loading(), url, imageLoader) {
-
-        imageLoader.loadPicture(url).collect {
-            value = if (it == null) {
-                Result.Error(message = "No image")
-            } else {
-                Result.Data(it)
-            }
+): State<Image?> =
+    produceState<Image?>(initialValue = null, url, imageLoader) {
+        imageLoader.loadPicture(url).collect { image ->
+            value = image
         }
-
     }

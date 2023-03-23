@@ -1,7 +1,9 @@
 package com.marzec.view
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.res.ResourceLoader
 import com.marzec.cache.Cache
 import com.marzec.logger.Logger
 import io.ktor.client.HttpClient
@@ -23,6 +25,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.animatedimage.AnimatedImage
+import org.jetbrains.skia.Codec
+import org.jetbrains.skia.Data
 import org.jetbrains.skia.Image as ImageUtil
 
 class ImageLoaderDesktop(
@@ -43,49 +48,81 @@ class ImageLoaderDesktop(
         }
     }
 
-    override suspend fun loadPicture(url: String): Flow<ImageBitmap?> = withContext(dispatcher) {
+    override suspend fun loadPicture(url: String): Flow<Image?> = withContext(dispatcher) {
         scope.launch {
-            if (memoryCache.get<ByteArray>(url) == null) {
+            if (memoryCache.get<Image>(url) == null) {
                 commands.emit { loadImage(url) }
             }
         }
-        memoryCache.observe<ByteArray>(url).map { bytes ->
-            bytes?.let { toImageBitmap(it) }
-        }
+        memoryCache.observe<Image>(url)
     }
 
-    override fun toImageBitmap(bytes: ByteArray): ImageBitmap = bytes.toImageBitmap()
-
-
-    private suspend fun loadImage(url: String) = withContext(dispatcher) {
+    private suspend fun loadImage(url: String): Unit = withContext(dispatcher) {
         try {
-            val supportedContentTypes =
-                listOf(ContentType.Image.GIF, ContentType.Image.JPEG, ContentType.Image.PNG)
-            val supportedImagesExtensions = supportedContentTypes.map { it.contentSubtype }
-            val cachedImage = supportedImagesExtensions.map { urlToFile(url, it) }.firstOrNull {
-                it.exists()
-            }
+            val cachedImage = getCachedFileOrNull(url)
             if (cachedImage != null) {
-                memoryCache.put(url, cachedImage.readBytes())
+                putToMemoryCache(
+                    url = url,
+                    image = Image(
+                        bytes = cachedImage.readBytes(),
+                        extension = cachedImage.extension
+                    )
+                )
             } else {
-                clientProvider().use { client ->
-                    val httpResponse: HttpResponse = client.get(url)
-                    val loadedImage = httpResponse.receive<ByteArray>()
-                    memoryCache.put(url, loadedImage)
-                    when (val contentType = httpResponse.contentType()) {
-                        in supportedContentTypes -> {
-                            saveImageToFile(loadedImage, url, contentType?.contentSubtype.orEmpty())
-                        }
-                    }
+                if (isNetworkLoading(url)) {
+                    loadFromNetwork(url)
+                } else {
+                    loadFromResource(url)
                 }
             }
         } catch (exception: Exception) {
             Logger.log("ImageLoader", exception.message.orEmpty(), exception)
-            null
         }
     }
-}
 
+    private suspend fun putToMemoryCache(url: String, image: Image) {
+        memoryCache.put(url, image)
+    }
+
+    private fun isNetworkLoading(uri: String): Boolean = uri.startsWith("http")
+
+    private suspend fun loadFromNetwork(url: String) {
+        clientProvider().use { client ->
+            val httpResponse: HttpResponse = client.get(url)
+            val loadedImage = httpResponse.receive<ByteArray>()
+            val contentType = httpResponse.contentType()
+
+            putToMemoryCache(url, Image(loadedImage, contentType?.contentSubtype.orEmpty()))
+            when (contentType) {
+                in supportedContentTypes -> {
+                    saveImageToFile(loadedImage, url, contentType?.contentSubtype.orEmpty())
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    private suspend fun loadFromResource(path: String) {
+        val file = File(path)
+        val extension = file.extension
+        val loadedImage = ResourceLoader.Default.load(path).readBytes()
+        require(loadedImage.isNotEmpty())
+        require(extension.isNotEmpty())
+        putToMemoryCache(path, Image(loadedImage, extension))
+    }
+
+    private fun getCachedFileOrNull(url: String) =
+        supportedImagesExtensions.map { urlToFile(url, it) }.firstOrNull {
+            it.exists()
+        }
+
+    companion object {
+        private val supportedContentTypes =
+            listOf(ContentType.Image.GIF, ContentType.Image.JPEG, ContentType.Image.PNG)
+
+        private val supportedImagesExtensions = listOf("gif", "png", "jpeg", "jpg")
+    }
+}
 
 private fun saveImageToFile(
     image: ByteArray,
@@ -107,4 +144,12 @@ private fun urlToFile(url: String, extension: String): File {
     return File(imagesDir.absolutePath + File.separator + fileName + "." + extension)
 }
 
-private fun ByteArray.toImageBitmap() = ImageUtil.makeFromEncoded(this).asImageBitmap()
+fun ByteArray.toImageBitmap() = ImageUtil.makeFromEncoded(this).toComposeImageBitmap()
+
+fun Image.isAnimated() = extension == "gif"
+
+fun Image.toAnimatedImage(): AnimatedImage {
+    val data = Data.makeFromBytes(bytes)
+    val codec = Codec.makeFromData(data)
+    return AnimatedImage(codec)
+}

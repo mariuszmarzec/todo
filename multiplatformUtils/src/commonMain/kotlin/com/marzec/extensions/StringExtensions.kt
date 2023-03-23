@@ -21,3 +21,5 @@ fun String.urls(): List<String> {
 
     return containedUrls
 }
+
+fun String.nullIfEmpty() = ifEmpty { null }

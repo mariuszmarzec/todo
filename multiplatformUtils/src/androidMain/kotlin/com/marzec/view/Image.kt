@@ -21,13 +21,15 @@ actual fun Image(
     modifier: Modifier,
     contentScale: ContentScale,
     placeholderColor: Color,
+    animationEnabled: Boolean
 ) {
     GlideImage(
         model = GlideUrlInterceptor.onUrl(url),
         contentDescription = contentDescription,
         modifier = modifier,
         contentScale = contentScale
-    ) {
-        it.placeholder(ColorDrawable(placeholderColor.toArgb()))
+    ) { builder ->
+        builder.placeholder(ColorDrawable(placeholderColor.toArgb()))
+            .let { if (!animationEnabled) it.dontAnimate() else it }
     }
 }

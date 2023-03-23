@@ -1,3 +1,4 @@
+import org.jetbrains.compose.ComposePlugin.DesktopComponentsDependencies
 import org.jetbrains.compose.compose
 
 plugins {
@@ -26,6 +27,7 @@ kotlin {
                 api(Dependency.kotlinStdlib)
                 api(Dependency.coroutineCore)
                 api(Dependency.ktorClient)
+                api(Dependency.okHttpClientLogger)
                 api(Dependency.ktorSerialization)
                 api(Dependency.serializationJson)
                 implementation(Dependency.kotlinDateTime)
@@ -55,6 +57,8 @@ kotlin {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
                 api(Dependency.ktorOkHttpClient)
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                api(DesktopComponentsDependencies.animatedImage)
             }
         }
     }
