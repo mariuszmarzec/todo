@@ -39,12 +39,7 @@ class ToDoApplication : Application() {
             Json
         )
 
-        DI.copyToClipBoardHelper = object : CopyToClipBoardHelper {
-            override fun copy(text: String) {
-                getSystemService<ClipboardManager>()
-                    ?.setPrimaryClip(ClipData.newPlainText("label", text))
-            }
-        }
+        DI.copyToClipBoardHelper = CopyToClipBoardHelper(this)
 
         DI.client = createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
         DI.ioDispatcher = Dispatchers.IO

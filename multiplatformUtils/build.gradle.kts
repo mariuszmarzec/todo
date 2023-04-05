@@ -46,6 +46,7 @@ kotlin {
                 api("androidx.core:core-ktx:1.3.1")
                 api(Dependency.ktorOkHttpClient)
                 implementation(Dependency.imageLoader)
+                implementation(Dependency.exoPlayer)
 
                 // data store
                 api("androidx.datastore:datastore-preferences:${datastore_version}")
@@ -57,6 +58,7 @@ kotlin {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
                 api(Dependency.ktorOkHttpClient)
+                api(Dependency.vlc)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 api(DesktopComponentsDependencies.animatedImage)
             }

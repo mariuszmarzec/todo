@@ -1,5 +1,5 @@
 package com.marzec.common
 
-interface CopyToClipBoardHelper {
+expect class CopyToClipBoardHelper {
     fun copy(text: String)
 }

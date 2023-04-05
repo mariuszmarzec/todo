@@ -48,13 +48,7 @@ fun main() {
         MemoryCache()
     )
 
-    DI.copyToClipBoardHelper = object : CopyToClipBoardHelper {
-        override fun copy(text: String) {
-            Toolkit.getDefaultToolkit()
-                .systemClipboard
-                .setContents(StringSelection(text), null)
-        }
-    }
+    DI.copyToClipBoardHelper = CopyToClipBoardHelper()
 
     DI.openUrlHelper = object : OpenUrlHelper {
         override fun open(url: String) = Desktop.getDesktop().browse(URI(url))
