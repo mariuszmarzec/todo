@@ -3,7 +3,7 @@ package com.marzec.navigation
 import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable
 
-internal val SECONDARY_ID = "SECONDARY_ID"
+val SECONDARY_ID = "SECONDARY_ID"
 
 data class NavigationEntry(
     val destination: Destination,
@@ -15,7 +15,7 @@ data class NavigationEntry(
 data class RequestKey(
     val requesterKey: String,
     val requestId: Int,
-    val options: Map<String, String> = emptyMap()
+    val options: Map<String, Any> = emptyMap()
 )
 
 @Serializable
@@ -25,7 +25,7 @@ data class ResultKey(
 )
 
 val RequestKey.secondaryId: Int?
-    get() = options[SECONDARY_ID]?.toInt()
+    get() = options[SECONDARY_ID] as? Int
 
 val RequestKey.secondaryIdValue: Int
-    get() = options.getValue(SECONDARY_ID).toInt()
+    get() = options.getValue(SECONDARY_ID) as Int
