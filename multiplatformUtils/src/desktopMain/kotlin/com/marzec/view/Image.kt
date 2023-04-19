@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.animatedimage.animate
 import kotlin.String
 
@@ -88,7 +89,11 @@ fun loadImageState(
     url: String,
     imageLoader: ImageLoader
 ): State<Image?> =
-    produceState<Image?>(initialValue = null, url, imageLoader) {
+    produceState(
+        initialValue = runBlocking { ImageLoader.imageMemoryCache.get(url) },
+        key1 = url,
+        key2 = imageLoader
+    ) {
         imageLoader.loadPicture(url).collect { image ->
             value = image
         }

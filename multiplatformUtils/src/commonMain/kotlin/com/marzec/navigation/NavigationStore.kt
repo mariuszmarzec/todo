@@ -3,7 +3,6 @@ package com.marzec.navigation
 import androidx.compose.runtime.Composable
 import com.marzec.mvi.Store3
 import com.marzec.preferences.Preferences
-import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -34,6 +33,23 @@ class NavigationStore(
             }
         }
 
+    fun nextWithOptionRequest(
+        action: NavigationAction,
+        requestId: Int? = null,
+        options: Map<String, Any>? = null
+    ) =
+        intent<Unit> {
+            reducer {
+                state.copy(
+                    backStack = state.backStack.toMutableList().apply {
+                        cleanResultCacheForCurrentScreen()
+                        handlePoppingScreens(action)
+                        addNextScreen(action, requestId, options)
+                    }
+                )
+            }
+        }
+
     fun goBack(result: Any? = null) = intent<Unit> {
         reducer {
             val requestKey = state.backStack.last().requestKey
@@ -58,6 +74,17 @@ class NavigationStore(
         requestId: Int?,
         secondaryId: Int?
     ) {
+        val options = secondaryId?.let {
+            mapOf(SECONDARY_ID to it.toString())
+        } ?: emptyMap()
+        addNextScreen(action, requestId, options)
+    }
+
+    private fun MutableList<NavigationEntry>.addNextScreen(
+        action: NavigationAction,
+        requestId: Int?,
+        options: Map<String, Any>?
+    ) {
         val screenProvider = router(action.destination)
         add(
             NavigationEntry(
@@ -68,9 +95,7 @@ class NavigationStore(
                     RequestKey(
                         requesterKey = last().cacheKey,
                         requestId = requestId,
-                        options = secondaryId?.let {
-                            mapOf(SECONDARY_ID to it.toString())
-                        } ?: emptyMap()
+                        options = options.orEmpty()
                     )
                 }
             )
@@ -108,8 +133,14 @@ class NavigationStore(
         state.value.backStack.lastOrNull()?.let { entry ->
             resultCache.observe(entry.cacheKey, requestId)
                 .filterIsInstance<ResultCacheValue>()
-                .filter { it.data != null && it.requestKey.secondaryId != null }
-                .map { ResultValue(it.requestKey.secondaryIdValue, it.data as T) }
+                .filter { it.data != null && it.requestKey.options.isNotEmpty() }
+                .map {
+                    ResultValue(
+                        requestId = it.requestKey.requestId,
+                        data = it.data as T,
+                        options = it.requestKey.options
+                    )
+                }
         }
 
     override suspend fun onNewState(newState: NavigationState) {
@@ -122,6 +153,10 @@ fun NavigationStore.next(destination: Destination) =
     next(NavigationAction(destination))
 
 data class ResultValue<T>(
-    val id: Int,
+    val requestId: Int,
+    val options: Map<String, Any> = emptyMap(),
     val data: T
 )
+
+val <T> ResultValue<T>.secondaryIdValue: Int
+    get() = options.getValue(SECONDARY_ID) as Int

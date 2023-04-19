@@ -140,7 +140,7 @@ private fun saveImageToFile(
 
 private fun urlToFile(url: String, extension: String): File {
     val imagesDir = File(IMAGES_DIR)
-    val fileName = url.replace(Regex("[:/]"), "_")
+    val fileName = url.hashCode()
     return File(imagesDir.absolutePath + File.separator + fileName + "." + extension)
 }
 

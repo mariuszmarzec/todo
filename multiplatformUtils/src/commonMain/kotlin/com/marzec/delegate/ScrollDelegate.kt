@@ -1,5 +1,6 @@
 package com.marzec.delegate
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +68,26 @@ fun rememberScrollState(store: ScrollDelegate): LazyListState {
         store.onFinishedScrolling(
             listState.firstVisibleItemIndex,
             listState.firstVisibleItemScrollOffset
+        )
+    }
+    return listState
+}
+
+@Composable
+fun rememberColumnScrollState(store: ScrollDelegate): ScrollState {
+    val store3 by rememberUpdatedState(store as Store3<*>)
+    val updatedIdentifier by rememberUpdatedState(store3.identifier)
+
+    val listState: ScrollState = remember(updatedIdentifier) {
+        val state = store3.state.value as State<out WithScrollListState<*>>
+        ScrollState(
+            state.data?.scrollListState?.offset ?: 0
+        )
+    }
+    LaunchedEffect(listState.value) {
+        store.onFinishedScrolling(
+            0,
+            listState.value
         )
     }
     return listState

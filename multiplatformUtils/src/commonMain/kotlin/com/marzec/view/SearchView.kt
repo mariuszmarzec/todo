@@ -33,25 +33,40 @@ data class SearchState(
 
 @Composable
 fun SearchView(state: SearchState, searchDelegate: SearchDelegate) {
+
+    SearchViewState(
+        state = state,
+        onSearchFocusChanged = searchDelegate::onSearchFocusChanged,
+        onSearchQueryChanged = searchDelegate::onSearchQueryChanged,
+        onClearSearchClick = searchDelegate::clearSearch,
+        onActivateSearchClick = searchDelegate::activateSearch
+    )
+}
+
+@Composable
+fun SearchViewState(
+    state: SearchState,
+    onSearchFocusChanged: (Boolean) -> Unit,
+    onSearchQueryChanged: (String) -> Unit,
+    onClearSearchClick: () -> Unit,
+    onActivateSearchClick: () -> Unit
+) {
     Row(
         Modifier.wrapContentWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         val focusManager = LocalFocusManager.current
         val focusRequester = remember { FocusRequester() }
         val searchInUse = state.focused || state.value.isNotEmpty()
         BasicTextField(
             modifier = Modifier
                 .focusRequester(focusRequester)
-                .onFocusChanged {
-                    searchDelegate.onSearchFocusChanged(it.isFocused)
-                }
+                .onFocusChanged { onSearchFocusChanged(it.isFocused) }
                 .widthIn(min = 100.dp, max = 300.dp)
                 .padding(0.dp),
             singleLine = true,
             value = if (searchInUse) state.value else "Search",
-            onValueChange = { searchDelegate.onSearchQueryChanged(it) }
+            onValueChange = { onSearchQueryChanged(it) }
         )
         LaunchedEffect(key1 = state.focused) {
             if (state.focused) {
@@ -61,18 +76,14 @@ fun SearchView(state: SearchState, searchDelegate: SearchDelegate) {
             }
         }
         if (searchInUse) {
-            IconButton({
-                searchDelegate.clearSearch()
-            }) {
+            IconButton({ onClearSearchClick() }) {
                 Icon(
                     imageVector = Icons.Default.Clear,
                     contentDescription = "Clear search"
                 )
             }
         } else {
-            IconButton({
-                searchDelegate.activateSearch()
-            }) {
+            IconButton({ onActivateSearchClick() }) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Activate search"
@@ -81,3 +92,4 @@ fun SearchView(state: SearchState, searchDelegate: SearchDelegate) {
         }
     }
 }
+

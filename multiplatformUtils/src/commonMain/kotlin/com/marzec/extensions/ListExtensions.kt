@@ -8,6 +8,15 @@ fun <T> List<T>.replaceIf(condition: (T) -> Boolean, replace: (T) -> T): List<T>
     }
 }
 
+fun <T> List<T>.replaceIfIndexed(condition: (Int, T) -> Boolean, replace: (T) -> T): List<T> =
+    mapIndexed { index: Int, item: T ->
+        if (condition(index, item)) {
+            replace(item)
+        } else {
+            item
+        }
+    }
+
 fun <T> List<T>.filterWithSearch(
     search: String,
     stringsToCompare: (T) -> List<String>
@@ -25,7 +34,7 @@ fun <T> List<T>.filterWithSearch(
     }
 }
 
-fun <T> MutableList<T>.swap(index1: Int, index2: Int){
+fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
     val tmp = this[index1]
     this[index1] = this[index2]
     this[index2] = tmp

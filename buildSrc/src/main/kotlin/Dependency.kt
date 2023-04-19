@@ -18,7 +18,7 @@ val glideVersion = "1.0.0-alpha.1"
 val exoPlayerVersion = "2.18.5"
 val vlcVersion = "4.7.0"
 
-private val composePluginVersion = "1.2.0"
+private val composePluginVersion = "1.4.0"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {
