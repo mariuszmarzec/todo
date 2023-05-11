@@ -70,11 +70,11 @@ android {
 
     namespace = "com.marzec"
 
-    compileSdkVersion(30)
+    compileSdk = Config.Android.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion(30)
-        targetSdkVersion(30)
+        minSdk = Config.Android.minSdkVersion
+        targetSdk = Config.Android.targetSdkVersion
     }
 
     compileOptions {

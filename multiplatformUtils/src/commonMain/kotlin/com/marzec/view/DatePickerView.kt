@@ -272,7 +272,7 @@ class DateDelegateImpl<DATA : WithDate<DATA>>(
     private val datePickerDestinationFactory: (date: LocalDateTime) -> Destination
 ) : StoreDelegate<DATA>(), DateDelegate {
 
-    override fun onDatePickerResult() = intent {
+    override fun onDatePickerResult() = intent<LocalDateTime> {
         onTrigger {
             navigationStore.observe<LocalDateTime>(REQUEST_DATE_PICKER)?.filterNotNull()
         }
@@ -295,7 +295,7 @@ class DateDelegateStateImpl<DATA : WithDate<DATA>>(
     private val datePickerDestinationFactory: (date: LocalDateTime) -> Destination
 ) : StoreDelegate<State<DATA>>(), DateDelegate {
 
-    override fun onDatePickerResult() = intent {
+    override fun onDatePickerResult() = intent<LocalDateTime> {
         onTrigger {
             navigationStore.observe<LocalDateTime>(REQUEST_DATE_PICKER)?.filterNotNull()
         }
