@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
@@ -118,6 +119,7 @@ fun TaskDetailsScreen(
 
                     val subTasksCount = state.data.task.subTasks.size
                     val selectedCount = state.data.selected.count()
+                    val doneSubtasksCount = state.data.task.subTasks.count { !it.isToDo }
                     val selectionModeEnabled = selectedCount > 0
                     if (subTasksCount > 0) {
 
@@ -222,6 +224,17 @@ fun TaskDetailsScreen(
                         }) {
                             Icon(imageVector = Icons.Default.AddCircle, contentDescription = "Copy task")
                         }
+                    }
+                    if (subTasksCount > 0) {
+                        val subTasksCountRow = if (doneSubtasksCount > 0) {
+                            "$doneSubtasksCount/$subTasksCount"
+                        } else {
+                            subTasksCount
+                        }
+                        Text(modifier = Modifier.padding(horizontal = 16.dp)
+                            .align(Alignment.End),
+                            text = "Subtasks: $subTasksCountRow"
+                        )
                     }
                     Spacer(Modifier.size(16.dp))
                     TaskListView(
