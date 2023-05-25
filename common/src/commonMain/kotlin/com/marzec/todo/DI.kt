@@ -334,7 +334,7 @@ object DI {
             navigationStore = navigationStore,
             stateCache = preferences,
             cacheKey = cacheKey,
-            initialState = DatePickerState.from(date)
+            initialState = DatePickerState.from(date, blockPastDates = true)
         )
     }
 

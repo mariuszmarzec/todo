@@ -28,6 +28,14 @@ object CurrentTimeUtil {
 fun currentTime(): LocalDateTime =
     java.time.LocalDateTime.now(CurrentTimeUtil.clock).toKotlinLocalDateTime()
 
+fun LocalDateTime.withStartOfDay(): LocalDateTime =
+    toJavaLocalDateTime()
+        .withHour(0)
+        .withMinute(0)
+        .withSecond(0)
+        .withNano(0)
+        .toKotlinLocalDateTime()
+
 fun currentMillis(): Long =
     java.time.LocalDateTime.now(CurrentTimeUtil.clock).toInstant(OffsetDateTime.now().offset)
         .toEpochMilli()

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.marzec.delegate.StoreDelegate
+import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.collectState
@@ -41,6 +42,7 @@ import com.marzec.time.currentTime
 import com.marzec.time.formatDate
 import com.marzec.time.plusDays
 import com.marzec.time.time
+import com.marzec.time.withStartOfDay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.datetime.DayOfWeek
@@ -81,17 +83,19 @@ data class DatePickerState(
     val year: Int = currentTime().year,
     val monthInYear: Int = currentTime().monthNumber,
     val dayInMonth: Int = currentTime().dayOfMonth,
-    val currentSelectedDay: LocalDateTime? = null
+    val currentSelectedDay: LocalDateTime? = null,
+    val blockPastDates: Boolean = false
 ) {
     fun toLocalDateTime() = time(dayInMonth, monthInYear, year)
 
     companion object {
-        fun from(dateTime: LocalDateTime?) = dateTime?.let {
+        fun from(dateTime: LocalDateTime?, blockPastDates: Boolean) = dateTime?.let {
             DatePickerState(
                 dateTime.year,
                 dateTime.monthNumber,
                 dateTime.dayOfMonth,
-                dateTime
+                dateTime,
+                blockPastDates
             )
         } ?: DatePickerState()
     }
@@ -117,12 +121,26 @@ class DatePickerStore(
 
     fun onDayClick(day: Int, month: Int) = intent<Unit> {
         reducer {
-            state.copy(dayInMonth = day, monthInYear = month)
+            if (isDatePickAllowed(day, month)) {
+                state.copy(dayInMonth = day, monthInYear = month)
+            } else {
+                state
+            }
         }
         sideEffect {
-            navigationStore.goBack(state.toLocalDateTime())
+            if (isDatePickAllowed(day, month)) {
+                navigationStore.goBack(state.toLocalDateTime())
+            }
         }
     }
+
+    private fun IntentBuilder.IntentContext<DatePickerState, Unit>.isDatePickAllowed(
+        day: Int,
+        month: Int
+    ) =
+        !state.blockPastDates
+                || state.copy(dayInMonth = day, monthInYear = month)
+            .toLocalDateTime() >= currentTime().withStartOfDay()
 
     override suspend fun onNewState(newState: DatePickerState) {
         super.onNewState(newState)
@@ -137,7 +155,7 @@ fun DatePickerScreen(
 ) {
     val state by store.collectState()
 
-    val years = (1920..currentTime().year+4).reversed().toList()
+    val years = (1920..currentTime().year + 4).reversed().toList()
     val months = (1..12).toList()
 
     Column(
@@ -238,7 +256,11 @@ fun DatePickerScreen(
                             ).weight(1 / 7f),
                         text = AnnotatedString(day.formatDate("d")),
                         style = TextStyle.Default.copy(
-                            color = if (day.monthNumber != state.monthInYear) {
+                            color = if (isSelected) {
+                                Color.White
+                            } else if (day.monthNumber != state.monthInYear
+                                || state.blockPastDates && day.withStartOfDay() < currentTime().withStartOfDay()
+                            ) {
                                 Color.Gray
                             } else {
                                 Color.Black
