@@ -115,9 +115,9 @@ class DatePickerStore(
         state.copy(monthInYear = month)
     }
 
-    fun onDayClick(day: Int) = intent<Unit> {
+    fun onDayClick(day: Int, month: Int) = intent<Unit> {
         reducer {
-            state.copy(dayInMonth = day)
+            state.copy(dayInMonth = day, monthInYear = month)
         }
         sideEffect {
             navigationStore.goBack(state.toLocalDateTime())
@@ -246,7 +246,7 @@ fun DatePickerScreen(
                             textAlign = TextAlign.Center
                         ),
                         onClick = {
-                            store.onDayClick(day.dayOfMonth)
+                            store.onDayClick(day.dayOfMonth, day.monthNumber)
                         }
                     )
                 }
