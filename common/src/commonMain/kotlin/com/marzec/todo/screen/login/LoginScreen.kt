@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
+import com.marzec.view.TextFieldStateful
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -69,12 +69,12 @@ private fun LoginScreen(
     ) {
 
         Box(modifier = Modifier.padding(16.dp)) {
-            TextField(login, {
+            TextFieldStateful(login, {
                 loginStore.onLoginChanged(it)
             })
         }
         Box(modifier = Modifier.padding(16.dp)) {
-            TextField(password, {
+            TextFieldStateful(password, {
                 loginStore.onPasswordChanged(it)
             })
         }

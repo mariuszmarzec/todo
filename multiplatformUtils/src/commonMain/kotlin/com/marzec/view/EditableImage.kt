@@ -13,7 +13,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import com.marzec.view.TextFieldStateful
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
@@ -88,7 +88,7 @@ fun EditableImage(
 
             is EditableImageState.Edit -> {
                 Column (modifier = Modifier.align(Alignment.Center)) {
-                    TextField(
+                    TextFieldStateful(
                         value = state.url,
                         label = { Text(label) },
                         onValueChange = {

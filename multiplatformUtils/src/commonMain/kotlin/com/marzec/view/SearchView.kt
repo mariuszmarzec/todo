@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
@@ -58,15 +57,20 @@ fun SearchViewState(
         val focusManager = LocalFocusManager.current
         val focusRequester = remember { FocusRequester() }
         val searchInUse = state.focused || state.value.isNotEmpty()
-        BasicTextField(
+        BasicTextFieldStateful(
             modifier = Modifier
                 .focusRequester(focusRequester)
-                .onFocusChanged { onSearchFocusChanged(it.isFocused) }
+                .onFocusChanged {
+                    onSearchFocusChanged(it.isFocused)
+
+                }
                 .widthIn(min = 100.dp, max = 300.dp)
                 .padding(0.dp),
             singleLine = true,
             value = if (searchInUse) state.value else "Search",
-            onValueChange = { onSearchQueryChanged(it) }
+            onValueChange = {
+                onSearchQueryChanged(it)
+            }
         )
         LaunchedEffect(key1 = state.focused) {
             if (state.focused) {

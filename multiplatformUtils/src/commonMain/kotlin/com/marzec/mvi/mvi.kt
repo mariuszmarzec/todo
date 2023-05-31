@@ -85,7 +85,7 @@ open class Store3<State : Any>(
 
         val identifier = Random.nextLong()
         val intent = builder.build()
-        val job = launchNewJob(id.isNotEmpty(), intent)
+        val job = launchNewJob(intent)
 
         if (id.isNotEmpty()) {
             job.invokeOnCompletion {
@@ -100,10 +100,10 @@ open class Store3<State : Any>(
     }
 
     private fun <Result : Any> launchNewJob(
-        isCancellable: Boolean,
         intent: Intent3<State, Result>
     ): Job = scope.launch {
-        val flow = withContext(SINGLE_THREAD) {
+
+        val flow = withContext(stateThread) {
             (intent.onTrigger(_state.value) ?: flowOf(null))
         }
         flow.collect { result ->
@@ -115,24 +115,23 @@ open class Store3<State : Any>(
         intent: Intent3<State, Result>,
         result: Result?
     ) {
-        val shouldCancel = withContext(SINGLE_THREAD) {
+        val shouldCancel = withContext(stateThread) {
             intent.cancelTrigger?.invoke(result, _state.value)
         }
         if (shouldCancel == true) {
             runCancellationAndSideEffectIfNeeded(result, intent)
             cancel()
         } else {
-            withContext(SINGLE_THREAD) {
+            withContext(stateThread) {
                 val oldStateValue = _state.value
                 val newResultIntent = intent.copy(
                     state = oldStateValue,
                     result = result,
                 )
 
-                val reducedState = newResultIntent.reducer(result, oldStateValue)
-                onNewState(reducedState)
-                newResultIntent.sideEffect?.invoke(result, reducedState)
-                _state.value = reducedState
+                _state.update { newResultIntent.reducer(result, oldStateValue) }
+                onNewState(_state.value)
+                newResultIntent.sideEffect?.invoke(result, _state.value)
             }
         }
     }
@@ -157,7 +156,7 @@ open class Store3<State : Any>(
     }
 
     companion object {
-        private val SINGLE_THREAD = newSingleThreadContext("mvi")
+        var stateThread: CoroutineDispatcher = newSingleThreadContext("mvi")
     }
 }
 

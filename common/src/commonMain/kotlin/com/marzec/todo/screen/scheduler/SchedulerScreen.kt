@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.Button
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import com.marzec.view.TextFieldStateful
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -77,12 +77,12 @@ fun SchedulerScreen(
                 Text("Repeat times?")
             }
             if (state.repeatTimes) {
-                TextField(label = { Text("Repeat count") },
+                TextFieldStateful(label = { Text("Repeat count") },
                     value = state.repeatCount.toString(),
                     onValueChange = { store.onRepeatCountChanged(it) })
             }
             Spacer(Modifier.height(16.dp))
-            TextField(label = { Text("Repeat in every period") },
+            TextFieldStateful(label = { Text("Repeat in every period") },
                 value = state.repeatInEveryPeriod.toString(),
                 onValueChange = { store.onRepeatInEveryPeriodChanged(it) })
         }

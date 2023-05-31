@@ -14,7 +14,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
+import com.marzec.view.TextFieldStateful
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
@@ -55,7 +55,7 @@ fun AddNewTaskScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextField(state.data.description, {
+                        TextFieldStateful(state.data.description, {
                             store.onDescriptionChanged(it)
                         })
                     }
