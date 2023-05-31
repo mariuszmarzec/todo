@@ -66,12 +66,11 @@ fun SearchViewState(
                 .widthIn(min = 100.dp, max = 300.dp)
                 .padding(0.dp),
             singleLine = true,
-            value = state.value,
+            value = if (searchInUse) state.value else "Search",
             onValueChange = {
-                println("ssssss")
-                println(it)
-                println(state)
-                onSearchQueryChanged(it)
+                if (searchInUse) {
+                    onSearchQueryChanged(it)
+                }
             }
         )
         LaunchedEffect(key1 = state.focused) {
