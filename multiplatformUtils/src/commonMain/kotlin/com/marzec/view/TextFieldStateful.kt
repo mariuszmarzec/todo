@@ -55,7 +55,7 @@ fun TextFieldStateful(
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
     colors: TextFieldColors = TextFieldDefaults.textFieldColors()
 ) {
-    var state by remember { mutableStateOf(value) }
+    var state by remember(value) { mutableStateOf(value) }
 
     snapshotFlow { state }
         .mapLatest {
@@ -117,7 +117,7 @@ fun OutlinedTextFieldStateful(
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
     colors: TextFieldColors = TextFieldDefaults.textFieldColors()
 ) {
-    var state by remember { mutableStateOf(value) }
+    var state by remember(value) { mutableStateOf(value) }
 
     snapshotFlow { state }
         .mapLatest {
@@ -175,7 +175,7 @@ fun BasicTextFieldStateful(
     decorationBox: @Composable (innerTextField: @Composable () -> Unit) -> Unit =
         @Composable { innerTextField -> innerTextField() }
 ) {
-    var state by remember { mutableStateOf(value) }
+    var state by remember(value) { mutableStateOf(value) }
 
     snapshotFlow { state }
         .mapLatest {

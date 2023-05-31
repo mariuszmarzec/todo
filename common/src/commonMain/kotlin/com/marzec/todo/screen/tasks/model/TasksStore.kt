@@ -93,6 +93,7 @@ class TasksStore(
 
     override suspend fun onNewState(newState: State<TasksScreenState>) {
         stateCache.set(cacheKey, newState)
+        println((newState as? State.Data<TasksScreenState>)?.data?.search)
     }
 
     fun moveToTop(id: Int) = sideEffect {

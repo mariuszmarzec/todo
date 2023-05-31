@@ -62,13 +62,15 @@ fun SearchViewState(
                 .focusRequester(focusRequester)
                 .onFocusChanged {
                     onSearchFocusChanged(it.isFocused)
-
                 }
                 .widthIn(min = 100.dp, max = 300.dp)
                 .padding(0.dp),
             singleLine = true,
-            value = if (searchInUse) state.value else "Search",
+            value = state.value,
             onValueChange = {
+                println("ssssss")
+                println(it)
+                println(state)
                 onSearchQueryChanged(it)
             }
         )
