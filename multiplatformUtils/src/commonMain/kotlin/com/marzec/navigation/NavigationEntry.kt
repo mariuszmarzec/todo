@@ -24,8 +24,8 @@ data class ResultKey(
     val requestId: Int
 )
 
-val RequestKey.secondaryId: Int?
-    get() = options[SECONDARY_ID] as? Int
+val RequestKey.secondaryId: Any?
+    get() = options[SECONDARY_ID] as? Any
 
-val RequestKey.secondaryIdValue: Int
-    get() = options.getValue(SECONDARY_ID) as Int
+val RequestKey.secondaryIdValue: Any
+    get() = options.getValue(SECONDARY_ID) as Any

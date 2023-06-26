@@ -75,7 +75,7 @@ class NavigationStore(
         secondaryId: Int?
     ) {
         val options = secondaryId?.let {
-            mapOf(SECONDARY_ID to it.toString())
+            mapOf<String, Any>(SECONDARY_ID to it)
         } ?: emptyMap()
         addNextScreen(action, requestId, options)
     }
@@ -158,5 +158,5 @@ data class ResultValue<T>(
     val data: T
 )
 
-val <T> ResultValue<T>.secondaryIdValue: Int
-    get() = options.getValue(SECONDARY_ID) as Int
+val ResultValue<*>.secondaryIdValue: Any
+    get() = options.getValue(SECONDARY_ID)
