@@ -37,20 +37,20 @@ open class Store3<State : Any>(
 
     open suspend fun onNewState(newState: State) = Unit
 
-    fun <Result : Any> intent(id: String = "", @BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
+    fun <Result : Any> intent(id: String? = null, @BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
         intentInternal(id, buildFun)
     }
 
     fun <Result : Any> intent(@BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
-        intentInternal("", buildFun)
+        intentInternal(id = null, buildFun)
     }
 
-    fun <Result : Any> intent(id: String = "", builder: IntentBuilder<State, Result>) {
+    fun <Result : Any> intent(id: String? = null, builder: IntentBuilder<State, Result>) {
         intentInternal(id, builder)
     }
 
     fun <Result : Any> intent(builder: IntentBuilder<State, Result>) {
-        intentInternal("", builder)
+        intentInternal(id = null, builder)
     }
 
     fun <Result : Any> triggerIntent(func: suspend IntentBuilder.IntentContext<State, Result>.() -> Flow<Result>?) {
@@ -75,52 +75,51 @@ open class Store3<State : Any>(
         intentInternal<Unit> { sideEffect(func) }
     }
 
-    private fun <Result : Any> intentInternal(id: String = "", buildFun: IntentBuilder<State, Result>.() -> Unit) {
+    private fun <Result : Any> intentInternal(id: String? = null, buildFun: IntentBuilder<State, Result>.() -> Unit) {
         val builder = IntentBuilder<State, Result>().apply { buildFun() }
         intentInternal(id, builder)
     }
 
-    private fun <Result : Any> intentInternal(id: String = "", builder: IntentBuilder<State, Result>) {
-        jobs[id]?.cancelJob()
+    private fun <Result : Any> intentInternal(id: String? = null, builder: IntentBuilder<State, Result>) {
+        val newJobId = id ?: System.nanoTime().toString()
+        jobs[newJobId]?.cancelJob()
 
         val identifier = Random.nextLong()
         val intent = builder.build()
-        val job = launchNewJob(intent)
+        val job = launchNewJob(intent, newJobId)
 
-        if (id.isNotEmpty()) {
-            job.invokeOnCompletion {
-                if (jobs[id]?.identifier == identifier) {
-                    jobs.remove(id)
-                }
-            }
-            if (job.isActive) {
-                jobs[id] = IntentJob(identifier, intent, job)
+        job.invokeOnCompletion {
+            if (jobs[newJobId]?.identifier == identifier) {
+                jobs.remove(newJobId)
             }
         }
+        jobs[newJobId] = IntentJob(identifier, intent, job)
+        job.start()
     }
 
     private fun <Result : Any> launchNewJob(
-        intent: Intent3<State, Result>
-    ): Job = scope.launch {
+        intent: Intent3<State, Result>,
+        jobId: String
+    ): Job = scope.launch(start = CoroutineStart.LAZY) {
 
         val flow = withContext(stateThread) {
             (intent.onTrigger(_state.value) ?: flowOf(null))
         }
         flow.collect { result ->
-            processTriggeredValue(intent, result)
+            processTriggeredValue(intent, result, jobId)
         }
     }
 
     private suspend fun <Result : Any> processTriggeredValue(
         intent: Intent3<State, Result>,
-        result: Result?
+        result: Result?,
+        jobId: String
     ) {
         val shouldCancel = withContext(stateThread) {
             intent.cancelTrigger?.invoke(result, _state.value)
         }
         if (shouldCancel == true) {
-            runCancellationAndSideEffectIfNeeded(result, intent)
-            cancel()
+            runCancellationAndSideEffectIfNeeded(result, intent, jobId)
         } else {
             withContext(stateThread) {
                 val oldStateValue = _state.value
@@ -136,8 +135,12 @@ open class Store3<State : Any>(
         }
     }
 
-    private fun <Result : Any> runCancellationAndSideEffectIfNeeded(result: Result?, intent: Intent3<State, Result>) {
-        cancelAll()
+    private fun <Result : Any> runCancellationAndSideEffectIfNeeded(
+        result: Result?,
+        intent: Intent3<State, Result>,
+        jobId: String
+    ) {
+        cancel(jobId)
         if (intent.runSideEffectAfterCancel) {
             intentInternal<Unit> {
                 sideEffect {
