@@ -1,5 +1,5 @@
 
-val kotlinVersion = "1.8.10"
+val kotlinVersion = "1.9.10"
 val ktorVersion = "1.6.8"
 val okHttpClientVersion = "4.10.0"
 val serializationVersion = "1.0.1"
@@ -18,7 +18,7 @@ val glideVersion = "1.0.0-alpha.1"
 val exoPlayerVersion = "2.18.5"
 val vlcVersion = "4.7.0"
 
-private val composePluginVersion = "1.4.0"
+private val composePluginVersion = "1.5.1"
 private val dateTimeVersion = "0.1.1"
 
 object Dependency {
