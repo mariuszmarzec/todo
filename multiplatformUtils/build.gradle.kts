@@ -82,6 +82,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = composeCompilerVersion
+    }
+
     buildFeatures {
         compose = true
     }

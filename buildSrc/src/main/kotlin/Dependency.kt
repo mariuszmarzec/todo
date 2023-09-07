@@ -20,6 +20,7 @@ val vlcVersion = "4.7.0"
 
 private val composePluginVersion = "1.5.1"
 private val dateTimeVersion = "0.1.1"
+val composeCompilerVersion = "1.5.3"
 
 object Dependency {
 
