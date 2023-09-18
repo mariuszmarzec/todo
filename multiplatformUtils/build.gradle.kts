@@ -14,7 +14,7 @@ kotlin {
     android()
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
-            useJUnitPlatform()
+            useJUnit()
         }
     }
 
@@ -33,8 +33,11 @@ kotlin {
                 implementation(Dependency.kotlinDateTime)
             }
         }
-        named("desktopTest") {
+        val desktopTest by getting {
             dependencies {
+                api(project(":multiplatformUtils"))
+                implementation(compose.desktop.currentOs)
+                implementation(compose.desktop.uiTestJUnit4)
                 implementation(kotlin("test"))
                 implementation(Dependency.coroutineTest)
             }

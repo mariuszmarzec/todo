@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun AddResourceView(
@@ -23,7 +24,7 @@ fun AddResourceView(
 ) {
     if (!showEmptyState) {
         Row(
-            modifier = Modifier.clickable { onClick() },
+            modifier = Modifier.testTag(AddResourceViewPageObject.contentRow).clickable { onClick() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton({ onRemoveAllButtonClick() }) {
@@ -34,10 +35,17 @@ fun AddResourceView(
             )
         }
     } else {
-        Button(onClick = {
+        Button(
+            modifier = Modifier.testTag(AddResourceViewPageObject.emptyLabel),
+            onClick = {
             onClick()
         }) {
             Text(emptyLabel)
         }
     }
+}
+
+object AddResourceViewPageObject {
+    val emptyLabel = "emptyLabel"
+    val contentRow = "contentRow"
 }
