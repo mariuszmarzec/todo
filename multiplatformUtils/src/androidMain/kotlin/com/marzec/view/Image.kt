@@ -9,10 +9,6 @@ import androidx.compose.ui.layout.ContentScale
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 
-object GlideUrlInterceptor {
-    var onUrl: (String) -> String = { it }
-}
-
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 actual fun Image(
