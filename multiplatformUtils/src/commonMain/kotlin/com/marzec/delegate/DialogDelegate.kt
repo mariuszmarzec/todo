@@ -4,27 +4,27 @@ import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
 import com.marzec.extensions.asInstanceAndReturn
 
-interface DialogDelegate {
+interface DialogDelegate<ID_TYPE> {
     fun closeDialog()
-    fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>)
-    fun showRemoveTaskDialog(idsToRemove: List<Int>, id: String = "")
+    fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>)
+    fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String = "")
     fun onRemoveWithSubTasksChange()
     fun showSelectUrlDialog(urls: List<String>)
 }
 
-class DialogDelegateImpl<DATA : WithDialog<DATA>> :
+class DialogDelegateImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> :
     StoreDelegate<State<DATA>>(),
-    DialogDelegate {
+    DialogDelegate<ID_TYPE> {
 
     override fun closeDialog() = intent<Unit> {
         reducer {
             state.reduceData {
-                copyWithDialog(DialogState.NoDialog)
+                copyWithDialog(DialogState.NoDialog())
             }
         }
     }
 
-    override fun showRemoveDialogWithCheckBox(idsToRemove: List<Int>) = intent<Unit> {
+    override fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(dialog = DialogState.RemoveDialogWithCheckBox(idsToRemove))
@@ -32,7 +32,7 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
         }
     }
 
-    override fun showRemoveTaskDialog(idsToRemove: List<Int>, id: String) = intent<Unit> {
+    override fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String) = intent<Unit> {
         reducer {
             state.reduceData {
                 copyWithDialog(
@@ -46,9 +46,9 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
         reducer {
             state.reduceData {
                 copyWithDialog(
-                    dialog = dialog.asInstanceAndReturn<DialogState.RemoveDialogWithCheckBox> {
+                    dialog = dialog.asInstanceAndReturn<DialogState.RemoveDialogWithCheckBox<ID_TYPE>> {
                         copy(checked = !this.checked)
-                    } ?: DialogState.NoDialog
+                    } ?: DialogState.NoDialog()
                 )
             }
         }
@@ -63,32 +63,32 @@ class DialogDelegateImpl<DATA : WithDialog<DATA>> :
     }
 }
 
-interface WithDialog<T> {
+interface WithDialog<ID_TYPE, T> {
 
-    val dialog: DialogState
+    val dialog: DialogState<ID_TYPE>
 
-    fun copyWithDialog(dialog: DialogState): T
+    fun copyWithDialog(dialog: DialogState<ID_TYPE>): T
 }
 
-sealed class DialogState {
+sealed class DialogState<ID_TYPE> {
 
-    data class RemoveDialog(
-        val idsToRemove: List<Int>,
+    data class RemoveDialog<ID>(
+        val idsToRemove: List<ID>,
         val id: String = ""
-    ) : DialogState()
+    ) : DialogState<ID>()
 
-    data class RemoveDialogWithCheckBox(
-        val idsToRemove: List<Int>,
+    data class RemoveDialogWithCheckBox<ID>(
+        val idsToRemove: List<ID>,
         val checked: Boolean = false
-    ) : DialogState()
+    ) : DialogState<ID>()
 
-    data class InputDialog(
+    data class InputDialog<ID>(
         val inputField: String,
-    ) : DialogState()
+    ) : DialogState<ID>()
 
-    data class SelectOptionsDialog(
+    data class SelectOptionsDialog<ID>(
         val items: List<Any>,
-    ) : DialogState()
+    ) : DialogState<ID>()
 
-    object NoDialog : DialogState()
+    data class NoDialog<ID>(val unit: Unit = Unit) : DialogState<ID>()
 }

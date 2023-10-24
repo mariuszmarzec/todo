@@ -15,13 +15,13 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
 ) : StoreDelegate<State<DATA>>(), RemoveTaskDelegate {
 
     private lateinit var removeTaskDelegate: RemoveTaskDelegate
-    private lateinit var dialogDelegate: DialogDelegate
+    private lateinit var dialogDelegate: DialogDelegate<Int>
 
     @Suppress("Unchecked_Cast")
     override fun init(store: Store3<State<DATA>>) {
         super.init(store)
         removeTaskDelegate = store as RemoveTaskDelegate
-        dialogDelegate = store as DialogDelegate
+        dialogDelegate = store as DialogDelegate<Int>
     }
 
     override fun removeTask(idsToRemove: List<Int>) = sideEffect {

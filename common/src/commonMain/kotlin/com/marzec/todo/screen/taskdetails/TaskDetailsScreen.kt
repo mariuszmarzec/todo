@@ -285,7 +285,7 @@ fun TaskDetailsScreen(
 }
 
 @Composable
-fun ShowDialog(store: TaskDetailsStore, dialog: DialogState) {
+fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
     when (dialog) {
         is DialogState.RemoveDialog -> {
             DialogBox(

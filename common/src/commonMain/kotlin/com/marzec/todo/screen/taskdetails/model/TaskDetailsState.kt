@@ -12,7 +12,7 @@ import com.marzec.view.SearchState
 
 data class TaskDetailsState(
     val task: Task,
-    override val dialog: DialogState,
+    override val dialog: DialogState<Int>,
     override val selected: Set<Int>,
     override val search: SearchState,
     override val scrollListState: ScrollListState
@@ -21,7 +21,7 @@ data class TaskDetailsState(
     WithScrollListState<TaskDetailsState>,
     WithSearch<TaskDetailsState> {
 
-    override fun copyWithDialog(dialog: DialogState): TaskDetailsState = copy(dialog = dialog)
+    override fun copyWithDialog(dialog: DialogState<Int>): TaskDetailsState = copy(dialog = dialog)
 
     override fun taskById(taskId: Int): Task = if (taskId == task.id) {
         task

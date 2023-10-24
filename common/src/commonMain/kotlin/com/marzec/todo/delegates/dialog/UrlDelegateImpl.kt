@@ -20,12 +20,12 @@ class UrlDelegateImpl<DATA : WithTasks<DATA>>(
 ) : StoreDelegate<State<DATA>>(), UrlDelegate {
 
     private lateinit var urlDelegatedStore: UrlDelegate
-    private lateinit var dialogDelegatedStore: DialogDelegate
+    private lateinit var dialogDelegatedStore: DialogDelegate<Int>
 
     override fun init(store: Store3<State<DATA>>) {
         super.init(store)
         urlDelegatedStore = store as UrlDelegate
-        dialogDelegatedStore = store as DialogDelegate
+        dialogDelegatedStore = store as DialogDelegate<Int>
     }
 
     override fun openUrls(urls: List<String>) =

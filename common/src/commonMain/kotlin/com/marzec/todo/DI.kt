@@ -171,7 +171,7 @@ object DI {
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE,
             urlDelegate = UrlDelegateImpl<TasksScreenState>(openUrlHelper),
-            dialogDelegate = DialogDelegateImpl<TasksScreenState>(),
+            dialogDelegate = DialogDelegateImpl<Int, TasksScreenState>(),
             removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(
                 provideTodoRepository()
             ),
@@ -243,7 +243,7 @@ object DI {
         initialState = TaskDetailsState.INITIAL,
         taskId = taskId,
         copyToClipBoardHelper = copyToClipBoardHelper,
-        dialogDelegate = DialogDelegateImpl<TaskDetailsState>(),
+        dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
         removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(provideTodoRepository()),
         urlDelegate = UrlDelegateImpl<TaskDetailsState>(openUrlHelper),
         changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(

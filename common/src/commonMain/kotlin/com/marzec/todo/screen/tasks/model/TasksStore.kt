@@ -34,7 +34,7 @@ class TasksStore(
     private val todoRepository: TodoRepository,
     private val loginRepository: LoginRepository,
     private val urlDelegate: UrlDelegate,
-    private val dialogDelegate: DialogDelegate,
+    private val dialogDelegate: DialogDelegate<Int>,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val searchDelegate: SearchDelegate,
@@ -45,7 +45,7 @@ class TasksStore(
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
-    DialogDelegate by dialogDelegate,
+    DialogDelegate<Int> by dialogDelegate,
     SearchDelegate by searchDelegate,
     ScrollDelegate by scrollDelegate {
 

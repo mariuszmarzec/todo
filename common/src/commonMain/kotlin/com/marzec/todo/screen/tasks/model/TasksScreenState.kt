@@ -14,12 +14,12 @@ data class TasksScreenState(
     val tasks: List<Task>,
     override val scrollListState: ScrollListState,
     override val search: SearchState,
-    override val dialog: DialogState
+    override val dialog: DialogState<Int>
 ) : WithTasks<TasksScreenState>,
     WithSearch<TasksScreenState>,
     WithScrollListState<TasksScreenState> {
 
-    override fun copyWithDialog(dialog: DialogState): TasksScreenState = copy(dialog = dialog)
+    override fun copyWithDialog(dialog: DialogState<Int>): TasksScreenState = copy(dialog = dialog)
 
     override fun copyWithSearch(search: SearchState): TasksScreenState =
         copy(search = search)
@@ -38,7 +38,7 @@ data class TasksScreenState(
                 value = EMPTY_STRING,
                 focused = false,
             ),
-            dialog = DialogState.NoDialog
+            dialog = DialogState.NoDialog()
         )
     }
 }

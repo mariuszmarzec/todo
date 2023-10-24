@@ -37,7 +37,7 @@ class TaskDetailsStore(
     private val todoRepository: TodoRepository,
     private val taskId: Int,
     private val copyToClipBoardHelper: CopyToClipBoardHelper,
-    private val dialogDelegate: DialogDelegate,
+    private val dialogDelegate: DialogDelegate<Int>,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
@@ -48,7 +48,7 @@ class TaskDetailsStore(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
-    DialogDelegate by dialogDelegate,
+    DialogDelegate<Int> by dialogDelegate,
     SelectionDelegate<Int> by selectionDelegate,
     ScrollDelegate by scrollDelegate,
     SearchDelegate by searchDelegate {
@@ -77,7 +77,7 @@ class TaskDetailsStore(
                 val taskIds = result.subTasks.map { it.id }.toSet()
                 TaskDetailsState(
                     task = result,
-                    dialog = DialogState.NoDialog,
+                    dialog = DialogState.NoDialog(),
                     selected = this?.selected?.filter { it in taskIds }?.toSet().orEmpty(),
                     search = SearchState(
                         value = "",
