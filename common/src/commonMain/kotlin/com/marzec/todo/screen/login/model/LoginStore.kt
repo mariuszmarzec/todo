@@ -5,6 +5,7 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
+import com.marzec.mvi.postSideEffect
 import com.marzec.mvi.reduceContentNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.NavigationAction
@@ -39,26 +40,20 @@ class LoginStore(
             }
         }
 
-        cancelTrigger(runSideEffectAfterCancel = true) {
-            resultNonNull() is Content.Data
-        }
-
         reducer {
             state.reduceContentNoChanges(resultNonNull())
         }
 
-        sideEffect {
-            resultNonNull().ifDataSuspend {
-                navigationStore.next(
-                    NavigationAction(
-                        TodoDestination.Tasks,
-                        options = NavigationOptions(
-                            popTo = TodoDestination.Tasks,
-                            popToInclusive = true
-                        )
+        postSideEffect {
+            navigationStore.next(
+                NavigationAction(
+                    TodoDestination.Tasks,
+                    options = NavigationOptions(
+                        popTo = TodoDestination.Tasks,
+                        popToInclusive = true
                     )
                 )
-            }
+            )
         }
     }
 

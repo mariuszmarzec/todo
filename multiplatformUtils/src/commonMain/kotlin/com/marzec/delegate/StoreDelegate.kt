@@ -1,6 +1,7 @@
 package com.marzec.delegate
 
 import com.marzec.mvi.IntentBuilder
+import com.marzec.mvi.IntentContext
 import com.marzec.mvi.Store3
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -17,7 +18,7 @@ open class StoreDelegate<State : Any> {
         store.intent(buildFun)
 
     fun sideEffect(
-        func: suspend IntentBuilder.IntentContext<State, Unit>.() -> Unit
+        func: suspend IntentContext<State, Unit>.() -> Unit
     ) = store.sideEffect(func)
 }
 

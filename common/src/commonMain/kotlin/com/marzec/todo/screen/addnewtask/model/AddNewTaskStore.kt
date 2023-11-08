@@ -2,7 +2,7 @@ package com.marzec.todo.screen.addnewtask.model
 
 import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
-import com.marzec.mvi.IntentBuilder
+import com.marzec.mvi.IntentContext
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceContentNoChanges
@@ -153,7 +153,7 @@ class AddNewTaskStore(
         }
     }
 
-    private suspend fun IntentBuilder.IntentContext<State<AddNewTaskState>, Content<Unit>>.navigateOutAfterCall() {
+    private suspend fun IntentContext<State<AddNewTaskState>, Content<Unit>>.navigateOutAfterCall() {
         result?.ifDataSuspend {
             state.ifDataAvailable(blockOnLoading = false) {
                 val taskIdToShow = taskId ?: parentTaskId
