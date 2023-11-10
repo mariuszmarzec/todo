@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 class NavigationStore(
     private val router: (Destination) -> @Composable (destination: Destination, cacheKey: String) -> Unit,
@@ -25,7 +26,7 @@ class NavigationStore(
             reducer {
                 state.copy(
                     backStack = state.backStack.toMutableList().apply {
-                        cleanResultCacheForCurrentScreen()
+                        runBlocking { cleanResultCacheForCurrentScreen() }
                         handlePoppingScreens(action)
                         addNextScreen(action, requestId, secondaryId)
                     }
@@ -42,7 +43,7 @@ class NavigationStore(
             reducer {
                 state.copy(
                     backStack = state.backStack.toMutableList().apply {
-                        cleanResultCacheForCurrentScreen()
+                        runBlocking { cleanResultCacheForCurrentScreen() }
                         handlePoppingScreens(action)
                         addNextScreen(action, requestId, options)
                     }
@@ -54,14 +55,14 @@ class NavigationStore(
         reducer {
             val requestKey = state.backStack.last().requestKey
             if (requestKey != null) {
-                resultCache.save(requestKey, result)
+                runBlocking { resultCache.save(requestKey, result) }
             }
             state.copy(
                 backStack = state.backStack.toMutableList().apply {
                     if (size > 1) {
                         removeLast().also {
                             stateCache.remove(it.cacheKey)
-                            resultCache.remove(it.cacheKey)
+                            runBlocking { resultCache.remove(it.cacheKey) }
                         }
                     }
                 }

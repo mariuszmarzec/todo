@@ -1,10 +1,12 @@
 package com.marzec.delegate
 
+import com.marzec.mvi.Intent3
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.Store3
 import kotlin.experimental.ExperimentalTypeInference
 
+@OptIn(ExperimentalTypeInference::class)
 open class StoreDelegate<State : Any> {
 
     private lateinit var store: Store3<State>
@@ -13,9 +15,12 @@ open class StoreDelegate<State : Any> {
         this.store = store
     }
 
-    @OptIn(ExperimentalTypeInference::class)
     fun <RESULT : Any> intent(@BuilderInference buildFun: IntentBuilder<State, RESULT>.() -> Unit) =
         store.intent(buildFun)
+
+    fun <Result : Any> run(intent: Intent3<State, Result>) {
+        store.run(intent)
+    }
 
     fun sideEffect(
         func: suspend IntentContext<State, Unit>.() -> Unit

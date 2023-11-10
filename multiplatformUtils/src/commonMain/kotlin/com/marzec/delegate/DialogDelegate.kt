@@ -2,7 +2,11 @@ package com.marzec.delegate
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
+import com.marzec.mvi.intent as createIntent
 import com.marzec.extensions.asInstanceAndReturn
+import com.marzec.mvi.Intent3
+import com.marzec.mvi.IntentContext
+import com.marzec.mvi.map
 
 interface DialogDelegate<ID_TYPE> {
     fun closeDialog()
@@ -12,55 +16,84 @@ interface DialogDelegate<ID_TYPE> {
     fun showSelectUrlDialog(urls: List<String>)
 }
 
-class DialogDelegateImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> :
-    StoreDelegate<State<DATA>>(),
+class DialogDelegateImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> : StoreDelegate<State<DATA>>(),
     DialogDelegate<ID_TYPE> {
 
-    override fun closeDialog() = intent<Unit> {
+    override fun closeDialog() =
+        run(createCloseDialog<ID_TYPE, DATA>().mapIntent())
+
+    override fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>) =
+        run(createShowRemoveDialogWithCheckBox<ID_TYPE, DATA>(idsToRemove).mapIntent())
+
+    override fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String) =
+        run(createShowRemoveTaskDialog<ID_TYPE, DATA>(idsToRemove, id).mapIntent())
+
+    override fun onRemoveWithSubTasksChange() =
+        run(intentOnRemoveWithSubTasksChange<ID_TYPE, DATA>().mapIntent())
+
+    override fun showSelectUrlDialog(urls: List<String>) =
+        run(intentShowSelectUrlDialog<ID_TYPE, DATA>(urls).mapIntent())
+
+    private fun Intent3<DATA, Any>.mapIntent(): Intent3<State<DATA>, Any> = map(
+        stateReducer = { state.reduceData { it(result, this) } },
+        stateMapper = { it.ifDataAvailable { it.data } }
+    )
+}
+
+private fun <ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> createCloseDialog(): Intent3<DATA, Any> =
+    createIntent {
         reducer {
-            state.reduceData {
-                copyWithDialog(DialogState.NoDialog())
-            }
+            state.copyWithDialog(DialogState.NoDialog())
         }
     }
 
-    override fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>) = intent<Unit> {
+private fun <ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> createShowRemoveDialogWithCheckBox(
+    idsToRemove: List<ID_TYPE>
+): Intent3<DATA, Any> = createIntent {
+    reducer {
+        state.copyWithDialog(dialog = DialogState.RemoveDialogWithCheckBox(idsToRemove))
+    }
+}
+
+private fun <ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> createShowRemoveTaskDialog(
+    idsToRemove: List<ID_TYPE>, id: String
+): Intent3<DATA, Any> = createIntent {
+    reducer {
+        state.copyWithDialog(dialog = DialogState.RemoveDialog(idsToRemove, id))
+    }
+}
+
+private fun <ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> intentOnRemoveWithSubTasksChange(): Intent3<DATA, Any> =
+    createIntent {
         reducer {
-            state.reduceData {
-                copyWithDialog(dialog = DialogState.RemoveDialogWithCheckBox(idsToRemove))
-            }
+            state.copyWithDialog(dialog = state.dialog.asInstanceAndReturn<DialogState.RemoveDialogWithCheckBox<ID_TYPE>> {
+                copy(checked = !this.checked)
+            } ?: DialogState.NoDialog())
         }
     }
 
-    override fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String) = intent<Unit> {
+private fun <ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> intentShowSelectUrlDialog(urls: List<String>): Intent3<DATA, Any> =
+    createIntent {
         reducer {
-            state.reduceData {
-                copyWithDialog(
-                    dialog = DialogState.RemoveDialog(idsToRemove, id)
-                )
-            }
+            state.copyWithDialog(dialog = DialogState.SelectOptionsDialog(urls))
         }
     }
 
-    override fun onRemoveWithSubTasksChange() = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copyWithDialog(
-                    dialog = dialog.asInstanceAndReturn<DialogState.RemoveDialogWithCheckBox<ID_TYPE>> {
-                        copy(checked = !this.checked)
-                    } ?: DialogState.NoDialog()
-                )
-            }
-        }
-    }
+class DialogDelegateSimpleImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> :
+    StoreDelegate<DATA>(),
+    DialogDelegate<ID_TYPE> {
 
-    override fun showSelectUrlDialog(urls: List<String>) = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copyWithDialog(dialog = DialogState.SelectOptionsDialog(urls))
-            }
-        }
-    }
+    override fun closeDialog() = run(createCloseDialog())
+
+    override fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>) =
+        run(createShowRemoveDialogWithCheckBox(idsToRemove))
+
+    override fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String) =
+        run(createShowRemoveTaskDialog(idsToRemove, id))
+
+    override fun onRemoveWithSubTasksChange() = run(intentOnRemoveWithSubTasksChange())
+
+    override fun showSelectUrlDialog(urls: List<String>) = run(intentShowSelectUrlDialog(urls))
 }
 
 interface WithDialog<ID_TYPE, T> {
@@ -73,13 +106,11 @@ interface WithDialog<ID_TYPE, T> {
 sealed class DialogState<ID_TYPE> {
 
     data class RemoveDialog<ID>(
-        val idsToRemove: List<ID>,
-        val id: String = ""
+        val idsToRemove: List<ID>, val id: String = ""
     ) : DialogState<ID>()
 
     data class RemoveDialogWithCheckBox<ID>(
-        val idsToRemove: List<ID>,
-        val checked: Boolean = false
+        val idsToRemove: List<ID>, val checked: Boolean = false
     ) : DialogState<ID>()
 
     data class InputDialog<ID>(
