@@ -1,6 +1,7 @@
 package com.marzec.navigation
 
 import androidx.compose.runtime.Composable
+import com.marzec.mvi.IntentContext
 import com.marzec.mvi.Store3
 import com.marzec.preferences.Preferences
 import kotlinx.coroutines.CoroutineScope
@@ -8,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 class NavigationStore(
     private val router: (Destination) -> @Composable (destination: Destination, cacheKey: String) -> Unit,
@@ -22,51 +23,54 @@ class NavigationStore(
 ) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
     fun next(action: NavigationAction, requestId: Int? = null, secondaryId: Int? = null) =
-        intent<Unit> {
-            reducer {
-                state.copy(
-                    backStack = state.backStack.toMutableList().apply {
-                        runBlocking { cleanResultCacheForCurrentScreen() }
-                        handlePoppingScreens(action)
-                        addNextScreen(action, requestId, secondaryId)
-                    }
-                )
-            }
+        navigate {
+            state.copy(
+                backStack = state.backStack.toMutableList().apply {
+                    cleanResultCacheForCurrentScreen()
+                    handlePoppingScreens(action)
+                    addNextScreen(action, requestId, secondaryId)
+                }
+            )
         }
 
     fun nextWithOptionRequest(
         action: NavigationAction,
         requestId: Int? = null,
         options: Map<String, Any>? = null
-    ) =
-        intent<Unit> {
-            reducer {
-                state.copy(
-                    backStack = state.backStack.toMutableList().apply {
-                        runBlocking { cleanResultCacheForCurrentScreen() }
-                        handlePoppingScreens(action)
-                        addNextScreen(action, requestId, options)
-                    }
-                )
+    ) = navigate {
+        state.copy(
+            backStack = state.backStack.toMutableList().apply {
+                cleanResultCacheForCurrentScreen()
+                handlePoppingScreens(action)
+                addNextScreen(action, requestId, options)
             }
-        }
+        )
+    }
 
-    fun goBack(result: Any? = null) = intent<Unit> {
-        reducer {
-            val requestKey = state.backStack.last().requestKey
-            if (requestKey != null) {
-                runBlocking { resultCache.save(requestKey, result) }
-            }
-            state.copy(
-                backStack = state.backStack.toMutableList().apply {
-                    if (size > 1) {
-                        removeLast().also {
-                            stateCache.remove(it.cacheKey)
-                            runBlocking { resultCache.remove(it.cacheKey) }
-                        }
+    fun goBack(result: Any? = null) = navigate {
+        val requestKey = state.backStack.last().requestKey
+        if (requestKey != null) {
+            resultCache.save(requestKey, result)
+        }
+        state.copy(
+            backStack = state.backStack.toMutableList().apply {
+                if (size > 1) {
+                    removeLast().also {
+                        stateCache.remove(it.cacheKey)
+                        resultCache.remove(it.cacheKey)
                     }
                 }
-            )
+            }
+        )
+    }
+
+    private fun navigate(stateTransform: suspend IntentContext<NavigationState, NavigationState>.() -> NavigationState) {
+        intent {
+            onTrigger {
+                flowOf(stateTransform())
+            }
+
+            reducer { resultNonNull() }
         }
     }
 
