@@ -2,6 +2,8 @@ package com.marzec.todo.screen.addnewtask.model
 
 import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
+import com.marzec.model.toNullableUpdate
+import com.marzec.model.toUpdate
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
@@ -12,9 +14,11 @@ import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.Preferences
+import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
+import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +53,7 @@ class AddNewTaskStore(
                         ) { result ->
                             copy(
                                 taskId = result.data.id,
+                                task = result.data,
                                 parentTaskId = result.data.parentTaskId,
                                 description = result.data.description,
                                 priority = result.data.priority,
@@ -82,15 +87,16 @@ class AddNewTaskStore(
     fun addNewTask() = intent<Content<Unit>>("addNewTask") {
         onTrigger {
             state.ifDataAvailable {
-                val taskId = taskId
-                if (taskId != null) {
+                if ( task != null) {
                     todoRepository.updateTask(
-                        taskId = taskId,
-                        description = description,
-                        parentTaskId = parentTaskId,
-                        priority = priority,
-                        isToDo = isToDo,
-                        scheduler = schedulerWithOptions
+                        taskId = task.id,
+                        UpdateTask(
+                            description = description.toUpdate(task.description),
+                            parentTaskId = parentTaskId.toNullableUpdate(task.parentTaskId),
+                            priority = priority.toUpdate(task.priority),
+                            isToDo = isToDo.toUpdate(task.isToDo),
+                            scheduler = schedulerWithOptions.toNullableUpdate(task.scheduler)
+                        )
                     )
                 } else {
                     todoRepository.addNewTask(

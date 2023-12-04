@@ -514,9 +514,9 @@ object Api {
         val ADD_TASKS = "$BASE/tasks"
         val MARK_AS_TO_DO = "$BASE/tasks/mark-as-to-do"
         fun updateTask(taskId: Int) = "$BASE/tasks/$taskId"
-        fun removeTask(taskId: Int) = "$BASE/tasks/$taskId"
         fun copyTask(taskId: Int) = "$BASE/tasks/$taskId/copy"
-        fun removeTaskWithSubtask(taskId: Int) = "$BASE/tasks/$taskId/removeWithSubtasks"
+        fun removeTaskWithSubtask(taskId: Int, removeWithSubtasks: Boolean) =
+            "$BASE/tasks/$taskId?removeWithSubtasks=$removeWithSubtasks"
     }
 
     object Headers {

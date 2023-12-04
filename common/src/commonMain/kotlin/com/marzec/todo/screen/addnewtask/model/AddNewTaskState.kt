@@ -2,9 +2,11 @@ package com.marzec.todo.screen.addnewtask.model
 
 import com.marzec.mvi.State
 import com.marzec.todo.model.Scheduler
+import com.marzec.todo.model.Task
 
 data class AddNewTaskState(
     val taskId: Int?,
+    val task: Task?,
     val parentTaskId: Int?,
     val priority: Int,
     val isToDo: Boolean,
@@ -32,6 +34,7 @@ data class AddNewTaskState(
             parentTaskId: Int? = null
         ) = AddNewTaskState(
             taskId = taskId,
+            task = null,
             parentTaskId = parentTaskId,
             description = "",
             priority = 0,

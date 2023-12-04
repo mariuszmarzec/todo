@@ -1,5 +1,6 @@
 package com.marzec.todo.api
 
+import com.marzec.dto.NullableFieldDto
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -26,11 +27,11 @@ data class CreateTaskDto(
 
 @Serializable
 data class UpdateTaskDto(
-    val description: String,
-    val parentTaskId: Int? = null,
-    val priority: Int,
-    val isToDo: Boolean,
-    val scheduler: SchedulerDto? = null
+    val description: String? = null,
+    val parentTaskId: NullableFieldDto<Int>? = null,
+    val priority: Int? = null,
+    val isToDo: Boolean? = null,
+    val scheduler: NullableFieldDto<SchedulerDto>? = null
 )
 
 @Serializable
@@ -51,9 +52,4 @@ data class SchedulerDto(
 data class MarkAsToDoDto(
     val isToDo: Boolean,
     val taskIds: List<Int>,
-)
-
-@Serializable
-data class RemoveWithSubtasksDto(
-    val removeWithSubtasks: Boolean
 )

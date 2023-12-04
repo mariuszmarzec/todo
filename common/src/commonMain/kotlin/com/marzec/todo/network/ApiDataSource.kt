@@ -4,10 +4,10 @@ import com.marzec.todo.Api
 import com.marzec.todo.Api.Todo.ADD_TASKS
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
-import com.marzec.todo.api.RemoveWithSubtasksDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
+import com.marzec.todo.model.UpdateTask
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -17,14 +17,8 @@ import io.ktor.client.request.post
 class ApiDataSource(
     private val client: HttpClient
 ) : DataSource {
-    override suspend fun removeTask(taskId: Int) {
-        client.delete<Unit>(Api.Todo.removeTask(taskId))
-    }
-
     override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) {
-        client.post<Unit>(Api.Todo.removeTaskWithSubtask(taskId)) {
-            body = RemoveWithSubtasksDto(removeWithSubtasks = removeSubtasks)
-        }
+        client.delete<Unit>(Api.Todo.removeTaskWithSubtask(taskId, removeSubtasks))
     }
 
     override suspend fun getTasks() = client.get<List<TaskDto>>(Api.Todo.TASKS)
@@ -45,18 +39,9 @@ class ApiDataSource(
 
     override suspend fun updateTask(
         taskId: Int,
-        description: String,
-        parentTaskId: Int?,
-        priority: Int,
-        isToDo: Boolean,
-        scheduler: SchedulerDto?
+        task: UpdateTaskDto
     ) = client.patch<Unit>(Api.Todo.updateTask(taskId)) {
-        body = UpdateTaskDto(
-            description = description,
-            parentTaskId = parentTaskId,
-            priority = priority,
-            isToDo = isToDo,
-            scheduler = scheduler
-        )
+        headers.append("Version", "V2")
+        body = task
     }
 }

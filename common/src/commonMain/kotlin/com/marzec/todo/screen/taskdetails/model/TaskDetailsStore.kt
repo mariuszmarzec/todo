@@ -25,6 +25,8 @@ import com.marzec.todo.repository.TodoRepository
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.ScrollListState
+import com.marzec.model.NullableField
+import com.marzec.todo.model.UpdateTask
 import com.marzec.view.SearchState
 import kotlinx.coroutines.CoroutineScope
 
@@ -115,11 +117,7 @@ class TaskDetailsStore(
                 task.subTasks.firstOrNull { id == it.id }?.let { task ->
                     todoRepository.updateTask(
                         taskId = id,
-                        description = task.description,
-                        parentTaskId = null,
-                        priority = task.priority,
-                        isToDo = task.isToDo,
-                        scheduler = task.scheduler
+                        UpdateTask(parentTaskId = NullableField(null))
                     )
                 }
             }

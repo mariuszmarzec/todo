@@ -11,6 +11,7 @@ import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
+import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTaskDto
 import kotlinx.serialization.Serializable
 
@@ -34,10 +35,6 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     suspend fun init(tasks: List<TaskDto>) = update {
         val allTasks = tasks.flatMapTaskDto()
         localData = LocalData(tasks = allTasks)
-    }
-
-    override suspend fun removeTask(taskId: Int) = update {
-        removeTaskInternal(taskId)
     }
 
     override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) = update {
@@ -136,23 +133,27 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     override suspend fun updateTask(
         taskId: Int,
-        description: String,
-        parentTaskId: Int?,
-        priority: Int,
-        isToDo: Boolean,
-        scheduler: SchedulerDto?
+        task: UpdateTaskDto
     ) = update {
         localData = localData.copy(
             tasks = localData.tasks.replaceIf(
                 condition = { it.id == taskId },
-                replace = { task ->
-                    task.copy(
-                        description = description,
-                        parentTaskId = parentTaskId,
-                        priority = priority,
-                        isToDo = isToDo,
+                replace = { changedTask ->
+                    changedTask.copy(
+                        description = task.description ?: changedTask.description,
+                        parentTaskId = if (task.parentTaskId != null) {
+                            task.parentTaskId.value
+                        } else {
+                            changedTask.parentTaskId
+                        },
+                        priority = task.priority ?: changedTask.priority,
+                        isToDo = task.isToDo ?: changedTask.isToDo,
                         modifiedTime = currentTime().formatDate(),
-                        scheduler = scheduler
+                        scheduler = if (task.scheduler != null) {
+                            task.scheduler.value
+                        } else {
+                            changedTask.scheduler
+                        }
                     )
                 }
             )

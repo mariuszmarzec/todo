@@ -7,12 +7,17 @@ import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
+import com.marzec.model.toDto
+import com.marzec.model.toNullableUpdate
+import com.marzec.model.toUpdate
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
+import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
+import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.model.toDomain
 import com.marzec.todo.model.toDto
 import com.marzec.todo.network.DataSource
@@ -86,21 +91,10 @@ class TodoRepository(
 
     suspend fun updateTask(
         taskId: Int,
-        description: String,
-        parentTaskId: Int?,
-        priority: Int,
-        isToDo: Boolean,
-        scheduler: Scheduler?
+        task: UpdateTask
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.updateTask(
-                taskId = taskId,
-                description = description,
-                parentTaskId = parentTaskId,
-                priority = priority,
-                isToDo = isToDo,
-                scheduler = scheduler?.toDto()
-            )
+            dataSource.updateTask(taskId, task.toDto())
         }
 
     suspend fun markAsDone(taskId: Int): Flow<Content<Unit>> =
@@ -152,11 +146,9 @@ class TodoRepository(
         asContentWithListUpdate {
             dataSource.updateTask(
                 taskId = task.id,
-                description = task.description,
-                parentTaskId = parentTaskId,
-                priority = task.priority,
-                isToDo = task.isToDo,
-                scheduler = task.scheduler?.toDto()
+                UpdateTaskDto(
+                    parentTaskId = parentTaskId.toNullableUpdate(task.parentTaskId)?.toDto()
+                )
             )
         }
 
@@ -168,11 +160,9 @@ class TodoRepository(
             tasks.forEach { task ->
                 dataSource.updateTask(
                     taskId = task.id,
-                    description = task.description,
-                    parentTaskId = parentTaskId,
-                    priority = task.priority,
-                    isToDo = task.isToDo,
-                    scheduler = task.scheduler?.toDto()
+                    UpdateTaskDto(
+                        parentTaskId = parentTaskId.toNullableUpdate(task.parentTaskId)?.toDto()
+                    )
                 )
             }
         }

@@ -1,5 +1,7 @@
 package com.marzec.todo.model
 
+import com.marzec.model.NullableField
+import com.marzec.model.toDto
 import com.marzec.time.formatDate
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.SchedulerDto
@@ -10,7 +12,6 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.Serializable
 
 data class Task(
     val id: Int,
@@ -231,25 +232,17 @@ fun CreateTask.toDto() = CreateTaskDto(
 )
 
 data class UpdateTask(
-    val description: String,
-    val parentTaskId: Int?,
-    val priority: Int,
-    val isToDo: Boolean,
-    val scheduler: Scheduler? = null
-)
-
-fun UpdateTaskDto.toDomain() = UpdateTask(
-    description = description,
-    parentTaskId = parentTaskId,
-    priority = priority,
-    isToDo = isToDo,
-    scheduler = scheduler?.toDomain()
+    val description: String? = null,
+    val parentTaskId: NullableField<Int>? = null,
+    val priority: Int? = null,
+    val isToDo: Boolean? = null,
+    val scheduler: NullableField<Scheduler>? = null
 )
 
 fun UpdateTask.toDto() = UpdateTaskDto(
     description = description,
-    parentTaskId = parentTaskId,
+    parentTaskId = parentTaskId?.toDto(),
     priority = priority,
     isToDo = isToDo,
-    scheduler = scheduler?.toDto()
+    scheduler = scheduler?.toDto{ it?.toDto() }
 )
