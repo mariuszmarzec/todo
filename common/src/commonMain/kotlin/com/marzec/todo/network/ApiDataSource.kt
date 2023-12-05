@@ -41,7 +41,6 @@ class ApiDataSource(
         taskId: Int,
         task: UpdateTaskDto
     ) = client.patch<Unit>(Api.Todo.updateTask(taskId)) {
-        headers.append("Version", "V2")
         body = task
     }
 }
