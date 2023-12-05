@@ -61,10 +61,10 @@ object Dependency {
 
 object Config {
     object Android {
-        val compileSdkVersion = 33
+        val compileSdkVersion = 34
         val applicationId = "com.marzec.todo"
         val minSdkVersion = 30
-        val targetSdkVersion = 33
+        val targetSdkVersion = 34
         val versionCode = 1
         val versionName = "1.0"
     }
