@@ -9,8 +9,10 @@ import com.marzec.model.User
 import com.marzec.content.Content
 import com.marzec.content.asContentFlow
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineDispatcher
@@ -43,15 +45,15 @@ class LoginRepositoryImpl(
 
     override suspend fun login(login: String, password: String): Flow<Content<User>> =
         asContentFlow {
-            client.post<UserDto>(loginApiUrl) {
+            client.post(loginApiUrl) {
                 contentType(ContentType.Application.Json)
-                body = LoginRequestDto(login, password)
-            }.toDomain()
+                setBody(LoginRequestDto(login, password))
+            }.body<UserDto>().toDomain()
         }.flowOn(dispatcher)
 
     override suspend fun logout(): Flow<Content<Unit>> =
         asContentFlow {
             fileCache.putTyped<String>(authorizationPreferencesKey, null)
-            client.get<Unit>(logoutApiUrl)
+            client.get(logoutApiUrl).body<Unit>()
         }.flowOn(dispatcher)
 }

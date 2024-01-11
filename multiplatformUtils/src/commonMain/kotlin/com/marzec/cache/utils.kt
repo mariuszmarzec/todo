@@ -5,7 +5,6 @@ import com.marzec.content.asContentFlow
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -17,10 +16,13 @@ suspend fun <T : Any> cacheCall(
     key: String,
     dispatcher: CoroutineDispatcher,
     memoryCache: Cache,
-    networkCall: suspend () -> Content<T>
+    networkCall: suspend () -> Content<T>,
+    getCached: suspend () -> T? = { memoryCache.get<T>(key) },
+    observeCached: suspend () -> Flow<T?> = { memoryCache.observe<T>(key) },
+    cacheUpdate: suspend (Content.Data<T>) -> Unit = { memoryCache.put(key, it.data) }
 ): Flow<Content<T>> =
     withContext(dispatcher) {
-        val cached = memoryCache.observe<T>(key).firstOrNull()
+        val cached = getCached()
         val initial: Content<T> = if (cached != null) {
             Content.Data(cached)
         } else {
@@ -33,10 +35,10 @@ suspend fun <T : Any> cacheCall(
                 if (callResult is Content.Error) {
                     emit(callResult)
                 } else if (callResult is Content.Data) {
-                    memoryCache.put(key, callResult.data)
+                    cacheUpdate(callResult)
                 }
             },
-            memoryCache.observe<T>(key).filterNotNull().map { Content.Data(it) as Content<T> }
+            observeCached().filterNotNull().map { Content.Data(it) as Content<T> }
         )
     }.flowOn(dispatcher)
 

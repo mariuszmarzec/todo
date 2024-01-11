@@ -1,14 +1,14 @@
 
 val kotlinVersion = "1.9.10"
-val ktorVersion = "1.6.8"
+val ktorVersion = "2.3.7"
 val okHttpClientVersion = "4.10.0"
-val serializationVersion = "1.0.1"
+val serializationVersion = "1.6.2"
 val coreKtxVersion = "1.3.2"
 val appCompatVersion = "1.2.0"
 val materialVersion = "1.1.0"
 val coroutinesVersion = "1.6.0"
 val androidActivityXVersion = "1.3.0-alpha02"
-val androidGradlepluginVersion = "7.4.0"
+val androidGradlepluginVersion = "8.1.1"
 val buildkonfigVersion = "0.11.0"
 val datastore_version = "1.0.0-alpha05"
 val detektVersion = "1.18.1"
@@ -29,7 +29,8 @@ object Dependency {
 
     val ktorClient = "io.ktor:ktor-client-core:$ktorVersion"
     val ktorOkHttpClient = "io.ktor:ktor-client-okhttp:$ktorVersion"
-    val ktorSerialization = "io.ktor:ktor-client-serialization-jvm:$ktorVersion"
+    val ktorContentNegotiation = "io.ktor:ktor-client-content-negotiation:$ktorVersion"
+    val ktorSerialization = "io.ktor:ktor-serialization-kotlinx-json:$ktorVersion"
     val okHttpClientLogger = "com.squareup.okhttp3:logging-interceptor:$okHttpClientVersion"
 
     val androidBuildPlugin = "com.android.tools.build:gradle:${androidGradlepluginVersion}"

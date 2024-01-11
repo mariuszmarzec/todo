@@ -7,6 +7,7 @@ import androidx.compose.ui.res.ResourceLoader
 import com.marzec.cache.Cache
 import com.marzec.logger.Logger
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -89,7 +90,7 @@ class ImageLoaderDesktop(
     private suspend fun loadFromNetwork(url: String) {
         clientProvider().use { client ->
             val httpResponse: HttpResponse = client.get(url)
-            val loadedImage = httpResponse.receive<ByteArray>()
+            val loadedImage = httpResponse.body<ByteArray>()
             val contentType = httpResponse.contentType()
 
             putToMemoryCache(url, Image(loadedImage, contentType?.contentSubtype.orEmpty()))

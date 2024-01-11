@@ -28,7 +28,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.marzec.delegate.StoreDelegate
-import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
