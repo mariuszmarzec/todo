@@ -23,20 +23,24 @@ class NavigationStore(
 ) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
     fun next(action: NavigationAction, requestId: Int? = null, secondaryId: Int? = null) =
-        navigate {
-            state.copy(
-                backStack = state.backStack.toMutableList().apply {
-                    cleanResultCacheForCurrentScreen()
-                    handlePoppingScreens(action)
-                    addNextScreen(action, requestId, secondaryId)
-                }
-            )
-        }
+        navigate(
+            action = action,
+            requestId = requestId,
+            options = secondaryId?.let {
+                mapOf<String, Any>(SECONDARY_ID to it)
+            } ?: emptyMap()
+        )
 
     fun nextWithOptionRequest(
         action: NavigationAction,
         requestId: Int? = null,
         options: Map<String, Any>? = null
+    ) = navigate(action, requestId, options)
+
+    private fun navigate(
+        action: NavigationAction,
+        requestId: Int?,
+        options: Map<String, Any>?
     ) = navigate {
         state.copy(
             backStack = state.backStack.toMutableList().apply {
@@ -72,17 +76,6 @@ class NavigationStore(
 
             reducer { resultNonNull() }
         }
-    }
-
-    private fun MutableList<NavigationEntry>.addNextScreen(
-        action: NavigationAction,
-        requestId: Int?,
-        secondaryId: Int?
-    ) {
-        val options = secondaryId?.let {
-            mapOf<String, Any>(SECONDARY_ID to it)
-        } ?: emptyMap()
-        addNextScreen(action, requestId, options)
     }
 
     private fun MutableList<NavigationEntry>.addNextScreen(
