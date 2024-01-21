@@ -6,7 +6,7 @@ import com.marzec.delegate.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
-import com.marzec.mvi.reduceContentNoChanges
+import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
@@ -224,7 +224,7 @@ class TaskDetailsStore(
             }
         }
 
-        reducer { state.reduceContentNoChanges(resultNonNull()) }
+        reducer { state.reduceContentToLoadingWithNoChanges(resultNonNull()) }
     }
 
     fun markSelectedAsDone() = intent<Content<Unit>> {
@@ -234,7 +234,7 @@ class TaskDetailsStore(
             }
         }
 
-        reducer { state.reduceContentNoChanges(resultNonNull()) }
+        reducer { state.reduceContentToLoadingWithNoChanges(resultNonNull()) }
     }
 
     fun copyTask() = intent<Content<Unit>> {

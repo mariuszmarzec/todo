@@ -1,12 +1,10 @@
 package com.marzec.repository
 
 import com.marzec.cache.Cache
-import com.marzec.cache.asContentWithListUpdate
 import com.marzec.cache.cacheCall
 import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.asContentFlow
-import com.marzec.content.ifDataSuspend
 import com.marzec.datasource.CommonDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -61,7 +59,7 @@ class CrudRepository<
         }
     )
 
-    private suspend fun updateCache(id: ID, data: MODEL) = updateCache(id) { old ->
+    private suspend fun updateCache(id: ID, data: MODEL) = updateCache { old ->
         old?.map {
             if (it.isSameId(id)) {
                 data
@@ -71,7 +69,7 @@ class CrudRepository<
         } ?: listOf(data)
     }
 
-    private suspend fun updateCache(id: ID, update: (List<MODEL>?) -> List<MODEL>?) {
+    private suspend fun updateCache(update: (List<MODEL>?) -> List<MODEL>?) {
         val oldValue = memoryCache.get<List<MODEL>>(cacheKey)
         val newValue = update(oldValue)
         memoryCache.put(cacheKey, newValue)
@@ -79,7 +77,7 @@ class CrudRepository<
 
     suspend fun remove(id: ID): Flow<Content<Unit>> = asContentFlow {
         dataSource.remove(id)
-        updateCache(id) { cachedList ->
+        updateCache { cachedList ->
             cachedList?.toMutableList()?.apply {
                 removeIf { it.isSameId(id) }
             }
@@ -93,30 +91,23 @@ class CrudRepository<
 
     suspend fun create(
         create: CREATE
-    ): Flow<Content<Unit>> =
-        asContentWithListUpdate {
-            dataSource.create(create.createToDto())
+    ): Flow<Content<Unit>> = asContentFlow {
+        val createdModel = dataSource.create(create.createToDto()).toDomain()
+        updateCache { cachedList ->
+            cachedList.orEmpty().toMutableList().apply {
+                add(0, createdModel)
+            }
         }
+    }.flowOn(dispatcher)
 
     private suspend fun getTasksCacheFirst() =
         cacheCall(cacheKey) {
             asContent { dataSource.getAll().map(toDomain) }
         }
 
-    private suspend fun refreshListsCache() = asContent {
-        dataSource.getAll().map { it.toDomain() }
-    }.ifDataSuspend {
-        memoryCache.put(cacheKey, data)
-    }
-
     private suspend fun <T : Any> cacheCall(
         key: String,
         networkCall: suspend () -> Content<T>
     ): Flow<Content<T>> = cacheCall(key, dispatcher, memoryCache, networkCall)
 
-    private fun asContentWithListUpdate(
-        request: suspend () -> Unit
-    ) = asContentWithListUpdate(dispatcher, request) {
-        refreshListsCache()
-    }
 }

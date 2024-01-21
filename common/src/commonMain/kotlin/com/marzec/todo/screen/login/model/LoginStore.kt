@@ -6,7 +6,7 @@ import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
 import com.marzec.mvi.postSideEffect
-import com.marzec.mvi.reduceContentNoChanges
+import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
@@ -41,7 +41,7 @@ class LoginStore(
         }
 
         reducer {
-            state.reduceContentNoChanges(resultNonNull())
+            state.reduceContentToLoadingWithNoChanges(resultNonNull())
         }
 
         postSideEffect {

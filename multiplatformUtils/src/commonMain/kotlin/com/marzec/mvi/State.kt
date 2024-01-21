@@ -20,22 +20,6 @@ sealed class State<T>(open val data: T?) {
     ) = data?.takeIf { !blockOnLoading || this !is Loading }?.let(action)
 }
 
-fun <T, R> State<T>.reduceContentNoChanges(result: Content<R>): State<T> =
-    reduceContent(result) { this }
-
-fun <T, R> State<T>.reduceContent(
-    result: Content<R>,
-    reducer: State<T>.(Content.Data<R>) -> State<T>
-): State<T> =
-    when (result) {
-        is Content.Data -> this.reducer(result)
-        is Content.Loading -> State.Loading(data)
-        is Content.Error -> State.Error(
-            data,
-            result.exception.message.orEmpty()
-        )
-    }
-
 fun <T> State<T>.reduceData(
     reducer: T.() -> T
 ): State<T> =

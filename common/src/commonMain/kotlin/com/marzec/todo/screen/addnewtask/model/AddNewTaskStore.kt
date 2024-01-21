@@ -7,7 +7,7 @@ import com.marzec.model.toUpdate
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.State
 import com.marzec.mvi.Store3
-import com.marzec.mvi.reduceContentNoChanges
+import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
@@ -114,7 +114,7 @@ class AddNewTaskStore(
         }
 
         reducer {
-            state.reduceContentNoChanges(resultNonNull())
+            state.reduceContentToLoadingWithNoChanges(resultNonNull())
         }
 
         sideEffect {
@@ -139,7 +139,7 @@ class AddNewTaskStore(
         }
 
         reducer {
-            state.reduceContentNoChanges(resultNonNull())
+            state.reduceContentToLoadingWithNoChanges(resultNonNull())
         }
 
         sideEffect {

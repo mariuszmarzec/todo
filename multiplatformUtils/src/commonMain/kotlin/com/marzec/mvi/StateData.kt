@@ -9,7 +9,7 @@ data class StateData<T>(
     val error: String? = null
 )
 
-fun <T, R> StateData<T>.reduceContentNoChanges(result: Content<R>): StateData<T> =
+fun <T, R> StateData<T>.reduceContentToLoadingWithNoChanges(result: Content<R>): StateData<T> =
     reduceDataWithContent(result) { this }
 
 fun <T> StateData<T>.reduceData(
