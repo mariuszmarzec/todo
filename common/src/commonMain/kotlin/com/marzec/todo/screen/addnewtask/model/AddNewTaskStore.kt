@@ -59,8 +59,10 @@ class AddNewTaskStore(
                                 priority = result.data.priority,
                                 isToDo = result.data.isToDo,
                                 scheduler = result.data.scheduler,
-                                highestPriorityAsDefault = result.data.scheduler?.highestPriorityAsDefault ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT,
-                                removeAfterSchedule = (result.data.scheduler as? Scheduler.OneShot)?.removeScheduled ?: Scheduler.REMOVE_SCHEDULED
+                                highestPriorityAsDefault = result.data.scheduler?.highestPriorityAsDefault
+                                    ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT,
+                                removeAfterSchedule = (result.data.scheduler as? Scheduler.OneShot)?.removeScheduled
+                                    ?: Scheduler.REMOVE_SCHEDULED
                             )
                         }
                     } ?: state
@@ -87,7 +89,7 @@ class AddNewTaskStore(
     fun addNewTask() = intent<Content<Unit>>("addNewTask") {
         onTrigger {
             state.ifDataAvailable {
-                if ( task != null) {
+                if (task != null) {
                     todoRepository.updateTask(
                         taskId = task.id,
                         UpdateTask(
@@ -128,7 +130,13 @@ class AddNewTaskStore(
                 todoRepository.addNewTasks(
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     parentTaskId = parentTaskId,
-                    descriptions = description.split("\n"),
+                    descriptions = description.split("\n").let {
+                        if (highestPriorityAsDefault) {
+                            it.reversed()
+                        } else {
+                            it
+                        }
+                    },
                     scheduler = schedulerWithOptions
                 )
             }
@@ -173,6 +181,7 @@ class AddNewTaskStore(
                             )
                         )
                     }
+
                     else -> {
                         navigationStore.goBack()
                     }
