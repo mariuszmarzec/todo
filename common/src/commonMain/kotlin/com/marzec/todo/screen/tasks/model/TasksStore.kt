@@ -15,7 +15,9 @@ import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
+import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
+import com.marzec.delegate.SelectionDelegate
 import com.marzec.mvi.reduceData
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
@@ -39,7 +41,8 @@ class TasksStore(
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val searchDelegate: SearchDelegate,
     private val scrollDelegate: ScrollDelegate,
-    private val scheduledOptions: PickItemOptions<Task>
+    private val scheduledOptions: PickItemOptions<Task>,
+    private val selectionDelegate: SelectionDelegate<Int>
 ) : Store3<State<TasksScreenState>>(
     scope,
     stateCache.get(cacheKey) ?: initialState
@@ -47,7 +50,8 @@ class TasksStore(
     UrlDelegate by urlDelegate,
     DialogDelegate<Int> by dialogDelegate,
     SearchDelegate by searchDelegate,
-    ScrollDelegate by scrollDelegate {
+    ScrollDelegate by scrollDelegate,
+    SelectionDelegate<Int> by selectionDelegate {
 
     override val identifier: String
         get() = cacheKey
@@ -59,7 +63,8 @@ class TasksStore(
             changePriorityDelegate,
             urlDelegate,
             searchDelegate,
-            scrollDelegate
+            scrollDelegate,
+            selectionDelegate
         )
     }
 
@@ -70,12 +75,14 @@ class TasksStore(
 
         reducer {
             state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) { result ->
+                val taskIds = result.data.map { it.id }
                 copy(
                     tasks = result.data.sortedWith(
                         compareByDescending(Task::priority).thenBy(
                             Task::modifiedTime
                         )
-                    )
+                    ),
+                    selected = this.selected.filter { it in taskIds }.toSet()
                 )
             }
         }
@@ -135,5 +142,20 @@ class TasksStore(
 
     fun onScheduledClick() {
         navigationStore.next(NavigationAction(TodoDestination.PickItem(scheduledOptions)))
+    }
+
+    fun showRemoveSelectedSubTasksDialog() = reducerIntent {
+        state.reduceData {
+            copy(
+                dialog = DialogState.RemoveDialogWithCheckBox(
+                    idsToRemove = selected.toList(),
+                    id = DIALOG_ID_REMOVE_MULTIPLE_TASKS
+                )
+            )
+        }
+    }
+
+    companion object {
+        const val DIALOG_ID_REMOVE_MULTIPLE_TASKS = "DIALOG_ID_REMOVE_MULTIPLE_TASKS"
     }
 }

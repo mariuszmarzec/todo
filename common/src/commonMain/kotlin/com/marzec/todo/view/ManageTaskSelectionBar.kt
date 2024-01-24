@@ -24,10 +24,10 @@ fun ManageTaskSelectionBar(
     tasks: List<Task>,
     selected: Set<Int>,
     shouldShow: Boolean,
-    onMarkSelectedAsTodoClick: () -> Unit,
-    onMarkSelectedAsDoneClick: () -> Unit,
+    onMarkSelectedAsTodoClick: (() -> Unit)? = null,
+    onMarkSelectedAsDoneClick: (() -> Unit)? = null,
     onRemoveClick: () -> Unit,
-    onRemoveDoneTasksClick: () -> Unit,
+    onRemoveDoneTasksClick: (() -> Unit)? = null,
     onAllSelectClicked: () -> Unit,
     onUnpinSubtasksClick: (() -> Unit)? = null
 ) {
@@ -47,21 +47,25 @@ fun ManageTaskSelectionBar(
                 Text("($selectedCount/$subTasksCount)")
             }
             if (selectionModeEnabled) {
-                IconButton({
-                    onMarkSelectedAsTodoClick()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Mark selected as to do"
-                    )
+                onMarkSelectedAsTodoClick?.let {
+                    IconButton({
+                        onMarkSelectedAsTodoClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Mark selected as to do"
+                        )
+                    }
                 }
-                IconButton({
-                    onMarkSelectedAsDoneClick()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Mark selected as done"
-                    )
+                onMarkSelectedAsDoneClick?.let {
+                    IconButton({
+                        onMarkSelectedAsDoneClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Mark selected as done"
+                        )
+                    }
                 }
 
                 IconButton({
@@ -83,7 +87,7 @@ fun ManageTaskSelectionBar(
                     }
                 }
             }
-            if (tasks.any { !it.isToDo }) {
+            if (tasks.any { !it.isToDo } && onRemoveDoneTasksClick != null) {
                 IconButton({
                     onRemoveDoneTasksClick()
                 }) {

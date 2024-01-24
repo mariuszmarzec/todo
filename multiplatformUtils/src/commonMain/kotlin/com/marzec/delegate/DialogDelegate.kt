@@ -5,7 +5,6 @@ import com.marzec.mvi.reduceData
 import com.marzec.mvi.intent as createIntent
 import com.marzec.extensions.asInstanceAndReturn
 import com.marzec.mvi.Intent3
-import com.marzec.mvi.IntentContext
 import com.marzec.mvi.map
 
 interface DialogDelegate<ID_TYPE> {
@@ -110,7 +109,7 @@ sealed class DialogState<ID_TYPE> {
     ) : DialogState<ID>()
 
     data class RemoveDialogWithCheckBox<ID>(
-        val idsToRemove: List<ID>, val checked: Boolean = false
+        val idsToRemove: List<ID>, val checked: Boolean = false, val id:String = ""
     ) : DialogState<ID>()
 
     data class InputDialog<ID>(

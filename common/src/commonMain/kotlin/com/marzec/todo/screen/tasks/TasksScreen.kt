@@ -1,5 +1,6 @@
 package com.marzec.todo.screen.tasks
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.FabPosition
@@ -19,6 +20,8 @@ import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
+import com.marzec.todo.screen.tasks.model.TasksStore.Companion.DIALOG_ID_REMOVE_MULTIPLE_TASKS
+import com.marzec.todo.view.ManageTaskSelectionBar
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.Dialog
@@ -43,6 +46,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                     is State.Data<TasksScreenState> -> {
                         SearchView(state.data.search, store)
                     }
+
                     else -> Unit
                 }
                 IconButton({
@@ -82,30 +86,82 @@ private fun TaskScreenData(
     state: State.Data<TasksScreenState>,
     store: TasksStore,
     scrollState: LazyListState = rememberLazyListState()
-    ) {
-    TaskListView(
-        tasks = state.data.tasks,
-        search = state.data.search.value,
-        selected = emptySet(),
-        showButtonsInColumns = false,
-        scrollState = scrollState,
-        onClickListener = {
-            store.onListItemClicked(it)
-        },
-        onOpenUrlClick = { store.openUrl(it) },
-        onMoveToTopClick = { store.moveToTop(it) },
-        onMoveToBottomClick = {
-            store.moveToBottom(it)
-        },
-        onRemoveButtonClick = {
-            store.onRemoveButtonClick(it)
-        },
-        onPinButtonClick = null
-    )
+) {
+    Column {
+        ManageTaskSelectionBar(
+            tasks = state.data.tasks,
+            selected = state.data.selected,
+            shouldShow = state.data.selected.isNotEmpty(),
+            onRemoveClick = {
+                store.showRemoveSelectedSubTasksDialog()
+            },
+            onAllSelectClicked = {
+                store.onAllSelectClicked()
+            }
+        )
+
+        TaskListView(
+            tasks = state.data.tasks,
+            search = state.data.search.value,
+            selected = state.data.selected,
+            showButtonsInColumns = false,
+            scrollState = scrollState,
+            onClickListener = {
+                store.onListItemClicked(it)
+            },
+            onSelectedChange = {
+                store.onSelectedChange(it)
+            },
+            onOpenUrlClick = { store.openUrl(it) },
+            onMoveToTopClick = { store.moveToTop(it) },
+            onMoveToBottomClick = {
+                store.moveToBottom(it)
+            },
+            onRemoveButtonClick = {
+                store.onRemoveButtonClick(it)
+            }
+        )
+    }
 
     val dialog = state.data.dialog
     when (dialog) {
         is DialogState.RemoveDialogWithCheckBox -> {
+            RemoveTaskWithCheckBox(store, dialog)
+        }
+
+        is DialogState.RemoveDialog -> {
+            RemoveTaskDialog(store, dialog)
+        }
+
+        else -> Unit
+    }
+}
+
+@Composable
+private fun RemoveTaskWithCheckBox(
+    store: TasksStore,
+    dialog: DialogState.RemoveDialogWithCheckBox<Int>
+) {
+    when (dialog.id) {
+        DIALOG_ID_REMOVE_MULTIPLE_TASKS -> {
+            DialogBox(
+                state = Dialog.TwoOptionsDialogWithCheckbox(
+                    twoOptionsDialog = Dialog.TwoOptionsDialog(
+                        title = "Remove selected tasks",
+                        message = "Do you really want to remove selected tasks?",
+                        confirmButton = "Yes",
+                        dismissButton = "No",
+                        onDismiss = { store.closeDialog() },
+                        onConfirm = { store.removeTask(dialog.idsToRemove) }
+                    ),
+                    checked = dialog.checked,
+                    checkBoxLabel = "Remove with all sub-tasks",
+                    onCheckedChange = { store.onRemoveWithSubTasksChange() }
+                )
+            )
+        }
+
+        else -> {
             DialogBox(
                 state = Dialog.TwoOptionsDialogWithCheckbox(
                     twoOptionsDialog = Dialog.TwoOptionsDialog(
@@ -122,19 +178,22 @@ private fun TaskScreenData(
                 )
             )
         }
-        is DialogState.RemoveDialog -> {
-            DialogBox(
-                state = Dialog.TwoOptionsDialog(
-                    title = "Remove task",
-                    message = "Do you really want to remove this task?",
-                    confirmButton = "Yes",
-                    dismissButton = "No",
-                    onDismiss = { store.closeDialog() },
-                    onConfirm = { store.removeTask(dialog.idsToRemove) }
-                )
-            )
-        }
-        else -> {
-        }
     }
+}
+
+@Composable
+private fun RemoveTaskDialog(
+    store: TasksStore,
+    dialog: DialogState.RemoveDialog<Int>
+) {
+    DialogBox(
+        state = Dialog.TwoOptionsDialog(
+            title = "Remove task",
+            message = "Do you really want to remove this task?",
+            confirmButton = "Yes",
+            dismissButton = "No",
+            onDismiss = { store.closeDialog() },
+            onConfirm = { store.removeTask(dialog.idsToRemove) }
+        )
+    )
 }

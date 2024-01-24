@@ -180,7 +180,8 @@ object DI {
             ),
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
             scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
-            scheduledOptions = provideScheduledOptions()
+            scheduledOptions = provideScheduledOptions(),
+            selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>()
         )
     }
 
