@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Checkbox
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -21,20 +20,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
@@ -48,6 +42,7 @@ import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.rememberScrollState
+import com.marzec.todo.view.ManageTaskSelectionBar
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.TextListItem
@@ -118,78 +113,31 @@ fun TaskDetailsScreen(
                 ) {
 
                     val subTasksCount = state.data.task.subTasks.size
-                    val selectedCount = state.data.selected.count()
                     val doneSubtasksCount = state.data.task.subTasks.count { !it.isToDo }
-                    val selectionModeEnabled = selectedCount > 0
-                    if (subTasksCount > 0) {
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (selectedCount > 0) {
-                                Text("($selectedCount/$subTasksCount)")
-                            }
-                            if (selectionModeEnabled) {
-                                IconButton({
-                                    store.markSelectedAsTodo()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.CheckCircle,
-                                        contentDescription = "Mark selected as to do"
-                                    )
-                                }
-                                IconButton({
-                                    store.markSelectedAsDone()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Mark selected as done"
-                                    )
-                                }
-
-                                IconButton({
-                                    store.showRemoveSelectedSubTasksDialog()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Remove"
-                                    )
-                                }
-                                IconButton({
-                                    store.unpinSubtasks()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Unpin all"
-                                    )
-                                }
-                            }
-                            if (state.data.task.subTasks.any { !it.isToDo }) {
-                                IconButton({
-                                    store.removeDoneTasks()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = "Remove"
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Remove"
-                                    )
-                                }
-                            }
-                            Checkbox(
-                                checked = subTasksCount == selectedCount,
-                                onCheckedChange = {
-                                    store.onAllSelectClicked()
-                                }
-                            )
+                    ManageTaskSelectionBar(
+                        tasks = state.data.task.subTasks,
+                        selected = state.data.selected,
+                        shouldShow = state.data.task.subTasks.isNotEmpty(),
+                        onMarkSelectedAsTodoClick = {
+                            store.markSelectedAsTodo()
+                        },
+                        onMarkSelectedAsDoneClick = {
+                            store.markSelectedAsDone()
+                        },
+                        onRemoveClick = {
+                            store.showRemoveSelectedSubTasksDialog()
+                        },
+                        onRemoveDoneTasksClick = {
+                            store.removeDoneTasks()
+                        },
+                        onAllSelectClicked = {
+                            store.onAllSelectClicked()
+                        },
+                        onUnpinSubtasksClick = {
+                            store.unpinSubtasks()
                         }
-                    }
+                    )
                     Row(
                         modifier = Modifier
                             .padding(all = 16.dp)
@@ -217,12 +165,18 @@ fun TaskDetailsScreen(
                         IconButton({
                             store.copyDescription()
                         }) {
-                            Icon(imageVector = Icons.Default.Share, contentDescription = "Copy description")
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Copy description"
+                            )
                         }
                         IconButton({
                             store.copyTask()
                         }) {
-                            Icon(imageVector = Icons.Default.AddCircle, contentDescription = "Copy task")
+                            Icon(
+                                imageVector = Icons.Default.AddCircle,
+                                contentDescription = "Copy task"
+                            )
                         }
                     }
                     if (subTasksCount > 0) {
@@ -231,8 +185,9 @@ fun TaskDetailsScreen(
                         } else {
                             subTasksCount
                         }
-                        Text(modifier = Modifier.padding(horizontal = 16.dp)
-                            .align(Alignment.End),
+                        Text(
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                                .align(Alignment.End),
                             text = "Subtasks: $subTasksCountRow"
                         )
                     }
