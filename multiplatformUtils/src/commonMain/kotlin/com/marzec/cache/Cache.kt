@@ -8,6 +8,8 @@ interface Cache {
 
     suspend fun <T> get(key: String): T?
 
+    suspend fun <T> update(key: String, action: (T?) -> T?)
+
     suspend fun remove(key: String)
 
     suspend fun <T> observe(key: String): Flow<T?>

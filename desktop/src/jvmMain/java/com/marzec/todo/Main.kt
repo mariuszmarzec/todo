@@ -15,8 +15,6 @@ import com.marzec.logger.Logger
 import com.marzec.network.createHttpClient
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -36,7 +36,7 @@ import com.marzec.mvi.reduceData
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationStore
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import com.marzec.time.SHORT_DATE_FORMAT
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
@@ -106,7 +106,7 @@ class DatePickerStore(
     private val navigationStore: NavigationStore,
     initialState: DatePickerState,
     private val cacheKey: String,
-    private val stateCache: Preferences
+    private val stateCache: StateCache
 ) : Store3<DatePickerState>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {

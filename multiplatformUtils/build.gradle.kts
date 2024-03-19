@@ -1,5 +1,5 @@
 import org.jetbrains.compose.ComposePlugin.DesktopComponentsDependencies
-import org.jetbrains.compose.compose
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     id("com.android.library")
@@ -41,6 +41,7 @@ kotlin {
                 implementation(compose.desktop.uiTestJUnit4)
                 implementation(kotlin("test"))
                 implementation(Dependency.coroutineTest)
+                implementation(Dependency.mockk)
             }
         }
         named("androidMain") {
@@ -63,8 +64,18 @@ kotlin {
             dependencies {
                 api(Dependency.ktorOkHttpClient)
                 api(Dependency.vlc)
+                implementation(compose.desktop.currentOs)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 api(DesktopComponentsDependencies.animatedImage)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                implementation(Dependency.coroutineTest)
+                implementation(Dependency.mockk)
             }
         }
     }

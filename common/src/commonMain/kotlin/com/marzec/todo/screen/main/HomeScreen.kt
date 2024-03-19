@@ -11,16 +11,15 @@ import androidx.compose.ui.graphics.Color
 import com.marzec.mvi.collectState
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
+import com.marzec.todo.DI
+import com.marzec.view.NavigationHost
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {
-    val state: NavigationState by navigationStore.collectState()
 
     Box(
         modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.White)
     ) {
-        state.backStack.last().apply {
-            screenProvider(destination, cacheKey)
-        }
+        NavigationHost(navigationStore, DI::router)
     }
 }

@@ -1,113 +1,110 @@
 package com.marzec.repository
 
-import com.marzec.cache.Cache
-import com.marzec.cache.cacheCall
+import com.marzec.cache.CacheSaver
+import com.marzec.cache.GetWithCacheCall
+import com.marzec.cache.ManyItemsCacheSaver
 import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.asContentFlow
+import com.marzec.content.ifDataSuspend
 import com.marzec.datasource.CommonDataSource
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
-class CrudRepository<
-        ID,
-        MODEL : Any,
-        CREATE : Any,
-        UPDATE : Any,
-        MODEL_DTO : Any,
-        CREATE_DTO : Any,
-        UPDATE_DTO : Any
-        >(
+class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : Any, CREATE_DTO : Any, UPDATE_DTO : Any>(
     private val dataSource: CommonDataSource<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO>,
-    private val memoryCache: Cache,
     private val dispatcher: CoroutineDispatcher,
-    private val cacheKey: String,
+    private val cacheSaver: ManyItemsCacheSaver<ID, MODEL>,
     private val toDomain: MODEL_DTO.() -> MODEL,
     private val updateToDto: UPDATE.() -> UPDATE_DTO,
     private val createToDto: CREATE.() -> CREATE_DTO,
-    private val isSameId: MODEL.(id: ID) -> Boolean,
+    private val updaterCoroutineScope: CoroutineScope
 ) {
+    enum class RefreshPolicy {
+        NO_REFRESH, SEPARATE_DISPATCHER, BLOCKING
+    }
 
-    suspend fun observeAll(): Flow<Content<List<MODEL>>> = getTasksCacheFirst()
+    suspend fun observeAll(): Flow<Content<List<MODEL>>> =
+        GetWithCacheCall(
+            dispatcher = dispatcher,
+            cacheSaver = cacheSaver,
+            call = {
+                asContent { loadAll() }
+            }
+        ).run()
 
-    suspend fun getById(id: ID): Flow<Content<MODEL>> =
-        byIdCall(id) {
-            asContent { dataSource.getById(id).toDomain() }
-        }
+    suspend fun observeById(id: ID): Flow<Content<MODEL>> = byIdCall(id) {
+        asContent { dataSource.getById(id).toDomain() }
+    }
 
     private suspend fun byIdCall(
         id: ID,
-        getCached: suspend () -> MODEL? = {
-            memoryCache.get<List<MODEL>>(cacheKey)?.firstOrNull { it.isSameId(id) }
-        },
-        observeCached: suspend () -> Flow<MODEL?> = {
-            memoryCache.observe<List<MODEL>>(cacheKey)
-                .map { list -> list?.firstOrNull { it.isSameId(id) } }
-        },
         networkCall: suspend () -> Content<MODEL>,
-    ) = cacheCall(
-        cacheKey,
-        dispatcher,
-        memoryCache,
-        networkCall = networkCall,
-        getCached = getCached,
-        observeCached = observeCached,
-        cacheUpdate = { newCallData ->
-            updateCache(id, newCallData.data)
-        }
-    )
+    ): Flow<Content<MODEL>> = GetWithCacheCall(
+            dispatcher = dispatcher,
+            cacheSaver = object : CacheSaver<MODEL> {
+                override suspend fun get(): MODEL? {
+                    return cacheSaver.getById(id)
+                }
 
-    private suspend fun updateCache(id: ID, data: MODEL) = updateCache { old ->
-        old?.map {
-            if (it.isSameId(id)) {
-                data
-            } else {
-                it
-            }
-        } ?: listOf(data)
-    }
+                override suspend fun observeCached(): Flow<MODEL?> {
+                    return cacheSaver.observeCachedById(id)
+                }
 
-    private suspend fun updateCache(update: (List<MODEL>?) -> List<MODEL>?) {
-        val oldValue = memoryCache.get<List<MODEL>>(cacheKey)
-        val newValue = update(oldValue)
-        memoryCache.put(cacheKey, newValue)
-    }
+                override suspend fun updateCache(update: (MODEL?) -> MODEL?) = Unit
 
-    suspend fun remove(id: ID): Flow<Content<Unit>> = asContentFlow {
+                override suspend fun updateCache(data: MODEL) {
+                    cacheSaver.updateItem(id, data)
+                }
+
+            },
+            call = networkCall
+        ).run()
+
+    suspend fun remove(
+        id: ID, policy: RefreshPolicy = RefreshPolicy.SEPARATE_DISPATCHER
+    ): Flow<Content<Unit>> = asContentFlow {
         dataSource.remove(id)
-        updateCache { cachedList ->
-            cachedList?.toMutableList()?.apply {
-                removeIf { it.isSameId(id) }
-            }
-        }
-    }
+        cacheSaver.removeItem(id)
+    }.triggerUpdateIfNeeded(policy).flowOn(dispatcher)
 
-    suspend fun update(id: ID, model: UPDATE): Flow<Content<Unit>> = asContentFlow {
+    suspend fun update(
+        id: ID, model: UPDATE, policy: RefreshPolicy = RefreshPolicy.SEPARATE_DISPATCHER
+    ): Flow<Content<Unit>> = asContentFlow {
         val updatedModel = dataSource.update(id, model.updateToDto()).toDomain()
-        updateCache(id, updatedModel)
-    }.flowOn(dispatcher)
+        cacheSaver.updateItem(id, updatedModel)
+    }.triggerUpdateIfNeeded(policy).flowOn(dispatcher)
 
     suspend fun create(
-        create: CREATE
+        create: CREATE, policy: RefreshPolicy = RefreshPolicy.SEPARATE_DISPATCHER
     ): Flow<Content<Unit>> = asContentFlow {
         val createdModel = dataSource.create(create.createToDto()).toDomain()
-        updateCache { cachedList ->
-            cachedList.orEmpty().toMutableList().apply {
-                add(0, createdModel)
+        cacheSaver.addItem(createdModel)
+    }.triggerUpdateIfNeeded(policy).flowOn(dispatcher)
+
+    private suspend fun <T> Flow<Content<T>>.triggerUpdateIfNeeded(policy: RefreshPolicy): Flow<Content<T>> =
+        onEach {
+            if (it is Content.Data) {
+                when (policy) {
+                    RefreshPolicy.NO_REFRESH -> Unit
+                    RefreshPolicy.SEPARATE_DISPATCHER -> updaterCoroutineScope.launch {
+                        refreshAll()
+                    }
+
+                    RefreshPolicy.BLOCKING -> refreshAll()
+                }
             }
         }
-    }.flowOn(dispatcher)
 
-    private suspend fun getTasksCacheFirst() =
-        cacheCall(cacheKey) {
-            asContent { dataSource.getAll().map(toDomain) }
-        }
+    private suspend fun refreshAll() = asContent {
+        loadAll()
+    }.ifDataSuspend {
+        cacheSaver.updateCache(data)
+    }
 
-    private suspend fun <T : Any> cacheCall(
-        key: String,
-        networkCall: suspend () -> Content<T>
-    ): Flow<Content<T>> = cacheCall(key, dispatcher, memoryCache, networkCall)
-
+    private suspend fun loadAll() = dataSource.getAll().map(toDomain)
 }

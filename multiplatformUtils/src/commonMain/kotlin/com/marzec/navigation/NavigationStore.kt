@@ -1,9 +1,8 @@
 package com.marzec.navigation
 
-import androidx.compose.runtime.Composable
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.Store3
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -13,18 +12,25 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class NavigationStore(
-    private val router: (Destination) -> @Composable (destination: Destination, cacheKey: String) -> Unit,
     scope: CoroutineScope,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     private val resultCache: ResultCache,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
-    initialState: NavigationState
+    initialState: NavigationState,
+    private val overrideLastClose: (NavigationState.() -> NavigationState)? = null,
+    private val onNewStateCallback: ((NavigationState) -> Unit)? = null,
 ) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
-    fun next(action: NavigationAction, requestId: Int? = null, secondaryId: Int? = null) =
+    fun next(
+        action: NavigationAction,
+        requestId: Int? = null,
+        secondaryId: Int? = null,
+        id: String = ""
+    ) =
         navigate(
             action = action,
+            id = id,
             requestId = requestId,
             options = secondaryId?.let {
                 mapOf<String, Any>(SECONDARY_ID to it)
@@ -34,38 +40,61 @@ class NavigationStore(
     fun nextWithOptionRequest(
         action: NavigationAction,
         requestId: Int? = null,
-        options: Map<String, Any>? = null
-    ) = navigate(action, requestId, options)
+        options: Map<String, Any>? = null,
+        id: String = ""
+    ) = navigate(action, id, requestId, options)
 
     private fun navigate(
         action: NavigationAction,
+        id: String,
         requestId: Int?,
         options: Map<String, Any>?
     ) = navigate {
-        state.copy(
-            backStack = state.backStack.toMutableList().apply {
-                cleanResultCacheForCurrentScreen()
-                handlePoppingScreens(action)
-                addNextScreen(action, requestId, options)
-            }
-        )
+        state.cleanResultCacheForCurrentScreen()
+
+        val requestKey = requestKey(requestId, options)
+
+        state.popScreens(action)
+            .addNextScreen(action, id, requestKey)
+    }
+
+    private fun IntentContext<NavigationState, NavigationState>.requestKey(
+        requestId: Int?,
+        options: Map<String, Any>?
+    ): RequestKey? {
+        val requesterKey = state.currentScreen()?.cacheKey
+        return if (requestId != null && requesterKey != null) {
+            RequestKey(
+                requesterKey = requesterKey,
+                requestId = requestId,
+                options = options.orEmpty()
+            )
+        } else {
+            null
+        }
     }
 
     fun goBack(result: Any? = null) = navigate {
-        val requestKey = state.backStack.last().requestKey
-        if (requestKey != null) {
+        state.backStack.currentScreen()?.requestKey?.let { requestKey ->
             resultCache.save(requestKey, result)
         }
-        state.copy(
-            backStack = state.backStack.toMutableList().apply {
-                if (size > 1) {
-                    removeLast().also {
-                        stateCache.remove(it.cacheKey)
-                        resultCache.remove(it.cacheKey)
-                    }
-                }
-            }
-        )
+        if (state.screenCount == 1 && overrideLastClose != null) {
+            overrideLastClose.invoke(state)
+        } else {
+            state.popScreens(PopEntryTarget.ScreenCount(count = 1))
+        }
+    }
+
+    fun closeFlow(result: Any? = null) = navigate {
+        val currentFlow = state.currentFlow()
+        currentFlow.backStack.firstOrNull()?.requestKey?.let { requestKey ->
+            resultCache.save(requestKey, result)
+        }
+        if (currentFlow.isRootFlow() && overrideLastClose != null) {
+            overrideLastClose.invoke(state)
+        } else {
+            state.popScreens(PopEntryTarget.ToFlow(currentFlow.id, popToInclusive = true))
+        }
     }
 
     private fun navigate(stateTransform: suspend IntentContext<NavigationState, NavigationState>.() -> NavigationState) {
@@ -78,57 +107,175 @@ class NavigationStore(
         }
     }
 
-    private fun MutableList<NavigationEntry>.addNextScreen(
+    private fun NavigationState.addNextScreen(
         action: NavigationAction,
-        requestId: Int?,
-        options: Map<String, Any>?
-    ) {
-        val screenProvider = router(action.destination)
-        add(
-            NavigationEntry(
-                destination = action.destination,
-                cacheKey = cacheKeyProvider(),
-                screenProvider = screenProvider,
-                requestKey = requestId?.let {
-                    RequestKey(
-                        requesterKey = last().cacheKey,
-                        requestId = requestId,
-                        options = options.orEmpty()
-                    )
-                }
-            )
-        )
-    }
+        id: String,
+        requestKey: RequestKey?
+    ): NavigationFlow = copy(
+        backStack = backStack.addNextScreen(action, id, requestKey)
+    )
 
-    private fun MutableList<NavigationEntry>.handlePoppingScreens(
-        action: NavigationAction
-    ) {
-        action.options?.let { options ->
-            takeLastWhile { it.destination != options.popTo }.forEach {
-                if (it.destination != options.popTo) {
-                    remove(it)
-                    stateCache.remove(it.cacheKey)
-                }
-            }
-            if (options.popToInclusive && lastOrNull()?.destination == options.popTo) {
-                removeLast().also { stateCache.remove(it.cacheKey) }
-            }
+    private fun List<NavigationEntry>.addNextScreen(
+        action: NavigationAction,
+        id: String,
+        requestKey: RequestKey?
+    ): List<NavigationEntry> = toMutableList().apply {
+        val last = lastOrNull()
+        if (last?.subFlow != null) {
+            val newLast = last.copy(
+                subFlow = last.subFlow.addNextScreen(action, id, requestKey)
+            )
+            remove(last)
+            add(newLast)
+        } else {
+            add(createNavigationEntry(action, id, requestKey))
         }
     }
 
-    private suspend fun MutableList<NavigationEntry>.cleanResultCacheForCurrentScreen() {
-        lastOrNull()?.cacheKey?.let { requesterKey -> resultCache.remove(requesterKey) }
+    private fun MutableList<NavigationEntry>.createNavigationEntry(
+        action: NavigationAction,
+        id: String,
+        requestKey: RequestKey?
+    ): NavigationEntry {
+        val cacheKey = cacheKeyProvider()
+        val subFlow = (action.destination as? SubFlow)?.let { subFlow ->
+            NavigationFlow(
+                backStack = listOf(
+                    createNavigationEntry(
+                        action = NavigationAction(subFlow.startDestination),
+                        id = id,
+                        requestKey = requestKey
+                    )
+                ),
+                id = subFlow.id
+            )
+        }
+        return NavigationEntry(
+            destination = action.destination,
+            cacheKey = cacheKey,
+            id = id,
+            requestKey = requestKey,
+            subFlow = subFlow
+        )
+    }
+
+    private fun isTargetDestination(
+        flow: NavigationFlow,
+        entry: NavigationEntry,
+        target: PopEntryTarget,
+        poppedEntries: MutableList<NavigationEntry>
+    ) = when (target) {
+        is PopEntryTarget.ScreenCount -> entry.subFlow == null && target.count <= poppedEntries.size
+        is PopEntryTarget.ToDestination -> entry.destination == target.popTo
+        is PopEntryTarget.ToFlow -> entry.subFlow?.id == target.id ||  !target.popToInclusive && entry.subFlow == null && flow.id == target.id
+        is PopEntryTarget.ToId -> entry.id.takeIf { it.isNotBlank() } == target.id
+    }
+
+    private suspend fun NavigationState.popScreens(action: NavigationAction): NavigationFlow =
+        popScreens(popEntryTarget = action.options?.popTo)
+
+    private suspend fun NavigationState.popScreens(popEntryTarget: PopEntryTarget?): NavigationFlow {
+        val newBackStack = popEntryTarget?.let {
+            backStack.toMutableList().apply { popScreens(this@popScreens, it) }
+        } ?: backStack
+        return copy(backStack = newBackStack)
+    }
+
+    private suspend fun MutableList<NavigationEntry>.popScreens(
+        flow: NavigationFlow,
+        popEntryTarget: PopEntryTarget,
+        poppedScreens: MutableList<NavigationEntry> = mutableListOf()
+    ): Boolean {
+        while (size > 0) {
+            val entry = last()
+            val isTargetDestination = isTargetDestination(flow, entry, popEntryTarget, poppedScreens)
+            when {
+                entry.subFlow == null && !isTargetDestination -> {
+                    poppedScreens.add(entry)
+                    removeEntryWithCacheClear(entry)
+                }
+
+                entry.subFlow == null && isTargetDestination -> {
+                    if (popEntryTarget.popToInclusive) {
+                        poppedScreens.add(entry)
+                        removeEntryWithCacheClear(entry)
+                    }
+                    return true
+                }
+
+                else -> {
+                    val reachedPopTarget = handlePopScreenInSubFlow(
+                        popEntryTarget,
+                        isTargetDestination,
+                        poppedScreens,
+                        entry
+                    )
+                    if (reachedPopTarget) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    private suspend fun MutableList<NavigationEntry>.handlePopScreenInSubFlow(
+        popEntryTarget: PopEntryTarget,
+        isTargetDestination: Boolean,
+        poppedScreens: MutableList<NavigationEntry>,
+        entry: NavigationEntry
+    ): Boolean {
+        if (entry.subFlow != null) {
+            val newBackStack = entry.subFlow.backStack.toMutableList()
+            val reachedTargetInSubFlow = newBackStack.popScreens(entry.subFlow, popEntryTarget, poppedScreens)
+
+            val reachedPopTarget = reachedTargetInSubFlow || isTargetDestination
+
+            val isTargetReachedButPoppingExclusive =
+                reachedPopTarget && !popEntryTarget.popToInclusive && isTargetDestination
+
+            val subFlowShouldBeKept = newBackStack.isNotEmpty() || isTargetReachedButPoppingExclusive
+            if (subFlowShouldBeKept) {
+                val newSubFlow = entry.subFlow.copy(backStack = newBackStack)
+                remove(entry)
+                add(entry.copy(subFlow = newSubFlow))
+            } else {
+                removeEntryWithCacheClear(entry)
+            }
+            return reachedPopTarget
+        } else {
+            return false
+        }
+    }
+
+    private suspend fun MutableList<NavigationEntry>.removeEntryWithCacheClear(
+        entry: NavigationEntry
+    ) {
+        remove(entry)
+        clearCache(entry)
+    }
+
+    private suspend fun clearCache(entry: NavigationEntry) {
+        entry.subFlow?.backStack?.forEach {
+            clearCache(it)
+        }
+        stateCache.remove(entry.cacheKey)
+        resultCache.remove(entry.cacheKey)
+    }
+
+    private suspend fun NavigationState.cleanResultCacheForCurrentScreen() {
+        currentScreen()?.cacheKey?.let { requesterKey -> resultCache.remove(requesterKey) }
     }
 
     @Suppress("unchecked_cast")
     suspend fun <T : Any> observe(requestId: Int): Flow<T>? =
-        state.value.backStack.lastOrNull()?.let {
+        state.value.backStack.currentScreen()?.let {
             resultCache.observe(it.cacheKey, requestId).map { cache -> cache?.data as? T }
                 .filterNotNull()
         }
 
     suspend fun <T : Any> observeResult(requestId: Int): Flow<ResultValue<T>>? =
-        state.value.backStack.lastOrNull()?.let { entry ->
+        state.value.backStack.currentScreen()?.let { entry ->
             resultCache.observe(entry.cacheKey, requestId)
                 .filterIsInstance<ResultCacheValue>()
                 .filter { it.data != null && it.requestKey.options.isNotEmpty() }
@@ -143,6 +290,7 @@ class NavigationStore(
 
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
+        onNewStateCallback?.invoke(newState)
         stateCache.set(cacheKey, newState)
     }
 }
@@ -156,5 +304,23 @@ data class ResultValue<T>(
     val data: T
 )
 
+private val NavigationFlow.screenCount: Int
+    get() = backStack.fold(0) { acc, entry ->
+        acc + (entry.subFlow?.screenCount ?: 1)
+    }
+
 val ResultValue<*>.secondaryIdValue: Any
     get() = options.getValue(SECONDARY_ID)
+
+fun List<NavigationEntry>.currentScreen(): NavigationEntry? = lastOrNull()?.let { entry ->
+    entry.subFlow?.backStack?.currentScreen() ?: entry
+}
+
+fun NavigationFlow.currentScreen(): NavigationEntry? = backStack.currentScreen()
+
+fun NavigationFlow.currentFlow(): NavigationFlow =
+    backStack.lastOrNull()?.let {
+        it.subFlow?.currentFlow()
+    } ?: this
+
+fun NavigationFlow.isRootFlow() = this.id == NavigationFlow.ROOT_FLOW

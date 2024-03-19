@@ -10,6 +10,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,13 +18,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
 import kotlinx.coroutines.launch
 
 class ActionBarProvider(private val store: NavigationStore) {
+
     @Composable
-    fun provide(title: String = "", rightContent: @Composable () -> Unit = { }) {
-        ActionBar(store = store, title = title, rightContent)
+    fun provide(
+        title: String = "",
+        backButtonShow: (NavigationState) -> Boolean  = { it.backStack.size > 1 },
+        rightContent: @Composable () -> Unit = { }
+    ) {
+        ActionBar(store = store, title = title, backButtonShow, rightContent)
     }
 }
 
@@ -31,18 +38,21 @@ class ActionBarProvider(private val store: NavigationStore) {
 private fun ActionBar(
     store: NavigationStore,
     title: String,
+    backButtonShow: (NavigationState) -> Boolean  = { it.backStack.size > 1 },
     rightContent: @Composable () -> Unit = { }
 ) {
-    val scope = rememberCoroutineScope()
-
     val state by store.state.collectAsState()
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        if (state.backStack.size > 1) {
+        if (backButtonShow(state)) {
             IconButton({
                 store.goBack()
             }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                if (state.backStack.size > 1) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                } else {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                }
             }
         }
         Spacer(modifier = Modifier.width(16.dp))

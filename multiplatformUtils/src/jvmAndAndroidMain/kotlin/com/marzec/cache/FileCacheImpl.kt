@@ -6,7 +6,6 @@ import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -38,6 +37,24 @@ class FileCacheImpl(
         return memoryCache.observe<String>(key).map {
             it?.let { json.decodeFromString(serializer, it) }
         }
+    }
+
+    override suspend fun <T : Any> update(
+        key: String,
+        update: (T?) -> T?,
+        serializer: KSerializer<T>
+    ) {
+        initIfNeeded()
+
+        memoryCache.update<String>(key) { jsonValue ->
+            jsonValue?.let {
+                json.decodeFromString(serializer, it)
+            }?.let {
+                update(it)
+            }?.let { json.encodeToString(serializer, it) }
+        }
+
+        updateFile()
     }
 
     private suspend fun initIfNeeded() {

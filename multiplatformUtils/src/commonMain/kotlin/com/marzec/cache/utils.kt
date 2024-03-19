@@ -4,6 +4,7 @@ import com.marzec.content.Content
 import com.marzec.content.asContentFlow
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -11,18 +12,33 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.serializer
+import kotlin.reflect.typeOf
 
 suspend fun <T : Any> cacheCall(
     key: String,
     dispatcher: CoroutineDispatcher,
     memoryCache: Cache,
-    networkCall: suspend () -> Content<T>,
-    getCached: suspend () -> T? = { memoryCache.get<T>(key) },
-    observeCached: suspend () -> Flow<T?> = { memoryCache.observe<T>(key) },
-    cacheUpdate: suspend (Content.Data<T>) -> Unit = { memoryCache.put(key, it.data) }
+    call: suspend () -> Content<T>,
+    ignoreNetworkResult: Boolean = false
 ): Flow<Content<T>> =
-    withContext(dispatcher) {
-        val cached = getCached()
+    GetWithCacheCall(
+        dispatcher = dispatcher,
+        cacheSaver = MemoryCacheSaver(key, memoryCache),
+        call = call,
+        ignoreNetworkResult = ignoreNetworkResult
+    ).run()
+
+class GetWithCacheCall<T>(
+    private val dispatcher: CoroutineDispatcher,
+    private val cacheSaver: CacheSaver<T>,
+    private val call: suspend () -> Content<T>,
+    private val ignoreNetworkResult: Boolean = false
+) {
+
+    suspend fun run() = withContext(dispatcher) {
+        val cached = cacheSaver.get()
         val initial: Content<T> = if (cached != null) {
             Content.Data(cached)
         } else {
@@ -31,16 +47,21 @@ suspend fun <T : Any> cacheCall(
         merge(
             flow {
                 emit(initial)
-                val callResult = networkCall()
-                if (callResult is Content.Error) {
+                val callResult = call()
+                if (callResult is Content.Error && !ignoreNetworkResult) {
                     emit(callResult)
                 } else if (callResult is Content.Data) {
-                    cacheUpdate(callResult)
+                    cacheSaver.updateCache(callResult.data)
                 }
             },
-            observeCached().filterNotNull().map { Content.Data(it) as Content<T> }
+            cacheSaver.observeCached()
+                .filterNotNull()
+                .map { Content.Data(it) as Content<T> },
         )
-    }.flowOn(dispatcher)
+    }
+        .distinctUntilChanged()
+        .flowOn(dispatcher)
+}
 
 fun asContentWithListUpdate(
     dispatcher: CoroutineDispatcher,

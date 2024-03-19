@@ -11,7 +11,7 @@ import com.marzec.mvi.Store3
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationStore
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -31,7 +31,7 @@ class PickItemDataStore<ITEM : Any>(
     private val options: PickItemOptions<ITEM>,
     private val navigationStore: NavigationStore,
     scope: CoroutineScope,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     initialState: State<PickItemData<ITEM>>,
     private val cacheKey: String,
     private val selectionDelegate: SelectionDelegate<String>,

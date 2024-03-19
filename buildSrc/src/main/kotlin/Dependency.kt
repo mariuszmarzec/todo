@@ -17,6 +17,7 @@ val googleServicesVersion = "4.3.10"
 val glideVersion = "1.0.0-alpha.1"
 val exoPlayerVersion = "2.18.5"
 val vlcVersion = "4.7.0"
+val mockkVersion = "1.13.2"
 
 private val composePluginVersion = "1.5.1"
 private val dateTimeVersion = "0.4.1"
@@ -58,6 +59,8 @@ object Dependency {
     val imageLoader = "com.github.bumptech.glide:compose:$glideVersion"
     val exoPlayer = "com.google.android.exoplayer:exoplayer:$exoPlayerVersion"
     val vlc = "uk.co.caprica:vlcj:$vlcVersion"
+
+    val mockk = "io.mockk:mockk-jvm:$mockkVersion"
 }
 
 object Config {

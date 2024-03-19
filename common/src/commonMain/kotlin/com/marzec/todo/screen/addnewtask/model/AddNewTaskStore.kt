@@ -13,8 +13,8 @@ import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
-import com.marzec.preferences.Preferences
-import com.marzec.todo.api.UpdateTaskDto
+import com.marzec.navigation.PopEntryTarget
+import com.marzec.preferences.StateCache
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
@@ -28,7 +28,7 @@ class AddNewTaskStore(
     scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     private val initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
 ) : Store3<State<AddNewTaskState>>(
@@ -177,7 +177,12 @@ class AddNewTaskStore(
                         navigationStore.next(
                             NavigationAction(
                                 destination = destination,
-                                options = NavigationOptions(destination, true)
+                                options = NavigationOptions(
+                                    PopEntryTarget.ToDestination(
+                                        popTo = destination,
+                                        popToInclusive = true
+                                    )
+                                )
                             )
                         )
                     }

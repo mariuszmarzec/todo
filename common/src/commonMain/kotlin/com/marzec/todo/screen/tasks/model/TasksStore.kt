@@ -11,7 +11,7 @@ import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
@@ -19,6 +19,7 @@ import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
 import com.marzec.mvi.reduceData
+import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
@@ -31,7 +32,7 @@ class TasksStore(
     scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     initialState: State<TasksScreenState>,
     private val todoRepository: TodoRepository,
     private val loginRepository: LoginRepository,
@@ -131,8 +132,10 @@ class TasksStore(
                     NavigationAction(
                         destination = TodoDestination.Login,
                         NavigationOptions(
-                            TodoDestination.Login,
-                            popToInclusive = true
+                            PopEntryTarget.ToDestination(
+                                TodoDestination.Login,
+                                popToInclusive = true
+                            )
                         )
                     )
                 )

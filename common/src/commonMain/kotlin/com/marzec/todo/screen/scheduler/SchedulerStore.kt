@@ -4,7 +4,7 @@ import com.marzec.delegate.delegates
 import com.marzec.extensions.toggle
 import com.marzec.mvi.Store3
 import com.marzec.navigation.NavigationStore
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import com.marzec.time.currentTime
 import com.marzec.todo.model.Scheduler
 import com.marzec.view.DateDelegate
@@ -56,7 +56,7 @@ enum class SchedulerType {
 class SchedulerStore(
     scope: CoroutineScope,
     private val cacheKey: String,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     private val navigationStore: NavigationStore,
     initialState: SchedulerState,
     private val dateDelegate: DateDelegate

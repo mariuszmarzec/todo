@@ -10,7 +10,7 @@ import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.delegate.DialogDelegate
@@ -34,7 +34,7 @@ class TaskDetailsStore(
     scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     initialState: State<TaskDetailsState>,
     private val todoRepository: TodoRepository,
     private val taskId: Int,

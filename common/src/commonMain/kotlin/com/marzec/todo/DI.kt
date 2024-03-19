@@ -21,8 +21,6 @@ import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.ResultCache
-import com.marzec.preferences.MemoryPreferences
-import com.marzec.preferences.Preferences
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
@@ -33,6 +31,9 @@ import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.delegate.ScrollDelegateImpl
+import com.marzec.navigation.navigationState
+import com.marzec.preferences.MemoryStateCache
+import com.marzec.preferences.StateCache
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -66,9 +67,9 @@ import com.marzec.view.DatePickerScreen
 import com.marzec.view.DatePickerState
 import com.marzec.view.DatePickerStore
 import com.marzec.view.DateDelegateImpl
+import com.marzec.view.navigationStore
 import io.ktor.client.HttpClient
 import kotlin.random.Random
-import kotlin.reflect.KClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -92,15 +93,9 @@ object DI {
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = false
 
-    val navigationStoreCacheKey by lazy {
-        cacheKeyProvider()
-    }
+    val stateCache: StateCache = MemoryStateCache()
 
-    val resultCache by lazy { ResultCache(resultMemoryCache) }
-
-    val preferences: Preferences = MemoryPreferences()
-
-    private fun router(
+    fun router(
         destination: Destination
     ): @Composable (destination: Destination, cacheKey: String) -> Unit =
         when (destination as TodoDestination) {
@@ -167,7 +162,7 @@ object DI {
             navigationStore = navigationStore,
             todoRepository = provideTodoRepository(),
             loginRepository = loginRepository,
-            stateCache = preferences,
+            stateCache = stateCache,
             cacheKey = cacheKey,
             initialState = TasksScreenState.INITIAL_STATE,
             urlDelegate = UrlDelegateImpl<TasksScreenState>(openUrlHelper),
@@ -211,7 +206,7 @@ object DI {
         scope = scope,
         navigationStore = navigationStore,
         cacheKey = cacheKey,
-        stateCache = preferences,
+        stateCache = stateCache,
         initialState = AddNewTaskState.initial(
             taskId = taskId,
             parentTaskId = parentTaskId
@@ -239,7 +234,7 @@ object DI {
         scope = scope,
         navigationStore = navigationStore,
         todoRepository = provideTodoRepository(),
-        stateCache = preferences,
+        stateCache = stateCache,
         cacheKey = cacheKey,
         initialState = TaskDetailsState.INITIAL,
         taskId = taskId,
@@ -275,7 +270,7 @@ object DI {
         scope = scope,
         navigationStore = navigationStore,
         todoRepository = provideTodoRepository(),
-        stateCache = preferences,
+        stateCache = stateCache,
         cacheKey = cacheKey,
         initialState = AddSubTaskData.INITIAL,
         taskId = taskId,
@@ -303,7 +298,7 @@ object DI {
         return SchedulerStore(
             scope = scope,
             navigationStore = navigationStore,
-            stateCache = preferences,
+            stateCache = stateCache,
             cacheKey = cacheKey,
             initialState = SchedulerState.from(scheduler),
             dateDelegate = DateDelegateImpl<SchedulerState>(
@@ -333,7 +328,7 @@ object DI {
         return DatePickerStore(
             scope = scope,
             navigationStore = navigationStore,
-            stateCache = preferences,
+            stateCache = stateCache,
             cacheKey = cacheKey,
             initialState = DatePickerState.from(date, blockPastDates = true)
         )
@@ -353,28 +348,15 @@ object DI {
         }
 
         val defaultScreen = if (authToken.isNullOrEmpty()) {
-            NavigationEntry(
-                TodoDestination.Login,
-                cacheKeyProvider()
-            ) @Composable { _, it -> provideLoginScreen(it) }
+            TodoDestination.Login
         } else {
-            NavigationEntry(
-                TodoDestination.Tasks,
-                cacheKeyProvider()
-            ) @Composable { _, it -> provideTasksScreen(it) }
+            TodoDestination.Tasks
         }
-        return NavigationStore(
+        return navigationStore(
             scope = scope,
-            router = ::router,
-            stateCache = preferences,
-            resultCache = resultCache,
-            cacheKey = navigationStoreCacheKey,
+            stateCache = stateCache,
             cacheKeyProvider = cacheKeyProvider,
-            initialState = NavigationState(
-                backStack = listOf(
-                    defaultScreen
-                )
-            )
+            defaultDestination = defaultScreen
         )
     }
 
@@ -407,7 +389,7 @@ object DI {
         scope = scope,
         navigationStore = navigationStore,
         loginRepository = loginRepository,
-        stateCache = preferences,
+        stateCache = stateCache,
         cacheKey = cacheKey,
         initialState = LoginData.INITIAL
     )
@@ -457,7 +439,7 @@ object DI {
         options = options,
         scope = scope,
         navigationStore = navigationStore,
-        stateCache = preferences,
+        stateCache = stateCache,
         initialState = PickItemData.initial(options),
         cacheKey = cacheKey,
         selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>(),

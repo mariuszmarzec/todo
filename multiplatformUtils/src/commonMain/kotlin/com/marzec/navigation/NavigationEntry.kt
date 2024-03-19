@@ -1,6 +1,5 @@
 package com.marzec.navigation
 
-import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable
 
 val SECONDARY_ID = "SECONDARY_ID"
@@ -8,8 +7,9 @@ val SECONDARY_ID = "SECONDARY_ID"
 data class NavigationEntry(
     val destination: Destination,
     val cacheKey: String,
+    val id: String = "",
     val requestKey: RequestKey? = null,
-    val screenProvider: @Composable (destination: Destination, cacheKey: String) -> Unit
+    val subFlow: NavigationFlow? = null
 )
 
 data class RequestKey(

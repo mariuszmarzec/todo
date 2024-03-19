@@ -12,7 +12,7 @@ import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
-import com.marzec.preferences.Preferences
+import com.marzec.preferences.StateCache
 import com.marzec.delegate.SelectionDelegate
 import com.marzec.todo.extensions.findRootIdOrNull
 import com.marzec.todo.model.Task
@@ -25,7 +25,7 @@ class AddSubTaskStore(
     scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
-    private val stateCache: Preferences,
+    private val stateCache: StateCache,
     initialState: State<AddSubTaskData>,
     private val todoRepository: TodoRepository,
     private val taskId: Int,
