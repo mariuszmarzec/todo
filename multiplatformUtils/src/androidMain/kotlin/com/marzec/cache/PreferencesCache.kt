@@ -38,7 +38,7 @@ class PreferencesCache(
         }
     }
 
-    override suspend fun <T: Any> observe(key: String, serializer: KSerializer<List<Any>?>): Flow<T?> {
+    override suspend fun <T : Any> observe(key: String, serializer: KSerializer<T>): Flow<T?> {
         return dataStore.data.map {
             it[preferencesKey<String>(key)]?.let { value ->
                 json.decodeFromString(serializer, value)

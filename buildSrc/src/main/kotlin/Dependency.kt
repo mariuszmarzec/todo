@@ -21,7 +21,7 @@ val mockkVersion = "1.13.2"
 
 private val composePluginVersion = "1.6.1"
 private val dateTimeVersion = "0.4.1"
-val composeCompilerVersion = "1.6.1"
+val composeCompilerVersion = "1.5.11"
 
 object Dependency {
 
