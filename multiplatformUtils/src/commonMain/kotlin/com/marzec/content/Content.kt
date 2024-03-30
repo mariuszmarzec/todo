@@ -53,7 +53,7 @@ fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
     is Content.Error -> Content.Error(this.exception)
 }
 
-fun <T : Any> Flow<Content<T>>.toContentUnit() = map { result -> result.mapData { Unit } }
+fun <T> Flow<Content<T>>.toContentUnit() = map { result -> result.mapData { Unit } }
 
 suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) =
     (this as? Content.Data)?.action()
