@@ -14,9 +14,10 @@ class CompositeCacheSaver<T : Any>(private val savers: List<CacheSaver<T>>) : Ca
         savers.mapIndexed { index, saver ->
             saver.observeCached().filterNotNull().let { flow ->
                 if (index > 0) {
-                    flow.onEach { newValue ->
-                        savers.firstOrNull()?.updateCache(newValue)
-                    }
+                    flow.distinctUntilChanged()
+                        .onEach { newValue ->
+                            savers.firstOrNull()?.updateCache(newValue)
+                        }
                 } else {
                     flow
                 }
