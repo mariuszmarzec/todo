@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 sealed class Content<T> {
 
@@ -51,6 +52,8 @@ fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
     is Content.Loading -> Content.Loading(this.data?.let(mapper))
     is Content.Error -> Content.Error(this.exception)
 }
+
+fun <T : Any> Flow<Content<T>>.toContentUnit() = map { result -> result.mapData { Unit } }
 
 suspend fun <T> Content<T>.ifDataSuspend(action: suspend Content.Data<T>.() -> Unit) =
     (this as? Content.Data)?.action()
