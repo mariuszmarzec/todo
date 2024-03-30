@@ -48,11 +48,16 @@ fun <MODEL> atLastPositionInserter(): List<MODEL>?.(MODEL) -> MutableList<MODEL>
     }
 }
 
-fun <MODEL, R : Comparable<R>> alphabeticInserter(
+fun <MODEL, R : Comparable<R>> sortByInserter(
+    byDescending: Boolean = false,
     selector: (MODEL) -> R?
 ): List<MODEL>?.(MODEL) -> MutableList<MODEL> = {
     orEmpty().toMutableList().apply {
         add(it)
-        sortBy(selector)
+        if (byDescending) {
+            sortByDescending(selector)
+        } else {
+            sortBy(selector)
+        }
     }
 }
