@@ -49,7 +49,11 @@ class AddNewTaskStore(
                     result?.let {
                         state.reduceDataWithContent(
                             result = resultNonNull(),
-                            defaultData = AddNewTaskState.default(0, null)
+                            defaultData = AddNewTaskState.default(
+                                taskId = 0,
+                                parentTaskId = null,
+                                isScheduleAvailable = state.data?.isScheduleAvailable ?: false
+                            )
                         ) { result ->
                             copy(
                                 taskId = result.data.id,
@@ -199,7 +203,7 @@ class AddNewTaskStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun onScheduleButtonClick() = sideEffect {
+    fun onScheduleButtonClick() = sideEffectIntent {
         state.ifDataAvailable {
             navigationStore.next(
                 NavigationAction(TodoDestination.Schedule(scheduler)),

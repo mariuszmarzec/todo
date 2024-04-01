@@ -17,10 +17,7 @@ import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
-import com.marzec.navigation.NavigationEntry
-import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
-import com.marzec.navigation.ResultCache
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
@@ -31,7 +28,6 @@ import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.delegate.ScrollDelegateImpl
-import com.marzec.navigation.navigationState
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.preferences.StateCache
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
@@ -78,6 +74,9 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.builtins.serializer
 
 object DI {
+
+    private val isJustLocalStorageMode: Boolean
+        get() = BuildKonfig.ENVIRONMENT == "m"
 
     val logger: Logger by lazy {
         Logger.logger
@@ -164,7 +163,7 @@ object DI {
             loginRepository = loginRepository,
             stateCache = stateCache,
             cacheKey = cacheKey,
-            initialState = TasksScreenState.INITIAL_STATE,
+            initialState = TasksScreenState.initial(isScheduleAvailable = !isJustLocalStorageMode),
             urlDelegate = UrlDelegateImpl<TasksScreenState>(openUrlHelper),
             dialogDelegate = DialogDelegateImpl<Int, TasksScreenState>(),
             removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(
@@ -209,7 +208,8 @@ object DI {
         stateCache = stateCache,
         initialState = AddNewTaskState.initial(
             taskId = taskId,
-            parentTaskId = parentTaskId
+            parentTaskId = parentTaskId,
+            isScheduleAvailable = !isJustLocalStorageMode
         ),
         todoRepository = provideTodoRepository(),
     )
@@ -347,10 +347,10 @@ object DI {
             fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
         }
 
-        val defaultScreen = if (authToken.isNullOrEmpty()) {
-            TodoDestination.Login
-        } else {
+        val defaultScreen = if (!authToken.isNullOrEmpty() || isJustLocalStorageMode) {
             TodoDestination.Tasks
+        } else {
+            TodoDestination.Login
         }
         return navigationStore(
             scope = scope,
@@ -404,16 +404,18 @@ object DI {
         dispatcher = ioDispatcher
     )
 
-    private fun provideDataSource(): DataSource = if (BuildKonfig.ENVIRONMENT == "m") {
-        localDataSource
-    } else if (quickCacheEnabled) {
-        CompositeDataSource(
-            localDataSource,
-            ApiDataSource(client),
-            memoryCache,
-        ).apply { runBlocking { init() } }
-    } else {
-        ApiDataSource(client)
+    private fun provideDataSource(): DataSource {
+        return if (isJustLocalStorageMode) {
+            localDataSource
+        } else if (quickCacheEnabled) {
+            CompositeDataSource(
+                localDataSource,
+                ApiDataSource(client),
+                memoryCache,
+            ).apply { runBlocking { init() } }
+        } else {
+            ApiDataSource(client)
+        }
     }
 
     @Composable

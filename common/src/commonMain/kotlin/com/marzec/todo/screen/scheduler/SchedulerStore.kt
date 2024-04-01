@@ -68,7 +68,7 @@ class SchedulerStore(
         delegates(dateDelegate)
     }
 
-    fun onSaveButtonClick() = sideEffect {
+    fun onSaveButtonClick() = sideEffectIntent {
         val scheduler = when (state.type) {
             SchedulerType.OneShot -> Scheduler.OneShot(
                 state.hour,
@@ -76,6 +76,7 @@ class SchedulerStore(
                 state.date,
                 lastDate = null
             )
+
             SchedulerType.Weekly -> Scheduler.Weekly(
                 state.hour,
                 state.minute,
@@ -85,6 +86,7 @@ class SchedulerStore(
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
                 repeatInEveryPeriod = state.repeatInEveryPeriod
             )
+
             SchedulerType.Monthly -> Scheduler.Monthly(
                 state.hour,
                 state.minute,

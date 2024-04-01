@@ -16,7 +16,8 @@ data class TasksScreenState(
     override val scrollListState: ScrollListState,
     override val search: SearchState,
     override val dialog: DialogState<Int>,
-    override val selected: Set<Int>
+    override val selected: Set<Int>,
+    val isScheduleAvailable: Boolean
 ) : WithTasks<TasksScreenState>,
     WithSearch<TasksScreenState>,
     WithScrollListState<TasksScreenState>,
@@ -38,8 +39,11 @@ data class TasksScreenState(
     override fun taskById(taskId: Int): Task = tasks.first { it.id == taskId }
 
     companion object {
-        val INITIAL_STATE = State.Loading<TasksScreenState>()
-        val EMPTY_DATA = TasksScreenState(
+
+        fun initial(isScheduleAvailable: Boolean) =
+            State.Loading(emptyData().copy(isScheduleAvailable = isScheduleAvailable))
+
+        fun emptyData() = TasksScreenState(
             tasks = emptyList(),
             scrollListState = ScrollListState(),
             search = SearchState(
@@ -47,7 +51,8 @@ data class TasksScreenState(
                 focused = false,
             ),
             dialog = DialogState.NoDialog(),
-            selected = emptySet()
+            selected = emptySet(),
+            isScheduleAvailable = false
         )
     }
 }

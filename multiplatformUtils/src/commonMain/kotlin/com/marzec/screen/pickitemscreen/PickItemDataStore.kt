@@ -60,7 +60,7 @@ class PickItemDataStore<ITEM : Any>(
     }
 
     fun onItemClick(item: ITEM) {
-        sideEffect {
+        sideEffectIntent {
             if (options.returnIdOnly) {
                 navigationStore.goBack(options.mapItemToId(item))
             } else {
@@ -71,7 +71,7 @@ class PickItemDataStore<ITEM : Any>(
         }
     }
 
-    fun onConfirmClick() = sideEffect {
+    fun onConfirmClick() = sideEffectIntent {
         state.ifDataAvailable {
             if (options.returnIdOnly) {
                 navigationStore.goBack(selected.toList())
@@ -83,7 +83,7 @@ class PickItemDataStore<ITEM : Any>(
     }
 
     fun onAddButtonClick() = options.onAddNavigationAction?.let { action ->
-        sideEffect {
+        sideEffectIntent {
             navigationStore.next(action())
         }
     }

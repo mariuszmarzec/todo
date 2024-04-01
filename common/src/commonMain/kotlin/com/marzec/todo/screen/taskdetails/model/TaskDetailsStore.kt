@@ -124,7 +124,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun goToSubtaskDetails(id: Int) = sideEffect {
+    fun goToSubtaskDetails(id: Int) = sideEffectIntent {
         navigationStore.next(TodoDestination.TaskDetails(id))
     }
 
@@ -134,7 +134,7 @@ class TaskDetailsStore(
     fun showRemoveSubTaskDialog(subtaskId: Int) =
         removeTaskDelegate.onRemoveButtonClick(subtaskId)
 
-    override fun removeTask(idsToRemove: List<Int>) = sideEffect {
+    override fun removeTask(idsToRemove: List<Int>) = sideEffectIntent {
         intent<Content<Unit>> {
             removeTaskOnTrigger(todoRepository, idsToRemove)
 
@@ -152,7 +152,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun moveToTop(id: Int) = sideEffect {
+    fun moveToTop(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,
@@ -161,7 +161,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun moveToBottom(id: Int) = sideEffect {
+    fun moveToBottom(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,
@@ -170,7 +170,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun copyDescription() = sideEffect {
+    fun copyDescription() = sideEffectIntent {
         state.ifDataAvailable {
             copyToClipBoardHelper.copy(task.description)
         }
@@ -196,7 +196,7 @@ class TaskDetailsStore(
         }
     }
 
-    fun unpinSubtasks() = sideEffect {
+    fun unpinSubtasks() = sideEffectIntent {
         state.ifDataAvailable {
             task.subTasks.forEach {
                 unpinSubtask(it.id)
@@ -204,13 +204,13 @@ class TaskDetailsStore(
         }
     }
 
-    fun showRemoveSelectedSubTasksDialog() = sideEffect {
+    fun showRemoveSelectedSubTasksDialog() = sideEffectIntent {
         state.ifDataAvailable {
             onRemoveButtonClick(selected.toList())
         }
     }
 
-    fun removeDoneTasks() = sideEffect {
+    fun removeDoneTasks() = sideEffectIntent {
         state.ifDataAvailable {
             val ids = task.subTasks.filterNot { it.isToDo }.map { it.id }
             onRemoveButtonClick(ids)

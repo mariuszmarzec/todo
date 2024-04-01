@@ -24,7 +24,7 @@ open class StoreDelegate<State : Any> {
 
     fun sideEffect(
         func: suspend IntentContext<State, Unit>.() -> Unit
-    ) = store.sideEffect(func)
+    ) = store.sideEffectIntent(func)
 }
 
 @Suppress("unchecked_cast")

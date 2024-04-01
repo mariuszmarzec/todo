@@ -75,7 +75,7 @@ class TasksStore(
         }
 
         reducer {
-            state.reduceDataWithContent(resultNonNull(), TasksScreenState.EMPTY_DATA) { result ->
+            state.reduceDataWithContent(resultNonNull(), TasksScreenState.emptyData()) { result ->
                 val taskIds = result.data.map { it.id }
                 copy(
                     tasks = result.data.sortedWith(
@@ -89,11 +89,11 @@ class TasksStore(
         }
     }
 
-    fun onListItemClicked(id: Int) = sideEffect {
+    fun onListItemClicked(id: Int) = sideEffectIntent {
         navigationStore.next(TodoDestination.TaskDetails(id))
     }
 
-    fun addNewTask() = sideEffect {
+    fun addNewTask() = sideEffectIntent {
         state.asData {
             navigationStore.next(TodoDestination.AddNewTask(null, null))
         }
@@ -103,7 +103,7 @@ class TasksStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun moveToTop(id: Int) = sideEffect {
+    fun moveToTop(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,
@@ -112,7 +112,7 @@ class TasksStore(
         }
     }
 
-    fun moveToBottom(id: Int) = sideEffect {
+    fun moveToBottom(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             changePriorityDelegate.changePriority(
                 id = id,

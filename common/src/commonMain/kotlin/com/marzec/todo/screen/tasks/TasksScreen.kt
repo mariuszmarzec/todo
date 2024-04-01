@@ -49,10 +49,12 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
 
                     else -> Unit
                 }
-                IconButton({
-                    store.onScheduledClick()
-                }) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Scheduled")
+                if (state.data?.isScheduleAvailable == true) {
+                    IconButton({
+                        store.onScheduledClick()
+                    }) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Scheduled")
+                    }
                 }
 
                 IconButton({

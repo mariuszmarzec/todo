@@ -55,7 +55,7 @@ class AddSubTaskStore(
         }
     }
 
-    fun onAddSubTaskClick() = sideEffect {
+    fun onAddSubTaskClick() = sideEffectIntent {
         navigationStore.next(
             TodoDestination.AddNewTask(
                 taskToEditId = null,
