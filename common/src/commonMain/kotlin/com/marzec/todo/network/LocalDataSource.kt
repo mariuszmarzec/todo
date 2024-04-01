@@ -53,10 +53,18 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     override suspend fun getTasks(): List<TaskDto> = try {
         lock.lock()
-        localData.tasks.filter { it.parentTaskId != null }
+        val rootTasks = localData.tasks.filter { it.parentTaskId == null }
+        val subTasks = localData.tasks.filter { it.parentTaskId != null }.toMutableList()
+
+        rootTasks.fillSubTasks(subTasks)
     } finally {
         lock.unlock()
     }
+
+    private fun List<TaskDto>.fillSubTasks(subTasks: List<TaskDto>): List<TaskDto> = map { root ->
+        root.copy(subTasks = subTasks.filter { it.parentTaskId == root.id }.fillSubTasks(subTasks))
+    }
+
 
     override suspend fun copyTask(taskId: Int) {
         var taskToCopy: TaskDto? = null
