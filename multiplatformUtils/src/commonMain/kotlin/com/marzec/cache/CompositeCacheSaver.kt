@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 
-class CompositeCacheSaver<T : Any>(private val savers: List<CacheSaver<T>>) : CacheSaver<T> {
+class CompositeUpdatableCacheSaver<T : Any>(
+    private val savers: List<UpdatableCacheSaver<T>>
+) : UpdatableCacheSaver<T> {
 
     override suspend fun get(): T? = savers.firstOrNull()?.get()
 
@@ -16,7 +18,7 @@ class CompositeCacheSaver<T : Any>(private val savers: List<CacheSaver<T>>) : Ca
                 if (index > 0) {
                     flow.distinctUntilChanged()
                         .onEach { newValue ->
-                            savers.firstOrNull()?.updateCache(newValue)
+                            savers.firstOrNull()?.saveCache(newValue)
                         }
                 } else {
                     flow
@@ -25,9 +27,9 @@ class CompositeCacheSaver<T : Any>(private val savers: List<CacheSaver<T>>) : Ca
         }.merge()
             .distinctUntilChanged()
 
-    override suspend fun updateCache(data: T) {
+    override suspend fun saveCache(data: T) {
         savers.forEach {
-            it.updateCache(data)
+            it.saveCache(data)
         }
     }
 

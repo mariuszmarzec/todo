@@ -49,6 +49,7 @@ fun <T, R> Content<T>.mapData(mapper: (T) -> R) = when (this) {
     } catch (expected: Exception) {
         Content.Error(expected)
     }
+
     is Content.Loading -> Content.Loading(this.data?.let(mapper))
     is Content.Error -> Content.Error(this.exception)
 }

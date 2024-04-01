@@ -4,8 +4,8 @@ class ReversedManyItemsCacheSaver<ID, MODEL>(
     private val saver: ManyItemsCacheSaver<ID, MODEL>
 ) : ManyItemsCacheSaver<ID, MODEL> by saver {
 
-    override suspend fun updateCache(data: List<MODEL>) {
-        saver.updateCache(data.reversed())
+    override suspend fun saveCache(data: List<MODEL>) {
+        saver.saveCache(data.reversed())
     }
 }
 

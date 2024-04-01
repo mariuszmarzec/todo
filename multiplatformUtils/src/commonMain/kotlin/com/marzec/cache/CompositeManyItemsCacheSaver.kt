@@ -18,7 +18,7 @@ class CompositeManyItemsCacheSaver<ID, MODEL>(
                 if (index > 0) {
                     flow.distinctUntilChanged()
                         .onEach { newValue ->
-                            savers.firstOrNull()?.updateCache(newValue)
+                            savers.firstOrNull()?.saveCache(newValue)
                         }
                 } else {
                     flow
@@ -26,10 +26,6 @@ class CompositeManyItemsCacheSaver<ID, MODEL>(
             }
         }.merge()
             .distinctUntilChanged()
-
-    override suspend fun updateCache(update: (List<MODEL>?) -> List<MODEL>?) {
-        savers.forEach { it.updateCache(update) }
-    }
 
     override suspend fun removeItem(id: ID) {
         savers.forEach { it.removeItem(id) }
@@ -60,9 +56,9 @@ class CompositeManyItemsCacheSaver<ID, MODEL>(
 
     override suspend fun getById(id: ID): MODEL? = savers.firstOrNull()?.getById(id)
 
-    override suspend fun updateCache(data: List<MODEL>) {
+    override suspend fun saveCache(data: List<MODEL>) {
         savers.forEach {
-            it.updateCache(data)
+            it.saveCache(data)
         }
     }
 }

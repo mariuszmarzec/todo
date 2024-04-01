@@ -12,9 +12,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.serializer
-import kotlin.reflect.typeOf
 
 suspend fun <T : Any> cacheCall(
     key: String,
@@ -51,7 +48,7 @@ class GetWithCacheCall<T>(
                 if (callResult is Content.Error && !ignoreNetworkResult) {
                     emit(callResult)
                 } else if (callResult is Content.Data) {
-                    cacheSaver.updateCache(callResult.data)
+                    cacheSaver.saveCache(callResult.data)
                 }
             },
             cacheSaver.observeCached()

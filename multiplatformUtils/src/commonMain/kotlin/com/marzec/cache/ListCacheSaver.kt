@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.map
 interface ListCacheSaver<ID, MODEL> : ManyItemsCacheSaver<ID, MODEL>, WithListByIdUpdate<ID, MODEL>
 
 class ListCacheSaverImpl<ID, MODEL>(
-    private val cacheSaver: CacheSaver<List<MODEL>>,
+    private val cacheSaver: UpdatableCacheSaver<List<MODEL>>,
     override val isSameId: MODEL.(id: ID) -> Boolean,
     override val newItemInsert: List<MODEL>?.(item: MODEL) -> List<MODEL>? = atFirstPositionInserter()
 ) : ListCacheSaver<ID, MODEL>,
-    CacheSaver<List<MODEL>> by cacheSaver {
+    UpdatableCacheSaver<List<MODEL>> by cacheSaver {
 
     override suspend fun getById(id: ID): MODEL? =
         cacheSaver.get()?.firstOrNull { it.isSameId(id) }
@@ -23,7 +23,7 @@ class ListCacheSaverImpl<ID, MODEL>(
 
 @Suppress("FunctionName")
 fun <ID, MODEL> ListCacheSaver(
-    cacheSaver: CacheSaver<List<MODEL>>,
+    cacheSaver: UpdatableCacheSaver<List<MODEL>>,
     isSameId: MODEL.(id: ID) -> Boolean
 ) = ListCacheSaverImpl(
     cacheSaver = cacheSaver,

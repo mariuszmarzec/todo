@@ -5,13 +5,13 @@ import kotlinx.coroutines.flow.Flow
 class MemoryCacheSaver<T>(
     private val key: String,
     private val memoryCache: Cache
-) : CacheSaver<T> {
+) : UpdatableCacheSaver<T> {
 
     override suspend fun get(): T? = memoryCache.get<T>(key)
 
     override suspend fun observeCached(): Flow<T?> = memoryCache.observe<T>(key)
 
-    override suspend fun updateCache(data: T) = memoryCache.put(key, data)
+    override suspend fun saveCache(data: T) = memoryCache.put(key, data)
 
     override suspend fun updateCache(update: (T?) -> T?) {
         memoryCache.update(key, update)

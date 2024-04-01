@@ -55,12 +55,9 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
                     return cacheSaver.observeCachedById(id)
                 }
 
-                override suspend fun updateCache(update: (MODEL?) -> MODEL?) = Unit
-
-                override suspend fun updateCache(data: MODEL) {
+                override suspend fun saveCache(data: MODEL) {
                     cacheSaver.updateItem(id, data)
                 }
-
             },
             call = networkCall
         ).run()
@@ -104,7 +101,7 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
     private suspend fun refreshAll() = asContent {
         loadAll()
     }.ifDataSuspend {
-        cacheSaver.updateCache(data)
+        cacheSaver.saveCache(data)
     }
 
     private suspend fun loadAll() = dataSource.getAll().map(toDomain)
