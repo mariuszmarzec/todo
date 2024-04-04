@@ -24,14 +24,14 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
-                api(Dependency.kotlinStdlib)
-                api(Dependency.coroutineCore)
-                api(Dependency.ktorClient)
-                api(Dependency.okHttpClientLogger)
-                api(Dependency.ktorSerialization)
-                api(Dependency.ktorContentNegotiation)
-                api(Dependency.serializationJson)
-                implementation(Dependency.kotlinDateTime)
+                api(libs.kotlinStdlib)
+                api(libs.coroutineCore)
+                api(libs.ktorClient)
+                api(libs.okHttpClientLogger)
+                api(libs.ktorSerialization)
+                api(libs.ktorContentNegotiation)
+                api(libs.serializationJson)
+                implementation(libs.kotlinDateTime)
             }
         }
         val desktopTest by getting {
@@ -40,8 +40,8 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation(compose.desktop.uiTestJUnit4)
                 implementation(kotlin("test"))
-                implementation(Dependency.coroutineTest)
-                implementation(Dependency.mockk)
+                implementation(libs.coroutineTest)
+                implementation(libs.mockk)
             }
         }
         named("androidMain") {
@@ -49,21 +49,21 @@ kotlin {
             dependencies {
                 api("androidx.appcompat:appcompat:1.1.0")
                 api("androidx.core:core-ktx:1.3.1")
-                api(Dependency.ktorOkHttpClient)
-                implementation(Dependency.imageLoader)
-                implementation(Dependency.exoPlayer)
+                api(libs.ktorOkHttpClient)
+                implementation(libs.imageLoader)
+                implementation(libs.exoPlayer)
 
                 // data store
-                api("androidx.datastore:datastore-preferences:${datastore_version}")
-                api("androidx.datastore:datastore:${datastore_version}")
+                api(libs.datastore.preferences)
+                api(libs.datastore)
 
             }
         }
         named("desktopMain") {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
-                api(Dependency.ktorOkHttpClient)
-                api(Dependency.vlc)
+                api(libs.ktorOkHttpClient)
+                api(libs.vlc)
                 implementation(compose.desktop.currentOs)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 api(DesktopComponentsDependencies.animatedImage)
@@ -74,8 +74,8 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation(Dependency.coroutineTest)
-                implementation(Dependency.mockk)
+                implementation(libs.coroutineTest)
+                implementation(libs.mockk)
             }
         }
     }
@@ -85,11 +85,10 @@ android {
 
     namespace = "com.marzec"
 
-    compileSdk = Config.Android.compileSdkVersion
-
+    compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
-        minSdk = Config.Android.minSdkVersion
-        targetSdk = Config.Android.targetSdkVersion
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     compileOptions {
@@ -98,7 +97,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeCompilerVersion
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
     buildFeatures {

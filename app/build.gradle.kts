@@ -1,7 +1,8 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
 
- plugins {
+plugins {
     id("com.android.application")
     kotlin("android")
     id("org.jetbrains.compose")
@@ -13,13 +14,13 @@ import java.io.FileInputStream
 android {
     namespace = "com.marzec.todo"
 
-    compileSdk = Config.Android.compileSdkVersion
+    compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
-        minSdk = Config.Android.minSdkVersion
-        targetSdk = Config.Android.targetSdkVersion
-        applicationId = Config.Android.applicationId
-        versionCode = Config.Android.versionCode
-        versionName = Config.Android.versionName
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
+        applicationId = "com.marzec.todo"
+        versionCode = 1
+        versionName = "1.0.0"
     }
 
     signingConfigs {
@@ -59,7 +60,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeCompilerVersion
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
     kotlinOptions {
@@ -69,9 +70,9 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(Dependency.androidxAppCompat)
-    implementation(Dependency.androidMaterial)
-    implementation(Dependency.activityCompose)
+    implementation(libs.androidxAppCompat)
+    implementation(libs.androidMaterial)
+    implementation(libs.activityCompose)
     implementation(compose.material)
     implementation(compose.ui)
     implementation(compose.uiTooling)

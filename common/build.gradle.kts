@@ -34,18 +34,18 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
-                api(Dependency.kotlinStdlib)
-                api(Dependency.coroutineCore)
-                api(Dependency.ktorClient)
-                api(Dependency.ktorSerialization)
-                api(Dependency.serializationJson)
-                implementation(Dependency.kotlinDateTime)
+                api(libs.kotlinStdlib)
+                api(libs.coroutineCore)
+                api(libs.ktorClient)
+                api(libs.ktorSerialization)
+                api(libs.serializationJson)
+                implementation(libs.kotlinDateTime)
             }
         }
         named("desktopTest") {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(Dependency.coroutineTest)
+                implementation(libs.coroutineTest)
             }
         }
         named("androidMain") {
@@ -53,18 +53,17 @@ kotlin {
             dependencies {
                 api("androidx.appcompat:appcompat:1.1.0")
                 api("androidx.core:core-ktx:1.3.1")
-                api(Dependency.ktorOkHttpClient)
+                api(libs.ktorOkHttpClient)
 
                 // data store
-                api("androidx.datastore:datastore-preferences:${datastore_version}")
-                api("androidx.datastore:datastore:${datastore_version}")
-
+                api(libs.datastore.preferences)
+                api(libs.datastore)
             }
         }
         named("desktopMain") {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
-                api(Dependency.ktorOkHttpClient)
+                api(libs.ktorOkHttpClient)
             }
         }
     }
@@ -72,13 +71,12 @@ kotlin {
 
 android {
 
-    compileSdkVersion(30)
-
     namespace = "com.marzec.todo.common"
 
+    compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
-        minSdkVersion(30)
-        targetSdkVersion(30)
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     compileOptions {
@@ -91,7 +89,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeCompilerVersion
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
     sourceSets {
