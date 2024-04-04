@@ -53,15 +53,15 @@ mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 
-[plugins]
-composeGradle = { id = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composePlugin" }
-androidBuild = { id = "com.android.tools.build:gradle", version.ref = "androidGradleplugin" }
-kotlinGradle = { id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-serializationGradle = { id = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
-buildKonfig = { id = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfig" }
-detektPlugin = { id = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
-atomic = { id = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfu" }
+plugin-composeGradle = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composePlugin" }
+plugin-androidBuild = { module = "com.android.tools.build:gradle", version.ref = "androidGradleplugin" }
+plugin-kotlinGradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+plugin-serializationGradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+plugin-buildKonfig = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfig" }
+plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+plugin-atomic = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfu" }
 
+[plugins]
 
 [bundles]
 
