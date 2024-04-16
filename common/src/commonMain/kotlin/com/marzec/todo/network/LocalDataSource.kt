@@ -1,5 +1,6 @@
 package com.marzec.todo.network
 
+import androidx.compose.ui.util.fastMaxOfOrNull
 import com.marzec.cache.FileCache
 import com.marzec.cache.getTyped
 import com.marzec.cache.putTyped
@@ -103,7 +104,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
         val tasks = localData.tasks
-        val newTaskId = tasks.size
+        val newTaskId = (tasks.maxOfOrNull { it.id } ?: 0).inc()
         localData = localData.copy(
             tasks = tasks.toMutableList() + createNewTask(newTaskId, createTaskDto, tasks),
         )
