@@ -19,5 +19,3 @@ inline fun <reified T: Any> Any.asInstanceAndReturn(action: T.() -> T) = (this a
 inline fun <T> Boolean.ifTrue(valueLambda: () -> T): T? = if (this) valueLambda() else null
 
 inline fun <T> Boolean.ifFalse(valueLambda: () -> T): T? = if (this) null else valueLambda()
-
-fun <T> Flow<Content<T>>.asUnitContent() = map { it.mapData { Unit } }
