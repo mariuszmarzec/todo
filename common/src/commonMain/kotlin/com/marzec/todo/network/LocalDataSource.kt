@@ -1,6 +1,5 @@
 package com.marzec.todo.network
 
-import androidx.compose.ui.util.fastMaxOfOrNull
 import com.marzec.cache.FileCache
 import com.marzec.cache.getTyped
 import com.marzec.cache.putTyped
@@ -10,7 +9,6 @@ import com.marzec.time.currentTime
 import com.marzec.time.formatDate
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
-import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTaskDto
@@ -63,7 +61,10 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }
 
     private fun List<TaskDto>.fillSubTasks(subTasks: List<TaskDto>): List<TaskDto> = map { root ->
-        root.copy(subTasks = subTasks.filter { it.parentTaskId == root.id }.fillSubTasks(subTasks))
+        root.copy(subTasks = subTasks
+            .filter { it.parentTaskId == root.id }
+            .sortedByDescending { it.isToDo }
+            .fillSubTasks(subTasks))
     }
 
 
