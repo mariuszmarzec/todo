@@ -83,7 +83,11 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     private fun List<TaskDto>.fillSubTasks(subTasks: List<TaskDto>): List<TaskDto> = map { root ->
         root.copy(subTasks = subTasks
             .filter { it.parentTaskId == root.id }
-            .sortedByDescending { it.isToDo }
+            .sortedWith(
+                compareByDescending(TaskDto::isToDo)
+                    .thenByDescending(TaskDto::priority)
+                    .thenBy(TaskDto::modifiedTime)
+            )
             .fillSubTasks(subTasks))
     }
 
