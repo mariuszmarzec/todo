@@ -38,7 +38,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) = update {
         if (removeSubtasks) {
-            val taskDto = getSubtasksTree().first { task -> task.id == taskId }
+            val taskDto = getTasksTree().first { task -> task.id == taskId }
             removeTaskWithSubtasks(taskDto)
         } else {
             removeTaskInternal(taskId)
@@ -64,13 +64,17 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     override suspend fun getTasks(): List<TaskDto> = try {
         lock.lock()
-        getSubtasksTree()
+        getTasksTree()
     } finally {
         lock.unlock()
     }
 
-    private fun getSubtasksTree(): List<TaskDto> {
+    private fun getTasksTree(): List<TaskDto> {
         val rootTasks = localData.tasks.filter { it.parentTaskId == null }
+        return getTasksTree(rootTasks)
+    }
+
+    private fun getTasksTree(rootTasks: List<TaskDto>): List<TaskDto> {
         val subTasks = localData.tasks.filter { it.parentTaskId != null }.toMutableList()
 
         return rootTasks.fillSubTasks(subTasks)
@@ -93,20 +97,6 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             addNewTask(it.toCreateTask())
         }
     }
-
-    private fun getSubTasks(
-        remainedTasks: MutableList<TaskDto>,
-        parentTask: TaskDto
-    ): List<TaskDto> = if (remainedTasks.isNotEmpty()) {
-        val subtasks = remainedTasks.filter { it.parentTaskId == parentTask.id }
-        remainedTasks.removeAll(subtasks)
-        subtasks.map { task -> task.copy(subTasks = getSubTasks(remainedTasks, task)) }
-    } else {
-        emptyList()
-    }.sortedWith(
-        compareByDescending(TaskDto::isToDo).thenByDescending(TaskDto::priority)
-            .thenBy(TaskDto::modifiedTime)
-    )
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
         val tasks = localData.tasks
@@ -141,9 +131,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     private fun subTasksOfParentOrTasks(tasks: List<TaskDto>, createTaskDto: CreateTaskDto) =
         (createTaskDto.parentTaskId?.let { parentTask ->
-            getSubTasks(
-                tasks.toMutableList(),
-                tasks.first { parentTask == it.id })
+            getTasksTree(tasks.filter { parentTask == it.id }).firstOrNull()?.subTasks
         } ?: tasks)
 
     override suspend fun updateTask(
