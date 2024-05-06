@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +21,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.marzec.modifier.dragAndDrop
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -34,17 +37,15 @@ fun TextListItemView(
             .fillMaxWidth()
             .background(backgroundColor)
             .let {
-                val onLong = onLongClickListener?.let {
-                    { it.invoke(state) }
-                }
-                val onClick = onClickListener?.let {
-                    { it.invoke(state) }
-                } ?: { }
-                if (onLongClickListener != null || onClickListener != null) {
-                    it.combinedClickable(onLongClick = onLong, onClick = onClick)
-                } else {
-                    it
-                }
+                it.combinedClickable(
+                    enabled = onLongClickListener != null || onClickListener != null,
+                    onLongClick = onLongClickListener?.let<(TextListItem) -> Unit, () -> Unit> {
+                        { it.invoke(state) }
+                    },
+                    onClick = onClickListener?.let {
+                        { it.invoke(state) }
+                    } ?: { }
+                )
             }
     ) {
         Row(
