@@ -38,7 +38,8 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) = update {
         if (removeSubtasks) {
-            val taskDto = getTasksTree().firstInTreeOrNull { task -> task.id == taskId }
+            val tasksTree = getTasksTree()
+            val taskDto = tasksTree.firstInTreeOrNull { task -> task.id == taskId }
             taskDto?.let { removeTaskWithSubtasks(it) }
         } else {
             removeTaskInternal(taskId)
@@ -81,14 +82,15 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }
 
     private fun List<TaskDto>.firstInTreeOrNull(condition: (TaskDto) -> Boolean): TaskDto? {
+        var result: TaskDto? = null
         forEach {  task ->
-            return when {
+            result = when {
                 condition(task) -> task
                 task.subTasks.isNotEmpty() -> task.subTasks.firstInTreeOrNull(condition)
                 else -> null
             }
         }
-        return null
+        return result
     }
 
     private fun List<TaskDto>.fillSubTasks(subTasks: List<TaskDto>): List<TaskDto> = map { root ->
