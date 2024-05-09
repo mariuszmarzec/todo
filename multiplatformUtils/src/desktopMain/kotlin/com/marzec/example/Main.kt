@@ -78,6 +78,8 @@ object DI {
         { Random.nextInt(Int.MAX_VALUE).toString() }
     }
 
+    val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
+
     lateinit var navigationStore: NavigationStore
 
     fun provideNavigationStore(
@@ -87,6 +89,7 @@ object DI {
         scope = scope,
         stateCache = stateCache,
         cacheKeyProvider = cacheKeyProvider,
+        navigationStoreCacheKey = navigationStoreCacheKey,
         defaultDestination = NavigationExampleDestination.HomeScreen,
         overrideLastClose = overrideLastClose,
         onNewStateCallback = ::onNewStateCallback

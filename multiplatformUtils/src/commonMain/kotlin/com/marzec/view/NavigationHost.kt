@@ -58,6 +58,7 @@ fun navigationStore(
     scope: CoroutineScope,
     stateCache: StateCache,
     cacheKeyProvider: () -> String,
+    navigationStoreCacheKey: String,
     defaultDestination: Destination,
     overrideLastClose: (NavigationState.() -> NavigationState)? = null,
     onNewStateCallback: ((NavigationState) -> Unit)? = null
@@ -65,7 +66,7 @@ fun navigationStore(
     scope = scope,
     stateCache = stateCache,
     resultCache = ResultCache(MemoryCache()),
-    cacheKey = cacheKeyProvider.invoke(),
+    cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = navigationState(
         backStack = listOf(

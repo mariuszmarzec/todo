@@ -94,6 +94,8 @@ object DI {
 
     val stateCache: StateCache = MemoryStateCache()
 
+    val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
+
     fun router(
         destination: Destination
     ): @Composable (destination: Destination, cacheKey: String) -> Unit =
@@ -356,6 +358,7 @@ object DI {
             scope = scope,
             stateCache = stateCache,
             cacheKeyProvider = cacheKeyProvider,
+            navigationStoreCacheKey = navigationStoreCacheKey,
             defaultDestination = defaultScreen
         )
     }
