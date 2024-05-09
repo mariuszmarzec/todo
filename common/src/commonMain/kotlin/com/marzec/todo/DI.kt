@@ -210,8 +210,7 @@ object DI {
         stateCache = stateCache,
         initialState = AddNewTaskState.initial(
             taskId = taskId,
-            parentTaskId = parentTaskId,
-            isScheduleAvailable = !isJustLocalStorageMode
+            parentTaskId = parentTaskId
         ),
         todoRepository = provideTodoRepository(),
     )

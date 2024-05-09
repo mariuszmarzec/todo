@@ -13,8 +13,7 @@ data class AddNewTaskState(
     val description: String,
     val highestPriorityAsDefault: Boolean,
     val removeAfterSchedule: Boolean,
-    val scheduler: Scheduler? = null,
-    val isScheduleAvailable: Boolean
+    val scheduler: Scheduler? = null
 ) {
 
     val schedulerWithOptions: Scheduler?
@@ -34,7 +33,6 @@ data class AddNewTaskState(
         fun default(
             taskId: Int? = null,
             parentTaskId: Int? = null,
-            isScheduleAvailable: Boolean
         ) = AddNewTaskState(
             taskId = taskId,
             task = null,
@@ -43,26 +41,22 @@ data class AddNewTaskState(
             priority = 0,
             isToDo = true,
             highestPriorityAsDefault = false,
-            removeAfterSchedule = false,
-            isScheduleAvailable = isScheduleAvailable
+            removeAfterSchedule = false
         )
 
         fun initial(
             taskId: Int?,
-            parentTaskId: Int?,
-            isScheduleAvailable: Boolean
+            parentTaskId: Int?
         ): State<AddNewTaskState> = taskId?.let {
             State.Loading(
                 default(
                     taskId = taskId,
-                    parentTaskId = parentTaskId,
-                    isScheduleAvailable = isScheduleAvailable
+                    parentTaskId = parentTaskId
                 )
             )
         } ?: State.Data(
             default(
-                parentTaskId = parentTaskId,
-                isScheduleAvailable = isScheduleAvailable
+                parentTaskId = parentTaskId
             )
         )
     }

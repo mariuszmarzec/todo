@@ -85,7 +85,7 @@ fun AddNewTaskScreen(
                             }
                         }
                     }
-                    if (state.data.parentTaskId == null && state.data.isScheduleAvailable) {
+                    if (state.data.parentTaskId == null) {
                         ScheduleRow(
                             scheduler = state.data.scheduler,
                             onScheduleButtonClick = { store.onScheduleButtonClick() },

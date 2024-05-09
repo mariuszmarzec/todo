@@ -51,8 +51,7 @@ class AddNewTaskStore(
                             result = resultNonNull(),
                             defaultData = AddNewTaskState.default(
                                 taskId = 0,
-                                parentTaskId = null,
-                                isScheduleAvailable = state.data?.isScheduleAvailable ?: false
+                                parentTaskId = null
                             )
                         ) { result ->
                             copy(
