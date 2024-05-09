@@ -165,7 +165,7 @@ object DI {
             loginRepository = loginRepository,
             stateCache = stateCache,
             cacheKey = cacheKey,
-            initialState = TasksScreenState.initial(isScheduleAvailable = !isJustLocalStorageMode),
+            initialState = TasksScreenState.initial(),
             urlDelegate = UrlDelegateImpl<TasksScreenState>(openUrlHelper),
             dialogDelegate = DialogDelegateImpl<Int, TasksScreenState>(),
             removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(

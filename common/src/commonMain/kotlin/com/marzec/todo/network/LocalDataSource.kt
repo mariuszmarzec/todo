@@ -12,6 +12,14 @@ import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTaskDto
+import com.marzec.todo.model.Scheduler
+import com.marzec.todo.model.highestPriorityAsDefault
+import com.marzec.todo.model.toDomain
+import java.time.LocalDateTime
+import java.time.Period
+import java.time.YearMonth
+import kotlin.math.ceil
+import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -63,11 +71,14 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         )
     }
 
-    override suspend fun getTasks(): List<TaskDto> = try {
-        lock.lock()
-        getTasksTree()
-    } finally {
-        lock.unlock()
+    override suspend fun getTasks(): List<TaskDto> {
+        SchedulerDispatcher().dispatchScheduled()
+        return try {
+            lock.lock()
+            getTasksTree()
+        } finally {
+            lock.unlock()
+        }
     }
 
     private fun getTasksTree(): List<TaskDto> {
@@ -83,7 +94,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
     private fun List<TaskDto>.firstInTreeOrNull(condition: (TaskDto) -> Boolean): TaskDto? {
         var result: TaskDto? = null
-        forEach {  task ->
+        forEach { task ->
             result = when {
                 condition(task) -> task
                 task.subTasks.isNotEmpty() -> task.subTasks.firstInTreeOrNull(condition)
@@ -116,12 +127,19 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }
 
     override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
+        addNewTaskInternal(createTaskDto)
+    }
+
+    private fun addNewTaskInternal(createTaskDto: CreateTaskDto) {
         val tasks = localData.tasks
-        val newTaskId = (tasks.maxOfOrNull { it.id } ?: 0).inc()
+        val newTaskId = createNewId(tasks)
         localData = localData.copy(
             tasks = tasks.toMutableList() + createNewTask(newTaskId, createTaskDto, tasks),
         )
     }
+
+    private fun createNewId(tasks: List<TaskDto>) =
+        (tasks.maxOfOrNull { it.id } ?: 0).inc()
 
     private fun createNewTask(
         newTaskId: Int,
@@ -205,13 +223,136 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     private suspend fun updateStorage() {
         fileCache.putTyped(cacheKey, localData)
     }
+
+    private inner class SchedulerDispatcher {
+
+        suspend fun dispatchScheduled() = update {
+            localData.tasks.filter { it.scheduler != null }.forEach { task ->
+                val scheduler = task.scheduler?.toDomain()
+                if (scheduler?.shouldBeCreated() == true) {
+                    val createNewTask = task.toCreateTask(
+                        ignorePriority = true,
+                        ignoreScheduler = true
+                    ).copy(
+                        highestPriorityAsDefault = task.scheduler.highestPriorityAsDefault
+                    )
+
+                    addNewTaskInternal(createNewTask)
+
+                    if ((scheduler as? Scheduler.OneShot)?.removeScheduled == true) {
+                        removeTaskWithSubtasks(task)
+                    } else {
+                        updateLastDate(task)
+                    }
+                }
+            }
+        }
+
+        private fun Scheduler.shouldBeCreated(): Boolean {
+            return when (this) {
+                is Scheduler.OneShot -> shouldBeCreated()
+                is Scheduler.Monthly -> shouldBeCreated()
+                is Scheduler.Weekly -> shouldBeCreated()
+            }
+        }
+
+        private fun Scheduler.OneShot.shouldBeCreated(): Boolean {
+            val creationTime = startDate.toJavaLocalDateTime()
+                .withHour(hour)
+                .withMinute(minute)
+            return lastDate == null && isInStartWindow(creationTime)
+        }
+
+        private fun Scheduler.Monthly.shouldBeCreated(): Boolean {
+            val today = currentTime().toJavaLocalDateTime()
+            val dayOfMonth = if (dayOfMonth > 27) today.lastDayOfTheMonth() else dayOfMonth
+            val startedInNextMonth = startDate.dayOfMonth >= dayOfMonth
+            val firstDate = startDate.toJavaLocalDateTime()
+                .let { if (startedInNextMonth) it.plusMonths(1L) else it }
+                .withHour(hour)
+                .withMinute(minute)
+                .let {
+                    it.withDayOfMonth(if (dayOfMonth > 27) it.lastDayOfTheMonth() else dayOfMonth)
+                }
+            val maxDate = repeatCount.takeIf { it > 0 }
+                ?.let { firstDate.plusMonths(it * repeatInEveryPeriod.toLong()) }
+            val firstDateLocal = firstDate.toLocalDate()
+            val todayLocalDate = today.toLocalDate()
+
+            if (firstDateLocal <= todayLocalDate && (maxDate?.let { today <= it } != false)) {
+                if (Period.between(
+                        firstDateLocal,
+                        todayLocalDate.plusDays(1)
+                    ).months % repeatInEveryPeriod == 0
+                ) {
+                    val creationTime =
+                        today.withHour(hour).withMinute(minute).withDayOfMonth(dayOfMonth)
+                    return isInStartWindow(creationTime)
+                }
+            }
+            return false
+        }
+
+        private fun Scheduler.Weekly.shouldBeCreated(): Boolean {
+            val today = currentTime().toJavaLocalDateTime()
+            val firstDate = startDate.toJavaLocalDateTime()
+                .withHour(hour)
+                .withMinute(minute)
+            val maxDate = repeatCount.takeIf { it > 0 }
+                ?.let { firstDate.plusDays(it.dec() * WEEK_DAYS_COUNT * repeatInEveryPeriod.toLong()) }
+            val firstDateLocal = firstDate.toLocalDate()
+            val todayLocalDate = today.toLocalDate()
+
+            if (daysOfWeek.isNotEmpty() && today.dayOfWeek !in daysOfWeek) {
+                return false
+            }
+            val isLessOrEqualMaxDate = maxDate?.let { today <= it } != false
+            if (firstDateLocal <= todayLocalDate && isLessOrEqualMaxDate) {
+                if (ceil(
+                        Period.between(
+                            firstDateLocal,
+                            todayLocalDate
+                        ).days / WEEK_DAYS_COUNT.toFloat()
+                    ).toInt().dec()
+                        .mod(repeatInEveryPeriod) == 0
+                ) {
+                    val creationTime = today.withHour(hour).withMinute(minute)
+                    return isInStartWindow(creationTime)
+                }
+            }
+            return false
+        }
+
+        private fun isInStartWindow(creationTime: LocalDateTime): Boolean =
+            creationTime <= currentTime().toJavaLocalDateTime()
+
+
+        private fun updateLastDate(task: TaskDto) {
+            localData = localData.copy(
+                tasks = localData.tasks.replaceIf(
+                    condition = { item -> item.id == task.id },
+                    replace = {
+                        task.copy(scheduler = task.scheduler?.copy(lastDate = currentTime().formatDate()))
+                    }
+                )
+            )
+        }
+    }
+
+    companion object {
+        private const val WEEK_DAYS_COUNT = 7
+    }
 }
 
-private fun TaskDto.toCreateTask() = CreateTaskDto(
+private fun TaskDto.toCreateTask(
+    ignorePriority: Boolean = false,
+    ignoreScheduler: Boolean = false,
+) = CreateTaskDto(
     description = description,
     parentTaskId = parentTaskId,
-    priority = priority,
+    priority = priority.takeIf { !ignorePriority },
     highestPriorityAsDefault = false,
-    scheduler = scheduler
+    scheduler = scheduler.takeIf { !ignoreScheduler }
 )
 
+private fun LocalDateTime.lastDayOfTheMonth() = YearMonth.of(year, month).atEndOfMonth().dayOfMonth
