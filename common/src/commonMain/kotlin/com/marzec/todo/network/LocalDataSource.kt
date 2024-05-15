@@ -16,13 +16,11 @@ import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.highestPriorityAsDefault
 import com.marzec.todo.model.toDomain
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
 import kotlin.math.ceil
 import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -51,15 +49,15 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         if (removeSubtasks) {
             val tasksTree = getTasksTree()
             val taskDto = tasksTree.firstInTreeOrNull { task -> task.id == taskId }
-            taskDto?.let { removeTaskWithSubtasks(it) }
+            taskDto?.let { removeTaskWithSubtasksInternal(it) }
         } else {
             removeTaskInternal(taskId)
         }
     }
 
-    private fun removeTaskWithSubtasks(taskDto: TaskDto) {
+    private fun removeTaskWithSubtasksInternal(taskDto: TaskDto) {
         removeTaskInternal(taskDto.id)
-        taskDto.subTasks.forEach { removeTaskWithSubtasks(it) }
+        taskDto.subTasks.forEach { removeTaskWithSubtasksInternal(it) }
     }
 
     private fun removeTaskInternal(taskId: Int) {
@@ -99,7 +97,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         var result: TaskDto? = null
         forEach { task ->
             result = when {
-                condition(task) -> task
+                condition(task) -> return task
                 task.subTasks.isNotEmpty() -> task.subTasks.firstInTreeOrNull(condition)
                 else -> null
             }
@@ -243,7 +241,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                     addNewTaskInternal(createNewTask)
 
                     if ((scheduler as? Scheduler.OneShot)?.removeScheduled == true) {
-                        removeTaskWithSubtasks(task)
+                        removeTaskWithSubtasksInternal(task)
                     } else {
                         updateLastDate(task)
                     }
