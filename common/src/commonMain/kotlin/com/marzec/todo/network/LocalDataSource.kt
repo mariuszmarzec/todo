@@ -7,6 +7,7 @@ import com.marzec.extensions.replaceIf
 import com.marzec.locker.Locker
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
+import com.marzec.time.withStartOfDay
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.TaskDto
@@ -15,11 +16,13 @@ import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.highestPriorityAsDefault
 import com.marzec.todo.model.toDomain
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
 import kotlin.math.ceil
 import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -260,7 +263,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             val creationTime = startDate.toJavaLocalDateTime()
                 .withHour(hour)
                 .withMinute(minute)
-            return lastDate == null && isInStartWindow(creationTime)
+            return isInStartWindow(creationTime)
         }
 
         private fun Scheduler.Monthly.shouldBeCreated(): Boolean {
@@ -323,8 +326,15 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             return false
         }
 
-        private fun isInStartWindow(creationTime: LocalDateTime): Boolean =
-            creationTime <= currentTime().toJavaLocalDateTime()
+        private fun Scheduler.lastDateIsNotToday(): Boolean {
+            val todayLocalDate = currentTime().toJavaLocalDateTime().toLocalDate()
+            return lastDate?.withStartOfDay()
+                ?.let { it.toJavaLocalDateTime().toLocalDate() != todayLocalDate }
+                ?: true
+        }
+
+        private fun Scheduler.isInStartWindow(creationTime: LocalDateTime): Boolean =
+            lastDateIsNotToday() && creationTime <= currentTime().toJavaLocalDateTime()
 
 
         private fun updateLastDate(task: TaskDto) {
