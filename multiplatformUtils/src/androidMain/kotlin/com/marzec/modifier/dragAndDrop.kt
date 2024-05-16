@@ -19,7 +19,7 @@ import java.util.*
 actual fun Modifier.dragAndDrop(
     index: Int,
     dragEnteredIndex: MutableIntState,
-    onDrop: (Int, Int) -> Unit
+    onDrop: (draggedIndex: Int, targetIndex: Int) -> Unit
 ): Modifier = this
     .dragAndDropTarget(
         shouldStartDragAndDrop = {

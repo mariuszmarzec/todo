@@ -33,6 +33,7 @@ import com.marzec.preferences.StateCache
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
+import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.network.ApiDataSource
@@ -177,7 +178,8 @@ object DI {
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
             scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
             scheduledOptions = provideScheduledOptions(),
-            selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>()
+            selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>(),
+            reorderDelegate = ReorderDelegateImpl()
         )
     }
 

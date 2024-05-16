@@ -8,6 +8,8 @@ import com.marzec.delegate.WithSelection
 import com.marzec.extensions.EMPTY_STRING
 import com.marzec.mvi.State
 import com.marzec.todo.delegates.dialog.WithTasks
+import com.marzec.todo.delegates.reorder.ReorderMode
+import com.marzec.todo.delegates.reorder.WithReorderMode
 import com.marzec.todo.model.Task
 import com.marzec.view.SearchState
 
@@ -16,11 +18,13 @@ data class TasksScreenState(
     override val scrollListState: ScrollListState,
     override val search: SearchState,
     override val dialog: DialogState<Int>,
-    override val selected: Set<Int>
+    override val selected: Set<Int>,
+    override val reorderMode: ReorderMode = ReorderMode.Disabled
 ) : WithTasks<TasksScreenState>,
     WithSearch<TasksScreenState>,
     WithScrollListState<TasksScreenState>,
-    WithSelection<Int, TasksScreenState> {
+    WithSelection<Int, TasksScreenState>,
+    WithReorderMode {
 
     override fun copyWithDialog(dialog: DialogState<Int>): TasksScreenState = copy(dialog = dialog)
 

@@ -18,15 +18,21 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
+import com.marzec.extensions.applyIf
+import com.marzec.extensions.swap
+import com.marzec.mvi.intent
+import com.marzec.mvi.map
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
+import com.marzec.todo.delegates.reorder.ReorderDelegate
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.flowOf
 
 class TasksStore(
     scope: CoroutineScope,
@@ -43,7 +49,8 @@ class TasksStore(
     private val searchDelegate: SearchDelegate,
     private val scrollDelegate: ScrollDelegate,
     private val scheduledOptions: PickItemOptions<Task>,
-    private val selectionDelegate: SelectionDelegate<Int>
+    private val selectionDelegate: SelectionDelegate<Int>,
+    private val reorderDelegate: ReorderDelegate
 ) : Store3<State<TasksScreenState>>(
     scope,
     stateCache.get(cacheKey) ?: initialState
@@ -52,7 +59,8 @@ class TasksStore(
     DialogDelegate<Int> by dialogDelegate,
     SearchDelegate by searchDelegate,
     ScrollDelegate by scrollDelegate,
-    SelectionDelegate<Int> by selectionDelegate {
+    SelectionDelegate<Int> by selectionDelegate,
+    ReorderDelegate by reorderDelegate {
 
     override val identifier: String
         get() = cacheKey
@@ -65,7 +73,8 @@ class TasksStore(
             urlDelegate,
             searchDelegate,
             scrollDelegate,
-            selectionDelegate
+            selectionDelegate,
+            reorderDelegate
         )
     }
 
