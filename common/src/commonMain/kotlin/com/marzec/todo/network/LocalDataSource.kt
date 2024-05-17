@@ -245,7 +245,8 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                     copyTask(task)
 
                     if ((scheduler as? Scheduler.OneShot)?.removeScheduled == true) {
-                        removeTaskWithSubtasksInternal(task)
+                        val taskDtoToRemove = getTasksTree().firstInTreeOrNull { it.id == task.id }
+                        taskDtoToRemove?.let { removeTaskWithSubtasksInternal(it) }
                     } else {
                         updateLastDate(task)
                     }
