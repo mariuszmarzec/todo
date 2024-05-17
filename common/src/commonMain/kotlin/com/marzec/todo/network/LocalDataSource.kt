@@ -3,6 +3,7 @@ package com.marzec.todo.network
 import com.marzec.cache.FileCache
 import com.marzec.cache.getTyped
 import com.marzec.cache.putTyped
+import com.marzec.dto.NullableFieldDto
 import com.marzec.extensions.replaceIf
 import com.marzec.locker.Locker
 import com.marzec.time.currentTime
@@ -10,6 +11,7 @@ import com.marzec.time.formatDate
 import com.marzec.time.withStartOfDay
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
+import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTaskDto
@@ -131,12 +133,14 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         addNewTaskInternal(createTaskDto)
     }
 
-    private fun addNewTaskInternal(createTaskDto: CreateTaskDto) {
+    private fun addNewTaskInternal(createTaskDto: CreateTaskDto): TaskDto {
         val tasks = localData.tasks
         val newTaskId = createNewId(tasks)
+        val newTask = createNewTask(newTaskId, createTaskDto, tasks)
         localData = localData.copy(
-            tasks = tasks.toMutableList() + createNewTask(newTaskId, createTaskDto, tasks),
+            tasks = tasks.toMutableList() + newTask,
         )
+        return newTask
     }
 
     private fun createNewId(tasks: List<TaskDto>) =
@@ -174,6 +178,13 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         taskId: Int,
         task: UpdateTaskDto
     ) = update {
+        updateTaskInternal(taskId, task)
+    }
+
+    private fun updateTaskInternal(
+        taskId: Int,
+        task: UpdateTaskDto
+    ) {
         localData = localData.copy(
             tasks = localData.tasks.replaceIf(
                 condition = { it.id == taskId },
@@ -231,14 +242,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             localData.tasks.filter { it.scheduler != null }.forEach { task ->
                 val scheduler = task.scheduler?.toDomain()
                 if (scheduler?.shouldBeCreated() == true) {
-                    val createNewTask = task.toCreateTask(
-                        ignorePriority = true,
-                        ignoreScheduler = true
-                    ).copy(
-                        highestPriorityAsDefault = task.scheduler.highestPriorityAsDefault
-                    )
-
-                    addNewTaskInternal(createNewTask)
+                    copyTask(task)
 
                     if ((scheduler as? Scheduler.OneShot)?.removeScheduled == true) {
                         removeTaskWithSubtasksInternal(task)
@@ -247,6 +251,26 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                     }
                 }
             }
+        }
+
+        private fun copyTask(task: TaskDto): TaskDto {
+            val createNewTask = task.toCreateTask(
+                ignorePriority = true,
+                ignoreScheduler = true
+            ).copy(
+                highestPriorityAsDefault = task.scheduler?.highestPriorityAsDefault ?: false
+            )
+
+            val subTasks = localData.tasks
+                .filter { it.parentTaskId == task.id }
+                .map { copyTask(it) }
+
+            val newTask = addNewTaskInternal(createNewTask)
+
+            subTasks.forEach {
+                updateTaskInternal(it.id, UpdateTaskDto(parentTaskId = NullableFieldDto(newTask.id)))
+            }
+            return newTask
         }
 
         private fun Scheduler.shouldBeCreated(): Boolean {
