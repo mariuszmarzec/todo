@@ -18,21 +18,17 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
-import com.marzec.extensions.applyIf
-import com.marzec.extensions.swap
-import com.marzec.mvi.intent
-import com.marzec.mvi.map
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.reorder.ReorderDelegate
+import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.flowOf
 
 class TasksStore(
     scope: CoroutineScope,
@@ -86,12 +82,13 @@ class TasksStore(
         reducer {
             state.reduceDataWithContent(resultNonNull(), TasksScreenState.emptyData()) { result ->
                 val taskIds = result.data.map { it.id }
+                val tasks = result.data.sortedWith(
+                    compareByDescending(Task::priority).thenBy(
+                        Task::modifiedTime
+                    )
+                )
                 copy(
-                    tasks = result.data.sortedWith(
-                        compareByDescending(Task::priority).thenBy(
-                            Task::modifiedTime
-                        )
-                    ),
+                    tasks = tasks,
                     selected = this.selected.filter { it in taskIds }.toSet()
                 )
             }

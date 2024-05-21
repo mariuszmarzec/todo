@@ -1,9 +1,18 @@
 package com.marzec.todo.view
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -17,11 +26,18 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.marzec.extensions.applyIf
 import com.marzec.todo.extensions.descriptionWithProgress
 import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.extensions.ifFalse
+import com.marzec.modifier.dragAndDrop
 import com.marzec.todo.extensions.subDescription
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
@@ -42,6 +58,7 @@ fun TaskListView(
     tasks: List<Task>,
     search: String = "",
     selected: Set<Int>,
+    reorderMode: Boolean = false,
     showButtonsInColumns: Boolean,
     scrollState: LazyListState = rememberLazyListState(),
     onClickListener: (Int) -> Unit,
@@ -53,51 +70,97 @@ fun TaskListView(
     onCheckClick: ((Int) -> Unit)? = null,
     onUncheckClick: ((Int) -> Unit)? = null,
     onSelectedChange: ((Int) -> Unit)? = null,
+    onDragAndDrop: ((draggedIndex: Int, targetIndex: Int) -> Unit)? = null
 ) {
+
     val selectionModeEnabled = selected.isNotEmpty()
+
+    val dragEnteredIndex: MutableIntState = remember { mutableIntStateOf(-1) }
+
+    val selectable = selectionModeEnabled && !reorderMode
     LazyColumn(state = scrollState) {
-        items(
+        itemsIndexed(
             items = tasks
-            .filterWithSearch(search)
-            .map {
-                TaskListItem(
-                    id = it.id,
-                    item = TextListItem(
-                        id = it.id.toString(),
-                        name = it.descriptionWithProgress,
-                        description = it.subDescription
-                    ),
-                    urlToOpen = it.urlToOpen(),
-                    isToDo = it.isToDo,
-                    pinned = it.parentTaskId != null
-                )
-            },
-        ) { listItem ->
+                .filterWithSearch(search)
+                .map {
+                    TaskListItem(
+                        id = it.id,
+                        item = TextListItem(
+                            id = it.id.toString(),
+                            name = it.descriptionWithProgress,
+                            description = it.subDescription
+                        ),
+                        urlToOpen = it.urlToOpen(),
+                        isToDo = it.isToDo,
+                        pinned = it.parentTaskId != null
+                    )
+                },
+        ) { index, listItem ->
             val id = listItem.id
             val selected = id in selected
             key(id) {
-                SelectableRow(
-                    backgroundColor = when {
-                        selected -> Color.Gray
-                        !listItem.isToDo -> Color.LightGray
-                        else -> Color.White
-                    },
-                    selectable = selectionModeEnabled,
-                    selected = selected,
-                    onSelectedChange = { onSelectedChange?.invoke(id) }
-                ) {
-                    TextListItemView(
-                        state = listItem.item,
-                        backgroundColor = Color.Transparent,
-                        onLongClickListener = selectionModeEnabled.ifFalse {
-                            onSelectedChange?.let { { it(id) } }
+                Row(modifier = Modifier
+                    .height(IntrinsicSize.Max)
+                    .applyIf({ dragEnteredIndex.value == index }) {
+                        this.background(Color.LightGray)
+                    }
+                    .dragAndDrop(
+                    index = index,
+                    dragEnteredIndex = dragEnteredIndex,
+                    onDrop = { draggedIndex: Int, targetIndex: Int ->
+                        onDragAndDrop?.invoke(draggedIndex, targetIndex)
+                    }
+                )) {
+                    if (reorderMode) {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(56.dp)
+                                .background(Color.Gray)
+                        )
+                    }
+                    SelectableRow(
+                        backgroundColor = when {
+                            selected -> Color.Gray
+                            !listItem.isToDo -> Color.LightGray
+                            else -> Color.Transparent
                         },
-                        onClickListener = selectionModeEnabled.ifFalse {
-                            { onClickListener(it.id.toInt()) }
-                        }
+                        selectable = selectable,
+                        selected = selected,
+                        onSelectedChange = { onSelectedChange?.invoke(id) }
                     ) {
-                        if (showButtonsInColumns) {
-                            Column {
+                        TextListItemView(
+                            state = listItem.item,
+                            backgroundColor = Color.Transparent,
+                            onLongClickListener = selectable.ifFalse {
+                                onSelectedChange?.let { { it(id) } }
+                            },
+                            onClickListener = selectable.ifFalse {
+                                { onClickListener(it.id.toInt()) }
+                            }
+                        ) {
+                            if (showButtonsInColumns) {
+                                Column {
+                                    OpenUrl(listItem.urlToOpen, onOpenUrlClick)
+                                    ShowCheck(
+                                        listItem.id,
+                                        listItem.isToDo,
+                                        onCheckClick,
+                                        onUncheckClick
+                                    )
+                                }
+                                Column {
+                                    MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
+                                }
+                                Column {
+                                    ManageButtons(
+                                        id,
+                                        pinned = listItem.pinned,
+                                        onRemoveButtonClick,
+                                        onPinButtonClick
+                                    )
+                                }
+                            } else {
                                 OpenUrl(listItem.urlToOpen, onOpenUrlClick)
                                 ShowCheck(
                                     listItem.id,
@@ -105,33 +168,14 @@ fun TaskListView(
                                     onCheckClick,
                                     onUncheckClick
                                 )
-                            }
-                            Column {
                                 MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
-                            }
-                            Column {
                                 ManageButtons(
-                                    id,
+                                    id = id,
                                     pinned = listItem.pinned,
-                                    onRemoveButtonClick,
-                                    onPinButtonClick
+                                    onRemoveButtonClick = onRemoveButtonClick,
+                                    onPinButtonClick = onPinButtonClick
                                 )
                             }
-                        } else {
-                            OpenUrl(listItem.urlToOpen, onOpenUrlClick)
-                            ShowCheck(
-                                listItem.id,
-                                listItem.isToDo,
-                                onCheckClick,
-                                onUncheckClick
-                            )
-                            MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
-                            ManageButtons(
-                                id = id,
-                                pinned = listItem.pinned,
-                                onRemoveButtonClick = onRemoveButtonClick,
-                                onPinButtonClick = onPinButtonClick
-                            )
                         }
                     }
                 }

@@ -18,6 +18,7 @@ import com.marzec.delegate.DialogState
 import com.marzec.delegate.rememberScrollState
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
+import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.todo.screen.tasks.model.TasksStore.Companion.DIALOG_ID_REMOVE_MULTIPLE_TASKS
@@ -101,9 +102,10 @@ private fun TaskScreenData(
         )
 
         TaskListView(
-            tasks = state.data.tasks,
+            tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items ?: state.data.tasks,
             search = state.data.search.value,
             selected = state.data.selected,
+            reorderMode = state.data.reorderMode is ReorderMode.Enabled,
             showButtonsInColumns = false,
             scrollState = scrollState,
             onClickListener = {
@@ -119,6 +121,9 @@ private fun TaskScreenData(
             },
             onRemoveButtonClick = {
                 store.onRemoveButtonClick(it)
+            },
+            onDragAndDrop = { draggedIndex: Int, targetIndex: Int ->
+                store.onDragged(draggedIndex, targetIndex)
             }
         )
     }

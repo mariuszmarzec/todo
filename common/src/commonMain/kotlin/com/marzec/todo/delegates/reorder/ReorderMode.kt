@@ -40,7 +40,13 @@ fun onDraggedIntent(draggedIndex: Int, targetIndex: Int) = intent<ReorderMode, U
 
                     val targetIndexAfterRemoval = indexOf(targetItem)
 
+                    println(draggedIndex)
+                    println(targetIndex)
+                    println(this.map { it.description })
+
                     add(targetIndexAfterRemoval, draggedItem)
+                    println(this.map { it.description })
+
                 }
             )
         }
