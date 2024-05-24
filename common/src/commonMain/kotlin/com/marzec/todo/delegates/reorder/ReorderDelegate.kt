@@ -1,6 +1,8 @@
 package com.marzec.todo.delegates.reorder
 
 import com.marzec.delegate.StoreDelegate
+import com.marzec.mvi.Intent3
+import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
 import com.marzec.mvi.map
 import com.marzec.mvi.mapToState
@@ -18,17 +20,9 @@ interface ReorderDelegate {
 
 class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDelegate {
 
-    private val outStateReducer: TasksScreenState.(ReorderMode) -> TasksScreenState = { copy(reorderMode = it) }
-    private val outToInState: (TasksScreenState) -> ReorderMode? = { it.reorderMode }
-
     override fun enableReorderMode() {
         run(
-            enableReorderModeIntent().map(
-                stateReducer = {
-                    state.outStateReducer(it)
-                },
-                stateMapper = outToInState
-            ) {
+            enableReorderModeIntent().mapToData {
                 onTrigger {
                     flowOf(state.tasks)
                 }
@@ -38,24 +32,24 @@ class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDel
 
     override fun disableReorderMode() {
         run(
-            disableReorderModeIntent().map(
-                stateReducer = {
-                    state.outStateReducer(it)
-                },
-                stateMapper = outToInState
-            ).mapToState()
+            disableReorderModeIntent().mapToData().mapToState()
         )
     }
 
     override fun onDragged(draggedIndex: Int, targetIndex: Int) {
         run(
-            onDraggedIntent(draggedIndex, targetIndex).map(
-                stateReducer = {
-                    state.outStateReducer(it)
-                },
-                stateMapper = outToInState
-            ).mapToState()
+            onDraggedIntent(draggedIndex, targetIndex).mapToData().mapToState()
         )
     }
-}
 
+    private fun <Result : Any> Intent3<ReorderMode, Result>.mapToData(
+        setUp: IntentBuilder<TasksScreenState, Result>.(innerIntent: Intent3<ReorderMode, Result>) -> Unit = { }
+    ): Intent3<TasksScreenState, Result> =
+        map(
+            stateReducer = {
+                state.copy(reorderMode = it)
+            },
+            stateMapper = { it.reorderMode },
+            setUp = setUp
+        )
+}
