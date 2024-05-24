@@ -83,10 +83,8 @@ fun <T, R> State<T>.reduceContentToLoadingWithNoChanges(result: Content<R>?): St
     }
 
 fun <Data : Any, Result : Any> Intent3<Data, Result>.mapToState(
-    stateReducer: IntentContext<State<Data>, Result>.((result: Result?, state: Data) -> Data) -> State<Data> = {
-        state.reduceData {
-            it(result, this)
-        }
+    stateReducer: IntentContext<State<Data>, Result>.(state: Data) -> State<Data> = {
+        state.reduceData { it }
     },
     stateMapper: (State<Data>) -> Data? = { it.data },
     setUp: IntentBuilder<State<Data>, Result>.(innerIntent: Intent3<Data, Result>) -> Unit = { }

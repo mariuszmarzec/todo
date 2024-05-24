@@ -25,8 +25,7 @@ class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDel
         run(
             enableReorderModeIntent().map(
                 stateReducer = {
-                    val newReorderModeState = it(result, state.reorderMode)
-                    state.outStateReducer(newReorderModeState)
+                    state.outStateReducer(it)
                 },
                 stateMapper = outToInState
             ) {
@@ -41,7 +40,7 @@ class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDel
         run(
             disableReorderModeIntent().map(
                 stateReducer = {
-                    state.outStateReducer(it(result, state.reorderMode))
+                    state.outStateReducer(it)
                 },
                 stateMapper = outToInState
             ).mapToState()
@@ -52,7 +51,7 @@ class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDel
         run(
             onDraggedIntent(draggedIndex, targetIndex).map(
                 stateReducer = {
-                    state.outStateReducer(it(result, state.reorderMode))
+                    state.outStateReducer(it)
                 },
                 stateMapper = outToInState
             ).mapToState()

@@ -119,10 +119,8 @@ open class Store3<State : Any>(
         intent: Intent3<State, Result>,
         jobId: String
     ): Job = scope.launch(start = CoroutineStart.LAZY) {
+        val flow = intent.onTrigger(_state.value) ?: flowOf(null)
 
-        val flow = withContext(stateThread) {
-            (intent.onTrigger(_state.value) ?: flowOf(null))
-        }
         flow.collect { result ->
             processTriggeredValue(intent, result, jobId)
         }
@@ -133,9 +131,8 @@ open class Store3<State : Any>(
         result: Result?,
         jobId: String
     ) {
-        val shouldCancel = withContext(stateThread) {
-            intent.cancelTrigger?.invoke(result, _state.value)
-        } ?: false
+        val shouldCancel = intent.cancelTrigger?.invoke(result, _state.value) ?: false
+
         if (shouldCancel) {
             runCancellationAndSideEffectIfNeeded(result, intent, jobId)
         } else {
@@ -143,8 +140,8 @@ open class Store3<State : Any>(
                 val oldStateValue = _state.value
                 _state.update { intent.reducer(result, oldStateValue) }
                 onNewState(_state.value)
-                intent.sideEffect?.invoke(result, _state.value)
             }
+            intent.sideEffect?.invoke(result, _state.value)
         }
     }
 
@@ -283,6 +280,38 @@ fun <T : Any> Store3<T>.collectState(
 }
 
 fun <OutState : Any, InState : Any, Result : Any> Intent3<InState, Result>.map(
+    stateReducer: IntentContext<OutState, Result>.(newInState: InState) -> OutState,
+    stateMapper: (OutState) -> InState?,
+    setUp: IntentBuilder<OutState, Result>.(innerIntent: Intent3<InState, Result>) -> Unit = { }
+): Intent3<OutState, Result> =
+    let { inner ->
+        intent {
+            onTrigger { stateMapper(state)?.let { inner.onTrigger(it) } }
+
+            cancelTrigger(inner.runSideEffectAfterCancel) {
+                inner.cancelTrigger?.let { cancelTrigger ->
+                    stateMapper(state)?.let { cancelTrigger(result, it) } ?: false
+                } ?: false
+            }
+
+            reducer {
+                stateMapper(state)?.let { newInState ->
+                    stateReducer(inner.reducer(resultNonNull(), newInState))
+                } ?: state
+
+            }
+
+            sideEffect {
+                inner.sideEffect?.let { sideEffect ->
+                    stateMapper(state)?.let { sideEffect(result, it) }
+                }
+            }
+
+            setUp(inner)
+        }
+    }
+
+fun <OutState : Any, InState : Any, Result : Any> Intent3<InState, Result>.mapInnerReducer(
     stateReducer: IntentContext<OutState, Result>.((result: Result?, state: InState) -> InState) -> OutState,
     stateMapper: (OutState) -> InState?,
     setUp: IntentBuilder<OutState, Result>.(innerIntent: Intent3<InState, Result>) -> Unit = { }
@@ -314,4 +343,4 @@ fun <OutState : Any, InState : Any, Result : Any> Intent3<InState, Result>.map(
 fun <State : Any, Result : Any> Intent3<State, Result>.composite(
     setUp: IntentBuilder<State, Result>.(innerIntent: Intent3<State, Result>) -> Unit = { }
 ): Intent3<State, Result> =
-    map(stateReducer = { it(result, state) }, stateMapper = { it }, setUp = setUp)
+    map(stateReducer = { it }, stateMapper = { it }, setUp = setUp)

@@ -34,7 +34,7 @@ class DialogDelegateImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> : StoreDeleg
         run(intentShowSelectUrlDialog<ID_TYPE, DATA>(urls).mapIntent())
 
     private fun Intent3<DATA, Any>.mapIntent(): Intent3<State<DATA>, Any> = map(
-        stateReducer = { state.reduceData { it(result, this) } },
+        stateReducer = { state.reduceData { it } },
         stateMapper = { it.ifDataAvailable { it.data } }
     )
 }
