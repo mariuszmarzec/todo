@@ -103,6 +103,9 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                 task.subTasks.isNotEmpty() -> task.subTasks.firstInTreeOrNull(condition)
                 else -> null
             }
+            if (result != null) {
+                return result
+            }
         }
         return result
     }
