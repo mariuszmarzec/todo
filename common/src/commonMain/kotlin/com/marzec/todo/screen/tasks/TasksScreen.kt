@@ -10,6 +10,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
@@ -45,30 +46,36 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         topBar = {
             val count = state.data?.tasks?.count()?.let { " ($it)" }.orEmpty()
             actionBarProvider.provide(title = "Tasks$count") {
-                when (val state = state) {
-                    is State.Data<TasksScreenState> -> {
-                        SearchView(state.data.search, store)
+                if (state.data?.reorderMode is ReorderMode.Disabled) {
+                    state.ifDataAvailable {
+                        SearchView(search, store)
                     }
-
-                    else -> Unit
-                }
-                IconButton({
-                    store.onScheduledClick()
-                }) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Scheduled")
-                }
-
-                if ((state.data?.reorderMode is ReorderMode.Disabled)) {
                     IconButton({
-                        store.enableReorderMode()
+                        store.onScheduledClick()
                     }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Reorder")
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Scheduled")
                     }
-                } else {
+                }
+
+                if (state.data?.reorderMode is ReorderMode.Enabled) {
+                    IconButton({
+                        store.saveReorder()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close reorder"
+                        )
+                    }
                     IconButton({
                         store.saveReorder()
                     }) {
                         Icon(imageVector = Icons.Default.Done, contentDescription = "Save")
+                    }
+                } else {
+                    IconButton({
+                        store.enableReorderMode()
+                    }) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Reorder")
                     }
                 }
 

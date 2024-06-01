@@ -33,7 +33,7 @@ fun onDraggedIntent(draggedIndex: Int, targetIndex: Int) = intent<ReorderMode, U
         when (val currentState = state) {
             ReorderMode.Disabled -> currentState
             is ReorderMode.Enabled -> currentState.copy(
-                items = currentState.items.swap(draggedIndex, targetIndex)
+                items = currentState.items.reorder(draggedIndex, targetIndex)
             )
         }
     }
@@ -44,7 +44,7 @@ fun moveUpIntent(elementIndex: Int) = intent<ReorderMode, Unit> {
         when (val currentState = state) {
             ReorderMode.Disabled -> currentState
             is ReorderMode.Enabled -> currentState.copy(
-                items = currentState.items.swap(elementIndex, elementIndex - 1)
+                items = currentState.items.toMutableList().swap(elementIndex, elementIndex - 1)
             )
         }
     }
@@ -55,14 +55,21 @@ fun moveDownIntent(elementIndex: Int) = intent<ReorderMode, Unit> {
         when (val currentState = state) {
             ReorderMode.Disabled -> currentState
             is ReorderMode.Enabled -> currentState.copy(
-                items = currentState.items.swap(elementIndex, elementIndex + 1)
+                items = currentState.items.toMutableList().swap(elementIndex, elementIndex + 1)
             )
         }
     }
 }
 
-private fun List<Task>.swap(elementIndexToReorder: Int, targetIndex: Int) = toMutableList().apply {
+private fun List<Task>.reorder(elementIndexToReorder: Int, targetIndex: Int) = toMutableList().apply {
     if (elementIndexToReorder in 0..<size && targetIndex in 0..<size) {
-        swap(elementIndexToReorder, targetIndex)
+        val element = get(elementIndexToReorder)
+        val targetItem = get(targetIndex)
+
+        remove(element)
+
+        val targetIndexAfterRemoval = indexOf(targetItem)
+
+        add(targetIndexAfterRemoval, element)
     }
 }
