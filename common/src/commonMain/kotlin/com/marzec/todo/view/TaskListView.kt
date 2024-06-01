@@ -105,12 +105,12 @@ fun TaskListView(
                         this.background(Color.LightGray)
                     }
                     .dragAndDrop(
-                    index = index,
-                    dragEnteredIndex = dragEnteredIndex,
-                    onDrop = { draggedIndex: Int, targetIndex: Int ->
-                        onDragAndDrop?.invoke(draggedIndex, targetIndex)
-                    }
-                )) {
+                        index = index,
+                        dragEnteredIndex = dragEnteredIndex,
+                        onDrop = { draggedIndex: Int, targetIndex: Int ->
+                            onDragAndDrop?.invoke(draggedIndex, targetIndex)
+                        }
+                    )) {
                     if (reorderMode) {
                         Spacer(
                             modifier = Modifier
@@ -152,13 +152,15 @@ fun TaskListView(
                                 Column {
                                     MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
                                 }
-                                Column {
-                                    ManageButtons(
-                                        id,
-                                        pinned = listItem.pinned,
-                                        onRemoveButtonClick,
-                                        onPinButtonClick
-                                    )
+                                if (!reorderMode) {
+                                    Column {
+                                        ManageButtons(
+                                            id,
+                                            pinned = listItem.pinned,
+                                            onRemoveButtonClick,
+                                            onPinButtonClick
+                                        )
+                                    }
                                 }
                             } else {
                                 OpenUrl(listItem.urlToOpen, onOpenUrlClick)
@@ -169,12 +171,14 @@ fun TaskListView(
                                     onUncheckClick
                                 )
                                 MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
-                                ManageButtons(
-                                    id = id,
-                                    pinned = listItem.pinned,
-                                    onRemoveButtonClick = onRemoveButtonClick,
-                                    onPinButtonClick = onPinButtonClick
-                                )
+                                if (!reorderMode) {
+                                    ManageButtons(
+                                        id = id,
+                                        pinned = listItem.pinned,
+                                        onRemoveButtonClick = onRemoveButtonClick,
+                                        onPinButtonClick = onPinButtonClick
+                                    )
+                                }
                             }
                         }
                     }

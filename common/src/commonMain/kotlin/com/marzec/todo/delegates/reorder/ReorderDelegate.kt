@@ -16,6 +16,10 @@ interface ReorderDelegate {
     fun disableReorderMode()
 
     fun onDragged(draggedIndex: Int, targetIndex: Int)
+
+    fun moveUp(elementIndex: Int)
+
+    fun moveDown(elementIndex: Int)
 }
 
 class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDelegate {
@@ -40,6 +44,16 @@ class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDel
         run(
             onDraggedIntent(draggedIndex, targetIndex).mapToData().mapToState()
         )
+    }
+
+    override fun moveUp(elementIndex: Int) {
+        run(
+            moveUpIntent(elementIndex).mapToData().mapToState()
+        )
+    }
+
+    override fun moveDown(elementIndex: Int) {
+        run(moveDownIntent(elementIndex).mapToData().mapToState())
     }
 
     private fun <Result : Any> Intent3<ReorderMode, Result>.mapToData(

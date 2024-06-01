@@ -10,6 +10,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
@@ -56,6 +58,20 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = "Scheduled")
                 }
 
+                if ((state.data?.reorderMode is ReorderMode.Disabled)) {
+                    IconButton({
+                        store.enableReorderMode()
+                    }) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Reorder")
+                    }
+                } else {
+                    IconButton({
+                        store.disableReorderMode()
+                    }) {
+                        Icon(imageVector = Icons.Default.Done, contentDescription = "Save")
+                    }
+                }
+
                 IconButton({
                     store.logout()
                 }) {
@@ -65,12 +81,14 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    store.addNewTask()
+            if (state.data?.reorderMode !is ReorderMode.Enabled) {
+                FloatingActionButton(
+                    onClick = {
+                        store.addNewTask()
+                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
                 }
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add new")
             }
         }) {
         ScreenWithLoading(

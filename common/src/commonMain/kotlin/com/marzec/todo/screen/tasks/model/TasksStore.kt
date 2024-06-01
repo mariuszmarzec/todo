@@ -111,19 +111,27 @@ class TasksStore(
 
     fun moveToTop(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
-            changePriorityDelegate.changePriority(
-                id = id,
-                newPriority = tasks.maxOf { it.priority }.inc()
-            )
+            if (reorderMode is ReorderMode.Enabled) {
+                moveUp(reorderMode.items.indexOfFirst { it.id == id })
+            } else {
+                changePriorityDelegate.changePriority(
+                    id = id,
+                    newPriority = tasks.maxOf { it.priority }.inc()
+                )
+            }
         }
     }
 
     fun moveToBottom(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
-            changePriorityDelegate.changePriority(
-                id = id,
-                newPriority = tasks.minOf { it.priority }.dec()
-            )
+            if (reorderMode is ReorderMode.Enabled) {
+                moveDown(reorderMode.items.indexOfFirst { it.id == id })
+            } else {
+                changePriorityDelegate.changePriority(
+                    id = id,
+                    newPriority = tasks.minOf { it.priority }.dec()
+                )
+            }
         }
     }
 
