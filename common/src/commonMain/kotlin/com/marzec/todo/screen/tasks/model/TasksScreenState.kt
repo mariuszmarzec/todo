@@ -19,7 +19,7 @@ data class TasksScreenState(
     override val search: SearchState,
     override val dialog: DialogState<Int>,
     override val selected: Set<Int>,
-    override val reorderMode: ReorderMode = ReorderMode.Disabled
+    override val reorderMode: ReorderMode
 ) : WithTasks<TasksScreenState>,
     WithSearch<TasksScreenState>,
     WithScrollListState<TasksScreenState>,
@@ -54,7 +54,8 @@ data class TasksScreenState(
                 focused = false,
             ),
             dialog = DialogState.NoDialog(),
-            selected = emptySet()
+            selected = emptySet(),
+            reorderMode = ReorderMode.Disabled
         )
     }
 }
