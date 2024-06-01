@@ -167,6 +167,20 @@ class TodoRepository(
             }
         }
 
+    suspend fun reorderByPriority(
+        tasks: List<Task>
+    ): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            tasks.reversed().forEachIndexed { index, task ->
+                dataSource.updateTask(
+                    taskId = task.id,
+                    UpdateTaskDto(
+                        priority = index
+                    )
+                )
+            }
+        }
+
     suspend fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.removeTask(taskId)

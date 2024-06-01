@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.content.Content
+import com.marzec.content.asContentFlow
 import com.marzec.content.ifFinished
 import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.delegates
@@ -18,6 +19,7 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
+import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
@@ -29,6 +31,7 @@ import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.flowOf
 
 class TasksStore(
     scope: CoroutineScope,
@@ -131,6 +134,26 @@ class TasksStore(
                     id = id,
                     newPriority = tasks.minOf { it.priority }.dec()
                 )
+            }
+        }
+    }
+
+    fun saveReorder() = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                (reorderMode as? ReorderMode.Enabled)?.items?.let {
+                    todoRepository.reorderByPriority(it)
+                }
+            }
+        }
+
+        reducer {
+            state.reduceContentToLoadingWithNoChanges(result)
+        }
+
+        sideEffect {
+            state.asData {
+                disableReorderMode()
             }
         }
     }

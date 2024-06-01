@@ -66,7 +66,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                     }
                 } else {
                     IconButton({
-                        store.disableReorderMode()
+                        store.saveReorder()
                     }) {
                         Icon(imageVector = Icons.Default.Done, contentDescription = "Save")
                     }
