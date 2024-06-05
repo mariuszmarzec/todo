@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +38,7 @@ import com.marzec.extensions.applyIf
 import com.marzec.todo.extensions.descriptionWithProgress
 import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.extensions.ifFalse
+import com.marzec.extensions.letIf
 import com.marzec.modifier.dragAndDrop
 import com.marzec.todo.extensions.subDescription
 import com.marzec.todo.extensions.urlToOpen
@@ -101,8 +103,9 @@ fun TaskListView(
             key(id) {
                 Row(modifier = Modifier
                     .height(IntrinsicSize.Max)
-                    .applyIf({ dragEnteredIndex.value == index }) {
-                        this.background(Color.LightGray)
+                    .fillMaxWidth()
+                    .letIf({ dragEnteredIndex.value == index }) {
+                        background(Color.LightGray)
                     }
                     .dragAndDrop(
                         index = index,

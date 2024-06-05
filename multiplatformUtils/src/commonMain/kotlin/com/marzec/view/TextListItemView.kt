@@ -27,7 +27,7 @@ import com.marzec.modifier.dragAndDrop
 @Composable
 fun TextListItemView(
     state: TextListItem,
-    backgroundColor: Color = Color.White,
+    backgroundColor: Color = Color.Transparent,
     onLongClickListener: ((TextListItem) -> Unit)? = null,
     onClickListener: ((TextListItem) -> Unit)? = null,
     rightContent: @Composable () -> Unit = { }
