@@ -19,6 +19,7 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
+import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.PopEntryTarget
@@ -148,7 +149,7 @@ class TasksStore(
         }
 
         reducer {
-            state.reduceContentToLoadingWithNoChanges(result)
+            state.reduceContentAsSideAction(resultNonNull())
         }
 
         sideEffect {
