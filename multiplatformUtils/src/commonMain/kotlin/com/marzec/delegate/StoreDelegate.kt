@@ -22,7 +22,7 @@ open class StoreDelegate<State : Any> {
         store.run(intent)
     }
 
-    fun sideEffect(
+    fun sideEffectIntent(
         func: suspend IntentContext<State, Unit>.() -> Unit
     ) = store.sideEffectIntent(func)
 }

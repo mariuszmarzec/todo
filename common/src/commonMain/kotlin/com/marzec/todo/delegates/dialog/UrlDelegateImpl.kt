@@ -35,7 +35,7 @@ class UrlDelegateImpl<DATA : WithTasks<DATA>>(
             dialogDelegatedStore.showSelectUrlDialog(urls)
         }
 
-    override fun openUrl(url: String) = sideEffect {
+    override fun openUrl(url: String) = sideEffectIntent {
         openUrlHelper.open(url)
     }
 
@@ -43,7 +43,7 @@ class UrlDelegateImpl<DATA : WithTasks<DATA>>(
         task.urlToOpen()?.let { openUrl(it) }
     }
 
-    override fun openUrlForTask(id: Int) = sideEffect {
+    override fun openUrlForTask(id: Int) = sideEffectIntent {
         state.ifDataAvailable {
             urlDelegatedStore.openUrlForTask(taskById(id))
         }

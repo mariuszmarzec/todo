@@ -59,7 +59,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
 
                 if (state.data?.reorderMode is ReorderMode.Enabled) {
                     IconButton({
-                        store.saveReorder()
+                        store.disableReorderMode()
                     }) {
                         Icon(
                             imageVector = Icons.Default.Close,

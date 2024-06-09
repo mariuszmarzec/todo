@@ -11,13 +11,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
+import com.marzec.common.CopyToClipBoardHelper
+import com.marzec.common.OpenUrlHelper
 import com.marzec.delegate.DialogDelegateImpl
+import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationStore
+import com.marzec.preferences.MemoryStateCache
+import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
@@ -25,11 +30,6 @@ import com.marzec.screen.pickitemscreen.PickItemData
 import com.marzec.screen.pickitemscreen.PickItemDataStore
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
-import com.marzec.common.CopyToClipBoardHelper
-import com.marzec.common.OpenUrlHelper
-import com.marzec.delegate.ScrollDelegateImpl
-import com.marzec.preferences.MemoryStateCache
-import com.marzec.preferences.StateCache
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -60,10 +60,10 @@ import com.marzec.todo.screen.tasks.TasksScreen
 import com.marzec.todo.screen.tasks.model.TasksScreenState
 import com.marzec.todo.screen.tasks.model.TasksStore
 import com.marzec.view.ActionBarProvider
+import com.marzec.view.DateDelegateImpl
 import com.marzec.view.DatePickerScreen
 import com.marzec.view.DatePickerState
 import com.marzec.view.DatePickerStore
-import com.marzec.view.DateDelegateImpl
 import com.marzec.view.navigationStore
 import io.ktor.client.HttpClient
 import kotlin.random.Random
@@ -159,6 +159,9 @@ object DI {
         scope: CoroutineScope,
         cacheKey: String
     ): TasksStore {
+        val changePriorityDelegate = ChangePriorityDelegateImpl<TasksScreenState>(
+            provideTodoRepository()
+        )
         return TasksStore(
             scope = scope,
             navigationStore = navigationStore,
@@ -172,14 +175,13 @@ object DI {
             removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(
                 provideTodoRepository()
             ),
-            changePriorityDelegate = ChangePriorityDelegateImpl<TasksScreenState>(
-                provideTodoRepository()
-            ),
+            changePriorityDelegate = changePriorityDelegate,
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
             scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
             scheduledOptions = provideScheduledOptions(),
             selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>(),
             reorderDelegate = ReorderDelegateImpl<TasksScreenState>(
+                changePriorityDelegate = changePriorityDelegate,
                 tasksToReorder = { tasks }
             ) {
                 copy(reorderMode = it)
@@ -237,25 +239,34 @@ object DI {
         scope: CoroutineScope,
         taskId: Int,
         cacheKey: String
-    ): TaskDetailsStore = TaskDetailsStore(
-        scope = scope,
-        navigationStore = navigationStore,
-        todoRepository = provideTodoRepository(),
-        stateCache = stateCache,
-        cacheKey = cacheKey,
-        initialState = TaskDetailsState.INITIAL,
-        taskId = taskId,
-        copyToClipBoardHelper = copyToClipBoardHelper,
-        dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
-        removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(provideTodoRepository()),
-        urlDelegate = UrlDelegateImpl<TaskDetailsState>(openUrlHelper),
-        changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
+    ): TaskDetailsStore {
+        val changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
             provideTodoRepository()
-        ),
-        selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
-        searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
-        scrollDelegate = ScrollDelegateImpl<TaskDetailsState>()
-    )
+        )
+        return TaskDetailsStore(
+            scope = scope,
+            navigationStore = navigationStore,
+            todoRepository = provideTodoRepository(),
+            stateCache = stateCache,
+            cacheKey = cacheKey,
+            initialState = TaskDetailsState.INITIAL,
+            taskId = taskId,
+            copyToClipBoardHelper = copyToClipBoardHelper,
+            dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
+            removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(provideTodoRepository()),
+            urlDelegate = UrlDelegateImpl<TaskDetailsState>(openUrlHelper),
+            changePriorityDelegate = changePriorityDelegate,
+            selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
+            searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
+            scrollDelegate = ScrollDelegateImpl<TaskDetailsState>(),
+            reorderDelegate = ReorderDelegateImpl<TaskDetailsState>(
+                changePriorityDelegate = changePriorityDelegate,
+                tasksToReorder = { task.subTasks }
+            ) {
+                copy(reorderMode = it)
+            }
+        )
+    }
 
     @Composable
     private fun provideAddSubTaskScreen(taskId: Int, cacheKey: String) {

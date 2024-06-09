@@ -38,7 +38,6 @@ fun ManageTaskSelectionBar(
     if (shouldShow) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
                 .wrapContentHeight(),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically

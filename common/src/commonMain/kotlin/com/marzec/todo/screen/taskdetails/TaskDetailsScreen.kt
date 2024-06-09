@@ -20,10 +20,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +45,7 @@ import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.rememberScrollState
+import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.view.ManageTaskSelectionBar
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
@@ -115,29 +119,52 @@ fun TaskDetailsScreen(
                     val subTasksCount = state.data.task.subTasks.size
                     val doneSubtasksCount = state.data.task.subTasks.count { !it.isToDo }
 
-                    ManageTaskSelectionBar(
-                        tasks = state.data.task.subTasks,
-                        selected = state.data.selected,
-                        shouldShow = state.data.task.subTasks.isNotEmpty(),
-                        onMarkSelectedAsTodoClick = {
-                            store.markSelectedAsTodo()
-                        },
-                        onMarkSelectedAsDoneClick = {
-                            store.markSelectedAsDone()
-                        },
-                        onRemoveClick = {
-                            store.showRemoveSelectedSubTasksDialog()
-                        },
-                        onRemoveDoneTasksClick = {
-                            store.removeDoneTasks()
-                        },
-                        onAllSelectClicked = {
-                            store.onAllSelectClicked()
-                        },
-                        onUnpinSubtasksClick = {
-                            store.unpinSubtasks()
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        if (state.data.reorderMode is ReorderMode.Enabled) {
+                            IconButton({
+                                store.disableReorderMode()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close reorder"
+                                )
+                            }
+                            IconButton({
+                                store.saveReorder()
+                            }) {
+                                Icon(imageVector = Icons.Default.Done, contentDescription = "Save")
+                            }
+                        } else {
+                            IconButton({
+                                store.enableReorderMode()
+                            }) {
+                                Icon(imageVector = Icons.Default.Menu, contentDescription = "Reorder")
+                            }
                         }
-                    )
+                        ManageTaskSelectionBar(
+                            tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items ?: state.data.task.subTasks,
+                            selected = state.data.selected,
+                            shouldShow = state.data.task.subTasks.isNotEmpty(),
+                            onMarkSelectedAsTodoClick = {
+                                store.markSelectedAsTodo()
+                            },
+                            onMarkSelectedAsDoneClick = {
+                                store.markSelectedAsDone()
+                            },
+                            onRemoveClick = {
+                                store.showRemoveSelectedSubTasksDialog()
+                            },
+                            onRemoveDoneTasksClick = {
+                                store.removeDoneTasks()
+                            },
+                            onAllSelectClicked = {
+                                store.onAllSelectClicked()
+                            },
+                            onUnpinSubtasksClick = {
+                                store.unpinSubtasks()
+                            }
+                        )
+                    }
                     Row(
                         modifier = Modifier
                             .padding(all = 16.dp)
@@ -196,8 +223,9 @@ fun TaskDetailsScreen(
                         tasks = state.data.task.subTasks,
                         search = state.data.search.value,
                         selected = state.data.selected,
+                        reorderMode = state.data.reorderMode is ReorderMode.Enabled,
                         scrollState = listState,
-                        showButtonsInColumns = true,
+                        showButtonsInColumns = state.data.reorderMode !is ReorderMode.Enabled,
                         onClickListener = {
                             store.goToSubtaskDetails(it)
                         },
@@ -224,6 +252,9 @@ fun TaskDetailsScreen(
                         },
                         onSelectedChange = {
                             store.onSelectedChange(it)
+                        },
+                        onDragAndDrop = { draggedIndex: Int, targetIndex: Int ->
+                            store.onDragged(draggedIndex, targetIndex)
                         }
                     )
                 }
