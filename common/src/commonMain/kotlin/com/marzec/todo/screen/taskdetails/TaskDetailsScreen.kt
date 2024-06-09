@@ -220,7 +220,7 @@ fun TaskDetailsScreen(
                     }
                     Spacer(Modifier.size(16.dp))
                     TaskListView(
-                        tasks = state.data.task.subTasks,
+                        tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items ?: state.data.task.subTasks,
                         search = state.data.search.value,
                         selected = state.data.selected,
                         reorderMode = state.data.reorderMode is ReorderMode.Enabled,
