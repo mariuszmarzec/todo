@@ -6,7 +6,7 @@ import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
 import com.marzec.mvi.map
 import com.marzec.mvi.mapToState
-import com.marzec.todo.screen.tasks.model.TasksScreenState
+import com.marzec.todo.model.Task
 import kotlinx.coroutines.flow.flowOf
 
 interface ReorderDelegate {
@@ -22,13 +22,16 @@ interface ReorderDelegate {
     fun moveDown(elementIndex: Int)
 }
 
-class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDelegate {
+class ReorderDelegateImpl<DATA : WithReorderMode>(
+    private val tasksToReorder: DATA.() -> List<Task>,
+    private val stateReducer: DATA.(newInState: ReorderMode) -> DATA
+) : StoreDelegate<State<DATA>>(), ReorderDelegate {
 
     override fun enableReorderMode() {
         run(
             enableReorderModeIntent().mapToData {
                 onTrigger {
-                    flowOf(state.tasks)
+                    flowOf(state.tasksToReorder())
                 }
             }.mapToState()
         )
@@ -57,12 +60,10 @@ class ReorderDelegateImpl : StoreDelegate<State<TasksScreenState>>(), ReorderDel
     }
 
     private fun <Result : Any> Intent3<ReorderMode, Result>.mapToData(
-        setUp: IntentBuilder<TasksScreenState, Result>.(innerIntent: Intent3<ReorderMode, Result>) -> Unit = { }
-    ): Intent3<TasksScreenState, Result> =
+        setUp: IntentBuilder<DATA, Result>.(innerIntent: Intent3<ReorderMode, Result>) -> Unit = { }
+    ): Intent3<DATA, Result> =
         map(
-            stateReducer = {
-                state.copy(reorderMode = it)
-            },
+            stateReducer = { newInState: ReorderMode -> state.stateReducer(newInState) },
             stateMapper = { it.reorderMode },
             setUp = setUp
         )

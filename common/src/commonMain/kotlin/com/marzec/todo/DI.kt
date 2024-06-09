@@ -179,7 +179,11 @@ object DI {
             scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
             scheduledOptions = provideScheduledOptions(),
             selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>(),
-            reorderDelegate = ReorderDelegateImpl()
+            reorderDelegate = ReorderDelegateImpl<TasksScreenState>(
+                tasksToReorder = { tasks }
+            ) {
+                copy(reorderMode = it)
+            }
         )
     }
 
