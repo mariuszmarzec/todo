@@ -45,7 +45,7 @@ class TaskDetailsStore(
     private val dialogDelegate: DialogDelegate<Int>,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
-    private val changePriorityDelegate: ChangePriorityDelegate,
+    changePriorityDelegate: ChangePriorityDelegate,
     private val selectionDelegate: SelectionDelegate<Int>,
     private val searchDelegate: SearchDelegate,
     private val scrollDelegate: ScrollDelegate,

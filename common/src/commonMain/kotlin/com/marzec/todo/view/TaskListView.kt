@@ -212,7 +212,7 @@ private fun OpenUrl(urlToOpen: String?, onOpenUrlClick: ((String) -> Unit)?) {
 }
 
 @Composable
-private fun ShowCheck(
+fun ShowCheck(
     id: Int,
     isToDo: Boolean,
     onCheckClick: ((Int) -> Unit)?,
