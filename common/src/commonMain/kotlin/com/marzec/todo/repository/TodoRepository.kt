@@ -9,7 +9,6 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
-import com.marzec.model.toUpdate
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
@@ -60,7 +59,7 @@ class TodoRepository(
         scheduler: Scheduler?
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.addNewTask(
+            dataSource.create(
                 CreateTaskDto(
                     description = description,
                     parentTaskId = parentTaskId,
@@ -78,7 +77,7 @@ class TodoRepository(
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             descriptions.forEach {
-                dataSource.addNewTask(
+                dataSource.create(
                     CreateTaskDto(
                         description = it,
                         parentTaskId = parentTaskId,
@@ -94,7 +93,7 @@ class TodoRepository(
         task: UpdateTask
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.updateTask(taskId, task.toDto())
+            dataSource.update(taskId, task.toDto())
         }
 
     suspend fun markAsDone(taskId: Int): Flow<Content<Unit>> =
@@ -144,8 +143,8 @@ class TodoRepository(
         parentTaskId: Int?
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.updateTask(
-                taskId = task.id,
+            dataSource.update(
+                id = task.id,
                 UpdateTaskDto(
                     parentTaskId = parentTaskId.toNullableUpdate(task.parentTaskId)?.toDto()
                 )
@@ -158,8 +157,8 @@ class TodoRepository(
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             tasks.forEach { task ->
-                dataSource.updateTask(
-                    taskId = task.id,
+                dataSource.update(
+                    id = task.id,
                     UpdateTaskDto(
                         parentTaskId = parentTaskId.toNullableUpdate(task.parentTaskId)?.toDto()
                     )
@@ -172,8 +171,8 @@ class TodoRepository(
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             tasks.reversed().forEachIndexed { index, task ->
-                dataSource.updateTask(
-                    taskId = task.id,
+                dataSource.update(
+                    id = task.id,
                     UpdateTaskDto(
                         priority = index
                     )
@@ -212,13 +211,13 @@ class TodoRepository(
     private suspend fun getTasksCacheFirst() =
         cacheCall(Api.Todo.TASKS) {
             asContent {
-                dataSource.getTasks()
+                dataSource.getAll()
                     .map { it.toDomain() }
             }
         }
 
     private suspend fun refreshListsCache() = asContent {
-        dataSource.getTasks().map { it.toDomain() }
+        dataSource.getAll().map { it.toDomain() }
     }.ifDataSuspend {
         memoryCache.put(Api.Todo.TASKS, data)
     }

@@ -13,6 +13,8 @@ import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
+import com.marzec.datasource.CommonDataSource
+import com.marzec.datasource.EndpointProviderImpl
 import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
@@ -30,6 +32,9 @@ import com.marzec.screen.pickitemscreen.PickItemData
 import com.marzec.screen.pickitemscreen.PickItemDataStore
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
+import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.TaskDto
+import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -37,6 +42,7 @@ import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.network.ApiDataSource
+import com.marzec.todo.network.CommonTodoDataSource
 import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.LocalDataSource
@@ -73,6 +79,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 
 object DI {
 
@@ -429,13 +436,19 @@ object DI {
         } else if (quickCacheEnabled) {
             CompositeDataSource(
                 localDataSource,
-                ApiDataSource(client),
+                ApiDataSource(client, provideCommonDataSource()),
                 memoryCache,
             ).apply { runBlocking { init() } }
         } else {
-            ApiDataSource(client)
+            ApiDataSource(client, provideCommonDataSource())
         }
     }
+
+    private fun provideCommonDataSource(): CommonTodoDataSource = CommonDataSource(
+        EndpointProviderImpl(
+            Api.Todo.TASKS
+        ), client, Json
+    )
 
     @Composable
     private fun <ITEM : Any> providePickItemScreen(
