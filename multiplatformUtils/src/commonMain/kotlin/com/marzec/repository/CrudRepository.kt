@@ -16,7 +16,6 @@ import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.asContentFlow
 import com.marzec.content.ifDataSuspend
-import com.marzec.datasource.CommonDataSource
 import com.marzec.datasource.CrudDataSource
 import com.marzec.datasource.EndpointProviderImpl
 import io.ktor.client.HttpClient
@@ -146,7 +145,7 @@ inline fun <
     noinline inserter: List<MODEL>?.(MODEL) -> MutableList<MODEL> = atFirstPositionInserter()
 ): CrudRepository<ID, MODEL, CREATE, UPDATE, MODEL_DTO, CREATE_DTO, UPDATE_DTO> =
     CrudRepository(
-        dataSource = CommonDataSource(
+        dataSource = CrudDataSource(
             endpointProvider = EndpointProviderImpl(endpoint),
             client = client,
             json = Json

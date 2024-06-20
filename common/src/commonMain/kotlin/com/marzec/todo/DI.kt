@@ -13,7 +13,7 @@ import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
-import com.marzec.datasource.CommonDataSource
+import com.marzec.datasource.CrudDataSource
 import com.marzec.datasource.EndpointProviderImpl
 import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.ScrollDelegateImpl
@@ -444,7 +444,7 @@ object DI {
         }
     }
 
-    private fun provideCommonDataSource(): CommonTodoDataSource = CommonDataSource(
+    private fun provideCommonDataSource(): CommonTodoDataSource = CrudDataSource(
         EndpointProviderImpl(
             Api.Todo.TASKS
         ), client, Json

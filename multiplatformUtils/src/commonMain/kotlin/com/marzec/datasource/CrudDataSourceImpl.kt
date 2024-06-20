@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
-inline fun <ID, reified DTO : Any, reified CREATE : Any, reified UPDATE : Any> CommonDataSource(
+inline fun <ID, reified DTO : Any, reified CREATE : Any, reified UPDATE : Any> CrudDataSource(
     endpointProvider: EndpointProvider<ID>,
     client: HttpClient,
     json: Json
