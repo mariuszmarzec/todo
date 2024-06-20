@@ -9,11 +9,14 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
+import com.marzec.repository.CrudRepository
 import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTask
+import com.marzec.todo.model.CreateTask
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.UpdateTask
@@ -23,6 +26,8 @@ import com.marzec.todo.network.DataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+
+typealias TodoCrudRepository = CrudRepository<Int, Task, CreateTask, UpdateTask, TaskDto, CreateTaskDto, UpdateTaskDto>
 
 class TodoRepository(
     private val dataSource: DataSource,

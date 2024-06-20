@@ -1,6 +1,6 @@
 package com.marzec.todo.network
 
-import com.marzec.datasource.CommonDataSource
+import com.marzec.datasource.CrudDataSource
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.TaskDto
@@ -15,4 +15,4 @@ interface DataSource : CommonTodoDataSource {
     suspend fun markAsToDo(request: MarkAsToDoDto)
 }
 
-typealias CommonTodoDataSource = CommonDataSource<Int, TaskDto, CreateTaskDto, UpdateTaskDto>
+typealias CommonTodoDataSource = CrudDataSource<Int, TaskDto, CreateTaskDto, UpdateTaskDto>

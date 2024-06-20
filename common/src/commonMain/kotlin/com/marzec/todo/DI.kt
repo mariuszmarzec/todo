@@ -32,9 +32,6 @@ import com.marzec.screen.pickitemscreen.PickItemData
 import com.marzec.screen.pickitemscreen.PickItemDataStore
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
-import com.marzec.todo.api.CreateTaskDto
-import com.marzec.todo.api.TaskDto
-import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -76,6 +73,7 @@ import kotlin.random.Random
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.builtins.serializer
@@ -101,6 +99,8 @@ object DI {
     var quickCacheEnabled: Boolean = false
 
     val stateCache: StateCache = MemoryStateCache()
+
+    val updaterCoroutineScope = CoroutineScope(newSingleThreadContext("updater"))
 
     val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
 

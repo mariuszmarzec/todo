@@ -1,22 +1,38 @@
 package com.marzec.repository
 
+import com.marzec.cache.Cache
 import com.marzec.cache.CacheSaver
+import com.marzec.cache.CompositeUpdatableCacheSaver
+import com.marzec.cache.FileCache
+import com.marzec.cache.FileCacheSaver
 import com.marzec.cache.GetWithCacheCall
+import com.marzec.cache.ListCacheSaver
 import com.marzec.cache.ManyItemsCacheSaver
+import com.marzec.cache.MemoryCacheSaver
+import com.marzec.cache.atFirstPositionInserter
+import com.marzec.cache.toReversed
+import com.marzec.cache.withInserter
 import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.asContentFlow
 import com.marzec.content.ifDataSuspend
 import com.marzec.datasource.CommonDataSource
+import com.marzec.datasource.CrudDataSource
+import com.marzec.datasource.EndpointProviderImpl
+import io.ktor.client.HttpClient
+import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : Any, CREATE_DTO : Any, UPDATE_DTO : Any>(
-    private val dataSource: CommonDataSource<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO>,
+    private val dataSource: CrudDataSource<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO>,
     private val dispatcher: CoroutineDispatcher,
     private val cacheSaver: ManyItemsCacheSaver<ID, MODEL>,
     private val toDomain: MODEL_DTO.() -> MODEL,
@@ -84,7 +100,7 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
         createdModel
     }.triggerUpdateIfNeeded(policy).flowOn(dispatcher)
 
-    private suspend fun <T> Flow<Content<T>>.triggerUpdateIfNeeded(policy: RefreshPolicy): Flow<Content<T>> =
+    suspend fun <T> Flow<Content<T>>.triggerUpdateIfNeeded(policy: RefreshPolicy): Flow<Content<T>> =
         onEach {
             if (it is Content.Data) {
                 when (policy) {
@@ -106,3 +122,61 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
 
     private suspend fun loadAll() = dataSource.getAll().map(toDomain)
 }
+
+inline fun <
+        ID,
+        reified MODEL : Any,
+        CREATE : Any,
+        UPDATE : Any,
+        reified MODEL_DTO : Any,
+        reified CREATE_DTO : Any,
+        reified UPDATE_DTO : Any
+        > fileAndMemoryCacheCrudRepository(
+    dispatcher: CoroutineDispatcher,
+    client: HttpClient,
+    updaterCoroutineScope: CoroutineScope,
+    endpoint: String,
+    fileCache: FileCache,
+    memoryCache: Cache,
+    reversed: Boolean = false,
+    noinline isSameId: MODEL.(id: ID) -> Boolean,
+    noinline toDomain: MODEL_DTO.() -> MODEL,
+    noinline createToDto: CREATE.() -> CREATE_DTO,
+    noinline updateToDto: UPDATE.() -> UPDATE_DTO,
+    noinline inserter: List<MODEL>?.(MODEL) -> MutableList<MODEL> = atFirstPositionInserter()
+): CrudRepository<ID, MODEL, CREATE, UPDATE, MODEL_DTO, CREATE_DTO, UPDATE_DTO> =
+    CrudRepository(
+        dataSource = CommonDataSource(
+            endpointProvider = EndpointProviderImpl(endpoint),
+            client = client,
+            json = Json
+        ),
+        cacheSaver = ListCacheSaver(
+            cacheSaver = CompositeUpdatableCacheSaver(
+                savers = listOf(
+                    MemoryCacheSaver(
+                        key = endpoint,
+                        memoryCache = memoryCache
+                    ),
+                    FileCacheSaver(
+                        key = endpoint,
+                        fileCache = fileCache,
+                        serializer = serializer(typeOf<List<MODEL>>()) as KSerializer<List<MODEL>>
+                    )
+                )
+            ),
+            isSameId = isSameId
+        ).withInserter(inserter)
+            .let {
+                if (reversed) {
+                    it.toReversed()
+                } else {
+                    it
+                }
+            },
+        dispatcher = dispatcher,
+        toDomain = toDomain,
+        createToDto = createToDto,
+        updateToDto = updateToDto,
+        updaterCoroutineScope = updaterCoroutineScope
+    )
