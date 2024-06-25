@@ -15,11 +15,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
-inline fun <ID, reified DTO : Any, reified CREATE : Any, reified UPDATE : Any> CommonDataSource(
+inline fun <ID, reified DTO : Any, reified CREATE : Any, reified UPDATE : Any> CrudDataSource(
     endpointProvider: EndpointProvider<ID>,
     client: HttpClient,
     json: Json
-) = CommonDataSourceImpl(
+) = CrudDataSourceImpl(
     dtoClass = DTO::class,
     createClass = CREATE::class,
     updateClass = UPDATE::class,
@@ -29,14 +29,14 @@ inline fun <ID, reified DTO : Any, reified CREATE : Any, reified UPDATE : Any> C
 )
 
 @OptIn(InternalSerializationApi::class)
-class CommonDataSourceImpl<ID, DTO : Any, CREATE : Any, UPDATE : Any>(
+class CrudDataSourceImpl<ID, DTO : Any, CREATE : Any, UPDATE : Any>(
     private val dtoClass: KClass<DTO>,
     private val createClass: KClass<CREATE>,
     private val updateClass: KClass<UPDATE>,
     private val endpointProvider: EndpointProvider<ID>,
     private val client: HttpClient,
     private val json: Json
-) : CommonDataSource<ID, DTO, CREATE, UPDATE> {
+) : CrudDataSource<ID, DTO, CREATE, UPDATE> {
 
     override suspend fun getAll(): List<DTO> {
         val body = client.get(endpointProvider.getAll()).body<String>()

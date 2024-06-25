@@ -24,7 +24,7 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
         dialogDelegate = store as DialogDelegate<Int>
     }
 
-    override fun removeTask(idsToRemove: List<Int>) = sideEffect {
+    override fun removeTask(idsToRemove: List<Int>) = sideEffectIntent {
         intent {
             removeTaskOnTrigger(todoRepository, idsToRemove)
 
@@ -40,7 +40,7 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
         onRemoveButtonClick(listOf(id))
     }
 
-    override fun onRemoveButtonClick(ids: List<Int>) = sideEffect {
+    override fun onRemoveButtonClick(ids: List<Int>) = sideEffectIntent {
         state.ifDataAvailable {
             val tasksToRemove = ids.map { taskById(it) }
             when {

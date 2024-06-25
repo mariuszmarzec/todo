@@ -143,14 +143,16 @@ fun TaskListView(
                             }
                         ) {
                             if (showButtonsInColumns) {
-                                Column {
-                                    OpenUrl(listItem.urlToOpen, onOpenUrlClick)
-                                    ShowCheck(
-                                        listItem.id,
-                                        listItem.isToDo,
-                                        onCheckClick,
-                                        onUncheckClick
-                                    )
+                                if (!reorderMode) {
+                                    Column {
+                                        OpenUrl(listItem.urlToOpen, onOpenUrlClick)
+                                        ShowCheck(
+                                            listItem.id,
+                                            listItem.isToDo,
+                                            onCheckClick,
+                                            onUncheckClick
+                                        )
+                                    }
                                 }
                                 Column {
                                     MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
@@ -166,13 +168,15 @@ fun TaskListView(
                                     }
                                 }
                             } else {
-                                OpenUrl(listItem.urlToOpen, onOpenUrlClick)
-                                ShowCheck(
-                                    listItem.id,
-                                    listItem.isToDo,
-                                    onCheckClick,
-                                    onUncheckClick
-                                )
+                                if (!reorderMode) {
+                                    OpenUrl(listItem.urlToOpen, onOpenUrlClick)
+                                    ShowCheck(
+                                        listItem.id,
+                                        listItem.isToDo,
+                                        onCheckClick,
+                                        onUncheckClick
+                                    )
+                                }
                                 MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
                                 if (!reorderMode) {
                                     ManageButtons(
@@ -208,7 +212,7 @@ private fun OpenUrl(urlToOpen: String?, onOpenUrlClick: ((String) -> Unit)?) {
 }
 
 @Composable
-private fun ShowCheck(
+fun ShowCheck(
     id: Int,
     isToDo: Boolean,
     onCheckClick: ((Int) -> Unit)?,

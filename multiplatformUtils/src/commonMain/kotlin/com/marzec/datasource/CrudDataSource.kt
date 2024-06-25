@@ -1,6 +1,6 @@
 package com.marzec.datasource
 
-interface CommonDataSource<ID, DTO, CREATE, UPDATE> {
+interface CrudDataSource<ID, DTO, CREATE, UPDATE> {
 
     suspend fun getAll(): List<DTO>
 

@@ -26,6 +26,9 @@ import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.ScrollListState
 import com.marzec.model.NullableField
+import com.marzec.mvi.reduceContentAsSideAction
+import com.marzec.todo.delegates.reorder.ReorderDelegate
+import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.UpdateTask
 import com.marzec.view.SearchState
 import kotlinx.coroutines.CoroutineScope
@@ -42,10 +45,11 @@ class TaskDetailsStore(
     private val dialogDelegate: DialogDelegate<Int>,
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val urlDelegate: UrlDelegate,
-    private val changePriorityDelegate: ChangePriorityDelegate,
+    changePriorityDelegate: ChangePriorityDelegate,
     private val selectionDelegate: SelectionDelegate<Int>,
     private val searchDelegate: SearchDelegate,
     private val scrollDelegate: ScrollDelegate,
+    private val reorderDelegate: ReorderDelegate,
 ) : Store3<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
@@ -53,7 +57,8 @@ class TaskDetailsStore(
     DialogDelegate<Int> by dialogDelegate,
     SelectionDelegate<Int> by selectionDelegate,
     ScrollDelegate by scrollDelegate,
-    SearchDelegate by searchDelegate {
+    SearchDelegate by searchDelegate,
+    ReorderDelegate by reorderDelegate {
 
     override val identifier: String
         get() = cacheKey
@@ -66,7 +71,8 @@ class TaskDetailsStore(
             changePriorityDelegate,
             selectionDelegate,
             searchDelegate,
-            scrollDelegate
+            scrollDelegate,
+            reorderDelegate
         )
     }
 
@@ -85,7 +91,8 @@ class TaskDetailsStore(
                         value = "",
                         focused = false
                     ),
-                    scrollListState = this?.scrollListState ?: ScrollListState.DEFAULT
+                    scrollListState = this?.scrollListState ?: ScrollListState.DEFAULT,
+                    reorderMode = this?.reorderMode ?: ReorderMode.Disabled
                 )
             }
         }
@@ -149,24 +156,6 @@ class TaskDetailsStore(
                     }
                 }
             }
-        }
-    }
-
-    fun moveToTop(id: Int) = sideEffectIntent {
-        state.ifDataAvailable {
-            changePriorityDelegate.changePriority(
-                id = id,
-                newPriority = task.subTasks.maxOf { it.priority }.inc()
-            )
-        }
-    }
-
-    fun moveToBottom(id: Int) = sideEffectIntent {
-        state.ifDataAvailable {
-            changePriorityDelegate.changePriority(
-                id = id,
-                newPriority = task.subTasks.minOf { it.priority }.dec()
-            )
         }
     }
 
@@ -245,6 +234,26 @@ class TaskDetailsStore(
         sideEffect {
             resultNonNull().ifDataSuspend {
                 navigationStore.goBack()
+            }
+        }
+    }
+
+    fun saveReorder() = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                (reorderMode as? ReorderMode.Enabled)?.items?.let {
+                    todoRepository.reorderByPriority(it)
+                }
+            }
+        }
+
+        reducer {
+            state.reduceContentAsSideAction(resultNonNull())
+        }
+
+        sideEffect {
+            state.asData {
+                disableReorderMode()
             }
         }
     }

@@ -16,13 +16,12 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 
 class ApiDataSource(
-    private val client: HttpClient
-) : DataSource {
+    private val client: HttpClient,
+    private val commonDataSource : CommonTodoDataSource
+) : DataSource, CommonTodoDataSource by commonDataSource {
     override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) {
         client.delete(Api.Todo.removeTaskWithSubtask(taskId, removeSubtasks))
     }
-
-    override suspend fun getTasks() = client.get(Api.Todo.TASKS).body<List<TaskDto>>()
 
     override suspend fun copyTask(taskId: Int) {
         client.get(Api.Todo.copyTask(taskId))
@@ -31,21 +30,6 @@ class ApiDataSource(
     override suspend fun markAsToDo(request: MarkAsToDoDto) {
         client.post(Api.Todo.MARK_AS_TO_DO) {
             setBody(request)
-        }
-    }
-
-    override suspend fun addNewTask(createTaskDto: CreateTaskDto) {
-        client.post(ADD_TASKS) {
-            setBody(createTaskDto)
-        }
-    }
-
-    override suspend fun updateTask(
-        taskId: Int,
-        task: UpdateTaskDto
-    ) {
-        client.patch(Api.Todo.updateTask(taskId)) {
-            setBody(task)
         }
     }
 }

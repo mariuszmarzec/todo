@@ -2,7 +2,6 @@ package com.marzec.delegate
 
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
-import com.marzec.delegate.StoreDelegate
 import com.marzec.extensions.toggle
 
 interface WithSelection<SELECT_ITEM, DATA> {
@@ -45,7 +44,7 @@ class SelectionDelegateImpl<SELECT_ITEM, DATA : WithSelection<SELECT_ITEM, DATA>
         }
     }
 
-    override fun onAllSelectClicked() = sideEffect {
+    override fun onAllSelectClicked() = sideEffectIntent {
         state.ifDataAvailable {
             val ids = allIds()
             if (selected.size == ids.size) {

@@ -5,7 +5,6 @@ import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.cache.Cache
 import com.marzec.todo.api.MarkAsToDoDto
-import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.model.toDomain
 
@@ -23,11 +22,13 @@ class CompositeDataSource(
         removeTask(taskId, removeSubtasks)
     }
 
-    override suspend fun getTasks(): List<TaskDto> {
-        val todoLists = apiDataSource.getTasks()
+    override suspend fun getAll(): List<TaskDto> {
+        val todoLists = apiDataSource.getAll()
         localDataSource.init(todoLists)
         return todoLists
     }
+
+    override suspend fun getById(id: Int): TaskDto = localDataSource.getById(id)
 
     override suspend fun copyTask(taskId: Int) = update {
         copyTask(taskId)
@@ -37,24 +38,28 @@ class CompositeDataSource(
         markAsToDo(request)
     }
 
-    override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
-        addNewTask(createTaskDto)
+    override suspend fun create(createTaskDto: CreateTaskDto): TaskDto = update {
+        create(createTaskDto)
     }
 
-    override suspend fun updateTask(
+    override suspend fun update(
         taskId: Int,
         task: UpdateTaskDto
-    ) = update {
-        updateTask(taskId, task)
+    ): TaskDto = update {
+        this.update(taskId, task)
     }
 
-    private suspend fun update(action: suspend DataSource.() -> Unit) {
+    override suspend fun remove(id: Int) = update {
+        remove(id)
+    }
+
+    private suspend fun <T> update(action: suspend DataSource.() -> T): T {
         localDataSource.action()
         updateMemory()
-        apiDataSource.action()
+        return apiDataSource.action()
     }
 
     private suspend fun updateMemory() {
-        memoryCache.put(Api.Todo.TASKS, localDataSource.getTasks().map { it.toDomain() })
+        memoryCache.put(Api.Todo.TASKS, localDataSource.getAll().map { it.toDomain() })
     }
 }

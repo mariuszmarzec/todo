@@ -113,32 +113,6 @@ class TasksStore(
         stateCache.set(cacheKey, newState)
     }
 
-    fun moveToTop(id: Int) = sideEffectIntent {
-        state.ifDataAvailable {
-            if (reorderMode is ReorderMode.Enabled) {
-                moveUp(reorderMode.items.indexOfFirst { it.id == id })
-            } else {
-                changePriorityDelegate.changePriority(
-                    id = id,
-                    newPriority = tasks.maxOf { it.priority }.inc()
-                )
-            }
-        }
-    }
-
-    fun moveToBottom(id: Int) = sideEffectIntent {
-        state.ifDataAvailable {
-            if (reorderMode is ReorderMode.Enabled) {
-                moveDown(reorderMode.items.indexOfFirst { it.id == id })
-            } else {
-                changePriorityDelegate.changePriority(
-                    id = id,
-                    newPriority = tasks.minOf { it.priority }.dec()
-                )
-            }
-        }
-    }
-
     fun saveReorder() = intent<Content<Unit>> {
         onTrigger {
             state.ifDataAvailable {

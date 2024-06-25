@@ -27,7 +27,6 @@ fun SelectableRow(
     Row(
         modifier = Modifier
             .background(backgroundColor)
-            .fillMaxHeight()
             .fillMaxWidth().let {
             if (selectable) {
                 it.clickable { onSelectedChange() }

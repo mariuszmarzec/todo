@@ -304,7 +304,7 @@ class DateDelegateImpl<DATA : WithDate<DATA>>(
         }
     }
 
-    override fun onDatePickerViewClick() = sideEffect {
+    override fun onDatePickerViewClick() = sideEffectIntent {
         navigationStore.next(
             NavigationAction(datePickerDestinationFactory(state.date)),
             requestId = REQUEST_DATE_PICKER
@@ -327,7 +327,7 @@ class DateDelegateStateImpl<DATA : WithDate<DATA>>(
         }
     }
 
-    override fun onDatePickerViewClick() = sideEffect {
+    override fun onDatePickerViewClick() = sideEffectIntent {
         state.ifDataAvailable {
             navigationStore.next(
                 NavigationAction(datePickerDestinationFactory(date)),

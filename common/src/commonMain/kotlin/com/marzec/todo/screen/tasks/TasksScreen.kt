@@ -1,6 +1,9 @@
 package com.marzec.todo.screen.tasks
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.FabPosition
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.rememberScrollState
 import com.marzec.mvi.State
@@ -32,6 +36,7 @@ import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.view.ScreenWithLoading
 import com.marzec.view.SearchView
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
@@ -59,7 +64,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
 
                 if (state.data?.reorderMode is ReorderMode.Enabled) {
                     IconButton({
-                        store.saveReorder()
+                        store.disableReorderMode()
                     }) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -114,17 +119,22 @@ private fun TaskScreenData(
     scrollState: LazyListState = rememberLazyListState()
 ) {
     Column {
-        ManageTaskSelectionBar(
-            tasks = state.data.tasks,
-            selected = state.data.selected,
-            shouldShow = state.data.selected.isNotEmpty(),
-            onRemoveClick = {
-                store.showRemoveSelectedSubTasksDialog()
-            },
-            onAllSelectClicked = {
-                store.onAllSelectClicked()
-            }
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            ManageTaskSelectionBar(
+                tasks = state.data.tasks,
+                selected = state.data.selected,
+                shouldShow = state.data.selected.isNotEmpty(),
+                onRemoveClick = {
+                    store.showRemoveSelectedSubTasksDialog()
+                },
+                onAllSelectClicked = {
+                    store.onAllSelectClicked()
+                }
+            )
+        }
 
         TaskListView(
             tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items ?: state.data.tasks,

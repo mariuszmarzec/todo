@@ -11,7 +11,6 @@ import com.marzec.time.formatDate
 import com.marzec.time.withStartOfDay
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
-import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTaskDto
@@ -47,11 +46,12 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         localData = LocalData(tasks = allTasks)
     }
 
-    override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean) = update {
+    override suspend fun removeTask(taskId: Int, removeSubtasks: Boolean): Unit = update {
         if (removeSubtasks) {
             val tasksTree = getTasksTree()
             val taskDto = tasksTree.firstInTreeOrNull { task -> task.id == taskId }
             taskDto?.let { removeTaskWithSubtasksInternal(it) }
+            taskDto!!
         } else {
             removeTaskInternal(taskId)
         }
@@ -62,7 +62,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         taskDto.subTasks.forEach { removeTaskWithSubtasksInternal(it) }
     }
 
-    private fun removeTaskInternal(taskId: Int) {
+    private fun removeTaskInternal(taskId: Int): TaskDto {
         val taskToRemove = localData.tasks.first { it.id == taskId }
         localData = localData.copy(
             tasks = localData.tasks.toMutableList()
@@ -72,9 +72,10 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                     replace = { it.copy(parentTaskId = taskToRemove.parentTaskId) }
                 )
         )
+        return taskToRemove
     }
 
-    override suspend fun getTasks(): List<TaskDto> {
+    override suspend fun getAll(): List<TaskDto> {
         SchedulerDispatcher().dispatchScheduled()
         return try {
             lock.lock()
@@ -82,6 +83,10 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         } finally {
             lock.unlock()
         }
+    }
+
+    override suspend fun getById(id: Int): TaskDto = synchronized {
+        getTasksTree().firstInTreeOrNull { it.id == id }!!
     }
 
     private fun getTasksTree(): List<TaskDto> {
@@ -128,11 +133,11 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             taskToCopy = localData.tasks.firstOrNull { it.id == taskId }
         }
         taskToCopy?.let {
-            addNewTask(it.toCreateTask())
+            create(it.toCreateTask())
         }
     }
 
-    override suspend fun addNewTask(createTaskDto: CreateTaskDto) = update {
+    override suspend fun create(createTaskDto: CreateTaskDto): TaskDto = update {
         addNewTaskInternal(createTaskDto)
     }
 
@@ -177,22 +182,25 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             getTasksTree(tasks.filter { parentTask == it.id }).firstOrNull()?.subTasks
         } ?: tasks)
 
-    override suspend fun updateTask(
+    override suspend fun update(
         taskId: Int,
         task: UpdateTaskDto
-    ) = update {
+    ): TaskDto = update {
         updateTaskInternal(taskId, task)
     }
+
+    override suspend fun remove(id: Int) = removeTask(id)
 
     private fun updateTaskInternal(
         taskId: Int,
         task: UpdateTaskDto
-    ) {
+    ): TaskDto {
+        var updated: TaskDto? = null
         localData = localData.copy(
             tasks = localData.tasks.replaceIf(
                 condition = { it.id == taskId },
                 replace = { changedTask ->
-                    changedTask.copy(
+                    updated = changedTask.copy(
                         description = task.description ?: changedTask.description,
                         parentTaskId = if (task.parentTaskId != null) {
                             task.parentTaskId.value
@@ -208,9 +216,11 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                             changedTask.scheduler
                         }
                     )
+                    updated!!
                 }
             )
         )
+        return updated!!
     }
 
     override suspend fun markAsToDo(markAsToDo: MarkAsToDoDto) = update {
@@ -227,13 +237,19 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         )
     }
 
-    private suspend fun update(action: () -> Unit) = try {
-        lock.lock()
-        action()
-    } finally {
-        updateStorage()
-        lock.unlock()
-    }
+    private suspend fun <T> update(action: () -> T): T =
+        synchronized(finally = { updateStorage() }) {
+            action()
+        }
+
+    private suspend fun <T> synchronized(finally: suspend () -> Unit = { }, action: () -> T): T =
+        try {
+            lock.lock()
+            action()
+        } finally {
+            finally()
+            lock.unlock()
+        }
 
     private suspend fun updateStorage() {
         fileCache.putTyped(cacheKey, localData)
@@ -272,7 +288,10 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             val newTask = addNewTaskInternal(createNewTask)
 
             subTasks.forEach {
-                updateTaskInternal(it.id, UpdateTaskDto(parentTaskId = NullableFieldDto(newTask.id)))
+                updateTaskInternal(
+                    it.id,
+                    UpdateTaskDto(parentTaskId = NullableFieldDto(newTask.id))
+                )
             }
             return newTask
         }

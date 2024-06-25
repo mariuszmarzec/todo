@@ -1,5 +1,6 @@
 package com.marzec.todo.screen.taskdetails
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,15 +21,19 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
@@ -42,7 +47,9 @@ import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.rememberScrollState
+import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.view.ManageTaskSelectionBar
+import com.marzec.todo.view.ShowCheck
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.TextListItem
@@ -58,9 +65,16 @@ fun TaskDetailsScreen(
 
     val listState = rememberScrollState(store)
 
+    val topBarColor = if (state.data?.task?.isToDo == false) {
+        Color.LightGray
+    } else {
+        Color.Transparent
+    }
     Scaffold(
         topBar = {
-            actionBarProvider.provide {
+            actionBarProvider.provide(
+                backgroundColor = topBarColor
+            ) {
                 state.ifDataAvailable {
                     SearchView(search, store)
                     IconButton({
@@ -112,32 +126,68 @@ fun TaskDetailsScreen(
                     verticalArrangement = Arrangement.Top
                 ) {
 
-                    val subTasksCount = state.data.task.subTasks.size
-                    val doneSubtasksCount = state.data.task.subTasks.count { !it.isToDo }
+                    val task = state.data.task
+                    val subTasksCount = task.subTasks.size
+                    val doneSubtasksCount = task.subTasks.count { !it.isToDo }
 
-                    ManageTaskSelectionBar(
-                        tasks = state.data.task.subTasks,
-                        selected = state.data.selected,
-                        shouldShow = state.data.task.subTasks.isNotEmpty(),
-                        onMarkSelectedAsTodoClick = {
-                            store.markSelectedAsTodo()
-                        },
-                        onMarkSelectedAsDoneClick = {
-                            store.markSelectedAsDone()
-                        },
-                        onRemoveClick = {
-                            store.showRemoveSelectedSubTasksDialog()
-                        },
-                        onRemoveDoneTasksClick = {
-                            store.removeDoneTasks()
-                        },
-                        onAllSelectClicked = {
-                            store.onAllSelectClicked()
-                        },
-                        onUnpinSubtasksClick = {
-                            store.unpinSubtasks()
+                    if (state.data.task.subTasks.isNotEmpty()) {
+                        Row(
+                            Modifier.fillMaxWidth().background(topBarColor),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            if (state.data.reorderMode is ReorderMode.Enabled) {
+                                IconButton({
+                                    store.disableReorderMode()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Close reorder"
+                                    )
+                                }
+                                IconButton({
+                                    store.saveReorder()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Done,
+                                        contentDescription = "Save"
+                                    )
+                                }
+                            } else {
+                                IconButton({
+                                    store.enableReorderMode()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Reorder"
+                                    )
+                                }
+                            }
+                            ManageTaskSelectionBar(
+                                tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items
+                                    ?: task.subTasks,
+                                selected = state.data.selected,
+                                shouldShow = task.subTasks.isNotEmpty(),
+                                onMarkSelectedAsTodoClick = {
+                                    store.markSelectedAsTodo()
+                                },
+                                onMarkSelectedAsDoneClick = {
+                                    store.markSelectedAsDone()
+                                },
+                                onRemoveClick = {
+                                    store.showRemoveSelectedSubTasksDialog()
+                                },
+                                onRemoveDoneTasksClick = {
+                                    store.removeDoneTasks()
+                                },
+                                onAllSelectClicked = {
+                                    store.onAllSelectClicked()
+                                },
+                                onUnpinSubtasksClick = {
+                                    store.unpinSubtasks()
+                                }
+                            )
                         }
-                    )
+                    }
                     Row(
                         modifier = Modifier
                             .padding(all = 16.dp)
@@ -148,10 +198,10 @@ fun TaskDetailsScreen(
                     ) {
                         Box(Modifier.weight(1f)) {
                             SelectionContainer {
-                                Text(text = state.data.task.description, fontSize = 16.sp)
+                                Text(text = task.description, fontSize = 16.sp)
                             }
                         }
-                        val urls = state.data.task.description.urls()
+                        val urls = task.description.urls()
                         if (urls.isNotEmpty()) {
                             IconButton({
                                 store.openUrls(urls)
@@ -178,6 +228,16 @@ fun TaskDetailsScreen(
                                 contentDescription = "Copy task"
                             )
                         }
+                        ShowCheck(
+                            id = task.id,
+                            isToDo = task.isToDo,
+                            onCheckClick = {
+                                store.markAsDone(it)
+                            },
+                            onUncheckClick = {
+                                store.markAsToDo(it)
+                            }
+                        )
                     }
                     if (subTasksCount > 0) {
                         val subTasksCountRow = if (doneSubtasksCount > 0) {
@@ -193,11 +253,13 @@ fun TaskDetailsScreen(
                     }
                     Spacer(Modifier.size(16.dp))
                     TaskListView(
-                        tasks = state.data.task.subTasks,
+                        tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items
+                            ?: task.subTasks,
                         search = state.data.search.value,
                         selected = state.data.selected,
+                        reorderMode = state.data.reorderMode is ReorderMode.Enabled,
                         scrollState = listState,
-                        showButtonsInColumns = true,
+                        showButtonsInColumns = state.data.reorderMode !is ReorderMode.Enabled,
                         onClickListener = {
                             store.goToSubtaskDetails(it)
                         },
@@ -224,14 +286,19 @@ fun TaskDetailsScreen(
                         },
                         onSelectedChange = {
                             store.onSelectedChange(it)
+                        },
+                        onDragAndDrop = { draggedIndex: Int, targetIndex: Int ->
+                            store.onDragged(draggedIndex, targetIndex)
                         }
                     )
                 }
                 ShowDialog(store, state.data.dialog)
             }
+
             is State.Loading -> {
                 Text(text = "Loading")
             }
+
             is State.Error -> {
                 Text(text = state.message)
             }
@@ -261,6 +328,7 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
             )
 
         }
+
         is DialogState.RemoveDialogWithCheckBox -> {
             DialogBox(
                 state = Dialog.TwoOptionsDialogWithCheckbox(
@@ -286,6 +354,7 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
                 )
             )
         }
+
         is DialogState.SelectOptionsDialog -> {
             DialogBox(
                 state = Dialog.SelectOptionsDialog(
@@ -304,6 +373,7 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
                 )
             )
         }
+
         else -> Unit
     }
 }
