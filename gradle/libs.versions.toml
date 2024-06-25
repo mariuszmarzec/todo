@@ -25,7 +25,7 @@ vlc = "4.7.0"
 mockk = "1.13.2"
 dateTime = "0.4.1"
 
-composePlugin = "1.6.1"
+composePlugin = "1.6.11"
 composeCompiler = "1.5.11"
 
 [libraries]
