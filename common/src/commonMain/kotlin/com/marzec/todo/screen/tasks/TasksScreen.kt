@@ -62,25 +62,29 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
                     }
                 }
 
-                if (state.data?.reorderMode is ReorderMode.Enabled) {
-                    IconButton({
-                        store.disableReorderMode()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close reorder"
-                        )
-                    }
-                    IconButton({
-                        store.saveReorder()
-                    }) {
-                        Icon(imageVector = Icons.Default.Done, contentDescription = "Save")
-                    }
-                } else {
-                    IconButton({
-                        store.enableReorderMode()
-                    }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Reorder")
+                state.ifDataAvailable {
+                    if (search.value.isEmpty() && !search.focused) {
+                        if (state.data?.reorderMode is ReorderMode.Enabled) {
+                            IconButton({
+                                store.disableReorderMode()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close reorder"
+                                )
+                            }
+                            IconButton({
+                                store.saveReorder()
+                            }) {
+                                Icon(imageVector = Icons.Default.Done, contentDescription = "Save")
+                            }
+                        } else {
+                            IconButton({
+                                store.enableReorderMode()
+                            }) {
+                                Icon(imageVector = Icons.Default.Edit, contentDescription = "Reorder")
+                            }
+                        }
                     }
                 }
 

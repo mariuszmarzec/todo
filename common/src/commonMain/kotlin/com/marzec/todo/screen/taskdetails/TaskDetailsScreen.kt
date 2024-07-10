@@ -52,6 +52,7 @@ import com.marzec.todo.view.ManageTaskSelectionBar
 import com.marzec.todo.view.ShowCheck
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
+import com.marzec.view.SearchState
 import com.marzec.view.TextListItem
 
 @Composable
@@ -76,7 +77,9 @@ fun TaskDetailsScreen(
                 backgroundColor = topBarColor
             ) {
                 state.ifDataAvailable {
-                    SearchView(search, store)
+                    if (reorderMode is ReorderMode.Disabled) {
+                        SearchView(search, store)
+                    }
                     IconButton({
                         store.edit()
                     }) {
@@ -135,31 +138,33 @@ fun TaskDetailsScreen(
                             Modifier.fillMaxWidth().background(topBarColor),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            if (state.data.reorderMode is ReorderMode.Enabled) {
-                                IconButton({
-                                    store.disableReorderMode()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Close reorder"
-                                    )
-                                }
-                                IconButton({
-                                    store.saveReorder()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Done,
-                                        contentDescription = "Save"
-                                    )
-                                }
-                            } else {
-                                IconButton({
-                                    store.enableReorderMode()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Menu,
-                                        contentDescription = "Reorder"
-                                    )
+                            if (state.data.search.value.isEmpty() && !state.data.search.focused) {
+                                if (state.data.reorderMode is ReorderMode.Enabled) {
+                                    IconButton({
+                                        store.disableReorderMode()
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Close reorder"
+                                        )
+                                    }
+                                    IconButton({
+                                        store.saveReorder()
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Done,
+                                            contentDescription = "Save"
+                                        )
+                                    }
+                                } else {
+                                    IconButton({
+                                        store.enableReorderMode()
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Menu,
+                                            contentDescription = "Reorder"
+                                        )
+                                    }
                                 }
                             }
                             ManageTaskSelectionBar(
