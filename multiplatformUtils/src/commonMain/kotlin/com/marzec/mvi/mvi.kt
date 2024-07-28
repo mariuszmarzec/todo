@@ -5,80 +5,134 @@ package com.marzec.mvi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.random.Random
 
-@ExperimentalCoroutinesApi
-open class Store3<State : Any>(
-    private val scope: CoroutineScope,
-    private val defaultState: State
-) {
+@OptIn(ExperimentalCoroutinesApi::class)
+fun <State : Any> Store(
+    scope: CoroutineScope,
+    defaultState: State,
+    onNewStateCallback: (State) -> Unit = { }
+) = Store4Impl(scope, defaultState, onNewStateCallback)
 
-    private var _state = MutableStateFlow(defaultState)
+interface Store4<State : Any> {
 
     val state: StateFlow<State>
-        get() = _state
 
-    open val identifier: Any = Unit
+    val identifier: Any
 
-    private val jobs = hashMapOf<String, IntentJob<State, out Any>>()
+    suspend fun init(initialAction: suspend () -> Unit = {})
+    fun cancelAll()
 
-    suspend fun init(initialAction: suspend () -> Unit = {}) {
-        initialAction()
-    }
-
-    fun cancelAll() {
-        jobs.forEach { it.value.cancelJob() }
-    }
-
-    open suspend fun onNewState(newState: State) = Unit
-
-    fun <Result : Any> intent(id: String? = null, @BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
-        intentByBuilderInternal(id, buildFun)
-    }
-
-    fun <Result : Any> intent(@BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
-        intentByBuilderInternal(id = null, buildFun)
-    }
-
-    fun <Result : Any> intent(id: String? = null, builder: IntentBuilder<State, Result>) {
-        intentByBuilderInternal(id, builder)
-    }
-
-    fun <Result : Any> intent(builder: IntentBuilder<State, Result>) {
-        intentByBuilderInternal(id = null, builder)
-    }
-
-    fun <Result : Any> triggerIntent(func: suspend IntentContext<State, Result>.() -> Flow<Result>?) {
-        intentByBuilderInternal<Result> { onTrigger(func) }
-    }
+    suspend fun onNewState(newState: State)
+    fun <Result : Any> intent(id: String? = null, @BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit)
+    fun <Result : Any> intent(@BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit)
+    fun <Result : Any> intent(id: String? = null, builder: IntentBuilder<State, Result>)
+    fun <Result : Any> intent(builder: IntentBuilder<State, Result>)
+    fun <Result : Any> triggerIntent(func: suspend IntentContext<State, Result>.() -> Flow<Result>?)
 
     @Deprecated("Will be removed", replaceWith = ReplaceWith("triggerIntent(func)"))
     fun <Result : Any> onTrigger(
         @BuilderInference func: suspend IntentContext<State, Result>.() -> Flow<Result>? = { null }
+    ): IntentBuilder<State, Result>
+
+    fun reducerIntent(func: IntentContext<State, Unit>.() -> State)
+
+    @Deprecated("Will be removed", replaceWith = ReplaceWith("reducerIntent(func)"))
+    fun reduce(func: IntentContext<State, Unit>.() -> State): IntentBuilder<State, Unit>
+
+    @Deprecated("Will be removed", replaceWith = ReplaceWith("sideEffectIntent(func)"))
+    fun sideEffect(func: suspend IntentContext<State, Unit>.() -> Unit)
+    fun sideEffectIntent(func: suspend IntentContext<State, Unit>.() -> Unit)
+    fun <Result : Any> run(intent: Intent3<State, Result>)
+    fun <Result : Any> run(id: String?, intent: Intent3<State, Result>)
+}
+
+@ExperimentalCoroutinesApi
+open class Store4Impl<State : Any>(
+    private val scope: CoroutineScope,
+    private val defaultState: State,
+    private val onNewStateCallback: (State) -> Unit = {}
+) : Store4<State> {
+
+    private var _state = MutableStateFlow(defaultState)
+
+    override val state: StateFlow<State>
+        get() = _state
+
+    override val identifier: Any = Unit
+
+    private val jobs = hashMapOf<String, IntentJob<State, out Any>>()
+
+    override suspend fun init(initialAction: suspend () -> Unit) {
+        initialAction()
+    }
+
+    override fun cancelAll() {
+        jobs.forEach { it.value.cancelJob() }
+    }
+
+    override suspend fun onNewState(newState: State) {
+        onNewStateCallback(newState)
+    }
+
+    override fun <Result : Any> intent(id: String?, @BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
+        intentByBuilderInternal(id, buildFun)
+    }
+
+    override fun <Result : Any> intent(@BuilderInference buildFun: IntentBuilder<State, Result>.() -> Unit) {
+        intentByBuilderInternal(id = null, buildFun)
+    }
+
+    override fun <Result : Any> intent(id: String?, builder: IntentBuilder<State, Result>) {
+        intentByBuilderInternal(id, builder)
+    }
+
+    override fun <Result : Any> intent(builder: IntentBuilder<State, Result>) {
+        intentByBuilderInternal(id = null, builder)
+    }
+
+    override fun <Result : Any> triggerIntent(func: suspend IntentContext<State, Result>.() -> Flow<Result>?) {
+        intentByBuilderInternal<Result> { onTrigger(func) }
+    }
+
+    @Deprecated("Will be removed", replaceWith = ReplaceWith("triggerIntent(func)"))
+    override fun <Result : Any> onTrigger(
+        @BuilderInference func: suspend IntentContext<State, Result>.() -> Flow<Result>?
     ): IntentBuilder<State, Result> {
         return IntentBuilder<State, Result>().apply { onTrigger(func) }
     }
 
-    fun reducerIntent(func: IntentContext<State, Unit>.() -> State) {
+    override fun reducerIntent(func: IntentContext<State, Unit>.() -> State) {
         intentByBuilderInternal<Unit> { reducer(func) }
     }
 
     @Deprecated("Will be removed", replaceWith = ReplaceWith("reducerIntent(func)"))
-    fun reduce(func: IntentContext<State, Unit>.() -> State): IntentBuilder<State, Unit> {
+    override fun reduce(func: IntentContext<State, Unit>.() -> State): IntentBuilder<State, Unit> {
         return IntentBuilder<State, Unit>().apply { reducer(func) }
     }
 
     @Deprecated("Will be removed", replaceWith = ReplaceWith("sideEffectIntent(func)"))
-    fun sideEffect(func: suspend IntentContext<State, Unit>.() -> Unit) {
+    override fun sideEffect(func: suspend IntentContext<State, Unit>.() -> Unit) {
         intentByBuilderInternal<Unit> { sideEffect(func) }
     }
 
-    fun sideEffectIntent(func: suspend IntentContext<State, Unit>.() -> Unit) {
+    override fun sideEffectIntent(func: suspend IntentContext<State, Unit>.() -> Unit) {
         intentByBuilderInternal<Unit> { sideEffect(func) }
     }
 
@@ -95,11 +149,11 @@ open class Store3<State : Any>(
         run(id, intent)
     }
 
-    fun <Result : Any> run(intent: Intent3<State, Result>) {
+    override fun <Result : Any> run(intent: Intent3<State, Result>) {
         run(id = null, intent)
     }
 
-    fun <Result : Any> run(id: String?, intent: Intent3<State, Result>) {
+    override fun <Result : Any> run(id: String?, intent: Intent3<State, Result>) {
         val newJobId = id ?: System.nanoTime().toString()
         jobs[newJobId]?.cancelJob()
 
@@ -265,7 +319,7 @@ fun <State : Any, Result : Any> Intent3<State, Result>.rebuild(
 ).apply { buildFun(this@rebuild) }.build()
 
 @Composable
-fun <T : Any> Store3<T>.collectState(
+fun <T : Any> Store4<T>.collectState(
     context: CoroutineContext = EmptyCoroutineContext,
     onStoreInitAction: suspend () -> Unit = { }
 ): androidx.compose.runtime.State<T> {
