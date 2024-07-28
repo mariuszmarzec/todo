@@ -9,7 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.rememberCoroutineScope
 import com.marzec.common.OpenUrlHelper
-import com.marzec.todo.screen.main.HomeScreen
+import com.marzec.todo.screen.main.HomeScreenSaveable
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -32,9 +32,7 @@ class MainActivity : AppCompatActivity() {
 
                 DI.navigationScope = rememberCoroutineScope()
 
-                DI.navigationStore = DI.provideNavigationStore(rememberCoroutineScope())
-
-                HomeScreen(DI.navigationStore)
+                HomeScreenSaveable()
             }
         }
     }

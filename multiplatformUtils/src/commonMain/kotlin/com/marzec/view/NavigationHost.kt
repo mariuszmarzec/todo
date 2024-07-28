@@ -10,6 +10,7 @@ import com.marzec.cache.MemoryCache
 import com.marzec.mvi.collectState
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationEntry
+import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.ResultCache
@@ -62,20 +63,43 @@ fun navigationStore(
     defaultDestination: Destination,
     overrideLastClose: (NavigationState.() -> NavigationState)? = null,
     onNewStateCallback: ((NavigationState) -> Unit)? = null
-): NavigationStore = NavigationStore(
+): NavigationStore = navigationStore(
+    scope,
+    stateCache,
+    navigationStoreCacheKey,
+    cacheKeyProvider,
+    initialState(defaultDestination, cacheKeyProvider),
+    overrideLastClose,
+    onNewStateCallback
+)
+
+fun navigationStore(
+    scope: CoroutineScope,
+    stateCache: StateCache,
+    navigationStoreCacheKey: String,
+    cacheKeyProvider: () -> String,
+    initialState: NavigationFlow,
+    overrideLastClose: (NavigationState.() -> NavigationState)? = null,
+    onNewStateCallback: ((NavigationState) -> Unit)? = null
+) = NavigationStore(
     scope = scope,
     stateCache = stateCache,
     resultCache = ResultCache(MemoryCache()),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
-    initialState = navigationState(
-        backStack = listOf(
-            NavigationEntry(
-                destination = defaultDestination,
-                cacheKey = cacheKeyProvider()
-            )
-        )
-    ),
+    initialState = initialState,
     overrideLastClose = overrideLastClose,
     onNewStateCallback = onNewStateCallback
+)
+
+fun initialState(
+    defaultDestination: Destination,
+    cacheKeyProvider: () -> String
+) = navigationState(
+    backStack = listOf(
+        NavigationEntry(
+            destination = defaultDestination,
+            cacheKey = cacheKeyProvider()
+        )
+    )
 )

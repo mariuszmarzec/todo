@@ -47,16 +47,20 @@ kotlin {
         named("androidMain") {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
-                api("androidx.appcompat:appcompat:1.1.0")
                 api("androidx.core:core-ktx:1.3.1")
+                implementation(libs.androidxAppCompat)
+                implementation(libs.androidMaterial)
+                implementation(libs.activityCompose)
+                implementation(compose.material)
+                implementation(compose.ui)
+                implementation(compose.uiTooling)
+                implementation(compose.foundation)
                 api(libs.ktorOkHttpClient)
                 implementation(libs.imageLoader)
                 implementation(libs.exoPlayer)
-
                 // data store
                 api(libs.datastore.preferences)
                 api(libs.datastore)
-
             }
         }
         named("desktopMain") {

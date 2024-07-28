@@ -24,6 +24,7 @@ exoPlayer = "2.18.5"
 vlc = "4.7.0"
 mockk = "1.13.2"
 dateTime = "0.4.1"
+viewModel = "2.0.0"
 
 composePlugin = "1.6.11"
 composeCompiler = "1.5.11"
@@ -52,6 +53,8 @@ vlc = { module = "uk.co.caprica:vlcj", version.ref = "vlc" }
 mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "viewModel" }
+compose-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewModel" }
 
 plugin-composeGradle = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composePlugin" }
 plugin-androidBuild = { module = "com.android.tools.build:gradle", version.ref = "androidGradleplugin" }

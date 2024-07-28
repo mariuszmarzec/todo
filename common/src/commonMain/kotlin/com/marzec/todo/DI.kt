@@ -22,6 +22,8 @@ import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
+import com.marzec.navigation.NavigationFlow
+import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.preferences.StateCache
@@ -67,6 +69,7 @@ import com.marzec.view.DateDelegateImpl
 import com.marzec.view.DatePickerScreen
 import com.marzec.view.DatePickerState
 import com.marzec.view.DatePickerStore
+import com.marzec.view.initialState
 import com.marzec.view.navigationStore
 import io.ktor.client.HttpClient
 import kotlin.random.Random
@@ -368,6 +371,33 @@ object DI {
     fun provideNavigationStore(
         scope: CoroutineScope
     ): NavigationStore {
+        val defaultScreen = getDefaultNavigationState()
+        return navigationStore(
+            scope = scope,
+            stateCache = stateCache,
+            cacheKeyProvider = cacheKeyProvider,
+            navigationStoreCacheKey = navigationStoreCacheKey,
+            defaultDestination = defaultScreen
+        )
+    }
+
+    fun provideNavigationStore(
+        scope: CoroutineScope,
+        initialState: NavigationFlow = navigationInitialState(),
+        onNewStateCallback: ((NavigationState) -> Unit)? = null
+    ): NavigationStore {
+        return navigationStore(
+            scope = scope,
+            stateCache = stateCache,
+            cacheKeyProvider = cacheKeyProvider,
+            navigationStoreCacheKey = navigationStoreCacheKey,
+            initialState = initialState
+        )
+    }
+
+    fun navigationInitialState() = initialState(getDefaultNavigationState(), cacheKeyProvider)
+
+    private fun getDefaultNavigationState(): TodoDestination {
         val authToken = runBlocking {
             fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
         }
@@ -377,13 +407,7 @@ object DI {
         } else {
             TodoDestination.Login
         }
-        return navigationStore(
-            scope = scope,
-            stateCache = stateCache,
-            cacheKeyProvider = cacheKeyProvider,
-            navigationStoreCacheKey = navigationStoreCacheKey,
-            defaultDestination = defaultScreen
-        )
+        return defaultScreen
     }
 
     @Composable

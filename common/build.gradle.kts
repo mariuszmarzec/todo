@@ -58,6 +58,8 @@ kotlin {
                 // data store
                 api(libs.datastore.preferences)
                 api(libs.datastore)
+
+                implementation(libs.compose.viewModel)
             }
         }
         named("desktopMain") {
