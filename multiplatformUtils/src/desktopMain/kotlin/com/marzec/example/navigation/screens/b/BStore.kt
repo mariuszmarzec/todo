@@ -1,6 +1,6 @@
 package com.marzec.example.navigation.screens.b
 
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.view.navigationStore
@@ -13,7 +13,7 @@ class BStore(
     private val navigationStore: NavigationStore,
     private val message: MutableStateFlow<String>,
     scope: CoroutineScope
-) : Store3<String>(scope, message.value) {
+) : Store4Impl<String>(scope, message.value) {
 
     fun load() = intent {
         onTrigger {

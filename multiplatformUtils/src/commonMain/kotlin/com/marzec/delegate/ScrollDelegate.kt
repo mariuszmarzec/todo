@@ -8,7 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceData
 
 interface ScrollDelegate {
@@ -54,11 +55,11 @@ data class ScrollListState(
 
 @Composable
 fun rememberScrollState(store: ScrollDelegate): LazyListState {
-    val store3 by rememberUpdatedState(store as Store3<*>)
-    val updatedIdentifier by rememberUpdatedState(store3.identifier)
+    val Store4 by rememberUpdatedState(store as Store4<*>)
+    val updatedIdentifier by rememberUpdatedState(Store4.identifier)
 
     val listState: LazyListState = remember(updatedIdentifier) {
-        val state = store3.state.value as State<out WithScrollListState<*>>
+        val state = Store4.state.value as State<out WithScrollListState<*>>
         LazyListState(
             state.data?.scrollListState?.index ?: 0,
             state.data?.scrollListState?.offset ?: 0
@@ -75,11 +76,11 @@ fun rememberScrollState(store: ScrollDelegate): LazyListState {
 
 @Composable
 fun rememberColumnScrollState(store: ScrollDelegate): ScrollState {
-    val store3 by rememberUpdatedState(store as Store3<*>)
-    val updatedIdentifier by rememberUpdatedState(store3.identifier)
+    val Store4 by rememberUpdatedState(store as Store4<*>)
+    val updatedIdentifier by rememberUpdatedState(Store4.identifier)
 
     val listState: ScrollState = remember(updatedIdentifier) {
-        val state = store3.state.value as State<out WithScrollListState<*>>
+        val state = Store4.state.value as State<out WithScrollListState<*>>
         ScrollState(
             state.data?.scrollListState?.offset ?: 0
         )

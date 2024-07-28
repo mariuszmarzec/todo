@@ -7,7 +7,7 @@ import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.SelectionDelegate
 import com.marzec.delegate.delegates
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationStore
@@ -37,7 +37,7 @@ class PickItemDataStore<ITEM : Any>(
     private val selectionDelegate: SelectionDelegate<String>,
     private val searchDelegate: SearchDelegate,
     private val scrollDelegate: ScrollDelegate
-) : Store3<State<PickItemData<ITEM>>>(
+) : Store4Impl<State<PickItemData<ITEM>>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), SelectionDelegate<String> by selectionDelegate,
     SearchDelegate by searchDelegate,

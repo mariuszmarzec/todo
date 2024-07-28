@@ -4,7 +4,7 @@ import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
 import com.marzec.model.User
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.postSideEffect
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
@@ -26,7 +26,7 @@ class LoginStore(
     private val cacheKey: String,
     initialState: State<LoginData>,
     private val loginRepository: LoginRepository
-) : Store3<State<LoginData>>(
+) : Store4Impl<State<LoginData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 

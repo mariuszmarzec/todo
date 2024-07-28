@@ -6,7 +6,7 @@ import com.marzec.content.ifFinished
 import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.delegates
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
@@ -51,7 +51,7 @@ class TasksStore(
     private val scheduledOptions: PickItemOptions<Task>,
     private val selectionDelegate: SelectionDelegate<Int>,
     private val reorderDelegate: ReorderDelegate
-) : Store3<State<TasksScreenState>>(
+) : Store4Impl<State<TasksScreenState>>(
     scope,
     stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,

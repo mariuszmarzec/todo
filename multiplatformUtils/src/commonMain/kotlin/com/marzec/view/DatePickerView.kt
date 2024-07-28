@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.marzec.delegate.StoreDelegate
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.collectState
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.Destination
@@ -107,7 +107,7 @@ class DatePickerStore(
     initialState: DatePickerState,
     private val cacheKey: String,
     private val stateCache: StateCache
-) : Store3<DatePickerState>(
+) : Store4Impl<DatePickerState>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 

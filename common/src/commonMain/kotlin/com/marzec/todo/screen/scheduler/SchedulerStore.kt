@@ -2,7 +2,7 @@ package com.marzec.todo.screen.scheduler
 
 import com.marzec.delegate.delegates
 import com.marzec.extensions.toggle
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.StateCache
 import com.marzec.time.currentTime
@@ -60,7 +60,7 @@ class SchedulerStore(
     private val navigationStore: NavigationStore,
     initialState: SchedulerState,
     private val dateDelegate: DateDelegate
-) : Store3<SchedulerState>(
+) : Store4Impl<SchedulerState>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), DateDelegate by dateDelegate {
 

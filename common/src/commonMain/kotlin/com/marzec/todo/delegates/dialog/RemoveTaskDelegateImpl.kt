@@ -2,12 +2,12 @@ package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
 import com.marzec.delegate.StoreDelegate
 import com.marzec.extensions.urls
 import com.marzec.content.Content
 import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
+import com.marzec.mvi.Store4
 import com.marzec.todo.repository.TodoRepository
 
 class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
@@ -18,7 +18,7 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
     private lateinit var dialogDelegate: DialogDelegate<Int>
 
     @Suppress("Unchecked_Cast")
-    override fun init(store: Store3<State<DATA>>) {
+    override fun init(store: Store4<State<DATA>>) {
         super.init(store)
         removeTaskDelegate = store as RemoveTaskDelegate
         dialogDelegate = store as DialogDelegate<Int>

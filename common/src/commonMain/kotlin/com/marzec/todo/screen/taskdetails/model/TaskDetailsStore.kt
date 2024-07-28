@@ -5,7 +5,7 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.delegate.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
@@ -50,7 +50,7 @@ class TaskDetailsStore(
     private val searchDelegate: SearchDelegate,
     private val scrollDelegate: ScrollDelegate,
     private val reorderDelegate: ReorderDelegate,
-) : Store3<State<TaskDetailsState>>(
+) : Store4Impl<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,

@@ -7,7 +7,7 @@ import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
@@ -31,7 +31,7 @@ class AddSubTaskStore(
     private val taskId: Int,
     selectionDelegate: SelectionDelegate<Int>,
     searchDelegate: SearchDelegate
-) : Store3<State<AddSubTaskData>>(
+) : Store4Impl<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), SelectionDelegate<Int> by selectionDelegate, SearchDelegate by searchDelegate {
 

@@ -1,16 +1,16 @@
 package com.marzec.core
 
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.*
 
-fun <STATE : Any, STORE : Store3<STATE>> runStoreTest(
+fun <STATE : Any, STORE : Store4Impl<STATE>> runStoreTest(
     block: suspend StoreTest<STATE, STORE>.() -> Unit
 ) = StoreTest<STATE, STORE>().run(block)
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class StoreTest<STATE : Any, STORE : Store3<STATE>> {
+class StoreTest<STATE : Any, STORE : Store4Impl<STATE>> {
 
     val scope = TestScope()
     val dispatcher: TestDispatcher = UnconfinedTestDispatcher(scope.testScheduler)
@@ -18,7 +18,7 @@ class StoreTest<STATE : Any, STORE : Store3<STATE>> {
     lateinit var values: TestCollector<STATE>
 
     fun run(block: suspend StoreTest<STATE, STORE>.() -> Unit): Unit = scope.runTest {
-        Store3.stateThread = dispatcher
+        Store4.stateThread = dispatcher
 
         block()
     }

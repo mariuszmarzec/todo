@@ -6,7 +6,7 @@ import com.marzec.model.toNullableUpdate
 import com.marzec.model.toUpdate
 import com.marzec.mvi.IntentContext
 import com.marzec.mvi.State
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
@@ -31,7 +31,7 @@ class AddNewTaskStore(
     private val stateCache: StateCache,
     private val initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
-) : Store3<State<AddNewTaskState>>(
+) : Store4Impl<State<AddNewTaskState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 

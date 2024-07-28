@@ -1,7 +1,7 @@
 package com.marzec.navigation
 
 import com.marzec.mvi.IntentContext
-import com.marzec.mvi.Store3
+import com.marzec.mvi.Store4Impl
 import com.marzec.preferences.StateCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +20,7 @@ class NavigationStore(
     initialState: NavigationState,
     private val overrideLastClose: (NavigationState.() -> NavigationState)? = null,
     private val onNewStateCallback: ((NavigationState) -> Unit)? = null,
-) : Store3<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
+) : Store4Impl<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
     fun next(
         action: NavigationAction,
