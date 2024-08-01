@@ -1,12 +1,10 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.content.Content
-import com.marzec.content.asContentFlow
 import com.marzec.content.ifFinished
 import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.delegates
 import com.marzec.mvi.State
-import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
@@ -19,8 +17,8 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
+import com.marzec.mvi.Store4
 import com.marzec.mvi.reduceContentAsSideAction
-import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
@@ -31,15 +29,11 @@ import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.flowOf
 
 class TasksStore(
-    scope: CoroutineScope,
     private val navigationStore: NavigationStore,
     private val cacheKey: String,
     private val stateCache: StateCache,
-    initialState: State<TasksScreenState>,
     private val todoRepository: TodoRepository,
     private val loginRepository: LoginRepository,
     private val urlDelegate: UrlDelegate,
@@ -50,11 +44,10 @@ class TasksStore(
     private val scrollDelegate: ScrollDelegate,
     private val scheduledOptions: PickItemOptions<Task>,
     private val selectionDelegate: SelectionDelegate<Int>,
-    private val reorderDelegate: ReorderDelegate
-) : Store4Impl<State<TasksScreenState>>(
-    scope,
-    stateCache.get(cacheKey) ?: initialState
-), RemoveTaskDelegate by removeTaskDelegate,
+    private val reorderDelegate: ReorderDelegate,
+    private val store: Store4<State<TasksScreenState>>
+) : Store4<State<TasksScreenState>> by store,
+    RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate<Int> by dialogDelegate,
     SearchDelegate by searchDelegate,
