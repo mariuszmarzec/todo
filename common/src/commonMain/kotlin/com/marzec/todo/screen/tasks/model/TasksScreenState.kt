@@ -43,7 +43,7 @@ data class TasksScreenState(
 
     companion object {
 
-        fun initial() =
+        fun initial(): State<TasksScreenState> =
             State.Loading(emptyData())
 
         fun emptyData() = TasksScreenState(

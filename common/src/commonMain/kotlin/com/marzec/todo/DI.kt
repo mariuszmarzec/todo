@@ -20,7 +20,8 @@ import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.logger.Logger
-import com.marzec.mvi.CacheStateStore
+import com.marzec.mvi.Store
+import com.marzec.mvi.toCachable
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationFlow
@@ -195,9 +196,10 @@ object DI {
             ) {
                 copy(reorderMode = it)
             },
-            store = CacheStateStore(
+            store = Store(
                 scope = scope,
-                defaultState = TasksScreenState.initial(),
+                defaultState = TasksScreenState.initial()
+            ).toCachable(
                 cacheKey = cacheKey,
                 stateCache = stateCache
             )

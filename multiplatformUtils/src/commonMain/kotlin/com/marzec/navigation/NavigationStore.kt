@@ -18,8 +18,7 @@ class NavigationStore(
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState,
-    private val overrideLastClose: (NavigationState.() -> NavigationState)? = null,
-    private val onNewStateCallback: ((NavigationState) -> Unit)? = null,
+    private val overrideLastClose: (NavigationState.() -> NavigationState)? = null
 ) : Store4Impl<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
     fun next(

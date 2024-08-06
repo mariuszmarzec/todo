@@ -27,14 +27,17 @@ import kotlin.random.Random
 fun <State : Any> Store(
     scope: CoroutineScope,
     defaultState: State,
-    onNewStateCallback: (State) -> Unit = { }
-) = Store4Impl(scope, defaultState, onNewStateCallback)
+) = Store4Impl(scope, defaultState)
 
 interface Store4<State : Any> {
 
     val state: StateFlow<State>
 
     val identifier: Any
+
+    var stateInitializer: () -> MutableStateFlow<State>
+
+    var onNewStateCallback: (State) -> Unit
 
     suspend fun init(initialAction: suspend () -> Unit = {})
     fun cancelAll()
@@ -66,11 +69,14 @@ interface Store4<State : Any> {
 @ExperimentalCoroutinesApi
 open class Store4Impl<State : Any>(
     private val scope: CoroutineScope,
-    private val defaultState: State,
-    private val onNewStateCallback: (State) -> Unit = {}
+    private val defaultState: State
 ) : Store4<State> {
 
-    private var _state = MutableStateFlow(defaultState)
+    override var stateInitializer: () -> MutableStateFlow<State> = { MutableStateFlow(defaultState) }
+
+    override var onNewStateCallback: (State) -> Unit = { }
+
+    private val _state: MutableStateFlow<State> by lazy { stateInitializer() }
 
     override val state: StateFlow<State>
         get() = _state

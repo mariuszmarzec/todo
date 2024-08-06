@@ -88,9 +88,12 @@ fun navigationStore(
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = initialState,
-    overrideLastClose = overrideLastClose,
-    onNewStateCallback = onNewStateCallback
-)
+    overrideLastClose = overrideLastClose
+).apply {
+    if (onNewStateCallback != null) {
+        this.onNewStateCallback = onNewStateCallback
+    }
+}
 
 fun initialState(
     defaultDestination: Destination,

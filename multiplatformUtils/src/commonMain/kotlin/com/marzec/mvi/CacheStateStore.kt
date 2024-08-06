@@ -1,32 +1,30 @@
 package com.marzec.mvi
 
 import com.marzec.preferences.StateCache
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 
-@OptIn(ExperimentalCoroutinesApi::class)
-fun <State : Any> CacheStateStore(
-    scope: CoroutineScope,
-    defaultState: State,
+fun <State : Any> Store4<State>.toCachable(
     stateCache: StateCache,
-    cacheKey: String,
-    onNewStateCallback: (State) -> Unit = { }
-): Store4<State> = CacheStateStore(
-    store = Store4Impl(
-        scope = scope,
-        defaultState = stateCache.get<State>(cacheKey) ?: defaultState,
-        onNewStateCallback = {
-            stateCache.set(cacheKey, it)
-            onNewStateCallback(it)
-        }
-    ),
-    cacheKey = cacheKey
-)
+    cacheKey: String
+): Store4<State> = CacheStateStore(this, stateCache, cacheKey)
 
 private class CacheStateStore<State : Any>(
     private val store: Store4<State>,
+    stateCache: StateCache,
     cacheKey: String,
 ) : Store4<State> by store {
+
+    init {
+        val defaultStateInitializer = store.stateInitializer
+        store.stateInitializer = {
+            stateCache.get<State>(cacheKey)?.let {
+                MutableStateFlow(it)
+            } ?: defaultStateInitializer()
+        }
+        store.onNewStateCallback = {
+            stateCache.set(cacheKey, it)
+        }
+    }
 
     override val identifier = cacheKey
 }
