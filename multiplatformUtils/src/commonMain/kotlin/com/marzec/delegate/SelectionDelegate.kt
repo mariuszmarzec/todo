@@ -3,6 +3,7 @@ package com.marzec.delegate
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
 import com.marzec.extensions.toggle
+import com.marzec.mvi.StoreDelegate
 
 interface WithSelection<SELECT_ITEM, DATA> {
     val selected: Set<SELECT_ITEM>

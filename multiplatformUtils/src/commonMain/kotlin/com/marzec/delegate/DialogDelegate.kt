@@ -5,6 +5,7 @@ import com.marzec.mvi.reduceData
 import com.marzec.mvi.intent as createIntent
 import com.marzec.extensions.asInstanceAndReturn
 import com.marzec.mvi.Intent3
+import com.marzec.mvi.StoreDelegate
 import com.marzec.mvi.map
 
 interface DialogDelegate<ID_TYPE> {

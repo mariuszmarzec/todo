@@ -1,6 +1,6 @@
 package com.marzec.todo.screen.scheduler
 
-import com.marzec.delegate.delegates
+import com.marzec.mvi.delegates
 import com.marzec.extensions.toggle
 import com.marzec.mvi.Store4Impl
 import com.marzec.navigation.NavigationStore

@@ -4,7 +4,7 @@ import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.delegate.SearchDelegate
-import com.marzec.delegate.delegates
+import com.marzec.mvi.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl

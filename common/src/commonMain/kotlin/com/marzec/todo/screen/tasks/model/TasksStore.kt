@@ -3,7 +3,7 @@ package com.marzec.todo.screen.tasks.model
 import com.marzec.content.Content
 import com.marzec.content.ifFinished
 import com.marzec.delegate.SearchDelegate
-import com.marzec.delegate.delegates
+import com.marzec.mvi.delegates
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationAction

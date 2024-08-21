@@ -1,6 +1,6 @@
 package com.marzec.todo.delegates.reorder
 
-import com.marzec.delegate.StoreDelegate
+import com.marzec.mvi.StoreDelegate
 import com.marzec.mvi.Intent3
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State

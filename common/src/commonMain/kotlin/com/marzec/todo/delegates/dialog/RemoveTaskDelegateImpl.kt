@@ -2,7 +2,7 @@ package com.marzec.todo.delegates.dialog
 
 import com.marzec.mvi.IntentBuilder
 import com.marzec.mvi.State
-import com.marzec.delegate.StoreDelegate
+import com.marzec.mvi.StoreDelegate
 import com.marzec.extensions.urls
 import com.marzec.content.Content
 import com.marzec.delegate.DialogDelegate

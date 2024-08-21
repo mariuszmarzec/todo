@@ -5,7 +5,7 @@ import com.marzec.content.Content
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.SelectionDelegate
-import com.marzec.delegate.delegates
+import com.marzec.mvi.delegates
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceDataWithContent

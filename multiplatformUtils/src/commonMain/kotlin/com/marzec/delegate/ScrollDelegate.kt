@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4
-import com.marzec.mvi.Store4Impl
+import com.marzec.mvi.StoreDelegate
 import com.marzec.mvi.reduceData
 
 interface ScrollDelegate {

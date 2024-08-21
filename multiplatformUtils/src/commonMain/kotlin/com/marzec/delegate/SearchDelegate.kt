@@ -3,6 +3,7 @@ package com.marzec.delegate
 import com.marzec.mvi.State
 import com.marzec.mvi.reduceData
 import com.marzec.extensions.EMPTY_STRING
+import com.marzec.mvi.StoreDelegate
 import com.marzec.view.SearchState
 
 interface SearchDelegate {

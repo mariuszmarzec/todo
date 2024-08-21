@@ -2,7 +2,7 @@ package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
-import com.marzec.delegate.delegates
+import com.marzec.mvi.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
