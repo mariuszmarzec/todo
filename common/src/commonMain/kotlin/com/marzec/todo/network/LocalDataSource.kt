@@ -273,9 +273,9 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             }
         }
 
-        private fun copyTask(task: TaskDto): TaskDto {
+        private fun copyTask(task: TaskDto, ignorePriority: Boolean = true): TaskDto {
             val createNewTask = task.toCreateTask(
-                ignorePriority = true,
+                ignorePriority = ignorePriority,
                 ignoreScheduler = true
             ).copy(
                 highestPriorityAsDefault = task.scheduler?.highestPriorityAsDefault ?: false
@@ -283,7 +283,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
             val subTasks = localData.tasks
                 .filter { it.parentTaskId == task.id }
-                .map { copyTask(it) }
+                .map { copyTask(it, ignorePriority = false) }
 
             val newTask = addNewTaskInternal(createNewTask)
 
