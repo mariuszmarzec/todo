@@ -237,12 +237,12 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         )
     }
 
-    private suspend fun <T> update(action: () -> T): T =
+    private suspend fun <T> update(action: suspend () -> T): T =
         synchronized(finally = { updateStorage() }) {
             action()
         }
 
-    private suspend fun <T> synchronized(finally: suspend () -> Unit = { }, action: () -> T): T =
+    private suspend fun <T> synchronized(finally: suspend () -> Unit = { }, action: suspend () -> T): T =
         try {
             lock.lock()
             action()
@@ -273,7 +273,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             }
         }
 
-        private fun copyTask(task: TaskDto, ignorePriority: Boolean = true): TaskDto {
+        private suspend fun copyTask(task: TaskDto, ignorePriority: Boolean = true): TaskDto {
             val createNewTask = task.toCreateTask(
                 ignorePriority = ignorePriority,
                 ignoreScheduler = true
@@ -286,6 +286,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                 .map { copyTask(it, ignorePriority = false) }
 
             val newTask = addNewTaskInternal(createNewTask)
+            update(newTask.id, UpdateTaskDto(isToDo = task.isToDo))
 
             subTasks.forEach {
                 updateTaskInternal(
