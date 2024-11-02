@@ -29,6 +29,7 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
     Scheduler.OneShot::class.simpleName -> Scheduler.OneShot(
         hour = hour,
         minute = minute,
+        creationDate = creationDate?.toLocalDateTime(),
         startDate = startDate.toLocalDateTime(),
         lastDate = lastDate?.toLocalDateTime(),
         highestPriorityAsDefault = highestPriorityAsDefault,
@@ -37,6 +38,7 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
     Scheduler.Weekly::class.simpleName -> Scheduler.Weekly(
         hour = hour,
         minute = minute,
+        creationDate = creationDate?.toLocalDateTime(),
         startDate = startDate.toLocalDateTime(),
         lastDate = lastDate?.toLocalDateTime(),
         daysOfWeek = daysOfWeek.map { DayOfWeek(it) },
@@ -45,7 +47,10 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         highestPriorityAsDefault = highestPriorityAsDefault
     )
     Scheduler.Monthly::class.simpleName -> Scheduler.Monthly(
-        hour = hour, minute = minute, startDate = startDate.toLocalDateTime(),
+        hour = hour,
+        minute = minute,
+        creationDate = creationDate?.toLocalDateTime(),
+        startDate = startDate.toLocalDateTime(),
         lastDate = lastDate?.toLocalDateTime(),
         dayOfMonth = dayOfMonth,
         repeatInEveryPeriod = repeatInEveryPeriod,
@@ -72,6 +77,7 @@ fun getRemoveScheduled(options: Map<String, String>?) =
 sealed class Scheduler(
     open val hour: Int,
     open val minute: Int,
+    open val creationDate: LocalDateTime?,
     open val startDate: LocalDateTime,
     open val lastDate: LocalDateTime?,
     open val repeatCount: Int = DEFAULT_REPEAT_COUNT,
@@ -81,6 +87,7 @@ sealed class Scheduler(
     data class OneShot(
         override val hour: Int,
         override val minute: Int,
+        override val creationDate: LocalDateTime?,
         override val startDate: LocalDateTime,
         override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
@@ -88,12 +95,13 @@ sealed class Scheduler(
         override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT,
         val removeScheduled: Boolean = REMOVE_SCHEDULED
     ) : Scheduler(
-        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
+        hour, minute, creationDate, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
     )
 
     data class Weekly(
         override val hour: Int,
         override val minute: Int,
+        override val creationDate: LocalDateTime?,
         override val startDate: LocalDateTime,
         val daysOfWeek: List<DayOfWeek>,
         override val lastDate: LocalDateTime?,
@@ -101,12 +109,13 @@ sealed class Scheduler(
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
         override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT
     ) : Scheduler(
-        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
+        hour, minute, creationDate, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
     )
 
     data class Monthly(
         override val hour: Int,
         override val minute: Int,
+        override val creationDate: LocalDateTime?,
         override val startDate: LocalDateTime,
         val dayOfMonth: Int,
         override val lastDate: LocalDateTime?,
@@ -114,7 +123,7 @@ sealed class Scheduler(
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
         override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT
     ) : Scheduler(
-        hour, minute, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
+        hour, minute, creationDate, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
     )
 
     companion object {

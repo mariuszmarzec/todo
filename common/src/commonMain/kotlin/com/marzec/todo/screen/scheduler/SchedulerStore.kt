@@ -16,6 +16,7 @@ import kotlinx.datetime.LocalDateTime
 data class SchedulerState(
     val hour: Int = 7,
     val minute: Int = 0,
+    val creationDate: LocalDateTime? = currentTime(),
     override val date: LocalDateTime = currentTime(),
     val repeatTimes: Boolean = false,
     val repeatCount: Int = 1,
@@ -34,6 +35,7 @@ data class SchedulerState(
             SchedulerState(
                 hour = scheduler.hour,
                 minute = scheduler.minute,
+                creationDate = scheduler.creationDate ?: currentTime(),
                 date = scheduler.startDate,
                 repeatCount = scheduler.repeatCount,
                 repeatInEveryPeriod = scheduler.repeatInEveryPeriod,
@@ -71,16 +73,18 @@ class SchedulerStore(
     fun onSaveButtonClick() = sideEffectIntent {
         val scheduler = when (state.type) {
             SchedulerType.OneShot -> Scheduler.OneShot(
-                state.hour,
-                state.minute,
-                state.date,
+                hour = state.hour,
+                minute = state.minute,
+                creationDate = state.creationDate,
+                startDate = state.date,
                 lastDate = null
             )
 
             SchedulerType.Weekly -> Scheduler.Weekly(
-                state.hour,
-                state.minute,
-                state.date,
+                hour = state.hour,
+                minute = state.minute,
+                creationDate = state.creationDate,
+                startDate = state.date,
                 lastDate = null,
                 daysOfWeek = state.daysOfWeek,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
@@ -88,9 +92,10 @@ class SchedulerStore(
             )
 
             SchedulerType.Monthly -> Scheduler.Monthly(
-                state.hour,
-                state.minute,
-                state.date,
+                hour = state.hour,
+                minute = state.minute,
+                creationDate = state.creationDate,
+                startDate = state.date,
                 lastDate = null,
                 dayOfMonth = state.dayOfMonth,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
