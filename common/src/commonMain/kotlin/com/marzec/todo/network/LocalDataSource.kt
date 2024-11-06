@@ -8,7 +8,6 @@ import com.marzec.extensions.replaceIf
 import com.marzec.locker.Locker
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
-import com.marzec.time.withStartOfDay
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.TaskDto
@@ -261,7 +260,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
         private val schedulerChecker = SchedulerChecker(
             isInStartWindow = { creationTime: LocalDateTime, today: LocalDateTime ->
-                lastDateIsNotToday() && creationTime <= today
+                todayIsGreaterThanLastDay(today) && creationTime <= today
             },
             creationTimeFeatureEnabled = false
         )
@@ -271,7 +270,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                 val scheduler = task.scheduler?.toDomain()
                 val today = currentTime().toJavaLocalDateTime()
                 if (scheduler != null) {
-                    var highestLastDate: LocalDateTime? = findFirstHighestLastDate(today, scheduler)
+                    val highestLastDate = findFirstHighestLastDate(today, scheduler)
 
                     if (highestLastDate != null) {
                         copyTask(task)
@@ -300,7 +299,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
 
             var iterator = today
             var highestLastDate: LocalDateTime? = null
-            while (iterator >= minDateForSchedulerCheck) {
+            while (iterator > minDateForSchedulerCheck) {
                 if (schedulerChecker.shouldBeCreated(scheduler, iterator)) {
                     highestLastDate = iterator
                     break
@@ -334,10 +333,9 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             return newTask
         }
 
-        private fun Scheduler.lastDateIsNotToday(): Boolean {
-            val todayLocalDate = currentTime().toJavaLocalDateTime().toLocalDate()
-            return lastDate?.withStartOfDay()
-                ?.let { it.toJavaLocalDateTime().toLocalDate() != todayLocalDate }
+        private fun Scheduler.todayIsGreaterThanLastDay(today: LocalDateTime): Boolean {
+            val todayLocalDate = today.toLocalDate()
+            return lastDate?.let { todayLocalDate > it.toJavaLocalDateTime().toLocalDate() }
                 ?: true
         }
 
