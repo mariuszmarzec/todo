@@ -30,6 +30,7 @@ import com.marzec.todo.model.Scheduler
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.view.ActionBarProvider
+import kotlinx.datetime.LocalDateTime
 
 @Composable
 fun AddNewTaskScreen(
@@ -149,21 +150,31 @@ private val Scheduler.description: String
     get() = when (this) {
         is Scheduler.OneShot -> {
             this::class.simpleName.orEmpty() +
-                    String.format(" at %02d:%02d", hour, minute) +
-                    " from ${startDate.formatDate("dd-MM-yyyy")}"
+                    formatHour() +
+                    " from ${startDate.formatSimple()}"
         }
         is Scheduler.Weekly -> {
             this::class.simpleName.orEmpty() +
-                    String.format(" at %02d:%02d", hour, minute) +
-                    " from ${startDate.formatDate("dd-MM-yyyy")}" +
-                    " days: $daysOfWeek" +
-                    " repeat: $repeatCount times in every $repeatInEveryPeriod week"
+                    formatHour() +
+                    " from ${startDate.formatSimple()}" +
+                    " days: $daysOfWeek\n" +
+                    " repeat: $repeatCount times in every $repeatInEveryPeriod week" +
+                    formatLastDate()
         }
         is Scheduler.Monthly -> {
             this::class.simpleName.orEmpty() +
-                    String.format(" at %02d:%02d", hour, minute) +
-                    " from ${startDate.formatDate("dd-MM-yyyy")}" +
-                    " day of month $dayOfMonth" +
-                    " repeat: $repeatCount times in every $repeatInEveryPeriod month"
+                    formatHour() +
+                    " from ${startDate.formatSimple()}" +
+                    " day of month $dayOfMonth\n" +
+                    " repeat: $repeatCount times in every $repeatInEveryPeriod month" +
+                    formatLastDate()
         }
     }
+
+private fun Scheduler.formatLastDate() =
+    lastDate?.let { " last date: ${it.formatSimple()}" }.orEmpty()
+
+private fun Scheduler.formatHour() =
+    String.format(" at %02d:%02d", hour, minute)
+
+private fun LocalDateTime.formatSimple() = formatDate("dd-MM-yyyy")

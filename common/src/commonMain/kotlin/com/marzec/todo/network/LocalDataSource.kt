@@ -291,9 +291,9 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             today: LocalDateTime,
             scheduler: Scheduler
         ): LocalDateTime? {
-            val pastDate: LocalDateTime = today.plusWeeks(-2)
+            val pastDateDeadline: LocalDateTime = today.plusMonths(-1)
             val minDateForSchedulerCheck = listOf(
-                pastDate,
+                pastDateDeadline,
                 scheduler.lastDate?.toJavaLocalDateTime() ?: LocalDateTime.MIN,
                 scheduler.startDate.toJavaLocalDateTime()
             ).max()
