@@ -2,6 +2,8 @@ package com.marzec.screen.featuretoggle
 
 import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
+import com.marzec.extensions.asInstance
+import com.marzec.model.FeatureToggle
 import com.marzec.model.toNullableUpdate
 import com.marzec.model.toUpdate
 import com.marzec.mvi.IntentContext
@@ -15,14 +17,12 @@ import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.preferences.StateCache
-import com.marzec.todo.extensions.asInstance
+import com.marzec.repository.FeatureToggleRepository
 import com.marzec.todo.model.Scheduler
-import com.marzec.todo.model.Task
-import com.marzec.todo.model.UpdateTask
+import com.marzec.todo.model.FeatureToggle
+import com.marzec.todo.model.UpdateFeatureToggle
 import com.marzec.todo.navigation.TodoDestination
-import com.marzec.todo.repository.TodoRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filterNotNull
 
 class FeatureToggleStore(
     scope: CoroutineScope,
@@ -30,18 +30,18 @@ class FeatureToggleStore(
     private val cacheKey: String,
     private val stateCache: StateCache,
     private val initialState: State<FeatureToggleState>,
-    private val todoRepository: TodoRepository,
+    private val repository: FeatureToggleRepository,
 ) : Store4Impl<State<FeatureToggleState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
     fun initialLoad() = (stateCache.get(cacheKey) ?: initialState)
         .asInstance<State.Loading<FeatureToggleState>> {
-            intent<Content<Task>>("load") {
+            intent<Content<FeatureToggle>>("load") {
                 onTrigger {
                     state.ifDataAvailable(blockOnLoading = false) {
-                        taskId?.let {
-                            todoRepository.observeTask(it)
+                        FeatureToggleId?.let {
+                            repository.observeFeatureToggle(it)
                         }
                     }
                 }
@@ -50,14 +50,14 @@ class FeatureToggleStore(
                         state.reduceDataWithContent(
                             result = resultNonNull(),
                             defaultData = FeatureToggleState.default(
-                                taskId = 0,
-                                parentTaskId = null
+                                FeatureToggleId = 0,
+                                parentFeatureToggleId = null
                             )
                         ) { result ->
                             copy(
-                                taskId = result.data.id,
-                                task = result.data,
-                                parentTaskId = result.data.parentTaskId,
+                                FeatureToggleId = result.data.id,
+                                FeatureToggle = result.data,
+                                parentFeatureToggleId = result.data.parentFeatureToggleId,
                                 description = result.data.description,
                                 priority = result.data.priority,
                                 isToDo = result.data.isToDo,
@@ -72,41 +72,37 @@ class FeatureToggleStore(
                 }
             }
         }
-
-    fun onSchedulerRequest() = intent("onSchedulerRequest") {
-        onTrigger {
-            navigationStore.observe<Scheduler>(REQUEST_KEY_SCHEDULER)?.filterNotNull()
-        }
-
+    
+    fun onNameChanged(name: String) = intent<Unit> {
         reducer {
-            state.reduceData { copy(scheduler = resultNonNull()) }
+            state.reduceData { copy(name = name) }
         }
     }
 
-    fun onDescriptionChanged(description: String) = intent<Unit> {
+    fun onValueChanged(value: String) = intent<Unit> {
         reducer {
-            state.reduceData { copy(description = description) }
+            state.reduceData { copy(value = value) }
         }
     }
 
     fun FeatureToggle() = intent<Content<Unit>>("FeatureToggle") {
         onTrigger {
             state.ifDataAvailable {
-                if (task != null) {
-                    todoRepository.updateTask(
-                        taskId = task.id,
-                        UpdateTask(
-                            description = description.toUpdate(task.description),
-                            parentTaskId = parentTaskId.toNullableUpdate(task.parentTaskId),
-                            priority = priority.toUpdate(task.priority),
-                            isToDo = isToDo.toUpdate(task.isToDo),
-                            scheduler = schedulerWithOptions.toNullableUpdate(task.scheduler)
+                if (FeatureToggle != null) {
+                    repository.updateFeatureToggle(
+                        FeatureToggleId = FeatureToggle.id,
+                        UpdateFeatureToggle(
+                            description = description.toUpdate(FeatureToggle.description),
+                            parentFeatureToggleId = parentFeatureToggleId.toNullableUpdate(FeatureToggle.parentFeatureToggleId),
+                            priority = priority.toUpdate(FeatureToggle.priority),
+                            isToDo = isToDo.toUpdate(FeatureToggle.isToDo),
+                            scheduler = schedulerWithOptions.toNullableUpdate(FeatureToggle.scheduler)
                         )
                     )
                 } else {
-                    todoRepository.FeatureToggle(
+                    repository.FeatureToggle(
                         description,
-                        parentTaskId,
+                        parentFeatureToggleId,
                         highestPriorityAsDefault,
                         schedulerWithOptions
                     )
@@ -127,12 +123,12 @@ class FeatureToggleStore(
         }
     }
 
-    fun addManyTasks() = intent<Content<Unit>>("addManyTasks") {
+    fun addManyFeatureToggles() = intent<Content<Unit>>("addManyFeatureToggles") {
         onTrigger {
             state.ifDataAvailable {
-                todoRepository.FeatureToggles(
+                repository.FeatureToggles(
                     highestPriorityAsDefault = highestPriorityAsDefault,
-                    parentTaskId = parentTaskId,
+                    parentFeatureToggleId = parentFeatureToggleId,
                     descriptions = description.split("\n").let {
                         if (highestPriorityAsDefault) {
                             it.reversed()
@@ -158,25 +154,14 @@ class FeatureToggleStore(
         }
     }
 
-    fun toggleHighestPriority() = intent<Unit> {
-        reducer {
-            state.reduceData { copy(highestPriorityAsDefault = !highestPriorityAsDefault) }
-        }
-    }
-
-    fun toggleRemoveAfterSchedule() = intent<Unit> {
-        reducer {
-            state.reduceData { copy(removeAfterSchedule = !removeAfterSchedule) }
-        }
-    }
 
     private suspend fun IntentContext<State<FeatureToggleState>, Content<Unit>>.navigateOutAfterCall() {
         result?.ifDataSuspend {
             state.ifDataAvailable(blockOnLoading = false) {
-                val taskIdToShow = taskId ?: parentTaskId
+                val FeatureToggleIdToShow = FeatureToggleId ?: parentFeatureToggleId
                 when {
-                    taskIdToShow != null -> {
-                        val destination = TodoDestination.TaskDetails(taskIdToShow)
+                    FeatureToggleIdToShow != null -> {
+                        val destination = TodoDestination.FeatureToggleDetails(FeatureToggleIdToShow)
                         navigationStore.next(
                             NavigationAction(
                                 destination = destination,
@@ -201,23 +186,4 @@ class FeatureToggleStore(
     override suspend fun onNewState(newState: State<FeatureToggleState>) {
         stateCache.set(cacheKey, newState)
     }
-
-    fun onScheduleButtonClick() = sideEffectIntent {
-        state.ifDataAvailable {
-            navigationStore.next(
-                NavigationAction(TodoDestination.Schedule(scheduler)),
-                requestId = REQUEST_KEY_SCHEDULER
-            )
-        }
-    }
-
-    fun onRemoveSchedulerButtonClick() = intent<Unit> {
-        reducer {
-            state.reduceData {
-                copy(scheduler = null)
-            }
-        }
-    }
 }
-
-const val REQUEST_KEY_SCHEDULER = 1

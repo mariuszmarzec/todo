@@ -7,4 +7,4 @@ import com.marzec.model.FeatureToggle
 import com.marzec.model.NewFeatureToggle
 import com.marzec.model.UpdateFeatureToggle
 
-typealias TodoCrudRepository = CrudRepository<Int, FeatureToggle, NewFeatureToggle, UpdateFeatureToggle, FeatureToggleDto, NewFeatureToggleDto, UpdateFeatureToggleDto>
+typealias FeatureToggleRepository = CrudRepository<Int, FeatureToggle, NewFeatureToggle, UpdateFeatureToggle, FeatureToggleDto, NewFeatureToggleDto, UpdateFeatureToggleDto>
