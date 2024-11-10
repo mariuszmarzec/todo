@@ -1,0 +1,28 @@
+package com.marzec.model
+
+import com.marzec.dto.FeatureToggleDto
+import com.marzec.dto.UpdateFeatureToggleDto
+
+data class FeatureToggle(
+    val id: Int,
+    val name: String,
+    val value: String
+)
+
+data class NewFeatureToggle(
+    val name: String,
+    val value: String
+)
+
+data class UpdateFeatureToggle(
+    val name: String?,
+    val value: String?
+)
+
+fun FeatureToggle.toDto() = FeatureToggleDto(
+    id, name, value
+)
+
+fun UpdateFeatureToggle.toDto() = UpdateFeatureToggleDto(
+    name, value
+)
