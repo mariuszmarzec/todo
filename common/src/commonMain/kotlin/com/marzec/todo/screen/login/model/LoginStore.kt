@@ -1,7 +1,7 @@
 package com.marzec.todo.screen.login.model
 
 import com.marzec.content.Content
-import com.marzec.content.ifDataSuspend
+import com.marzec.model.FeatureToggle
 import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
@@ -12,8 +12,11 @@ import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.PopEntryTarget
+import com.marzec.navigation.next
 import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
+import com.marzec.screen.featuretoggle.FeatureToggles
+import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.navigation.TodoDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +28,8 @@ class LoginStore(
     private val stateCache: StateCache,
     private val cacheKey: String,
     initialState: State<LoginData>,
-    private val loginRepository: LoginRepository
+    private val loginRepository: LoginRepository,
+    private val featureTogglePickOptions: PickItemOptions<FeatureToggle>
 ) : Store4Impl<State<LoginData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
@@ -70,5 +74,9 @@ class LoginStore(
         reducer {
             state.reduceData { copy(password = password) }
         }
+    }
+
+    fun onFeatureFlagClicked() = sideEffectIntent {
+        navigationStore.next(FeatureToggles(featureTogglePickOptions))
     }
 }

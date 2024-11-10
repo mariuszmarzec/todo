@@ -3,7 +3,9 @@ package com.marzec.model
 import com.marzec.dto.FeatureToggleDto
 import com.marzec.dto.NewFeatureToggleDto
 import com.marzec.dto.UpdateFeatureToggleDto
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class FeatureToggle(
     val id: Int,
     val name: String,

@@ -19,8 +19,14 @@ import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
+import com.marzec.dto.FeatureToggleDto
+import com.marzec.dto.NewFeatureToggleDto
+import com.marzec.dto.UpdateFeatureToggleDto
 import com.marzec.dto.toDomain
 import com.marzec.logger.Logger
+import com.marzec.model.FeatureToggle
+import com.marzec.model.NewFeatureToggle
+import com.marzec.model.UpdateFeatureToggle
 import com.marzec.model.toDto
 import com.marzec.mvi.Store
 import com.marzec.mvi.toCachable
@@ -39,10 +45,13 @@ import com.marzec.screen.featuretoggle.FeatureToggleDetails
 import com.marzec.screen.featuretoggle.FeatureToggleScreen
 import com.marzec.screen.featuretoggle.FeatureToggleState
 import com.marzec.screen.featuretoggle.FeatureToggleStore
-import com.marzec.screen.pickitemscreen.PickItemData
+import com.marzec.screen.featuretoggle.FeatureToggles
+import com.marzec.screen.featuretoggle.featureTogglePickOptions
+import com.marzec.screen.featuretoggle.provideFeatureTogglesScreen
 import com.marzec.screen.pickitemscreen.PickItemDataStore
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
+import com.marzec.screen.pickitemscreen.providePickItemStore
 import com.marzec.todo.Api.Todo.FEATURE_TOGGLES
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
@@ -115,12 +124,37 @@ object DI {
 
     val updaterCoroutineScope = CoroutineScope(newSingleThreadContext("updater"))
 
+    val featureToggleRepository by lazy {
+        fileAndMemoryCacheCrudRepository<Int, FeatureToggle, NewFeatureToggle, UpdateFeatureToggle, FeatureToggleDto, NewFeatureToggleDto, UpdateFeatureToggleDto>(
+            dispatcher = ioDispatcher,
+            client = client,
+            updaterCoroutineScope = updaterCoroutineScope,
+            endpoint = FEATURE_TOGGLES,
+            fileCache = fileCache,
+            memoryCache = memoryCache,
+            isSameId = { it == id },
+            toDomain = { toDomain() },
+            createToDto = { toDto() },
+            updateToDto = { toDto() },
+        )
+    }
     val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
 
     fun router(
         destination: Destination
     ): @Composable (destination: Destination, cacheKey: String) -> Unit =
         when (destination) {
+            is FeatureToggles -> @Composable { destination, cacheKey ->
+                destination as FeatureToggles
+                provideFeatureTogglesScreen(
+                    provideActionBarProvider(),
+                    destination,
+                    cacheKey,
+                    navigationStore,
+                    stateCache
+                )
+            }
+
             is FeatureToggleDetails -> @Composable { destination, cacheKey ->
                 destination as FeatureToggleDetails
                 provideFeatureToggleScreen(destination, cacheKey)
@@ -183,18 +217,7 @@ object DI {
                 cacheKey = cacheKey,
                 stateCache = stateCache,
                 initialState = FeatureToggleState.initial(destination.id, destination.name, destination.value),
-                repository = fileAndMemoryCacheCrudRepository(
-                    dispatcher = ioDispatcher,
-                    client = client,
-                    updaterCoroutineScope = updaterCoroutineScope,
-                    endpoint = FEATURE_TOGGLES,
-                    fileCache = fileCache,
-                    memoryCache = memoryCache,
-                    isSameId = { it == id },
-                    toDomain = { toDomain() },
-                    createToDto = { toDto() },
-                    updateToDto = { toDto() },
-                ),
+                repository = featureToggleRepository,
             ),
             actionBarProvider = provideActionBarProvider()
         )
@@ -464,9 +487,15 @@ object DI {
     @Composable
     private fun provideLoginScreen(cacheKey: String) =
         LoginScreen(
-            loginStore = provideLoginStore(
+            actionBarProvider = provideActionBarProvider(),
+            store = provideLoginStore(
                 scope = rememberCoroutineScope(),
-                cacheKey = cacheKey
+                cacheKey = cacheKey,
+                featureTogglePickOptions(
+                    featureToggleRepository,
+                    navigationStore
+                )
+
             )
         )
 
@@ -485,14 +514,16 @@ object DI {
 
     fun provideLoginStore(
         scope: CoroutineScope,
-        cacheKey: String
+        cacheKey: String,
+        featureTogglePickOptions: PickItemOptions<FeatureToggle>
     ): LoginStore = LoginStore(
         scope = scope,
         navigationStore = navigationStore,
         loginRepository = loginRepository,
         stateCache = stateCache,
         cacheKey = cacheKey,
-        initialState = LoginData.INITIAL
+        initialState = LoginData.INITIAL,
+        featureTogglePickOptions = featureTogglePickOptions
     )
 
     val localDataSource by lazy {
@@ -544,16 +575,12 @@ object DI {
         options: PickItemOptions<ITEM>,
         scope: CoroutineScope,
         cacheKey: String
-    ): PickItemDataStore<ITEM> = PickItemDataStore(
+    ): PickItemDataStore<ITEM> = providePickItemStore(
         options = options,
         scope = scope,
         navigationStore = navigationStore,
         stateCache = stateCache,
-        initialState = PickItemData.initial(options),
-        cacheKey = cacheKey,
-        selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>(),
-        searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>(),
-        scrollDelegate = ScrollDelegateImpl<PickItemData<ITEM>>()
+        cacheKey = cacheKey
     )
 
     private fun provideScheduledOptions() = PickItemOptions(
@@ -611,7 +638,7 @@ object Api {
         fun removeTaskWithSubtask(taskId: Int, removeWithSubtasks: Boolean) =
             "$BASE/tasks/$taskId?removeWithSubtasks=$removeWithSubtasks"
 
-        val FEATURE_TOGGLES = "/fiteo/api/$CURRENT_API_VERSION/feature_toggles"
+        val FEATURE_TOGGLES = "$HOST/fiteo/api/$CURRENT_API_VERSION/feature_toggles"
     }
 
     object Headers {

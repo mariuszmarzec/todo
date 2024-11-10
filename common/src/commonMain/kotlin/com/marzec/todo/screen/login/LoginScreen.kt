@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import com.marzec.view.TextFieldStateful
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,17 +27,23 @@ import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.screen.login.model.LoginData
 import com.marzec.todo.screen.login.model.LoginStore
+import com.marzec.view.ActionBarProvider
+import com.marzec.view.TextFieldStateful
 
 @Composable
-fun LoginScreen(loginStore: LoginStore) {
+fun LoginScreen(
+    actionBarProvider: ActionBarProvider,
+    store: LoginStore
+) {
 
-    val state: State<LoginData> by loginStore.collectState()
+    val state: State<LoginData> by store.collectState()
 
     when (val state = state) {
         is State.Data -> {
             LoginScreen(
+                actionBarProvider = actionBarProvider,
                 login = state.data.login,
-                loginStore = loginStore,
+                store = store,
                 password = state.data.password,
                 error = ""
             )
@@ -44,8 +54,9 @@ fun LoginScreen(loginStore: LoginStore) {
         }
         is State.Error -> {
             LoginScreen(
+                actionBarProvider = actionBarProvider,
                 login = state.data?.login.orEmpty(),
-                loginStore = loginStore,
+                store = store,
                 password = state.data?.password.orEmpty(),
                 error = state.message
             )
@@ -55,39 +66,52 @@ fun LoginScreen(loginStore: LoginStore) {
 
 @Composable
 private fun LoginScreen(
+    actionBarProvider: ActionBarProvider,
     login: String,
-    loginStore: LoginStore,
+    store: LoginStore,
     password: String,
     error: String
 ) {
-    Column(
-        modifier = Modifier
-            .background(Color.White)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        Box(modifier = Modifier.padding(16.dp)) {
-            TextFieldStateful(login, {
-                loginStore.onLoginChanged(it)
-            })
-        }
-        Box(modifier = Modifier.padding(16.dp)) {
-            TextFieldStateful(password, {
-                loginStore.onPasswordChanged(it)
-            })
-        }
-        Row(horizontalArrangement = Arrangement.Center) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                TextButton({ loginStore.login() }) {
-                    Text("Login")
+    Scaffold(
+        topBar = {
+            actionBarProvider.provide {
+                IconButton({
+                    store.onFeatureFlagClicked()
+                }) {
+                    Icon(imageVector = Icons.Default.Settings, contentDescription = "Feature Toggle")
                 }
             }
         }
-        Spacer(Modifier.size(16.dp))
-        if (error.isNotEmpty()) {
-            Text(text = error, fontSize = 16.sp)
+    ) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Box(modifier = Modifier.padding(16.dp)) {
+                TextFieldStateful(login, {
+                    store.onLoginChanged(it)
+                })
+            }
+            Box(modifier = Modifier.padding(16.dp)) {
+                TextFieldStateful(password, {
+                    store.onPasswordChanged(it)
+                })
+            }
+            Row(horizontalArrangement = Arrangement.Center) {
+                Box(modifier = Modifier.padding(16.dp)) {
+                    TextButton({ store.login() }) {
+                        Text("Login")
+                    }
+                }
+            }
+            Spacer(Modifier.size(16.dp))
+            if (error.isNotEmpty()) {
+                Text(text = error, fontSize = 16.sp)
+            }
         }
     }
 }

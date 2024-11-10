@@ -3,8 +3,11 @@ package com.marzec.screen.pickitemscreen
 import androidx.compose.runtime.Composable
 import com.marzec.content.Content
 import com.marzec.delegate.ScrollDelegate
+import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegate
+import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegate
+import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.mvi.delegates
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
@@ -25,6 +28,24 @@ data class PickItemOptions<ITEM : Any>(
     val selected: Set<String> = emptySet(),
     val stringsToCompare: ((ITEM) -> List<String>)? = null,
     val groupByHeader: ((ITEM) -> String)? = null
+)
+
+fun <ITEM : Any> providePickItemStore(
+    navigationStore: NavigationStore,
+    options: PickItemOptions<ITEM>,
+    scope: CoroutineScope,
+    stateCache: StateCache,
+    cacheKey: String
+): PickItemDataStore<ITEM> = PickItemDataStore(
+    options = options,
+    scope = scope,
+    navigationStore = navigationStore,
+    stateCache = stateCache,
+    initialState = PickItemData.initial(options),
+    cacheKey = cacheKey,
+    selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>(),
+    searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>(),
+    scrollDelegate = ScrollDelegateImpl<PickItemData<ITEM>>()
 )
 
 class PickItemDataStore<ITEM : Any>(

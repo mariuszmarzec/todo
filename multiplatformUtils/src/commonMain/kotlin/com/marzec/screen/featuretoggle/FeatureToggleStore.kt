@@ -16,7 +16,6 @@ import com.marzec.preferences.StateCache
 import com.marzec.repository.FeatureToggleRepository
 import kotlinx.coroutines.CoroutineScope
 
-
 class FeatureToggleStore(
     scope: CoroutineScope,
     private val args: FeatureToggleDetails,
