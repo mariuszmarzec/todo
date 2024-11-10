@@ -19,7 +19,9 @@ import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
+import com.marzec.dto.toDomain
 import com.marzec.logger.Logger
+import com.marzec.model.toDto
 import com.marzec.mvi.Store
 import com.marzec.mvi.toCachable
 import com.marzec.navigation.Destination
@@ -32,10 +34,16 @@ import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
+import com.marzec.repository.fileAndMemoryCacheCrudRepository
+import com.marzec.screen.featuretoggle.FeatureToggleDetails
+import com.marzec.screen.featuretoggle.FeatureToggleScreen
+import com.marzec.screen.featuretoggle.FeatureToggleState
+import com.marzec.screen.featuretoggle.FeatureToggleStore
 import com.marzec.screen.pickitemscreen.PickItemData
 import com.marzec.screen.pickitemscreen.PickItemDataStore
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
+import com.marzec.todo.Api.Todo.FEATURE_TOGGLES
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -112,7 +120,12 @@ object DI {
     fun router(
         destination: Destination
     ): @Composable (destination: Destination, cacheKey: String) -> Unit =
-        when (destination as TodoDestination) {
+        when (destination) {
+            is FeatureToggleDetails -> @Composable { destination, cacheKey ->
+                destination as FeatureToggleDetails
+                provideFeatureToggleScreen(destination, cacheKey)
+            }
+
             is TodoDestination.AddNewTask -> @Composable { destination, cacheKey ->
                 destination as TodoDestination.AddNewTask
                 provideAddNewTaskScreen(
@@ -154,7 +167,38 @@ object DI {
             TodoDestination.Tasks -> @Composable { _, cacheKey ->
                 provideTasksScreen(cacheKey)
             }
+
+            else -> {
+                throw error("Unknown destination: $destination")
+            }
         }
+
+    @Composable
+    private fun provideFeatureToggleScreen(destination: FeatureToggleDetails, cacheKey: String) {
+        FeatureToggleScreen(
+            store = FeatureToggleStore(
+                rememberCoroutineScope(),
+                args = destination,
+                navigationStore = navigationStore,
+                cacheKey = cacheKey,
+                stateCache = stateCache,
+                initialState = FeatureToggleState.initial(destination.id, destination.name, destination.value),
+                repository = fileAndMemoryCacheCrudRepository(
+                    dispatcher = ioDispatcher,
+                    client = client,
+                    updaterCoroutineScope = updaterCoroutineScope,
+                    endpoint = FEATURE_TOGGLES,
+                    fileCache = fileCache,
+                    memoryCache = memoryCache,
+                    isSameId = { it == id },
+                    toDomain = { toDomain() },
+                    createToDto = { toDto() },
+                    updateToDto = { toDto() },
+                ),
+            ),
+            actionBarProvider = provideActionBarProvider()
+        )
+    }
 
     @Composable
     private fun provideTasksScreen(cacheKey: String) {
@@ -556,7 +600,8 @@ object Api {
     }
 
     object Todo {
-        val BASE = "$HOST/todo/api/1"
+        val CURRENT_API_VERSION = "1"
+        val BASE = "$HOST/todo/api/$CURRENT_API_VERSION"
 
         val TASKS = "$BASE/tasks"
         val ADD_TASKS = "$BASE/tasks"
@@ -565,6 +610,8 @@ object Api {
         fun copyTask(taskId: Int) = "$BASE/tasks/$taskId/copy"
         fun removeTaskWithSubtask(taskId: Int, removeWithSubtasks: Boolean) =
             "$BASE/tasks/$taskId?removeWithSubtasks=$removeWithSubtasks"
+
+        val FEATURE_TOGGLES = "/fiteo/api/$CURRENT_API_VERSION/feature_toggles"
     }
 
     object Headers {

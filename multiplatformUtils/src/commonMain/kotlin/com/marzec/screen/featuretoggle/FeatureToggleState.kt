@@ -1,11 +1,13 @@
 package com.marzec.screen.featuretoggle
 
+import com.marzec.model.FeatureToggle
 import com.marzec.mvi.State
 
 data class FeatureToggleState(
     val id: Int?,
     val name: String,
     val value: String,
+    val toggle: FeatureToggle? = null
 ) {
 
     companion object {

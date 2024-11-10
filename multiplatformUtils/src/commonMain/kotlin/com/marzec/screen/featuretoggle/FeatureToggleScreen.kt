@@ -13,10 +13,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.marzec.model.FeatureToggle
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
+import com.marzec.navigation.Destination
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.TextFieldStateful
+
+data class FeatureToggleDetails(
+    val id: Int? = null,
+    val name: String = "",
+    val value: String = ""
+) : Destination
 
 @Composable
 fun FeatureToggleScreen(
