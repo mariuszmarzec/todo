@@ -86,9 +86,10 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
 
     suspend fun update(
         id: ID, model: UPDATE, policy: RefreshPolicy = RefreshPolicy.SEPARATE_DISPATCHER
-    ): Flow<Content<Unit>> = asContentFlow {
+    ): Flow<Content<MODEL>> = asContentFlow {
         val updatedModel = dataSource.update(id, model.updateToDto()).toDomain()
         cacheSaver.updateItem(id, updatedModel)
+        updatedModel
     }.triggerUpdateIfNeeded(policy).flowOn(dispatcher)
 
     suspend fun create(
