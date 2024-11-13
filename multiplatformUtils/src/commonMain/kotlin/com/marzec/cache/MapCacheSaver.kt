@@ -11,7 +11,8 @@ class MapCacheSaver<TARGET : Any, NESTED : Any>(
 
     override suspend fun get(): TARGET? = cacheSaver.get()?.toTarget()
 
-    override suspend fun observeCached(): Flow<TARGET?> = cacheSaver.observeCached().map { it?.toTarget() }
+    override suspend fun observeCached(): Flow<TARGET?> =
+        cacheSaver.observeCached().map { it?.toTarget() }
 
     override suspend fun saveCache(data: TARGET) = cacheSaver.saveCache(data.toNested())
 
@@ -22,3 +23,12 @@ class MapCacheSaver<TARGET : Any, NESTED : Any>(
     }
 }
 
+fun <T : Any, R : Any> UpdatableCacheSaver<T>.map(
+    toNested: R.() -> T,
+    toTarget: T.() -> R,
+): UpdatableCacheSaver<R> =
+    MapCacheSaver(
+        cacheSaver = this,
+        toNested = toNested,
+        toTarget = toTarget
+    )

@@ -134,6 +134,7 @@ object DI {
             memoryCache = memoryCache,
             isSameId = { it == id },
             toDomain = { toDomain() },
+            toDto = { toDto() },
             createToDto = { toDto() },
             updateToDto = { toDto() },
         )
