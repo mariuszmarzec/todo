@@ -51,7 +51,7 @@ class RemoveTaskDelegateImpl<DATA : WithTasks<DATA>>(
                     it.description.length > 80 ||
                             it.description.urls().isNotEmpty()
                 } -> {
-                    dialogDelegate.showRemoveTaskDialog(ids)
+                    dialogDelegate.showRemoveDialog(ids)
                 }
                 else -> {
                     removeTaskDelegate.removeTask(ids)

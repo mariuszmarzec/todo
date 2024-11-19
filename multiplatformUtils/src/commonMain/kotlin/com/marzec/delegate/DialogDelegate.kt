@@ -11,7 +11,7 @@ import com.marzec.mvi.map
 interface DialogDelegate<ID_TYPE> {
     fun closeDialog()
     fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>)
-    fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String = "")
+    fun showRemoveDialog(idsToRemove: List<ID_TYPE>, id: String = "")
     fun onRemoveWithSubTasksChange()
     fun showSelectUrlDialog(urls: List<String>)
 }
@@ -25,7 +25,7 @@ class DialogDelegateImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> : StoreDeleg
     override fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>) =
         run(createShowRemoveDialogWithCheckBox<ID_TYPE, DATA>(idsToRemove).mapIntent())
 
-    override fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String) =
+    override fun showRemoveDialog(idsToRemove: List<ID_TYPE>, id: String) =
         run(createShowRemoveTaskDialog<ID_TYPE, DATA>(idsToRemove, id).mapIntent())
 
     override fun onRemoveWithSubTasksChange() =
@@ -88,7 +88,7 @@ class DialogDelegateSimpleImpl<ID_TYPE, DATA : WithDialog<ID_TYPE, DATA>> :
     override fun showRemoveDialogWithCheckBox(idsToRemove: List<ID_TYPE>) =
         run(createShowRemoveDialogWithCheckBox(idsToRemove))
 
-    override fun showRemoveTaskDialog(idsToRemove: List<ID_TYPE>, id: String) =
+    override fun showRemoveDialog(idsToRemove: List<ID_TYPE>, id: String) =
         run(createShowRemoveTaskDialog(idsToRemove, id))
 
     override fun onRemoveWithSubTasksChange() = run(intentOnRemoveWithSubTasksChange())

@@ -1,6 +1,7 @@
 package com.marzec.screen.featuretoggle
 
 import com.marzec.content.Content
+import com.marzec.delegate.DialogDelegate
 import com.marzec.extensions.asInstance
 import com.marzec.model.FeatureToggle
 import com.marzec.model.NewFeatureToggle
@@ -8,6 +9,8 @@ import com.marzec.model.UpdateFeatureToggle
 import com.marzec.model.toUpdate
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
+import com.marzec.mvi.delegates
+import com.marzec.mvi.postSideEffect
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
@@ -24,9 +27,14 @@ class FeatureToggleStore(
     private val stateCache: StateCache,
     private val initialState: State<FeatureToggleState>,
     private val repository: FeatureToggleRepository,
+    private val dialogDelegate: DialogDelegate<Int>
 ) : Store4Impl<State<FeatureToggleState>>(
     scope, stateCache.get(cacheKey) ?: initialState
-) {
+), DialogDelegate<Int> by dialogDelegate {
+
+    init {
+        delegates(dialogDelegate)
+    }
 
     fun initialLoad() = (stateCache.get(cacheKey) ?: initialState)
         .asInstance<State.Loading<FeatureToggleState>> {
@@ -51,7 +59,8 @@ class FeatureToggleStore(
                             copy(
                                 id = result.data.id,
                                 name = result.data.name,
-                                value = result.data.value
+                                value = result.data.value,
+                                toggle = result.data
                             )
                         }
                     } ?: state
@@ -78,8 +87,8 @@ class FeatureToggleStore(
                     repository.update(
                         id = toggle.id,
                         UpdateFeatureToggle(
-                            name = toggle.name.toUpdate(name),
-                            value = toggle.name.toUpdate(value)
+                            name = name.toUpdate(toggle.name),
+                            value = value.toUpdate(toggle.value)
                         )
                     )
                 } else {
@@ -90,17 +99,29 @@ class FeatureToggleStore(
             }
         }
 
-        cancelTrigger(runSideEffectAfterCancel = true) {
-            resultNonNull() is Content.Data
-        }
-
         reducer {
             state.reduceContentToLoadingWithNoChanges(resultNonNull())
         }
 
-        sideEffect {
+        postSideEffect {
             navigationStore.goBack()
         }
+    }
+
+    fun showRemoveDialog() = sideEffectIntent {
+        state.data?.id?.let {
+            dialogDelegate.showRemoveDialog(listOf(it))
+        }
+    }
+
+    fun remove(idsToRemove: List<Int>) = intent<Content<Unit>> {
+        onTrigger {
+            repository.remove(idsToRemove.first())
+        }
+
+        reducer { state.reduceContentToLoadingWithNoChanges(result) }
+
+        postSideEffect { navigationStore.goBack() }
     }
 
     override suspend fun onNewState(newState: State<FeatureToggleState>) {

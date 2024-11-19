@@ -219,6 +219,7 @@ object DI {
                 stateCache = stateCache,
                 initialState = FeatureToggleState.initial(destination.id, destination.name, destination.value),
                 repository = featureToggleRepository,
+                dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
             actionBarProvider = provideActionBarProvider()
         )
