@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import com.marzec.view.TextFieldStateful
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.collectState
+import com.marzec.todo.model.Scheduler
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.DatePickerView
 import com.marzec.view.SelectableRow
@@ -112,6 +116,34 @@ fun SchedulerScreen(
             }
         }
         Spacer(Modifier.height(16.dp))
+        if (state.additionalOptionsAvailable) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = state.highestPriorityAsDefault,
+                    onCheckedChange = { store.toggleHighestPriority() }
+                )
+                TextButton({ store.toggleHighestPriority() }) {
+                    Text("Highest priority as default")
+                }
+            }
+            if (state.type == SchedulerType.OneShot) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = state.removeAfterSchedule,
+                        onCheckedChange = { store.toggleRemoveAfterSchedule() }
+                    )
+                    TextButton({ store.toggleRemoveAfterSchedule() }) {
+                        Text("Remove after schedule")
+                    }
+                }
+            }
+        }
         Button({ store.onSaveButtonClick() }) {
             Text("Save")
         }
