@@ -7,6 +7,7 @@ import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
+import com.marzec.dto.NullableFieldDto
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
 import com.marzec.repository.CrudRepository
@@ -23,7 +24,13 @@ import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.model.toDomain
 import com.marzec.todo.model.toDto
 import com.marzec.todo.network.DataSource
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -231,6 +238,19 @@ class TodoRepository(
         key: String,
         networkCall: suspend () -> Content<T>
     ): Flow<Content<T>> = cacheCall(key, dispatcher, memoryCache, networkCall)
+
+    suspend fun schedule(tasks: List<Task>, scheduler: Scheduler): Flow<Content<Unit>> =
+        asContentWithListUpdate {
+            val scope = CoroutineScope(coroutineContext + dispatcher + SupervisorJob())
+            tasks.map {
+                scope.async {
+                    dataSource.update(
+                        id = it.id,
+                        update = UpdateTaskDto(scheduler = NullableFieldDto(scheduler.toDto()))
+                    )
+                }
+            }.map { it.await() }
+        }
 
     private fun asContentWithListUpdate(
         request: suspend () -> Unit

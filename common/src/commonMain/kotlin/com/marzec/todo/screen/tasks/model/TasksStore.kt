@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.content.Content
+import com.marzec.content.asContentFlow
 import com.marzec.content.ifFinished
 import com.marzec.delegate.SearchDelegate
 import com.marzec.mvi.delegates
@@ -17,8 +18,10 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
+import com.marzec.model.NullableField
 import com.marzec.mvi.Store4
 import com.marzec.mvi.reduceContentAsSideAction
+import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
@@ -26,9 +29,13 @@ import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.reorder.ReorderDelegate
 import com.marzec.todo.delegates.reorder.ReorderMode
+import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
+import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.merge
 
 class TasksStore(
     private val navigationStore: NavigationStore,
@@ -163,7 +170,46 @@ class TasksStore(
         }
     }
 
+    fun onScheduleSelectedClick() {
+        sideEffectIntent {
+            navigationStore.next(
+                NavigationAction(
+                    destination = TodoDestination.Schedule(
+                        scheduler = null,
+                        additionalOptionsAvailable = true
+                    )
+                ),
+                requestId = REQUEST_ID_SCHEDULE_SELECTED
+            )
+        }
+    }
+
+    fun onScheduleSelectedRequest() = intent("onScheduleSelectedRequest") {
+        onTrigger {
+            navigationStore.observe(REQUEST_ID_SCHEDULE_SELECTED)
+        }
+
+        sideEffect {
+            scheduleSelected(resultNonNull())
+        }
+    }
+
+    private fun scheduleSelected(scheduler: Scheduler) = intent<Content<Unit>> {
+        onTrigger {
+            state.ifDataAvailable {
+                tasks.filter { it.id in selected }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { todoRepository.schedule(it, scheduler) }
+            }
+        }
+
+        reducer {
+            state.reduceContentToLoadingWithNoChanges(result)
+        }
+    }
+
     companion object {
         const val DIALOG_ID_REMOVE_MULTIPLE_TASKS = "DIALOG_ID_REMOVE_MULTIPLE_TASKS"
+        const val REQUEST_ID_SCHEDULE_SELECTED = 7891
     }
 }

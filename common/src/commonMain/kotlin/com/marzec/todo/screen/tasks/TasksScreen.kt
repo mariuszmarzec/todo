@@ -43,6 +43,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
 
     val state: State<TasksScreenState> by store.collectState {
         store.loadList()
+        store.onScheduleSelectedRequest()
     }
 
     val listState = rememberScrollState(store)
@@ -136,6 +137,9 @@ private fun TaskScreenData(
                 },
                 onAllSelectClicked = {
                     store.onAllSelectClicked()
+                },
+                onScheduleClick = {
+                    store.onScheduleSelectedClick()
                 }
             )
         }

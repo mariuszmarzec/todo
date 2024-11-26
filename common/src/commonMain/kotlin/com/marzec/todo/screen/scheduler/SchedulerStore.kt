@@ -53,7 +53,7 @@ data class SchedulerState(
                 removeAfterSchedule = (scheduler as? Scheduler.OneShot)?.removeScheduled ?: false,
                 highestPriorityAsDefault = scheduler.highestPriorityAsDefault
             )
-        } ?: INITIAL
+        } ?: INITIAL.copy(additionalOptionsAvailable = additionalOptionsAvailable)
     }
 }
 
