@@ -83,7 +83,9 @@ class SchedulerStore(
                 minute = state.minute,
                 creationDate = state.creationDate,
                 startDate = state.date,
-                lastDate = null
+                lastDate = null,
+                highestPriorityAsDefault = state.highestPriorityAsDefault,
+                removeScheduled = state.removeAfterSchedule
             )
 
             SchedulerType.Weekly -> Scheduler.Weekly(
@@ -94,7 +96,8 @@ class SchedulerStore(
                 lastDate = null,
                 daysOfWeek = state.daysOfWeek,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
-                repeatInEveryPeriod = state.repeatInEveryPeriod
+                repeatInEveryPeriod = state.repeatInEveryPeriod,
+                highestPriorityAsDefault = state.highestPriorityAsDefault
             )
 
             SchedulerType.Monthly -> Scheduler.Monthly(
@@ -105,7 +108,8 @@ class SchedulerStore(
                 lastDate = null,
                 dayOfMonth = state.dayOfMonth,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
-                repeatInEveryPeriod = state.repeatInEveryPeriod
+                repeatInEveryPeriod = state.repeatInEveryPeriod,
+                highestPriorityAsDefault = state.highestPriorityAsDefault
             )
         }
         navigationStore.goBack(scheduler)
