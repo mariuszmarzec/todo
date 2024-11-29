@@ -133,9 +133,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         update {
             taskToCopy = localData.tasks.firstOrNull { it.id == taskId }
         }
-        taskToCopy?.let {
-            create(it.toCreateTask())
-        }
+        taskToCopy?.let { copyTaskInternal(it) }
     }
 
     override suspend fun create(createTaskDto: CreateTaskDto): TaskDto = update {
@@ -256,6 +254,30 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
         fileCache.putTyped(cacheKey, localData)
     }
 
+    private suspend fun copyTaskInternal(task: TaskDto, ignorePriority: Boolean = true): TaskDto {
+        val createNewTask = task.toCreateTask(
+            ignorePriority = ignorePriority,
+            ignoreScheduler = true
+        ).copy(
+            highestPriorityAsDefault = task.scheduler?.highestPriorityAsDefault ?: false
+        )
+
+        val subTasks = localData.tasks
+            .filter { it.parentTaskId == task.id }
+            .map { copyTaskInternal(it, ignorePriority = false) }
+
+        val newTask = addNewTaskInternal(createNewTask)
+        update(newTask.id, UpdateTaskDto(isToDo = task.isToDo))
+
+        subTasks.forEach {
+            updateTaskInternal(
+                it.id,
+                UpdateTaskDto(parentTaskId = NullableFieldDto(newTask.id))
+            )
+        }
+        return newTask
+    }
+
     private inner class SchedulerDispatcher {
 
         private val schedulerChecker = SchedulerChecker(
@@ -273,7 +295,7 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                     val highestLastDate = findFirstHighestLastDate(today, scheduler)
 
                     if (highestLastDate != null) {
-                        copyTask(task)
+                        copyTaskInternal(task)
 
                         if ((scheduler as? Scheduler.OneShot)?.removeScheduled == true) {
                             val taskDtoToRemove = getTasksTree().firstInTreeOrNull { it.id == task.id }
@@ -307,30 +329,6 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
                 iterator = iterator.plusDays(-1)
             }
             return highestLastDate
-        }
-
-        private suspend fun copyTask(task: TaskDto, ignorePriority: Boolean = true): TaskDto {
-            val createNewTask = task.toCreateTask(
-                ignorePriority = ignorePriority,
-                ignoreScheduler = true
-            ).copy(
-                highestPriorityAsDefault = task.scheduler?.highestPriorityAsDefault ?: false
-            )
-
-            val subTasks = localData.tasks
-                .filter { it.parentTaskId == task.id }
-                .map { copyTask(it, ignorePriority = false) }
-
-            val newTask = addNewTaskInternal(createNewTask)
-            update(newTask.id, UpdateTaskDto(isToDo = task.isToDo))
-
-            subTasks.forEach {
-                updateTaskInternal(
-                    it.id,
-                    UpdateTaskDto(parentTaskId = NullableFieldDto(newTask.id))
-                )
-            }
-            return newTask
         }
 
         private fun Scheduler.todayIsGreaterThanLastDay(today: LocalDateTime): Boolean {
