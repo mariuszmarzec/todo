@@ -3,7 +3,6 @@ package com.marzec.view
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.res.ResourceLoader
 import com.marzec.cache.Cache
 import com.marzec.logger.Logger
 import io.ktor.client.HttpClient
@@ -27,8 +26,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.animatedimage.AnimatedImage
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
+import todo.multiplatformutils.generated.resources.Res
 import org.jetbrains.skia.Image as ImageUtil
 
 class ImageLoaderDesktop(
@@ -102,11 +103,11 @@ class ImageLoaderDesktop(
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
+    @OptIn(ExperimentalComposeUiApi::class, ExperimentalResourceApi::class)
     private suspend fun loadFromResource(path: String) {
         val file = File(path)
         val extension = file.extension
-        val loadedImage = ResourceLoader.Default.load(path).readBytes()
+        val loadedImage = Res.readBytes(path)
         require(loadedImage.isNotEmpty())
         require(extension.isNotEmpty())
         putToMemoryCache(path, Image(loadedImage, extension))

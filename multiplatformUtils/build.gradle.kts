@@ -24,6 +24,7 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
+                implementation(compose.components.resources)
                 api(libs.kotlinStdlib)
                 api(libs.coroutineCore)
                 api(libs.ktorClient)
