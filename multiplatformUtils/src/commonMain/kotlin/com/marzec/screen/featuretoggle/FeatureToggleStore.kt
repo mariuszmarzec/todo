@@ -49,7 +49,7 @@ class FeatureToggleStore(
                 }
                 reducer {
                     state.reduceWithResult(
-                        result = resultNonNull()
+                        result = result
                     ) { result ->
                         copy(
                             id = result.data.id,
