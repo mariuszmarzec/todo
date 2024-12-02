@@ -1,12 +1,11 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.content.Content
-import com.marzec.content.asContentFlow
 import com.marzec.content.ifFinished
 import com.marzec.delegate.SearchDelegate
 import com.marzec.mvi.delegates
 import com.marzec.mvi.State
-import com.marzec.mvi.reduceDataWithContent
+import com.marzec.mvi.reduceWithResult
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
@@ -18,7 +17,6 @@ import com.marzec.delegate.DialogDelegate
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.ScrollDelegate
 import com.marzec.delegate.SelectionDelegate
-import com.marzec.model.NullableField
 import com.marzec.mvi.Store4
 import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
@@ -31,11 +29,8 @@ import com.marzec.todo.delegates.reorder.ReorderDelegate
 import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
-import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.merge
 
 class TasksStore(
     private val navigationStore: NavigationStore,
@@ -84,7 +79,7 @@ class TasksStore(
         }
 
         reducer {
-            state.reduceDataWithContent(resultNonNull(), TasksScreenState.emptyData()) { result ->
+            state.reduceWithResult(resultNonNull(), TasksScreenState.emptyData()) { result ->
                 val taskIds = result.data.map { it.id }
                 val tasks = result.data.sortedWith(
                     compareByDescending(Task::priority).thenBy(

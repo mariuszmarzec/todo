@@ -14,6 +14,7 @@ import com.marzec.mvi.postSideEffect
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceDataWithContent
+import com.marzec.mvi.reduceWithResult
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.StateCache
 import com.marzec.repository.FeatureToggleRepository
@@ -47,23 +48,16 @@ class FeatureToggleStore(
                     }
                 }
                 reducer {
-                    result?.let {
-                        state.reduceDataWithContent(
-                            result = resultNonNull(),
-                            defaultData = FeatureToggleState.new(
-                                id = args.id,
-                                name = args.name,
-                                value = args.value
-                            )
-                        ) { result ->
-                            copy(
-                                id = result.data.id,
-                                name = result.data.name,
-                                value = result.data.value,
-                                toggle = result.data
-                            )
-                        }
-                    } ?: state
+                    state.reduceWithResult(
+                        result = resultNonNull()
+                    ) { result ->
+                        copy(
+                            id = result.data.id,
+                            name = result.data.name,
+                            value = result.data.value,
+                            toggle = result.data
+                        )
+                    }
                 }
             }
         }
