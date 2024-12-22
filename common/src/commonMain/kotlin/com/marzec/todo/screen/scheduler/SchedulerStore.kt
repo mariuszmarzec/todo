@@ -23,15 +23,18 @@ data class SchedulerState(
     val repeatInEveryPeriod: Int = 1,
     val type: SchedulerType = SchedulerType.OneShot,
     val daysOfWeek: List<DayOfWeek> = emptyList(),
-    val dayOfMonth: Int = 1
+    val dayOfMonth: Int = 1,
+    val additionalOptionsAvailable: Boolean = false,
+    val removeAfterSchedule: Boolean = false,
+    val highestPriorityAsDefault: Boolean = false
 ) : WithDate<SchedulerState> {
 
     override fun copyWithDate(date: LocalDateTime): SchedulerState = copy(date = date)
-    
+
     companion object {
         val INITIAL = SchedulerState()
 
-        fun from(scheduler: Scheduler?) = scheduler?.let {
+        fun from(scheduler: Scheduler?, additionalOptionsAvailable: Boolean) = scheduler?.let {
             SchedulerState(
                 hour = scheduler.hour,
                 minute = scheduler.minute,
@@ -45,9 +48,12 @@ data class SchedulerState(
                     is Scheduler.Weekly -> SchedulerType.Weekly
                 },
                 daysOfWeek = (scheduler as? Scheduler.Weekly)?.daysOfWeek ?: emptyList(),
-                dayOfMonth = (scheduler as? Scheduler.Monthly)?.dayOfMonth ?: 1
+                dayOfMonth = (scheduler as? Scheduler.Monthly)?.dayOfMonth ?: 1,
+                additionalOptionsAvailable = additionalOptionsAvailable,
+                removeAfterSchedule = (scheduler as? Scheduler.OneShot)?.removeScheduled ?: false,
+                highestPriorityAsDefault = scheduler.highestPriorityAsDefault
             )
-        } ?: INITIAL
+        } ?: INITIAL.copy(additionalOptionsAvailable = additionalOptionsAvailable)
     }
 }
 
@@ -77,7 +83,9 @@ class SchedulerStore(
                 minute = state.minute,
                 creationDate = state.creationDate,
                 startDate = state.date,
-                lastDate = null
+                lastDate = null,
+                highestPriorityAsDefault = state.highestPriorityAsDefault,
+                removeScheduled = state.removeAfterSchedule
             )
 
             SchedulerType.Weekly -> Scheduler.Weekly(
@@ -88,7 +96,8 @@ class SchedulerStore(
                 lastDate = null,
                 daysOfWeek = state.daysOfWeek,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
-                repeatInEveryPeriod = state.repeatInEveryPeriod
+                repeatInEveryPeriod = state.repeatInEveryPeriod,
+                highestPriorityAsDefault = state.highestPriorityAsDefault
             )
 
             SchedulerType.Monthly -> Scheduler.Monthly(
@@ -99,7 +108,8 @@ class SchedulerStore(
                 lastDate = null,
                 dayOfMonth = state.dayOfMonth,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
-                repeatInEveryPeriod = state.repeatInEveryPeriod
+                repeatInEveryPeriod = state.repeatInEveryPeriod,
+                highestPriorityAsDefault = state.highestPriorityAsDefault
             )
         }
         navigationStore.goBack(scheduler)
@@ -140,4 +150,10 @@ class SchedulerStore(
     fun onDayOfMonthChanged(dayOfMonth: Int) = reducerIntent {
         state.copy(dayOfMonth = dayOfMonth)
     }
+
+    fun toggleHighestPriority() =
+        reducerIntent { state.copy(highestPriorityAsDefault = !state.highestPriorityAsDefault) }
+
+    fun toggleRemoveAfterSchedule() =
+        reducerIntent { state.copy(removeAfterSchedule = !state.removeAfterSchedule) }
 }

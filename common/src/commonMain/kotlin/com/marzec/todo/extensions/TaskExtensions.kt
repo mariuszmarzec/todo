@@ -16,7 +16,7 @@ val Task.descriptionWithProgress: String
 
 val Task.subDescription: String
     get() = subTasks
-        .firstOrNull()
+        .firstOrNull { it.isToDo }
         ?.description
         ?.lines()
         ?.first()?.takeIf { it != it.urls().firstOrNull() } ?: ""

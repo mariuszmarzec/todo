@@ -9,7 +9,7 @@ import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
 import com.marzec.mvi.reduceData
-import com.marzec.mvi.reduceDataWithContent
+import com.marzec.mvi.reduceWithResult
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
@@ -47,7 +47,7 @@ class AddNewTaskStore(
                 }
                 reducer {
                     result?.let {
-                        state.reduceDataWithContent(
+                        state.reduceWithResult(
                             result = resultNonNull(),
                             defaultData = AddNewTaskState.default(
                                 taskId = 0,

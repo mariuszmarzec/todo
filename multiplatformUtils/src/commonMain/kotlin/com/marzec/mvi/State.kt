@@ -29,20 +29,22 @@ fun <T> State<T>.reduceData(
         is State.Error -> copy(this.data?.reducer())
     }
 
-fun <T, R> State<T>.reduceDataWithContent(
-    result: Content<R>,
-    defaultData: T,
+fun <T, R> State<T>.reduceWithResult(
+    result: Content<R>?,
+    defaultData: T? = null,
     reducer: T.(Content.Data<R>) -> T
 ): State<T> =
     when (result) {
         is Content.Data -> {
-            State.Data((this.data ?: defaultData).reducer(result))
+            State.Data((this.data ?: defaultData ?: throw IllegalStateException("State data is null")).reducer(result))
         }
         is Content.Loading -> State.Loading(data)
         is Content.Error -> State.Error(
             data,
             result.exception.message.orEmpty()
         )
+
+        else -> this
     }
 
 fun <T, R> State<T>.reduceDataWithContent(

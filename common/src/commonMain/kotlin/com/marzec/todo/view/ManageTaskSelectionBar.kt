@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +30,8 @@ fun ManageTaskSelectionBar(
     onRemoveClick: () -> Unit,
     onRemoveDoneTasksClick: (() -> Unit)? = null,
     onAllSelectClicked: () -> Unit,
-    onUnpinSubtasksClick: (() -> Unit)? = null
+    onUnpinSubtasksClick: (() -> Unit)? = null,
+    onScheduleClick: (() -> Unit)? = null
 ) {
     val subTasksCount = tasks.size
     val selectedCount = selected.count()
@@ -82,6 +84,16 @@ fun ManageTaskSelectionBar(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Unpin all"
+                        )
+                    }
+                }
+                onScheduleClick?.let {
+                    IconButton({
+                        onScheduleClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Schedule selected"
                         )
                     }
                 }

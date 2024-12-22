@@ -10,6 +10,7 @@ import com.marzec.cache.ListCacheSaver
 import com.marzec.cache.ManyItemsCacheSaver
 import com.marzec.cache.MemoryCacheSaver
 import com.marzec.cache.atFirstPositionInserter
+import com.marzec.cache.map
 import com.marzec.cache.toReversed
 import com.marzec.cache.withInserter
 import com.marzec.content.Content
@@ -60,22 +61,22 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
         id: ID,
         networkCall: suspend () -> Content<MODEL>,
     ): Flow<Content<MODEL>> = GetWithCacheCall(
-            dispatcher = dispatcher,
-            cacheSaver = object : CacheSaver<MODEL> {
-                override suspend fun get(): MODEL? {
-                    return cacheSaver.getById(id)
-                }
+        dispatcher = dispatcher,
+        cacheSaver = object : CacheSaver<MODEL> {
+            override suspend fun get(): MODEL? {
+                return cacheSaver.getById(id)
+            }
 
-                override suspend fun observeCached(): Flow<MODEL?> {
-                    return cacheSaver.observeCachedById(id)
-                }
+            override suspend fun observeCached(): Flow<MODEL?> {
+                return cacheSaver.observeCachedById(id)
+            }
 
-                override suspend fun saveCache(data: MODEL) {
-                    cacheSaver.updateItem(id, data)
-                }
-            },
-            call = networkCall
-        ).run()
+            override suspend fun saveCache(data: MODEL) {
+                cacheSaver.updateItem(id, data)
+            }
+        },
+        call = networkCall
+    ).run()
 
     suspend fun remove(
         id: ID, policy: RefreshPolicy = RefreshPolicy.SEPARATE_DISPATCHER
@@ -141,6 +142,7 @@ inline fun <
     reversed: Boolean = false,
     noinline isSameId: MODEL.(id: ID) -> Boolean,
     noinline toDomain: MODEL_DTO.() -> MODEL,
+    noinline toDto: MODEL.() -> MODEL_DTO,
     noinline createToDto: CREATE.() -> CREATE_DTO,
     noinline updateToDto: UPDATE.() -> UPDATE_DTO,
     noinline inserter: List<MODEL>?.(MODEL) -> MutableList<MODEL> = atFirstPositionInserter()
@@ -161,7 +163,10 @@ inline fun <
                     FileCacheSaver(
                         key = endpoint,
                         fileCache = fileCache,
-                        serializer = serializer(typeOf<List<MODEL>>()) as KSerializer<List<MODEL>>
+                        serializer = serializer(typeOf<List<MODEL_DTO>>()) as KSerializer<List<MODEL_DTO>>
+                    ).map(
+                        toNested = { map { it.toDto() } },
+                        toTarget = { map { it.toDomain() } }
                     )
                 )
             ),

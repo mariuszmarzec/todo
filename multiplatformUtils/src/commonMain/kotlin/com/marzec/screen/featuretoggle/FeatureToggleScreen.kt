@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -19,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.content.mapData
+import com.marzec.delegate.DialogState
 import com.marzec.model.FeatureToggle
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
@@ -31,8 +36,9 @@ import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.screen.pickitemscreen.providePickItemStore
 import com.marzec.view.ActionBarProvider
+import com.marzec.view.Dialog
+import com.marzec.view.DialogBox
 import com.marzec.view.TextFieldStateful
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.mapLatest
 
 data class FeatureToggles(val options: PickItemOptions<FeatureToggle>) : Destination
@@ -107,7 +113,18 @@ fun FeatureToggleScreen(
 
     Scaffold(
         topBar = {
-            actionBarProvider.provide()
+            actionBarProvider.provide {
+                state.data?.toggle?.let {
+                    IconButton({
+                        store.showRemoveDialog()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Remove"
+                        )
+                    }
+                }
+            }
         }
     ) {
         when (val state = state) {
@@ -139,6 +156,7 @@ fun FeatureToggleScreen(
                         }
                     }
                 }
+                ShowDialog(store, state)
             }
 
             is State.Loading -> {
@@ -149,5 +167,24 @@ fun FeatureToggleScreen(
                 Text(text = state.message)
             }
         }
+    }
+}
+
+@Composable
+private fun ShowDialog(store: FeatureToggleStore, state: State.Data<FeatureToggleState>) {
+    when (val dialog = state.data.dialog) {
+        is DialogState.RemoveDialog -> {
+            DialogBox(
+                Dialog.TwoOptionsDialog(
+                    title = "Remove selected tasks",
+                    message = "Do you really want to remove selected tasks?",
+                    confirmButton = "Yes",
+                    dismissButton = "No",
+                    onDismiss = { store.closeDialog() },
+                    onConfirm = { store.remove(dialog.idsToRemove) }
+                ))
+        }
+
+        else -> Unit
     }
 }

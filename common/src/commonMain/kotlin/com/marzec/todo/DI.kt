@@ -57,7 +57,6 @@ import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
-import com.marzec.todo.model.Scheduler
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CommonTodoDataSource
@@ -134,6 +133,7 @@ object DI {
             memoryCache = memoryCache,
             isSameId = { it == id },
             toDomain = { toDomain() },
+            toDto = { toDto() },
             createToDto = { toDto() },
             updateToDto = { toDto() },
         )
@@ -190,7 +190,7 @@ object DI {
 
             is TodoDestination.Schedule -> @Composable { destination, cacheKey ->
                 destination as TodoDestination.Schedule
-                provideSchedulerScreen(cacheKey, destination.scheduler)
+                provideSchedulerScreen(cacheKey, destination)
             }
 
             is TodoDestination.TaskDetails -> @Composable { destination, cacheKey ->
@@ -218,6 +218,7 @@ object DI {
                 stateCache = stateCache,
                 initialState = FeatureToggleState.initial(destination.id, destination.name, destination.value),
                 repository = featureToggleRepository,
+                dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
             actionBarProvider = provideActionBarProvider()
         )
@@ -381,12 +382,12 @@ object DI {
     )
 
     @Composable
-    private fun provideSchedulerScreen(cacheKey: String, scheduler: Scheduler?) {
+    private fun provideSchedulerScreen(cacheKey: String, destination: TodoDestination.Schedule) {
         SchedulerScreen(
             store = provideSchedulerStore(
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey,
-                scheduler = scheduler
+                destination = destination
             ),
             actionBarProvider = provideActionBarProvider()
         )
@@ -395,14 +396,14 @@ object DI {
     private fun provideSchedulerStore(
         scope: CoroutineScope,
         cacheKey: String,
-        scheduler: Scheduler?
+        destination: TodoDestination.Schedule
     ): SchedulerStore {
         return SchedulerStore(
             scope = scope,
             navigationStore = navigationStore,
             stateCache = stateCache,
             cacheKey = cacheKey,
-            initialState = SchedulerState.from(scheduler),
+            initialState = SchedulerState.from(destination.scheduler, destination.additionalOptionsAvailable),
             dateDelegate = DateDelegateImpl<SchedulerState>(
                 navigationStore = navigationStore,
                 datePickerDestinationFactory = { TodoDestination.DatePicker(it) }
