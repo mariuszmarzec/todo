@@ -48,7 +48,6 @@ class TaskDetailsStore(
     changePriorityDelegate: ChangePriorityDelegate,
     private val selectionDelegate: SelectionDelegate<Int>,
     private val searchDelegate: SearchDelegate,
-    private val scrollDelegate: ScrollDelegate,
     private val reorderDelegate: ReorderDelegate,
 ) : Store4Impl<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
@@ -56,7 +55,6 @@ class TaskDetailsStore(
     UrlDelegate by urlDelegate,
     DialogDelegate<Int> by dialogDelegate,
     SelectionDelegate<Int> by selectionDelegate,
-    ScrollDelegate by scrollDelegate,
     SearchDelegate by searchDelegate,
     ReorderDelegate by reorderDelegate {
 
@@ -71,7 +69,6 @@ class TaskDetailsStore(
             changePriorityDelegate,
             selectionDelegate,
             searchDelegate,
-            scrollDelegate,
             reorderDelegate
         )
     }
@@ -91,7 +88,6 @@ class TaskDetailsStore(
                         value = "",
                         focused = false
                     ),
-                    scrollListState = this?.scrollListState ?: ScrollListState.DEFAULT,
                     reorderMode = this?.reorderMode ?: ReorderMode.Disabled
                 )
             }

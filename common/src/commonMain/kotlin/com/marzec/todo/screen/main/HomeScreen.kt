@@ -5,21 +5,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.marzec.mvi.collectState
-import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
 import com.marzec.todo.DI
+import com.marzec.view.LocalScrollListStateMap
+import com.marzec.view.LocalScrollStateMap
 import com.marzec.view.NavigationHost
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {
 
-    Box(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.White)
+    CompositionLocalProvider(
+        LocalScrollStateMap provides DI.scrollStateCache,
+        LocalScrollListStateMap provides DI.listScrollStateCache
     ) {
-        NavigationHost(navigationStore, DI::router)
+        Box(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.White)
+        ) {
+            NavigationHost(navigationStore, DI::router)
+        }
     }
 }

@@ -46,14 +46,13 @@ import com.marzec.view.ActionBarProvider
 import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.delegate.DialogState
-import com.marzec.delegate.rememberScrollState
 import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.view.ManageTaskSelectionBar
 import com.marzec.todo.view.ShowCheck
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
-import com.marzec.view.SearchState
 import com.marzec.view.TextListItem
+import com.marzec.view.rememberForeverListState
 
 @Composable
 fun TaskDetailsScreen(
@@ -64,7 +63,7 @@ fun TaskDetailsScreen(
         store.loadDetails()
     }
 
-    val listState = rememberScrollState(store)
+    val listState = rememberForeverListState(store.identifier)
 
     val topBarColor = if (state.data?.task?.isToDo == false) {
         Color.LightGray

@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.marzec.cache.Cache
 import com.marzec.logger.Logger
-import fiteoapp.multiplatformutils.generated.resources.Res
+import todo.multiplatformutils.generated.resources.Res
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.call.receive

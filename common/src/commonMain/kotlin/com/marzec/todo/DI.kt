@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
+import com.marzec.cache.MemoryCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.datasource.CrudDataSource
@@ -32,6 +33,7 @@ import com.marzec.mvi.Store
 import com.marzec.mvi.toCachable
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
+import com.marzec.navigation.NavigationEntryCache
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
@@ -139,6 +141,13 @@ object DI {
         )
     }
     val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
+
+    val scrollStateCache: Cache by lazy {
+        NavigationEntryCache(navigationStore, MemoryCache())
+    }
+    val listScrollStateCache: Cache by lazy {
+        NavigationEntryCache(navigationStore, MemoryCache())
+    }
 
     fun router(
         destination: Destination
@@ -343,7 +352,6 @@ object DI {
             changePriorityDelegate = changePriorityDelegate,
             selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
             searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
-            scrollDelegate = ScrollDelegateImpl<TaskDetailsState>(),
             reorderDelegate = ReorderDelegateImpl<TaskDetailsState>(
                 changePriorityDelegate = changePriorityDelegate,
                 tasksToReorder = { task.subTasks }
@@ -452,7 +460,13 @@ object DI {
             stateCache = stateCache,
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
-            defaultDestination = defaultScreen
+            defaultDestination = defaultScreen,
+            onAfterClosed = {
+                runBlocking {
+                    scrollStateCache.remove(it.cacheKey)
+                    listScrollStateCache.remove(it.cacheKey)
+                }
+            }
         )
     }
 
