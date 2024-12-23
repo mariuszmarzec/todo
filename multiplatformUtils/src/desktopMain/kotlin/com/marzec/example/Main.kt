@@ -20,8 +20,10 @@ import com.marzec.example.navigation.screens.home.HomeScreen
 import com.marzec.example.navigation.screens.home.HomeStore
 import com.marzec.logger.Logger
 import com.marzec.navigation.Destination
+import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.NavigationUpdate
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.NavigationHost
@@ -54,10 +56,12 @@ fun main() {
                 )
             )
         ) {
-            DI.navigationStore = DI.provideNavigationStore(rememberCoroutineScope()) {
-                exitApplication()
-                this
-            }
+            DI.navigationStore = DI.provideNavigationStore(
+                scope = rememberCoroutineScope(), overrideLastClose = {
+                    exitApplication()
+                    NavigationUpdate(this, emptyList())
+                }
+            )
 
             Column(modifier = Modifier.fillMaxSize()) {
                 ActionBarProvider(DI.navigationStore).provide(
@@ -84,7 +88,7 @@ object DI {
 
     fun provideNavigationStore(
         scope: CoroutineScope,
-        overrideLastClose: (NavigationState.() -> NavigationState)? = null
+        overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null
     ) = navigationStore(
         scope = scope,
         stateCache = stateCache,
@@ -123,12 +127,14 @@ object DI {
             }
 
             is NavigationExampleDestination.A -> @Composable { _, cacheKey ->
-                val store = AStore(navigationStore, flowsScope.getValue(flowId), rememberCoroutineScope())
+                val store =
+                    AStore(navigationStore, flowsScope.getValue(flowId), rememberCoroutineScope())
                 ScreenA(store)
             }
 
             is NavigationExampleDestination.B -> @Composable { _, cacheKey ->
-                val store = BStore(navigationStore, flowsScope.getValue(flowId), rememberCoroutineScope())
+                val store =
+                    BStore(navigationStore, flowsScope.getValue(flowId), rememberCoroutineScope())
                 ScreenB(store)
             }
         }

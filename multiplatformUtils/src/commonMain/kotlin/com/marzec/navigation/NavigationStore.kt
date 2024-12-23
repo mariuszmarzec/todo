@@ -18,7 +18,8 @@ class NavigationStore(
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState,
-    private val overrideLastClose: (NavigationState.() -> NavigationState)? = null
+    private val overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
+    private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) : Store4Impl<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
     fun next(
@@ -53,11 +54,14 @@ class NavigationStore(
 
         val requestKey = requestKey(requestId, options)
 
-        state.popScreens(action)
+        val poppedScreens = mutableListOf<NavigationEntry>()
+        val newState = state.popScreens(action, poppedScreens)
             .addNextScreen(action, id, requestKey)
+
+        NavigationUpdate(newState, poppedScreens)
     }
 
-    private fun IntentContext<NavigationState, NavigationState>.requestKey(
+    private fun IntentContext<NavigationState, NavigationUpdate>.requestKey(
         requestId: Int?,
         options: Map<String, Any>?
     ): RequestKey? {
@@ -80,7 +84,9 @@ class NavigationStore(
         if (state.screenCount == 1 && overrideLastClose != null) {
             overrideLastClose.invoke(state)
         } else {
-            state.popScreens(PopEntryTarget.ScreenCount(count = 1))
+            val poppedScreens = mutableListOf<NavigationEntry>()
+            val newState = state.popScreens(PopEntryTarget.ScreenCount(count = 1), poppedScreens)
+            NavigationUpdate(newState, poppedScreens)
         }
     }
 
@@ -92,17 +98,28 @@ class NavigationStore(
         if (currentFlow.isRootFlow() && overrideLastClose != null) {
             overrideLastClose.invoke(state)
         } else {
-            state.popScreens(PopEntryTarget.ToFlow(currentFlow.id, popToInclusive = true))
+            val poppedScreens = mutableListOf<NavigationEntry>()
+            val newState = state.popScreens(PopEntryTarget.ToFlow(currentFlow.id, popToInclusive = true), poppedScreens)
+            NavigationUpdate(newState, poppedScreens)
         }
     }
 
-    private fun navigate(stateTransform: suspend IntentContext<NavigationState, NavigationState>.() -> NavigationState) {
-        intent {
+    private fun navigate(stateTransform: suspend IntentContext<NavigationState, NavigationUpdate>.() -> NavigationUpdate) {
+        intent<NavigationUpdate> {
             onTrigger {
                 flowOf(stateTransform())
             }
 
-            reducer { resultNonNull() }
+            reducer { resultNonNull().newState }
+
+            sideEffect {
+                onAfterClosed?.let {
+                    val update = resultNonNull()
+                    update.closedEntries.forEach {
+                        onAfterClosed.invoke(it)
+                    }
+                }
+            }
         }
     }
 
@@ -166,16 +183,28 @@ class NavigationStore(
     ) = when (target) {
         is PopEntryTarget.ScreenCount -> entry.subFlow == null && target.count <= poppedEntries.size
         is PopEntryTarget.ToDestination -> entry.destination == target.popTo
-        is PopEntryTarget.ToFlow -> entry.subFlow?.id == target.id ||  !target.popToInclusive && entry.subFlow == null && flow.id == target.id
+        is PopEntryTarget.ToFlow -> entry.subFlow?.id == target.id || !target.popToInclusive && entry.subFlow == null && flow.id == target.id
         is PopEntryTarget.ToId -> entry.id.takeIf { it.isNotBlank() } == target.id
     }
 
-    private suspend fun NavigationState.popScreens(action: NavigationAction): NavigationFlow =
-        popScreens(popEntryTarget = action.options?.popTo)
+    private suspend fun NavigationState.popScreens(
+        action: NavigationAction,
+        poppedScreens: MutableList<NavigationEntry>
+    ): NavigationFlow =
+        popScreens(popEntryTarget = action.options?.popTo, poppedScreens)
 
-    private suspend fun NavigationState.popScreens(popEntryTarget: PopEntryTarget?): NavigationFlow {
+    private suspend fun NavigationState.popScreens(
+        popEntryTarget: PopEntryTarget?,
+        poppedScreens: MutableList<NavigationEntry>
+    ): NavigationFlow {
         val newBackStack = popEntryTarget?.let {
-            backStack.toMutableList().apply { popScreens(this@popScreens, it) }
+            backStack.toMutableList().apply {
+                popScreens(
+                    flow = this@popScreens,
+                    popEntryTarget = it,
+                    poppedScreens = poppedScreens
+                )
+            }
         } ?: backStack
         return copy(backStack = newBackStack)
     }
@@ -183,11 +212,12 @@ class NavigationStore(
     private suspend fun MutableList<NavigationEntry>.popScreens(
         flow: NavigationFlow,
         popEntryTarget: PopEntryTarget,
-        poppedScreens: MutableList<NavigationEntry> = mutableListOf()
+        poppedScreens: MutableList<NavigationEntry>
     ): Boolean {
         while (size > 0) {
             val entry = last()
-            val isTargetDestination = isTargetDestination(flow, entry, popEntryTarget, poppedScreens)
+            val isTargetDestination =
+                isTargetDestination(flow, entry, popEntryTarget, poppedScreens)
             when {
                 entry.subFlow == null && !isTargetDestination -> {
                     poppedScreens.add(entry)
@@ -226,14 +256,16 @@ class NavigationStore(
     ): Boolean {
         if (entry.subFlow != null) {
             val newBackStack = entry.subFlow.backStack.toMutableList()
-            val reachedTargetInSubFlow = newBackStack.popScreens(entry.subFlow, popEntryTarget, poppedScreens)
+            val reachedTargetInSubFlow =
+                newBackStack.popScreens(entry.subFlow, popEntryTarget, poppedScreens)
 
             val reachedPopTarget = reachedTargetInSubFlow || isTargetDestination
 
             val isTargetReachedButPoppingExclusive =
                 reachedPopTarget && !popEntryTarget.popToInclusive && isTargetDestination
 
-            val subFlowShouldBeKept = newBackStack.isNotEmpty() || isTargetReachedButPoppingExclusive
+            val subFlowShouldBeKept =
+                newBackStack.isNotEmpty() || isTargetReachedButPoppingExclusive
             if (subFlowShouldBeKept) {
                 val newSubFlow = entry.subFlow.copy(backStack = newBackStack)
                 remove(entry)
@@ -323,3 +355,8 @@ fun NavigationFlow.currentFlow(): NavigationFlow =
     } ?: this
 
 fun NavigationFlow.isRootFlow() = this.id == NavigationFlow.ROOT_FLOW
+
+data class NavigationUpdate(
+    val newState: NavigationState,
+    val closedEntries: List<NavigationEntry>
+)

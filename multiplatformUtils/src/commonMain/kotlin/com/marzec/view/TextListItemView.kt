@@ -37,15 +37,18 @@ fun TextListItemView(
             .fillMaxWidth()
             .background(backgroundColor)
             .let {
-                it.combinedClickable(
-                    enabled = onLongClickListener != null || onClickListener != null,
-                    onLongClick = onLongClickListener?.let<(TextListItem) -> Unit, () -> Unit> {
-                        { it.invoke(state) }
-                    },
-                    onClick = onClickListener?.let {
-                        { it.invoke(state) }
-                    } ?: { }
-                )
+                if (onLongClickListener != null || onClickListener != null) {
+                    it.combinedClickable(
+                        onLongClick = onLongClickListener?.let<(TextListItem) -> Unit, () -> Unit> {
+                            { it.invoke(state) }
+                        },
+                        onClick = onClickListener?.let {
+                            { it.invoke(state) }
+                        } ?: { }
+                    )
+                } else {
+                    it
+                }
             }
     ) {
         Row(

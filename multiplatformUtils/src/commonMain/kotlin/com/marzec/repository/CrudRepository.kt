@@ -11,6 +11,7 @@ import com.marzec.cache.ManyItemsCacheSaver
 import com.marzec.cache.MemoryCacheSaver
 import com.marzec.cache.atFirstPositionInserter
 import com.marzec.cache.map
+import com.marzec.cache.synchronized
 import com.marzec.cache.toReversed
 import com.marzec.cache.withInserter
 import com.marzec.content.Content
@@ -20,9 +21,9 @@ import com.marzec.content.ifDataSuspend
 import com.marzec.datasource.CrudDataSource
 import com.marzec.datasource.EndpointProviderImpl
 import io.ktor.client.HttpClient
-import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
@@ -30,6 +31,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import kotlin.coroutines.coroutineContext
+import kotlin.reflect.typeOf
 
 class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : Any, CREATE_DTO : Any, UPDATE_DTO : Any>(
     private val dataSource: CrudDataSource<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO>,
@@ -38,7 +41,8 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
     private val toDomain: MODEL_DTO.() -> MODEL,
     private val updateToDto: UPDATE.() -> UPDATE_DTO,
     private val createToDto: CREATE.() -> CREATE_DTO,
-    private val updaterCoroutineScope: CoroutineScope
+    private val updaterCoroutineScope: CoroutineScope,
+    private val onUpdate: List<suspend () -> Unit> = emptyList()
 ) {
     enum class RefreshPolicy {
         NO_REFRESH, SEPARATE_DISPATCHER, BLOCKING
@@ -107,19 +111,31 @@ class CrudRepository<ID, MODEL : Any, CREATE : Any, UPDATE : Any, MODEL_DTO : An
                 when (policy) {
                     RefreshPolicy.NO_REFRESH -> Unit
                     RefreshPolicy.SEPARATE_DISPATCHER -> updaterCoroutineScope.launch {
-                        refreshAll()
+                        runRefreshing()
                     }
 
-                    RefreshPolicy.BLOCKING -> refreshAll()
+                    RefreshPolicy.BLOCKING -> runRefreshing()
                 }
             }
         }
 
-    private suspend fun refreshAll() = asContent {
+    private suspend fun runRefreshing() = with(CoroutineScope(SupervisorJob() + coroutineContext)) {
+        val updaters = listOf<suspend () -> Unit> { refreshCache() } + onUpdate
+
+        updaters.forEach {
+            launch {
+                it()
+            }
+        }
+    }
+
+    suspend fun refreshCache() = asContent {
         loadAll()
     }.ifDataSuspend {
         cacheSaver.saveCache(data)
     }
+
+
 
     private suspend fun loadAll() = dataSource.getAll().map(toDomain)
 }
@@ -178,7 +194,7 @@ inline fun <
                 } else {
                     it
                 }
-            },
+            }.synchronized(),
         dispatcher = dispatcher,
         toDomain = toDomain,
         createToDto = createToDto,

@@ -18,17 +18,17 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.marzec.extensions.filterWithSearch
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.ScreenWithLoading
-import com.marzec.view.SelectableRow
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.marzec.delegate.rememberScrollState
-import com.marzec.extensions.filterWithSearch
 import com.marzec.view.SearchView
+import com.marzec.view.SelectableRow
+import com.marzec.view.rememberForeverListState
 
 @Composable
 fun <ITEM : Any> PickItemScreen(
@@ -40,7 +40,7 @@ fun <ITEM : Any> PickItemScreen(
     val state: State<PickItemData<ITEM>> by store.collectState {
         store.load()
     }
-    val scrollState = rememberScrollState(store)
+    val scrollState = rememberForeverListState(store.identifier)
 
     Column(
         modifier = Modifier.background(Color.White)

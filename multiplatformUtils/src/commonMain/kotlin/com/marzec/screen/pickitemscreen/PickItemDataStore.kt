@@ -2,8 +2,6 @@ package com.marzec.screen.pickitemscreen
 
 import androidx.compose.runtime.Composable
 import com.marzec.content.Content
-import com.marzec.delegate.ScrollDelegate
-import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegate
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegate
@@ -44,8 +42,7 @@ fun <ITEM : Any> providePickItemStore(
     initialState = PickItemData.initial(options),
     cacheKey = cacheKey,
     selectionDelegate = SelectionDelegateImpl<String, PickItemData<ITEM>>(),
-    searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>(),
-    scrollDelegate = ScrollDelegateImpl<PickItemData<ITEM>>()
+    searchDelegate = SearchDelegateImpl<PickItemData<ITEM>>()
 )
 
 class PickItemDataStore<ITEM : Any>(
@@ -56,17 +53,18 @@ class PickItemDataStore<ITEM : Any>(
     initialState: State<PickItemData<ITEM>>,
     private val cacheKey: String,
     private val selectionDelegate: SelectionDelegate<String>,
-    private val searchDelegate: SearchDelegate,
-    private val scrollDelegate: ScrollDelegate
+    private val searchDelegate: SearchDelegate
 ) : Store4Impl<State<PickItemData<ITEM>>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), SelectionDelegate<String> by selectionDelegate,
-    SearchDelegate by searchDelegate,
-    ScrollDelegate by scrollDelegate {
+    SearchDelegate by searchDelegate {
 
     init {
-        delegates(selectionDelegate, searchDelegate, scrollDelegate)
+        delegates(selectionDelegate, searchDelegate)
     }
+
+    override val identifier: Any
+        get() = cacheKey
 
     fun load() = intent<Content<List<ITEM>>> {
         onTrigger {

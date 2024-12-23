@@ -13,6 +13,7 @@ import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.NavigationUpdate
 import com.marzec.navigation.ResultCache
 import com.marzec.navigation.currentFlow
 import com.marzec.navigation.currentScreen
@@ -61,8 +62,9 @@ fun navigationStore(
     cacheKeyProvider: () -> String,
     navigationStoreCacheKey: String,
     defaultDestination: Destination,
-    overrideLastClose: (NavigationState.() -> NavigationState)? = null,
-    onNewStateCallback: ((NavigationState) -> Unit)? = null
+    overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
+    onNewStateCallback: ((NavigationState) -> Unit)? = null,
+    onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ): NavigationStore = navigationStore(
     scope,
     stateCache,
@@ -70,7 +72,8 @@ fun navigationStore(
     cacheKeyProvider,
     initialState(defaultDestination, cacheKeyProvider),
     overrideLastClose,
-    onNewStateCallback
+    onNewStateCallback,
+    onAfterClosed
 )
 
 fun navigationStore(
@@ -79,8 +82,9 @@ fun navigationStore(
     navigationStoreCacheKey: String,
     cacheKeyProvider: () -> String,
     initialState: NavigationFlow,
-    overrideLastClose: (NavigationState.() -> NavigationState)? = null,
-    onNewStateCallback: ((NavigationState) -> Unit)? = null
+    overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
+    onNewStateCallback: ((NavigationState) -> Unit)? = null,
+    onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) = NavigationStore(
     scope = scope,
     stateCache = stateCache,
@@ -88,7 +92,8 @@ fun navigationStore(
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = initialState,
-    overrideLastClose = overrideLastClose
+    overrideLastClose = overrideLastClose,
+    onAfterClosed = onAfterClosed
 ).apply {
     if (onNewStateCallback != null) {
         this.onNewStateCallback = onNewStateCallback

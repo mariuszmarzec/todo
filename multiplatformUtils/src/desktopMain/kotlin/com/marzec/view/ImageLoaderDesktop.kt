@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.marzec.cache.Cache
 import com.marzec.logger.Logger
+import fiteoapp.multiplatformutils.generated.resources.Res
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.call.receive
@@ -29,7 +30,6 @@ import org.jetbrains.compose.animatedimage.AnimatedImage
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
-import todo.multiplatformutils.generated.resources.Res
 import org.jetbrains.skia.Image as ImageUtil
 
 class ImageLoaderDesktop(
