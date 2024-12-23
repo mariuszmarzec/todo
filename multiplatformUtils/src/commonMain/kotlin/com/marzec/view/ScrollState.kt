@@ -53,7 +53,6 @@ fun rememberForeverListState(
     offset: Int = 0
 ): LazyListState {
     val map = LocalScrollListStateMap.current
-    runBlocking { println(map.toMap()) }
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
         runBlocking {
             val scrollValue = map.get<ScrollListState>(key.toString())
