@@ -42,6 +42,7 @@ import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
+import com.marzec.repository.createDataSource
 import com.marzec.repository.fileAndMemoryCacheCrudRepository
 import com.marzec.resource.ResourceLoader
 import com.marzec.screen.featuretoggle.FeatureToggleDetails
@@ -141,6 +142,11 @@ object DI {
             toDto = { toDto() },
             createToDto = { toDto() },
             updateToDto = { toDto() },
+            dataSource = if (BuildKonfig.ENVIRONMENT != "m") {
+                createDataSource(FEATURE_TOGGLES, client)
+            } else {
+                MockFeatureToggleDataSource()
+            }
         )
     }
     val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
@@ -687,4 +693,26 @@ object Api {
             BuildKonfig.TEST_AUTH_HEADER
         }
     }
+}
+
+private class MockFeatureToggleDataSource : CrudDataSource<Int, FeatureToggleDto, NewFeatureToggleDto, UpdateFeatureToggleDto> {
+    override suspend fun getAll(): List<FeatureToggleDto> = emptyList()
+
+    override suspend fun remove(id: Int) = Unit
+
+    override suspend fun update(
+        id: Int,
+        update: UpdateFeatureToggleDto
+    ): FeatureToggleDto {
+        throw UnsupportedOperationException()
+    }
+
+    override suspend fun create(create: NewFeatureToggleDto): FeatureToggleDto {
+        throw UnsupportedOperationException()
+    }
+
+    override suspend fun getById(id: Int): FeatureToggleDto {
+        throw UnsupportedOperationException()
+    }
+
 }
