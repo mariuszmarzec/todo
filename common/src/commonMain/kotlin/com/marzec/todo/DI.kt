@@ -156,11 +156,11 @@ object DI {
     val featureTogglesManagerInitializer by lazy {
         FeatureTogglesManagerInitializerImpl(
             resourceLoader,
-                    Json,
-                    featureToggleRepository,
-                    memoryCache,
-                    updaterCoroutineScope,
-                    "feature_toggle_conf.json"
+            Json,
+            featureToggleRepository,
+            memoryCache,
+            updaterCoroutineScope,
+            "feature_toggle_conf.json"
         )
     }
 
@@ -242,7 +242,11 @@ object DI {
                 navigationStore = navigationStore,
                 cacheKey = cacheKey,
                 stateCache = stateCache,
-                initialState = FeatureToggleState.initial(destination.id, destination.name, destination.value),
+                initialState = FeatureToggleState.initial(
+                    destination.id,
+                    destination.name,
+                    destination.value
+                ),
                 repository = featureToggleRepository,
                 dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
@@ -428,7 +432,10 @@ object DI {
             navigationStore = navigationStore,
             stateCache = stateCache,
             cacheKey = cacheKey,
-            initialState = SchedulerState.from(destination.scheduler, destination.additionalOptionsAvailable),
+            initialState = SchedulerState.from(
+                destination.scheduler,
+                destination.additionalOptionsAvailable
+            ),
             dateDelegate = DateDelegateImpl<SchedulerState>(
                 navigationStore = navigationStore,
                 datePickerDestinationFactory = { TodoDestination.DatePicker(it) }
