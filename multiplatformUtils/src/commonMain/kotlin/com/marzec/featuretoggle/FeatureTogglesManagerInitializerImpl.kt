@@ -1,13 +1,12 @@
 package com.marzec.featuretoggle
 
-import android.content.Context
 import com.marzec.cache.MemoryCache
-import com.marzec.common.readFile
+import com.marzec.resource.ResourceLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 
 class FeatureTogglesManagerInitializerImpl(
-    private val context: Context,
+    private val resourceLoader: ResourceLoader,
     private val json: Json,
     private val featureToggleRepository: FeatureToggleRepository,
     private val memoryCache: MemoryCache,
@@ -16,10 +15,14 @@ class FeatureTogglesManagerInitializerImpl(
 ) : FeatureTogglesManagerInitializer {
 
     override fun create(): FeatureTogglesManager {
-        val featureTogglesDefaults: Map<String, String> = context.readFile(featureToggleConfFile)
-            .let {
-                json.decodeFromString<Map<String, String>>(it)
-            }
+        val featureTogglesDefaults: Map<String, String> = resourceLoader.loadResource(featureToggleConfFile)
+            ?.let {
+                try {
+                    json.decodeFromString<Map<String, String>>(it)
+                } catch (_: Throwable) {
+                    null
+                }
+            }.orEmpty()
         return FeatureTogglesManagerImpl(
             featureTogglesDefaults = featureTogglesDefaults,
             featureToggleRepository = featureToggleRepository,
