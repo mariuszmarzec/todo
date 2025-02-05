@@ -29,6 +29,7 @@ kotlin {
 
     sourceSets {
         named("commonMain") {
+            resources.srcDir("src/commonMain/resources/$environment")
             dependencies {
                 api(project(":multiplatformUtils"))
                 api(compose.runtime)
