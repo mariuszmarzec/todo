@@ -19,6 +19,15 @@ val prodAuthHeader = properties.getProperty("prod.authHeader")
 val testApiUrl = properties.getProperty("test.apiUrl")
 val testAuthHeader = properties.getProperty("test.authHeader")
 
+tasks.register<Copy>("copyCommonResourcesToRaw") {
+    from("src/commonMain/resources/$environment")
+    into("src/main/assets")
+}
+
+tasks.named("preBuild") {
+    dependsOn("copyCommonResourcesToRaw")
+}
+
 kotlin {
     android()
     jvm("desktop") {

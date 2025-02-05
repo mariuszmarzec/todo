@@ -17,7 +17,6 @@ import com.marzec.common.OpenUrlHelper
 import com.marzec.datasource.CrudDataSource
 import com.marzec.datasource.EndpointProviderImpl
 import com.marzec.delegate.DialogDelegateImpl
-import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.dto.FeatureToggleDto
