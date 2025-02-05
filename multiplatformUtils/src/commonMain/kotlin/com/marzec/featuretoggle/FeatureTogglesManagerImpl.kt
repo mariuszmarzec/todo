@@ -1,6 +1,6 @@
 package com.marzec.featuretoggle
 
-import com.marzec.cache.MemoryCache
+import com.marzec.cache.Cache
 import com.marzec.content.ifDataSuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 class FeatureTogglesManagerImpl(
     private val featureTogglesDefaults: Map<String, String>,
     private val featureToggleRepository: FeatureToggleRepository,
-    private val memoryCache: MemoryCache,
+    private val memoryCache: Cache,
     private val updaterCoroutineScope: CoroutineScope
 ) : FeatureTogglesManager {
 

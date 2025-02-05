@@ -1,8 +1,6 @@
 package com.marzec.todo.screen.tasks.model
 
 import com.marzec.delegate.DialogState
-import com.marzec.delegate.ScrollListState
-import com.marzec.delegate.WithScrollListState
 import com.marzec.delegate.WithSearch
 import com.marzec.delegate.WithSelection
 import com.marzec.extensions.EMPTY_STRING
@@ -15,14 +13,13 @@ import com.marzec.view.SearchState
 
 data class TasksScreenState(
     val tasks: List<Task>,
-    override val scrollListState: ScrollListState,
     override val search: SearchState,
     override val dialog: DialogState<Int>,
     override val selected: Set<Int>,
-    override val reorderMode: ReorderMode
+    override val reorderMode: ReorderMode,
+    val doneButtonOnTaskList: Boolean
 ) : WithTasks<TasksScreenState>,
     WithSearch<TasksScreenState>,
-    WithScrollListState<TasksScreenState>,
     WithSelection<Int, TasksScreenState>,
     WithReorderMode {
 
@@ -30,9 +27,6 @@ data class TasksScreenState(
 
     override fun copyWithSearch(search: SearchState): TasksScreenState =
         copy(search = search)
-
-    override fun copyWithScrollListState(scrollListState: ScrollListState) =
-        copy(scrollListState = scrollListState)
 
     override fun copyWithSelection(selected: Set<Int>): TasksScreenState =
         copy(selected = selected)
@@ -48,14 +42,14 @@ data class TasksScreenState(
 
         fun emptyData() = TasksScreenState(
             tasks = emptyList(),
-            scrollListState = ScrollListState(),
             search = SearchState(
                 value = EMPTY_STRING,
                 focused = false,
             ),
             dialog = DialogState.NoDialog(),
             selected = emptySet(),
-            reorderMode = ReorderMode.Disabled
+            reorderMode = ReorderMode.Disabled,
+            doneButtonOnTaskList = false
         )
     }
 }

@@ -17,7 +17,7 @@ import com.marzec.mvi.reduceDataWithContent
 import com.marzec.mvi.reduceWithResult
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.StateCache
-import com.marzec.repository.FeatureToggleRepository
+import com.marzec.featuretoggle.FeatureToggleRepository
 import kotlinx.coroutines.CoroutineScope
 
 class FeatureToggleStore(

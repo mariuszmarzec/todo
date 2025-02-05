@@ -12,6 +12,7 @@ import com.marzec.cache.PreferencesCache
 import kotlinx.coroutines.Dispatchers
 import com.marzec.network.createHttpClient
 import com.marzec.cache.MemoryCache
+import com.marzec.resource.ResourceLoaderImpl
 import kotlinx.serialization.json.Json
 
 class ToDoApplication : Application() {
@@ -30,6 +31,8 @@ class ToDoApplication : Application() {
                 Log.e(tag, message, t)
             }
         }
+
+        DI.resourceLoader = ResourceLoaderImpl(this)
 
         DI.memoryCache = MemoryCache()
         DI.resultMemoryCache = MemoryCache()

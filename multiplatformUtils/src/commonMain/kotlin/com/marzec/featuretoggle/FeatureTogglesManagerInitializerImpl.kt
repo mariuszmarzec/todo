@@ -1,6 +1,6 @@
 package com.marzec.featuretoggle
 
-import com.marzec.cache.MemoryCache
+import com.marzec.cache.Cache
 import com.marzec.resource.ResourceLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
@@ -9,7 +9,7 @@ class FeatureTogglesManagerInitializerImpl(
     private val resourceLoader: ResourceLoader,
     private val json: Json,
     private val featureToggleRepository: FeatureToggleRepository,
-    private val memoryCache: MemoryCache,
+    private val memoryCache: Cache,
     private val updaterCoroutineScope: CoroutineScope,
     private val featureToggleConfFile: String
 ) : FeatureTogglesManagerInitializer {

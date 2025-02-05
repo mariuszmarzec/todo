@@ -24,6 +24,7 @@ import com.marzec.dto.FeatureToggleDto
 import com.marzec.dto.NewFeatureToggleDto
 import com.marzec.dto.UpdateFeatureToggleDto
 import com.marzec.dto.toDomain
+import com.marzec.featuretoggle.FeatureTogglesManagerInitializerImpl
 import com.marzec.logger.Logger
 import com.marzec.model.FeatureToggle
 import com.marzec.model.NewFeatureToggle
@@ -43,6 +44,7 @@ import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
 import com.marzec.repository.fileAndMemoryCacheCrudRepository
+import com.marzec.resource.ResourceLoader
 import com.marzec.screen.featuretoggle.FeatureToggleDetails
 import com.marzec.screen.featuretoggle.FeatureToggleScreen
 import com.marzec.screen.featuretoggle.FeatureToggleState
@@ -118,6 +120,8 @@ object DI {
     lateinit var memoryCache: Cache
     lateinit var resultMemoryCache: Cache
 
+    lateinit var resourceLoader: ResourceLoader
+
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = false
 
@@ -148,6 +152,20 @@ object DI {
     val listScrollStateCache: Cache by lazy {
         NavigationEntryCache(navigationStore, MemoryCache())
     }
+
+
+    val featureTogglesManagerInitializer by lazy {
+        FeatureTogglesManagerInitializerImpl(
+            resourceLoader,
+                    Json,
+                    featureToggleRepository,
+                    memoryCache,
+                    updaterCoroutineScope,
+                    "feature_toggle_conf.json"
+        )
+    }
+
+    val featureTogglesManager by lazy { featureTogglesManagerInitializer.create() }
 
     fun router(
         destination: Destination
@@ -264,7 +282,6 @@ object DI {
             ),
             changePriorityDelegate = changePriorityDelegate,
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
-            scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
             scheduledOptions = provideScheduledOptions(),
             selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>(),
             reorderDelegate = ReorderDelegateImpl<TasksScreenState>(
@@ -273,6 +290,7 @@ object DI {
             ) {
                 copy(reorderMode = it)
             },
+            featureTogglesManager = featureTogglesManager,
             store = Store(
                 scope = scope,
                 defaultState = TasksScreenState.initial()
