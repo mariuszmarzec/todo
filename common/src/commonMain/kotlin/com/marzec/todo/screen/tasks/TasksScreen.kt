@@ -166,7 +166,9 @@ private fun TaskScreenData(
             },
             onDragAndDrop = { draggedIndex: Int, targetIndex: Int ->
                 store.onDragged(draggedIndex, targetIndex)
-            }
+            },
+            onCheckClick = { id: Int -> store.markAsDone(id) }.takeIf { state.data.doneButtonOnTaskList },
+            onUncheckClick = { id: Int -> store.markAsToDo(id) }.takeIf { state.data.doneButtonOnTaskList }
         )
     }
 

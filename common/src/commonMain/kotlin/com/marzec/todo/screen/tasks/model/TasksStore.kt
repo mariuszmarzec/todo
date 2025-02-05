@@ -202,6 +202,22 @@ class TasksStore(
         }
     }
 
+    fun markAsDone(id: Int) = intent {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.markAsDone(id)
+            }
+        }
+    }
+
+    fun markAsToDo(id: Int) = intent {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.markAsToDo(id)
+            }
+        }
+    }
+
     companion object {
         const val DIALOG_ID_REMOVE_MULTIPLE_TASKS = "DIALOG_ID_REMOVE_MULTIPLE_TASKS"
         const val REQUEST_ID_SCHEDULE_SELECTED = 7891
