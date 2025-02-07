@@ -14,14 +14,16 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import com.marzec.view.TextFieldStateful
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
@@ -30,6 +32,7 @@ import com.marzec.todo.model.Scheduler
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.view.ActionBarProvider
+import com.marzec.view.TextFieldStateful
 import kotlinx.datetime.LocalDateTime
 
 @Composable
@@ -50,15 +53,24 @@ fun AddNewTaskScreen(
     ) {
         when (val state = state) {
             is State.Data -> {
+                val focusRequester = remember { FocusRequester() }
+
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
+                }
+
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
-                        TextFieldStateful(state.data.description, {
-                            store.onDescriptionChanged(it)
-                        })
+                        TextFieldStateful(
+                            modifier = Modifier.focusRequester(focusRequester),
+                            value = state.data.description,
+                            onValueChange = {
+                                store.onDescriptionChanged(it)
+                            })
                     }
                     if (state.data.taskId == null || state.data.scheduler != null) {
                         Row(
@@ -109,9 +121,11 @@ fun AddNewTaskScreen(
                     }
                 }
             }
+
             is State.Loading -> {
                 Text(text = "Loading")
             }
+
             is State.Error -> {
                 Text(text = state.message)
             }
@@ -153,6 +167,7 @@ private val Scheduler.description: String
                     formatHour() +
                     " from ${startDate.formatSimple()}"
         }
+
         is Scheduler.Weekly -> {
             this::class.simpleName.orEmpty() +
                     formatHour() +
@@ -161,6 +176,7 @@ private val Scheduler.description: String
                     " repeat: $repeatCount times in every $repeatInEveryPeriod week" +
                     formatLastDate()
         }
+
         is Scheduler.Monthly -> {
             this::class.simpleName.orEmpty() +
                     formatHour() +
