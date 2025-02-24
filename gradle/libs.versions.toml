@@ -25,6 +25,7 @@ vlc = "4.7.0"
 mockk = "1.13.2"
 dateTime = "0.4.1"
 viewModel = "2.0.0"
+quickMvi = "1.0.0"
 
 composePlugin = "1.7.1"
 composeCompiler = "1.5.11"
@@ -55,6 +56,7 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "viewModel" }
 compose-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewModel" }
+quickMvi = {module = "io.github.mariuszmarzec:quickmvi", version.ref = "quickMvi" }
 
 plugin-composeGradle = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composePlugin" }
 plugin-androidBuild = { module = "com.android.tools.build:gradle", version.ref = "androidGradleplugin" }

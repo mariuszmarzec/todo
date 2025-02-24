@@ -32,6 +32,7 @@ kotlin {
                 api(libs.ktorSerialization)
                 api(libs.ktorContentNegotiation)
                 api(libs.serializationJson)
+                api(libs.quickMvi)
                 implementation(libs.kotlinDateTime)
             }
         }
