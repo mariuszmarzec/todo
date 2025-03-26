@@ -2,8 +2,10 @@ import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+
     kotlin("multiplatform")
-    id("org.jetbrains.compose")
     id("io.gitlab.arturbosch.detekt")
 }
 

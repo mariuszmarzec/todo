@@ -4,10 +4,10 @@ compileSdk = "34"
 minSdk = "30"
 targetSdk = "34"
 
-kotlin = "1.9.10"
+kotlin = "2.1.20"
 ktor = "2.3.7"
 okHttpClient = "4.10.0"
-serialization = "1.6.2"
+serialization = "1.8.0"
 coreKtx = "1.3.2"
 appCompat = "1.2.0"
 material = "1.1.0"
@@ -17,7 +17,7 @@ androidGradleplugin = "8.1.1"
 buildkonfig = "0.11.0"
 datastore = "1.0.0-alpha05"
 detekt = "1.18.1"
-atomicfu = "0.20.2"
+atomicfu = "0.27.0"
 googleServices = "4.3.10"
 glide = "1.0.0-alpha.1"
 exoPlayer = "2.18.5"
@@ -25,7 +25,7 @@ vlc = "4.7.0"
 mockk = "1.13.2"
 dateTime = "0.4.1"
 viewModel = "2.0.0"
-quickMvi = "1.0.0"
+quickMvi = "1.1.0-SNAPSHOT"
 
 composePlugin = "1.7.1"
 composeCompiler = "1.5.11"
@@ -57,6 +57,7 @@ datastore = { module = "androidx.datastore:datastore", version.ref = "datastore"
 viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "viewModel" }
 compose-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewModel" }
 quickMvi = {module = "io.github.mariuszmarzec:quickmvi", version.ref = "quickMvi" }
+quickMvi-compose = {module = "io.github.mariuszmarzec:quickmvi-compose", version.ref = "quickMvi" }
 
 plugin-composeGradle = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composePlugin" }
 plugin-androidBuild = { module = "com.android.tools.build:gradle", version.ref = "androidGradleplugin" }
@@ -67,6 +68,8 @@ plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", v
 plugin-atomic = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfu" }
 
 [plugins]
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "composePlugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 [bundles]
 

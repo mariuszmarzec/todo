@@ -3,9 +3,11 @@ import com.codingfeline.buildkonfig.compiler.FieldSpec
 import java.util.Properties
 
 plugins {
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+
     id("com.android.library")
     kotlin("multiplatform")
-    id("org.jetbrains.compose")
     kotlin("plugin.serialization")
     id("com.codingfeline.buildkonfig")
     id("io.gitlab.arturbosch.detekt")
@@ -29,7 +31,7 @@ tasks.named("preBuild") {
 }
 
 kotlin {
-    android()
+    androidTarget()
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()

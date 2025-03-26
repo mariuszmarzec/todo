@@ -1,11 +1,12 @@
 import java.util.Properties
 import java.io.FileInputStream
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
 
 plugins {
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+
     id("com.android.application")
     kotlin("android")
-    id("org.jetbrains.compose")
     id("io.gitlab.arturbosch.detekt")
      // TODO wait for stable 7.3 AGP
 //    id("com.google.gms.google-services")
