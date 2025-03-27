@@ -25,7 +25,7 @@ vlc = "4.7.0"
 mockk = "1.13.2"
 dateTime = "0.4.1"
 viewModel = "2.0.0"
-quickMvi = "1.1.0-SNAPSHOT"
+quickMvi = "1.1.0"
 
 composePlugin = "1.7.1"
 composeCompiler = "1.5.11"
