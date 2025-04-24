@@ -79,7 +79,13 @@ class AddNewTaskStore(
         }
 
         reducer {
-            state.reduceData { copy(scheduler = resultNonNull()) }
+            val scheduler = resultNonNull()
+            state.reduceData {
+                copy(
+                    scheduler = scheduler,
+                    removeAfterSchedule = scheduler is Scheduler.OneShot
+                )
+            }
         }
     }
 
