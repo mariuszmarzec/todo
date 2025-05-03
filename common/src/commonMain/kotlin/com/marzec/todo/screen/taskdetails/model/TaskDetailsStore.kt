@@ -1,33 +1,33 @@
 package com.marzec.todo.screen.taskdetails.model
 
-import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.content.Content
 import com.marzec.content.ifDataSuspend
-import com.marzec.delegate.DialogDelegate
-import com.marzec.delegate.DialogState
-import com.marzec.delegate.SearchDelegate
-import com.marzec.delegate.SelectionDelegate
+import com.marzec.mvi.delegates
 import com.marzec.extensions.asInstance
-import com.marzec.model.NullableField
 import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
-import com.marzec.mvi.delegates
-import com.marzec.mvi.reduceContentAsSideAction
 import com.marzec.mvi.reduceContentToLoadingWithNoChanges
-import com.marzec.mvi.reduceWithResult
+import com.marzec.mvi.reduceDataWithContent
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
 import com.marzec.preferences.StateCache
+import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
+import com.marzec.delegate.DialogDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
+import com.marzec.delegate.SearchDelegate
+import com.marzec.delegate.SelectionDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.dialog.removeTaskOnTrigger
-import com.marzec.todo.delegates.reorder.ReorderDelegate
-import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.Task
-import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
+import com.marzec.delegate.DialogState
+import com.marzec.model.NullableField
+import com.marzec.mvi.reduceContentAsSideAction
+import com.marzec.todo.delegates.reorder.ReorderDelegate
+import com.marzec.todo.delegates.reorder.ReorderMode
+import com.marzec.todo.model.UpdateTask
 import com.marzec.view.SearchState
 import kotlinx.coroutines.CoroutineScope
 
@@ -76,13 +76,13 @@ class TaskDetailsStore(
             todoRepository.observeTask(taskId)
         }
         reducer {
-            state.reduceWithResult(resultNonNull()) { result ->
-                val taskIds = result.data.subTasks.map { it.id }.toSet()
-                copy(
-                    task = result.data,
+            state.reduceDataWithContent(resultNonNull()) { result ->
+                val taskIds = result.subTasks.map { it.id }.toSet()
+                TaskDetailsState(
+                    task = result,
                     dialog = DialogState.NoDialog(),
                     selected = this?.selected?.filter { it in taskIds }?.toSet().orEmpty(),
-                    search = SearchState(
+                    search = this?.search ?: SearchState(
                         value = "",
                         focused = false
                     ),
