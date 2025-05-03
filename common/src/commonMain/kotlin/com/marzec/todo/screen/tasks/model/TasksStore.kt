@@ -2,27 +2,27 @@ package com.marzec.todo.screen.tasks.model
 
 import com.marzec.content.Content
 import com.marzec.content.ifFinished
+import com.marzec.delegate.DialogDelegate
+import com.marzec.delegate.DialogState
 import com.marzec.delegate.SearchDelegate
-import com.marzec.mvi.delegates
+import com.marzec.delegate.SelectionDelegate
+import com.marzec.featuretoggle.FeatureTogglesManager
 import com.marzec.mvi.State
+import com.marzec.mvi.Store4
+import com.marzec.mvi.delegates
+import com.marzec.mvi.reduceContentAsSideAction
+import com.marzec.mvi.reduceContentToLoadingWithNoChanges
+import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceWithResult
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.PopEntryTarget
 import com.marzec.navigation.next
 import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
-import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
-import com.marzec.delegate.DialogDelegate
-import com.marzec.delegate.DialogState
-import com.marzec.delegate.ScrollDelegate
-import com.marzec.delegate.SelectionDelegate
-import com.marzec.mvi.Store4
-import com.marzec.mvi.reduceContentAsSideAction
-import com.marzec.mvi.reduceContentToLoadingWithNoChanges
-import com.marzec.mvi.reduceData
-import com.marzec.navigation.PopEntryTarget
 import com.marzec.screen.pickitemscreen.PickItemOptions
+import com.marzec.todo.delegates.dialog.ChangePriorityDelegate
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegate
 import com.marzec.todo.delegates.dialog.UrlDelegate
 import com.marzec.todo.delegates.reorder.ReorderDelegate
@@ -43,17 +43,16 @@ class TasksStore(
     private val removeTaskDelegate: RemoveTaskDelegate,
     private val changePriorityDelegate: ChangePriorityDelegate,
     private val searchDelegate: SearchDelegate,
-    private val scrollDelegate: ScrollDelegate,
     private val scheduledOptions: PickItemOptions<Task>,
     private val selectionDelegate: SelectionDelegate<Int>,
     private val reorderDelegate: ReorderDelegate,
+    private val featureTogglesManager: FeatureTogglesManager,
     private val store: Store4<State<TasksScreenState>>
 ) : Store4<State<TasksScreenState>> by store,
     RemoveTaskDelegate by removeTaskDelegate,
     UrlDelegate by urlDelegate,
     DialogDelegate<Int> by dialogDelegate,
     SearchDelegate by searchDelegate,
-    ScrollDelegate by scrollDelegate,
     SelectionDelegate<Int> by selectionDelegate,
     ReorderDelegate by reorderDelegate {
 
@@ -67,7 +66,6 @@ class TasksStore(
             changePriorityDelegate,
             urlDelegate,
             searchDelegate,
-            scrollDelegate,
             selectionDelegate,
             reorderDelegate
         )
@@ -88,7 +86,8 @@ class TasksStore(
                 )
                 copy(
                     tasks = tasks,
-                    selected = this.selected.filter { it in taskIds }.toSet()
+                    selected = this.selected.filter { it in taskIds }.toSet(),
+                    doneButtonOnTaskList = featureTogglesManager.get("todo.doneButtonOnTaskList")
                 )
             }
         }
@@ -200,6 +199,22 @@ class TasksStore(
 
         reducer {
             state.reduceContentToLoadingWithNoChanges(result)
+        }
+    }
+
+    fun markAsDone(id: Int) = intent {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.markAsDone(id)
+            }
+        }
+    }
+
+    fun markAsToDo(id: Int) = intent {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.markAsToDo(id)
+            }
         }
     }
 

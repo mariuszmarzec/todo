@@ -3,9 +3,11 @@ import com.codingfeline.buildkonfig.compiler.FieldSpec
 import java.util.Properties
 
 plugins {
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+
     id("com.android.library")
     kotlin("multiplatform")
-    id("org.jetbrains.compose")
     kotlin("plugin.serialization")
     id("com.codingfeline.buildkonfig")
     id("io.gitlab.arturbosch.detekt")
@@ -19,8 +21,17 @@ val prodAuthHeader = properties.getProperty("prod.authHeader")
 val testApiUrl = properties.getProperty("test.apiUrl")
 val testAuthHeader = properties.getProperty("test.authHeader")
 
+tasks.register<Copy>("copyCommonResourcesToRaw") {
+    from("src/commonMain/resources/$environment")
+    into("src/main/assets")
+}
+
+tasks.named("preBuild") {
+    dependsOn("copyCommonResourcesToRaw")
+}
+
 kotlin {
-    android()
+    androidTarget()
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -29,6 +40,7 @@ kotlin {
 
     sourceSets {
         named("commonMain") {
+            resources.srcDir("src/commonMain/resources/$environment")
             dependencies {
                 api(project(":multiplatformUtils"))
                 api(compose.runtime)

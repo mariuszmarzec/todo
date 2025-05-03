@@ -25,7 +25,7 @@ data class SchedulerState(
     val daysOfWeek: List<DayOfWeek> = emptyList(),
     val dayOfMonth: Int = 1,
     val additionalOptionsAvailable: Boolean = false,
-    val removeAfterSchedule: Boolean = false,
+    val removeAfterSchedule: Boolean = true,
     val highestPriorityAsDefault: Boolean = false
 ) : WithDate<SchedulerState> {
 
@@ -50,7 +50,7 @@ data class SchedulerState(
                 daysOfWeek = (scheduler as? Scheduler.Weekly)?.daysOfWeek ?: emptyList(),
                 dayOfMonth = (scheduler as? Scheduler.Monthly)?.dayOfMonth ?: 1,
                 additionalOptionsAvailable = additionalOptionsAvailable,
-                removeAfterSchedule = (scheduler as? Scheduler.OneShot)?.removeScheduled ?: false,
+                removeAfterSchedule = (scheduler as? Scheduler.OneShot)?.removeScheduled ?: true,
                 highestPriorityAsDefault = scheduler.highestPriorityAsDefault
             )
         } ?: INITIAL.copy(additionalOptionsAvailable = additionalOptionsAvailable)

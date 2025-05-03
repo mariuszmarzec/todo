@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.marzec.delegate.DialogState
-import com.marzec.delegate.rememberScrollState
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.todo.delegates.reorder.ReorderMode
@@ -36,7 +35,7 @@ import com.marzec.view.Dialog
 import com.marzec.view.DialogBox
 import com.marzec.view.ScreenWithLoading
 import com.marzec.view.SearchView
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import com.marzec.view.rememberForeverListState
 
 @Composable
 fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
@@ -46,7 +45,7 @@ fun TasksScreen(store: TasksStore, actionBarProvider: ActionBarProvider) {
         store.onScheduleSelectedRequest()
     }
 
-    val listState = rememberScrollState(store)
+    val listState = rememberForeverListState(store.identifier)
 
     Scaffold(
         topBar = {
@@ -167,7 +166,9 @@ private fun TaskScreenData(
             },
             onDragAndDrop = { draggedIndex: Int, targetIndex: Int ->
                 store.onDragged(draggedIndex, targetIndex)
-            }
+            },
+            onCheckClick = { id: Int -> store.markAsDone(id) }.takeIf { state.data.doneButtonOnTaskList },
+            onUncheckClick = { id: Int -> store.markAsToDo(id) }.takeIf { state.data.doneButtonOnTaskList }
         )
     }
 

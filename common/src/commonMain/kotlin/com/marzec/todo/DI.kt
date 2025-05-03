@@ -17,13 +17,13 @@ import com.marzec.common.OpenUrlHelper
 import com.marzec.datasource.CrudDataSource
 import com.marzec.datasource.EndpointProviderImpl
 import com.marzec.delegate.DialogDelegateImpl
-import com.marzec.delegate.ScrollDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.dto.FeatureToggleDto
 import com.marzec.dto.NewFeatureToggleDto
 import com.marzec.dto.UpdateFeatureToggleDto
 import com.marzec.dto.toDomain
+import com.marzec.featuretoggle.FeatureTogglesManagerInitializerImpl
 import com.marzec.logger.Logger
 import com.marzec.model.FeatureToggle
 import com.marzec.model.NewFeatureToggle
@@ -42,7 +42,9 @@ import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
 import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
+import com.marzec.repository.createDataSource
 import com.marzec.repository.fileAndMemoryCacheCrudRepository
+import com.marzec.resource.ResourceLoader
 import com.marzec.screen.featuretoggle.FeatureToggleDetails
 import com.marzec.screen.featuretoggle.FeatureToggleScreen
 import com.marzec.screen.featuretoggle.FeatureToggleState
@@ -118,6 +120,8 @@ object DI {
     lateinit var memoryCache: Cache
     lateinit var resultMemoryCache: Cache
 
+    lateinit var resourceLoader: ResourceLoader
+
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = false
 
@@ -138,6 +142,11 @@ object DI {
             toDto = { toDto() },
             createToDto = { toDto() },
             updateToDto = { toDto() },
+            dataSource = if (BuildKonfig.ENVIRONMENT != "m") {
+                createDataSource(FEATURE_TOGGLES, client)
+            } else {
+                MockFeatureToggleDataSource()
+            }
         )
     }
     val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
@@ -148,6 +157,20 @@ object DI {
     val listScrollStateCache: Cache by lazy {
         NavigationEntryCache(navigationStore, MemoryCache())
     }
+
+
+    val featureTogglesManagerInitializer by lazy {
+        FeatureTogglesManagerInitializerImpl(
+            resourceLoader,
+            Json,
+            featureToggleRepository,
+            memoryCache,
+            updaterCoroutineScope,
+            "feature_toggle_conf.json"
+        )
+    }
+
+    val featureTogglesManager by lazy { featureTogglesManagerInitializer.create() }
 
     fun router(
         destination: Destination
@@ -225,7 +248,11 @@ object DI {
                 navigationStore = navigationStore,
                 cacheKey = cacheKey,
                 stateCache = stateCache,
-                initialState = FeatureToggleState.initial(destination.id, destination.name, destination.value),
+                initialState = FeatureToggleState.initial(
+                    destination.id,
+                    destination.name,
+                    destination.value
+                ),
                 repository = featureToggleRepository,
                 dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
@@ -264,7 +291,6 @@ object DI {
             ),
             changePriorityDelegate = changePriorityDelegate,
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
-            scrollDelegate = ScrollDelegateImpl<TasksScreenState>(),
             scheduledOptions = provideScheduledOptions(),
             selectionDelegate = SelectionDelegateImpl<Int, TasksScreenState>(),
             reorderDelegate = ReorderDelegateImpl<TasksScreenState>(
@@ -273,6 +299,7 @@ object DI {
             ) {
                 copy(reorderMode = it)
             },
+            featureTogglesManager = featureTogglesManager,
             store = Store(
                 scope = scope,
                 defaultState = TasksScreenState.initial()
@@ -411,7 +438,10 @@ object DI {
             navigationStore = navigationStore,
             stateCache = stateCache,
             cacheKey = cacheKey,
-            initialState = SchedulerState.from(destination.scheduler, destination.additionalOptionsAvailable),
+            initialState = SchedulerState.from(
+                destination.scheduler,
+                destination.additionalOptionsAvailable
+            ),
             dateDelegate = DateDelegateImpl<SchedulerState>(
                 navigationStore = navigationStore,
                 datePickerDestinationFactory = { TodoDestination.DatePicker(it) }
@@ -663,4 +693,26 @@ object Api {
             BuildKonfig.TEST_AUTH_HEADER
         }
     }
+}
+
+private class MockFeatureToggleDataSource : CrudDataSource<Int, FeatureToggleDto, NewFeatureToggleDto, UpdateFeatureToggleDto> {
+    override suspend fun getAll(): List<FeatureToggleDto> = emptyList()
+
+    override suspend fun remove(id: Int) = Unit
+
+    override suspend fun update(
+        id: Int,
+        update: UpdateFeatureToggleDto
+    ): FeatureToggleDto {
+        throw UnsupportedOperationException()
+    }
+
+    override suspend fun create(create: NewFeatureToggleDto): FeatureToggleDto {
+        throw UnsupportedOperationException()
+    }
+
+    override suspend fun getById(id: Int): FeatureToggleDto {
+        throw UnsupportedOperationException()
+    }
+
 }

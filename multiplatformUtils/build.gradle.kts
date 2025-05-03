@@ -2,16 +2,18 @@ import org.jetbrains.compose.ComposePlugin.DesktopComponentsDependencies
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+
     id("com.android.library")
     kotlin("multiplatform")
     kotlin("plugin.serialization")
-    id("org.jetbrains.compose")
-    id("kotlinx-atomicfu")
+    id("org.jetbrains.kotlinx.atomicfu")
 }
 
 
 kotlin {
-    android()
+    androidTarget()
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
             useJUnit()
@@ -32,6 +34,8 @@ kotlin {
                 api(libs.ktorSerialization)
                 api(libs.ktorContentNegotiation)
                 api(libs.serializationJson)
+                api(libs.quickMvi)
+                api(libs.quickMvi.compose)
                 implementation(libs.kotlinDateTime)
             }
         }
@@ -64,6 +68,8 @@ kotlin {
                 api(libs.datastore)
             }
         }
+        val androidUnitTest by getting
+
         named("desktopMain") {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {

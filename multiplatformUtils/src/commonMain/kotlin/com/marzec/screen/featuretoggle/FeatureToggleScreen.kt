@@ -31,7 +31,7 @@ import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.StateCache
-import com.marzec.repository.FeatureToggleRepository
+import com.marzec.featuretoggle.FeatureToggleRepository
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.screen.pickitemscreen.providePickItemStore

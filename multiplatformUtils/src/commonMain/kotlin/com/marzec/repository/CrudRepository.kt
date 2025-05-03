@@ -19,6 +19,7 @@ import com.marzec.content.asContent
 import com.marzec.content.asContentFlow
 import com.marzec.content.ifDataSuspend
 import com.marzec.datasource.CrudDataSource
+import com.marzec.datasource.CrudDataSourceImpl
 import com.marzec.datasource.EndpointProviderImpl
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineDispatcher
@@ -161,13 +162,13 @@ inline fun <
     noinline toDto: MODEL.() -> MODEL_DTO,
     noinline createToDto: CREATE.() -> CREATE_DTO,
     noinline updateToDto: UPDATE.() -> UPDATE_DTO,
-    noinline inserter: List<MODEL>?.(MODEL) -> MutableList<MODEL> = atFirstPositionInserter()
+    noinline inserter: List<MODEL>?.(MODEL) -> MutableList<MODEL> = atFirstPositionInserter(),
+    dataSource: CrudDataSource<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO>? = null
 ): CrudRepository<ID, MODEL, CREATE, UPDATE, MODEL_DTO, CREATE_DTO, UPDATE_DTO> =
     CrudRepository(
-        dataSource = CrudDataSource(
-            endpointProvider = EndpointProviderImpl(endpoint),
-            client = client,
-            json = Json
+        dataSource = dataSource ?: createDataSource<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO>(
+            endpoint,
+            client
         ),
         cacheSaver = ListCacheSaver(
             cacheSaver = CompositeUpdatableCacheSaver(
@@ -200,4 +201,14 @@ inline fun <
         createToDto = createToDto,
         updateToDto = updateToDto,
         updaterCoroutineScope = updaterCoroutineScope
+    )
+
+inline fun <ID, reified MODEL_DTO : Any, reified CREATE_DTO : Any, reified UPDATE_DTO : Any> createDataSource(
+    endpoint: String,
+    client: HttpClient
+): CrudDataSourceImpl<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO> =
+    CrudDataSource(
+        endpointProvider = EndpointProviderImpl(endpoint),
+        client = client,
+        json = Json
     )
