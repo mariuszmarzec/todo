@@ -26,7 +26,8 @@ data class SchedulerState(
     val dayOfMonth: Int = 1,
     val additionalOptionsAvailable: Boolean = false,
     val removeAfterSchedule: Boolean = true,
-    val highestPriorityAsDefault: Boolean = false
+    val highestPriorityAsDefault: Boolean = false,
+    val error: String = ""
 ) : WithDate<SchedulerState> {
 
     override fun copyWithDate(date: LocalDateTime): SchedulerState = copy(date = date)
@@ -77,6 +78,10 @@ class SchedulerStore(
     }
 
     fun onSaveButtonClick() = sideEffectIntent {
+        if (state.isStartingDateInPast()) {
+            showDateInPastError()
+            return@sideEffectIntent
+        }
         val scheduler = when (state.type) {
             SchedulerType.OneShot -> Scheduler.OneShot(
                 hour = state.hour,
@@ -115,17 +120,31 @@ class SchedulerStore(
         navigationStore.goBack(scheduler)
     }
 
+    private fun SchedulerState.isStartingDateInPast(): Boolean =
+        LocalDateTime(date.year, date.month, date.dayOfMonth, hour, minute) < currentTime()
+
+    private fun showDateInPastError() = reducerIntent {
+        state.copy(error = "Starting date can not be in the past")
+    }
+
     override suspend fun onNewState(newState: SchedulerState) {
         stateCache.set(cacheKey, newState)
     }
 
     fun onHourChanged(hour: Int) = intent<Unit> {
-        reducer { state.copy(hour = hour) }
+        reducer { state.copy(hour = hour, error = "") }
     }
 
     fun onMinuteChanged(minute: Int) = reducerIntent {
-        state.copy(minute = minute)
+        state.copy(minute = minute, error = "")
     }
+
+    override fun onDatePickerResult() {
+        dateDelegate.onDatePickerResult()
+
+    }
+
+    private fun clearError() = reducerIntent { state.copy(error = "") }
 
     fun onRepeatTimesChanged() = reducerIntent {
         state.copy(repeatTimes = !state.repeatTimes)

@@ -149,6 +149,9 @@ fun SchedulerScreen(
                 }
             }
         }
+        Box(Modifier.padding(16.dp)) {
+            Text(state.error)
+        }
         Button({ store.onSaveButtonClick() }) {
             Text("Save")
         }
