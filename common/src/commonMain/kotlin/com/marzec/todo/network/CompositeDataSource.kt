@@ -7,6 +7,8 @@ import com.marzec.cache.Cache
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.model.toDomain
+import io.ktor.sse.ServerSentEvent
+import kotlinx.coroutines.flow.Flow
 
 class CompositeDataSource(
     private val localDataSource: LocalDataSource,
@@ -62,4 +64,6 @@ class CompositeDataSource(
     private suspend fun updateMemory() {
         memoryCache.put(Api.Todo.TASKS, localDataSource.getAll().map { it.toDomain() })
     }
+
+    override suspend fun sse(): Flow<ServerSentEvent> = apiDataSource.sse()
 }

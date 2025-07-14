@@ -44,7 +44,6 @@ class ToDoApplication : Application() {
 
         DI.copyToClipBoardHelper = CopyToClipBoardHelper(this)
 
-        DI.client = createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
         DI.ioDispatcher = Dispatchers.IO
     }
 }

@@ -8,7 +8,6 @@ import com.marzec.logger.Logger
 import todo.multiplatformutils.generated.resources.Res
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType

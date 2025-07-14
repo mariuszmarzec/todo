@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.marzec.navigation.NavigationStore
@@ -16,6 +17,10 @@ import com.marzec.view.NavigationHost
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {
+
+    LaunchedEffect(Unit) {
+        DI.todoRepository.receiveSse()
+    }
 
     CompositionLocalProvider(
         LocalScrollStateMap provides DI.scrollStateCache,

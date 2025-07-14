@@ -37,6 +37,7 @@ import com.marzec.navigation.NavigationEntryCache
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
+import com.marzec.network.createHttpClient
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.preferences.StateCache
 import com.marzec.repository.LoginRepository
@@ -94,6 +95,9 @@ import com.marzec.view.DatePickerStore
 import com.marzec.view.initialState
 import com.marzec.view.navigationStore
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.sse.SSE
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -276,18 +280,18 @@ object DI {
         cacheKey: String
     ): TasksStore {
         val changePriorityDelegate = ChangePriorityDelegateImpl<TasksScreenState>(
-            provideTodoRepository()
+            todoRepository
         )
         return TasksStore(
             navigationStore = navigationStore,
-            todoRepository = provideTodoRepository(),
+            todoRepository = todoRepository,
             loginRepository = loginRepository,
             stateCache = stateCache,
             cacheKey = cacheKey,
             urlDelegate = UrlDelegateImpl<TasksScreenState>(openUrlHelper),
             dialogDelegate = DialogDelegateImpl<Int, TasksScreenState>(),
             removeTaskDelegate = RemoveTaskDelegateImpl<TasksScreenState>(
-                provideTodoRepository()
+                todoRepository
             ),
             changePriorityDelegate = changePriorityDelegate,
             searchDelegate = SearchDelegateImpl<TasksScreenState>(),
@@ -341,7 +345,7 @@ object DI {
             taskId = taskId,
             parentTaskId = parentTaskId
         ),
-        todoRepository = provideTodoRepository(),
+        todoRepository = todoRepository,
     )
 
     @Composable
@@ -362,19 +366,19 @@ object DI {
         cacheKey: String
     ): TaskDetailsStore {
         val changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(
-            provideTodoRepository()
+            todoRepository
         )
         return TaskDetailsStore(
             scope = scope,
             navigationStore = navigationStore,
-            todoRepository = provideTodoRepository(),
+            todoRepository = todoRepository,
             stateCache = stateCache,
             cacheKey = cacheKey,
             initialState = TaskDetailsState.INITIAL,
             taskId = taskId,
             copyToClipBoardHelper = copyToClipBoardHelper,
             dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
-            removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(provideTodoRepository()),
+            removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(todoRepository),
             urlDelegate = UrlDelegateImpl<TaskDetailsState>(openUrlHelper),
             changePriorityDelegate = changePriorityDelegate,
             selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
@@ -407,7 +411,7 @@ object DI {
     ) = AddSubTaskStore(
         scope = scope,
         navigationStore = navigationStore,
-        todoRepository = provideTodoRepository(),
+        todoRepository = todoRepository,
         stateCache = stateCache,
         cacheKey = cacheKey,
         initialState = AddSubTaskData.INITIAL,
@@ -544,7 +548,31 @@ object DI {
             )
         )
 
-    lateinit var client: HttpClient
+    val client: HttpClient by lazy {
+        createHttpClient(
+            fileCache = fileCache,
+            authorizationHeader = Api.Headers.AUTHORIZATION,
+            preferencesHeaderKey = PreferencesKeys.AUTHORIZATION
+        )
+    }
+
+    val sseClient: HttpClient by lazy {
+        createHttpClient(
+            fileCache = fileCache,
+            authorizationHeader = Api.Headers.AUTHORIZATION,
+            preferencesHeaderKey = PreferencesKeys.AUTHORIZATION
+        ) {
+            install(SSE)
+            install(HttpTimeout) {
+                connectTimeoutMillis = 60 * 60 * 1000L
+                socketTimeoutMillis = 60 * 60 * 1000L
+                connectTimeoutMillis = 60 * 60 * 1000L
+            }
+            install(HttpRequestRetry) {
+                retryOnServerErrors()
+            }
+        }
+    }
 
     val loginRepository: LoginRepository by lazy {
         if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(
@@ -575,11 +603,14 @@ object DI {
         LocalDataSource(fileCache).apply { runBlocking { init() } }
     }
 
-    private fun provideTodoRepository() = TodoRepository(
-        dataSource = provideDataSource(),
-        memoryCache = memoryCache,
-        dispatcher = ioDispatcher
-    )
+    val todoRepository by lazy {
+        TodoRepository(
+            dataSource = provideDataSource(),
+            memoryCache = memoryCache,
+            fileCache = fileCache,
+            dispatcher = ioDispatcher
+        )
+    }
 
     private fun provideDataSource(): DataSource {
         return if (isJustLocalStorageMode) {
@@ -587,11 +618,19 @@ object DI {
         } else if (quickCacheEnabled) {
             CompositeDataSource(
                 localDataSource,
-                ApiDataSource(client, provideCommonDataSource()),
+                ApiDataSource(
+                    client,
+                    sseClient,
+                    provideCommonDataSource()
+                ),
                 memoryCache,
             ).apply { runBlocking { init() } }
         } else {
-            ApiDataSource(client, provideCommonDataSource())
+            ApiDataSource(
+                client,
+                sseClient,
+                provideCommonDataSource()
+            )
         }
     }
 
@@ -629,7 +668,7 @@ object DI {
     )
 
     private fun provideScheduledOptions() = PickItemOptions(
-        loadData = { provideTodoRepository().observeScheduledTasks() },
+        loadData = { todoRepository.observeScheduledTasks() },
         mapItemToId = { it.id.toString() },
         itemRow = { item, _ ->
             Row(
@@ -684,6 +723,8 @@ object Api {
             "$BASE/tasks/$taskId?removeWithSubtasks=$removeWithSubtasks"
 
         val FEATURE_TOGGLES = "$HOST/fiteo/api/$CURRENT_API_VERSION/feature_toggles"
+
+        val SSE = "$HOST/sse"
     }
 
     object Headers {
@@ -714,5 +755,4 @@ private class MockFeatureToggleDataSource : CrudDataSource<Int, FeatureToggleDto
     override suspend fun getById(id: Int): FeatureToggleDto {
         throw UnsupportedOperationException()
     }
-
 }

@@ -12,7 +12,6 @@ import com.marzec.cache.MemoryCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.logger.Logger
-import com.marzec.network.createHttpClient
 import com.marzec.resource.ResourceLoaderImpl
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
@@ -55,8 +54,6 @@ fun main() {
 
     DI.resourceLoader = ResourceLoaderImpl()
 
-    DI.client =
-        createHttpClient(DI.fileCache, Api.Headers.AUTHORIZATION, PreferencesKeys.AUTHORIZATION)
     DI.ioDispatcher = Dispatchers.IO
 
     application {

@@ -1,8 +1,10 @@
 package com.marzec.todo.repository
 
 import com.marzec.cache.Cache
+import com.marzec.cache.FileCache
 import com.marzec.cache.asContentWithListUpdate
 import com.marzec.cache.cacheCall
+import com.marzec.cache.observeTyped
 import com.marzec.content.Content
 import com.marzec.content.asContent
 import com.marzec.content.ifDataSuspend
@@ -10,14 +12,12 @@ import com.marzec.content.mapData
 import com.marzec.dto.NullableFieldDto
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
-import com.marzec.repository.CrudRepository
 import com.marzec.todo.Api
+import com.marzec.todo.PreferencesKeys
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.MarkAsToDoDto
-import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTask
-import com.marzec.todo.model.CreateTask
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.UpdateTask
@@ -29,16 +29,17 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-
-typealias TodoCrudRepository = CrudRepository<Int, Task, CreateTask, UpdateTask, TaskDto, CreateTaskDto, UpdateTaskDto>
+import kotlinx.coroutines.flow.mapLatest
 
 class TodoRepository(
     private val dataSource: DataSource,
     private val memoryCache: Cache,
+    private val fileCache: FileCache,
     private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -64,7 +65,7 @@ class TodoRepository(
             }
         }
 
-    suspend fun addNewTask(
+    fun addNewTask(
         description: String,
         parentTaskId: Int?,
         highestPriorityAsDefault: Boolean,
@@ -81,7 +82,7 @@ class TodoRepository(
             )
         }
 
-    suspend fun addNewTasks(
+    fun addNewTasks(
         highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
         descriptions: List<String>,
@@ -100,7 +101,7 @@ class TodoRepository(
             }
         }
 
-    suspend fun updateTask(
+    fun updateTask(
         taskId: Int,
         task: UpdateTask
     ): Flow<Content<Unit>> =
@@ -108,7 +109,7 @@ class TodoRepository(
             dataSource.update(taskId, task.toDto())
         }
 
-    suspend fun markAsDone(taskId: Int): Flow<Content<Unit>> =
+    fun markAsDone(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.markAsToDo(
                 MarkAsToDoDto(
@@ -119,7 +120,7 @@ class TodoRepository(
         }
 
 
-    suspend fun markAsDone(taskIds: List<Int>): Flow<Content<Unit>> =
+    fun markAsDone(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.markAsToDo(
                 MarkAsToDoDto(
@@ -129,7 +130,7 @@ class TodoRepository(
             )
         }
 
-    suspend fun markAsToDo(taskId: Int): Flow<Content<Unit>> =
+    fun markAsToDo(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.markAsToDo(
                 MarkAsToDoDto(
@@ -140,7 +141,7 @@ class TodoRepository(
         }
 
 
-    suspend fun markAsToDo(taskIds: List<Int>): Flow<Content<Unit>> =
+    fun markAsToDo(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.markAsToDo(
                 MarkAsToDoDto(
@@ -150,7 +151,7 @@ class TodoRepository(
             )
         }
 
-    suspend fun pinTask(
+    fun pinTask(
         task: Task,
         parentTaskId: Int?
     ): Flow<Content<Unit>> =
@@ -163,7 +164,7 @@ class TodoRepository(
             )
         }
 
-    suspend fun pinAllTasks(
+    fun pinAllTasks(
         tasks: List<Task>,
         parentTaskId: Int?
     ): Flow<Content<Unit>> =
@@ -178,7 +179,7 @@ class TodoRepository(
             }
         }
 
-    suspend fun reorderByPriority(
+    fun reorderByPriority(
         tasks: List<Task>
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
@@ -192,12 +193,12 @@ class TodoRepository(
             }
         }
 
-    suspend fun removeTask(taskId: Int): Flow<Content<Unit>> =
+    fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.removeTask(taskId)
         }
 
-    suspend fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
+    fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             taskIds.forEach {
                 dataSource.removeTask(it)
@@ -239,7 +240,7 @@ class TodoRepository(
         networkCall: suspend () -> Content<T>
     ): Flow<Content<T>> = cacheCall(key, dispatcher, memoryCache, networkCall)
 
-    suspend fun schedule(tasks: List<Task>, scheduler: Scheduler): Flow<Content<Unit>> =
+    fun schedule(tasks: List<Task>, scheduler: Scheduler): Flow<Content<Unit>> =
         asContentWithListUpdate {
             val scope = CoroutineScope(coroutineContext + dispatcher + SupervisorJob())
             tasks.map {
@@ -255,4 +256,19 @@ class TodoRepository(
     private fun asContentWithListUpdate(
         request: suspend () -> Unit
     ) = asContentWithListUpdate(dispatcher, ::refreshListsCache, request)
+
+    suspend fun receiveSse() {
+        fileCache.observeTyped<String>(PreferencesKeys.AUTHORIZATION).flatMapLatest {
+            if(it?.isNotEmpty() == true) {
+                dataSource.sse()
+            } else {
+                flowOf(null)
+            }
+        }.filterNotNull().collect {
+            println(it)
+            if (it.data.equals("update", ignoreCase = true)) {
+                refreshListsCache()
+            }
+        }
+    }
 }

@@ -16,11 +16,14 @@ import com.marzec.todo.extensions.flatMapTaskDto
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.highestPriorityAsDefault
 import com.marzec.todo.model.toDomain
+import io.ktor.sse.ServerSentEvent
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.serialization.Serializable
@@ -235,6 +238,8 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             )
         )
     }
+
+    override suspend fun sse(): Flow<ServerSentEvent> = flowOf()
 
     private suspend fun <T> update(action: suspend () -> T): T =
         synchronized(finally = { updateStorage() }) {
