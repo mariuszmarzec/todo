@@ -1,5 +1,6 @@
 package com.marzec.todo.network
 
+import com.marzec.logger.Logger
 import com.marzec.todo.Api
 import com.marzec.todo.api.MarkAsToDoDto
 import io.ktor.client.HttpClient
@@ -9,6 +10,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.sse.ServerSentEvent
+import kotlin.math.log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import com.marzec.todo.Api.Todo.SSE as SSE_PATH
@@ -16,17 +18,22 @@ import com.marzec.todo.Api.Todo.SSE as SSE_PATH
 class ApiDataSource(
     private val client: HttpClient,
     private val sseClient: HttpClient,
-    private val commonDataSource: CommonTodoDataSource
+    private val commonDataSource: CommonTodoDataSource,
+    private val logger: Logger,
 ) : DataSource, CommonTodoDataSource by commonDataSource {
 
     override suspend fun sse(): Flow<ServerSentEvent> {
         return flow {
-            sseClient.sse(
-                urlString = SSE_PATH,
-            ) {
-                incoming.collect {
-                    this@flow.emit(it)
+            try {
+                sseClient.sse(
+                    urlString = SSE_PATH,
+                ) {
+                    incoming.collect {
+                        this@flow.emit(it)
+                    }
                 }
+            } catch (e: Exception) {
+                logger.log("SSE", e.message.orEmpty(), e)
             }
         }
     }

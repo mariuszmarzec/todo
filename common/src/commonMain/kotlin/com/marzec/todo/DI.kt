@@ -621,7 +621,8 @@ object DI {
                 ApiDataSource(
                     client,
                     sseClient,
-                    provideCommonDataSource()
+                    provideCommonDataSource(),
+                    logger
                 ),
                 memoryCache,
             ).apply { runBlocking { init() } }
@@ -629,7 +630,8 @@ object DI {
             ApiDataSource(
                 client,
                 sseClient,
-                provideCommonDataSource()
+                provideCommonDataSource(),
+                logger
             )
         }
     }
