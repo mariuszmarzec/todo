@@ -5,9 +5,12 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import com.marzec.common.OpenUrlHelper
 import com.marzec.todo.screen.main.HomeScreenSaveable
 import kotlinx.coroutines.launch
@@ -29,10 +32,11 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             MaterialTheme(colors = lightColors()) {
+                Box(Modifier.safeDrawingPadding()) {
+                    DI.navigationScope = rememberCoroutineScope()
 
-                DI.navigationScope = rememberCoroutineScope()
-
-                HomeScreenSaveable()
+                    HomeScreenSaveable()
+                }
             }
         }
     }

@@ -37,6 +37,7 @@ kotlin {
                 api(libs.quickMvi)
                 api(libs.quickMvi.compose)
                 implementation(libs.kotlinDateTime)
+                implementation(libs.compose.icons)
             }
         }
         val desktopTest by getting {

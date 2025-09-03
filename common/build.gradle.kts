@@ -52,6 +52,7 @@ kotlin {
                 api(libs.ktorSerialization)
                 api(libs.serializationJson)
                 implementation(libs.kotlinDateTime)
+                implementation(libs.compose.icons)
             }
         }
         named("desktopTest") {

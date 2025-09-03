@@ -3,9 +3,12 @@ package com.marzec.todo
 import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.util.Log
 import androidx.core.content.getSystemService
-import androidx.datastore.preferences.createDataStore
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.logger.Logger
 import com.marzec.cache.PreferencesCache
@@ -38,7 +41,7 @@ class ToDoApplication : Application() {
         DI.resultMemoryCache = MemoryCache()
 
         DI.fileCache = PreferencesCache(
-            createDataStore(name = "user_preferences"),
+            dataStore,
             Json
         )
 
@@ -47,3 +50,5 @@ class ToDoApplication : Application() {
         DI.ioDispatcher = Dispatchers.IO
     }
 }
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")

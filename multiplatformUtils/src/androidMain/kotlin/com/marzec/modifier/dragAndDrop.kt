@@ -45,19 +45,13 @@ actual fun Modifier.dragAndDrop(
             }
         }
     )
-    .dragAndDropSource {
-        detectTapGestures(
-            onLongPress = {
-                startTransfer(
-                    DragAndDropTransferData(
-                        ClipData(
-                            "",
-                            arrayOf(),
-                            ClipData.Item("")
-                        ),
-                        localState = index
-                    )
-                )
-            }
+    .dragAndDropSource { _ ->
+        DragAndDropTransferData(
+            ClipData(
+                "",
+                arrayOf(),
+                ClipData.Item("")
+            ),
+            localState = index
         )
     }
