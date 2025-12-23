@@ -27,6 +27,7 @@ data class SchedulerState(
     val additionalOptionsAvailable: Boolean = false,
     val removeAfterSchedule: Boolean = true,
     val highestPriorityAsDefault: Boolean = false,
+    val showNotification: Boolean = false,
     val error: String = ""
 ) : WithDate<SchedulerState> {
 
@@ -52,7 +53,8 @@ data class SchedulerState(
                 dayOfMonth = (scheduler as? Scheduler.Monthly)?.dayOfMonth ?: 1,
                 additionalOptionsAvailable = additionalOptionsAvailable,
                 removeAfterSchedule = (scheduler as? Scheduler.OneShot)?.removeScheduled ?: true,
-                highestPriorityAsDefault = scheduler.highestPriorityAsDefault
+                highestPriorityAsDefault = scheduler.highestPriorityAsDefault,
+                showNotification = scheduler.showNotification,
             )
         } ?: INITIAL.copy(additionalOptionsAvailable = additionalOptionsAvailable)
     }
@@ -90,7 +92,8 @@ class SchedulerStore(
                 startDate = state.date,
                 lastDate = null,
                 highestPriorityAsDefault = state.highestPriorityAsDefault,
-                removeScheduled = state.removeAfterSchedule
+                removeScheduled = state.removeAfterSchedule,
+                showNotification = state.showNotification,
             )
 
             SchedulerType.Weekly -> Scheduler.Weekly(
@@ -102,7 +105,8 @@ class SchedulerStore(
                 daysOfWeek = state.daysOfWeek,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
                 repeatInEveryPeriod = state.repeatInEveryPeriod,
-                highestPriorityAsDefault = state.highestPriorityAsDefault
+                highestPriorityAsDefault = state.highestPriorityAsDefault,
+                showNotification = state.showNotification,
             )
 
             SchedulerType.Monthly -> Scheduler.Monthly(
@@ -114,7 +118,8 @@ class SchedulerStore(
                 dayOfMonth = state.dayOfMonth,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
                 repeatInEveryPeriod = state.repeatInEveryPeriod,
-                highestPriorityAsDefault = state.highestPriorityAsDefault
+                highestPriorityAsDefault = state.highestPriorityAsDefault,
+                showNotification = state.showNotification,
             )
         }
         navigationStore.goBack(scheduler)
@@ -175,4 +180,7 @@ class SchedulerStore(
 
     fun toggleRemoveAfterSchedule() =
         reducerIntent { state.copy(removeAfterSchedule = !state.removeAfterSchedule) }
+
+    fun toggleShowNotification() =
+        reducerIntent { state.copy(showNotification = !state.showNotification) }
 }

@@ -81,7 +81,7 @@ fun getRemoveScheduled(options: Map<String, String>?) =
         ?: Scheduler.REMOVE_SCHEDULED
 
 fun getShowNotification(options: Map<String, String>?) =
-    options?.get(Scheduler.OneShot::showNotification.name)?.toBooleanStrictOrNull()
+    options?.get(Scheduler::showNotification.name)?.toBooleanStrictOrNull()
         ?: Scheduler.SHOW_NOTIFICATION
 
 sealed class Scheduler(
@@ -93,7 +93,7 @@ sealed class Scheduler(
     open val repeatCount: Int = DEFAULT_REPEAT_COUNT,
     open val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
     open val highestPriorityAsDefault: Boolean,
-    open val showNotification: Boolean,
+    open val showNotification: Boolean = false,
 ) {
     data class OneShot(
         override val hour: Int,
@@ -105,7 +105,7 @@ sealed class Scheduler(
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
         override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT,
         val removeScheduled: Boolean = REMOVE_SCHEDULED,
-        override val showNotification: Boolean = SHOW_NOTIFICATION,
+        override val showNotification: Boolean,
     ) : Scheduler(
         hour,
         minute,

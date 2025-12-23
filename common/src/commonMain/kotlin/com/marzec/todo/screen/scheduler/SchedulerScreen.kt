@@ -148,6 +148,18 @@ fun SchedulerScreen(
                     }
                 }
             }
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = state.showNotification,
+                    onCheckedChange = { store.toggleShowNotification() }
+                )
+                TextButton({ store.toggleShowNotification() }) {
+                    Text("Show notification")
+                }
+            }
         }
         Box(Modifier.padding(16.dp)) {
             Text(state.error)

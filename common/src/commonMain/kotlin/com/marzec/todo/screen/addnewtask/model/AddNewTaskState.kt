@@ -19,13 +19,20 @@ data class AddNewTaskState(
 
     val schedulerWithOptions: Scheduler?
         get() = when (scheduler) {
-            is Scheduler.Monthly -> scheduler.copy(highestPriorityAsDefault = highestPriorityAsDefault)
+            is Scheduler.Monthly -> scheduler.copy(
+                highestPriorityAsDefault = highestPriorityAsDefault,
+                showNotification = showNotification,
+            )
             is Scheduler.OneShot -> scheduler.copy(
                 highestPriorityAsDefault = highestPriorityAsDefault,
-                removeScheduled = removeAfterSchedule
+                removeScheduled = removeAfterSchedule,
+                        showNotification = showNotification,
             )
 
-            is Scheduler.Weekly -> scheduler.copy(highestPriorityAsDefault = highestPriorityAsDefault)
+            is Scheduler.Weekly -> scheduler.copy(
+                highestPriorityAsDefault = highestPriorityAsDefault,
+                showNotification = showNotification,
+            )
             else -> null
         }
 

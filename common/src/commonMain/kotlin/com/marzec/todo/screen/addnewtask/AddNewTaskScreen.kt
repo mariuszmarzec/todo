@@ -119,6 +119,21 @@ fun AddNewTaskScreen(
                             }
                         }
                     }
+                    if (state.data.scheduler != null) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = state.data.showNotification,
+                                onCheckedChange = { store.toggleShowNotification() }
+                            )
+                            TextButton({ store.toggleShowNotification() }) {
+                                Text("Show notification")
+                            }
+                        }
+
+                    }
                 }
             }
 

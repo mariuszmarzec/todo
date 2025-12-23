@@ -54,7 +54,7 @@ class AddNewTaskStore(
                                 parentTaskId = null
                             )
                         ) { result ->
-                            copy(
+                                copy(
                                 taskId = result.data.id,
                                 task = result.data,
                                 parentTaskId = result.data.parentTaskId,
@@ -65,7 +65,9 @@ class AddNewTaskStore(
                                 highestPriorityAsDefault = result.data.scheduler?.highestPriorityAsDefault
                                     ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT,
                                 removeAfterSchedule = (result.data.scheduler as? Scheduler.OneShot)?.removeScheduled
-                                    ?: Scheduler.REMOVE_SCHEDULED
+                                    ?: Scheduler.REMOVE_SCHEDULED,
+                                showNotification = result.data.scheduler?.showNotification
+                                    ?: Scheduler.SHOW_NOTIFICATION
                             )
                         }
                     } ?: state
@@ -173,6 +175,12 @@ class AddNewTaskStore(
     fun toggleRemoveAfterSchedule() = intent<Unit> {
         reducer {
             state.reduceData { copy(removeAfterSchedule = !removeAfterSchedule) }
+        }
+    }
+
+    fun toggleShowNotification() = reducerIntent {
+        state.reduceData {
+            copy(showNotification = !showNotification)
         }
     }
 
