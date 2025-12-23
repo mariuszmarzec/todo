@@ -13,6 +13,7 @@ data class AddNewTaskState(
     val description: String,
     val highestPriorityAsDefault: Boolean,
     val removeAfterSchedule: Boolean,
+    val showNotification: Boolean,
     val scheduler: Scheduler? = null
 ) {
 
@@ -41,7 +42,8 @@ data class AddNewTaskState(
             priority = 0,
             isToDo = true,
             highestPriorityAsDefault = false,
-            removeAfterSchedule = false
+            removeAfterSchedule = false,
+            showNotification = false,
         )
 
         fun initial(

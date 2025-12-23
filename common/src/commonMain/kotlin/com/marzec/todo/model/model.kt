@@ -33,7 +33,8 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         startDate = startDate.toLocalDateTime(),
         lastDate = lastDate?.toLocalDateTime(),
         highestPriorityAsDefault = highestPriorityAsDefault,
-        removeScheduled = removeScheduled
+        removeScheduled = removeScheduled,
+        showNotification = showNotification,
     )
     Scheduler.Weekly::class.simpleName -> Scheduler.Weekly(
         hour = hour,
@@ -44,7 +45,8 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         daysOfWeek = daysOfWeek.map { DayOfWeek(it) },
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
-        highestPriorityAsDefault = highestPriorityAsDefault
+        highestPriorityAsDefault = highestPriorityAsDefault,
+        showNotification = showNotification,
     )
     Scheduler.Monthly::class.simpleName -> Scheduler.Monthly(
         hour = hour,
@@ -55,7 +57,8 @@ fun SchedulerDto.toDomain(): Scheduler = when (type) {
         dayOfMonth = dayOfMonth,
         repeatInEveryPeriod = repeatInEveryPeriod,
         repeatCount = repeatCount,
-        highestPriorityAsDefault = highestPriorityAsDefault
+        highestPriorityAsDefault = highestPriorityAsDefault,
+        showNotification = showNotification,
     )
     else -> throw IllegalArgumentException("Unknown type of scheduler")
 }
@@ -66,6 +69,9 @@ val SchedulerDto.highestPriorityAsDefault: Boolean
 val SchedulerDto.removeScheduled: Boolean
     get() = getRemoveScheduled(options)
 
+val SchedulerDto.showNotification: Boolean
+    get() = getShowNotification(options)
+
 fun getHighestPriorityAsDefault(options: Map<String, String>?) =
     options?.get(Scheduler::highestPriorityAsDefault.name)?.toBooleanStrictOrNull()
         ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT
@@ -73,6 +79,10 @@ fun getHighestPriorityAsDefault(options: Map<String, String>?) =
 fun getRemoveScheduled(options: Map<String, String>?) =
     options?.get(Scheduler.OneShot::removeScheduled.name)?.toBooleanStrictOrNull()
         ?: Scheduler.REMOVE_SCHEDULED
+
+fun getShowNotification(options: Map<String, String>?) =
+    options?.get(Scheduler.OneShot::showNotification.name)?.toBooleanStrictOrNull()
+        ?: Scheduler.SHOW_NOTIFICATION
 
 sealed class Scheduler(
     open val hour: Int,
@@ -82,7 +92,8 @@ sealed class Scheduler(
     open val lastDate: LocalDateTime?,
     open val repeatCount: Int = DEFAULT_REPEAT_COUNT,
     open val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
-    open val highestPriorityAsDefault: Boolean
+    open val highestPriorityAsDefault: Boolean,
+    open val showNotification: Boolean,
 ) {
     data class OneShot(
         override val hour: Int,
@@ -93,9 +104,18 @@ sealed class Scheduler(
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
         override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT,
-        val removeScheduled: Boolean = REMOVE_SCHEDULED
+        val removeScheduled: Boolean = REMOVE_SCHEDULED,
+        override val showNotification: Boolean = SHOW_NOTIFICATION,
     ) : Scheduler(
-        hour, minute, creationDate, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
+        hour,
+        minute,
+        creationDate,
+        startDate,
+        lastDate,
+        repeatCount,
+        repeatInEveryPeriod,
+        highestPriorityAsDefault,
+        showNotification
     )
 
     data class Weekly(
@@ -107,9 +127,18 @@ sealed class Scheduler(
         override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
-        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT
+        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT,
+        override val showNotification: Boolean = SHOW_NOTIFICATION,
     ) : Scheduler(
-        hour, minute, creationDate, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
+        hour = hour,
+        minute = minute,
+        creationDate = creationDate,
+        startDate = startDate,
+        lastDate = lastDate,
+        repeatCount = repeatCount,
+        repeatInEveryPeriod = repeatInEveryPeriod,
+        highestPriorityAsDefault = highestPriorityAsDefault,
+        showNotification = showNotification,
     )
 
     data class Monthly(
@@ -121,9 +150,18 @@ sealed class Scheduler(
         override val lastDate: LocalDateTime?,
         override val repeatCount: Int = DEFAULT_REPEAT_COUNT,
         override val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
-        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT
+        override val highestPriorityAsDefault: Boolean = HIGHEST_PRIORITY_AS_DEFAULT,
+        override val showNotification: Boolean = SHOW_NOTIFICATION,
     ) : Scheduler(
-        hour, minute, creationDate, startDate, lastDate, repeatCount, repeatInEveryPeriod, highestPriorityAsDefault
+        hour,
+        minute,
+        creationDate,
+        startDate,
+        lastDate,
+        repeatCount,
+        repeatInEveryPeriod,
+        highestPriorityAsDefault,
+        showNotification
     )
 
     companion object {
@@ -131,12 +169,14 @@ sealed class Scheduler(
         const val DEFAULT_REPEAT_IN_EVERY_PERIOD = 1
         const val HIGHEST_PRIORITY_AS_DEFAULT = false
         const val REMOVE_SCHEDULED = false
+        const val SHOW_NOTIFICATION = false
     }
 }
 
 private fun Scheduler.optionsToMap(): Map<String, String>? =
     listOfNotNull(
-        takeIfNotDefault(Scheduler::highestPriorityAsDefault, Scheduler.HIGHEST_PRIORITY_AS_DEFAULT)
+        takeIfNotDefault(Scheduler::highestPriorityAsDefault, Scheduler.HIGHEST_PRIORITY_AS_DEFAULT),
+        takeIfNotDefault(Scheduler::showNotification, Scheduler.SHOW_NOTIFICATION),
     ).toMap()
         .takeIf { it.isNotEmpty() }
 
@@ -144,6 +184,7 @@ private fun Scheduler.OneShot.optionsToMap(): Map<String, String>? =
     listOfNotNull(
         takeIfNotDefault(Scheduler::highestPriorityAsDefault, Scheduler.HIGHEST_PRIORITY_AS_DEFAULT),
         takeIfNotDefault(Scheduler.OneShot::removeScheduled, Scheduler.REMOVE_SCHEDULED),
+        takeIfNotDefault(Scheduler::showNotification, Scheduler.SHOW_NOTIFICATION),
     ).toMap()
         .takeIf { it.isNotEmpty() }
 
