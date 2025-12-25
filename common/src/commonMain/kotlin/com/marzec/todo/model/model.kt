@@ -93,7 +93,7 @@ sealed class Scheduler(
     open val repeatCount: Int = DEFAULT_REPEAT_COUNT,
     open val repeatInEveryPeriod: Int = DEFAULT_REPEAT_IN_EVERY_PERIOD,
     open val highestPriorityAsDefault: Boolean,
-    open val showNotification: Boolean = false,
+    open val showNotification: Boolean = SHOW_NOTIFICATION,
 ) {
     data class OneShot(
         override val hour: Int,
