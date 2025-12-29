@@ -19,6 +19,7 @@ datastore = "1.1.7"
 detekt = "1.18.1"
 atomicfu = "0.29.0"
 googleServices = "4.3.10"
+firebaseBom = "34.7.0"
 glide = "1.0.0-alpha.1"
 exoPlayer = "2.18.5"
 vlc = "4.7.0"
@@ -60,6 +61,8 @@ compose-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose",
 compose-icons = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "composeIcons" }
 quickMvi = {module = "io.github.mariuszmarzec:quickmvi", version.ref = "quickMvi" }
 quickMvi-compose = {module = "io.github.mariuszmarzec:quickmvi-compose", version.ref = "quickMvi" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-fcm = { module = "com.google.firebase:firebase-messaging" }
 
 plugin-composeGradle = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composePlugin" }
 plugin-androidBuild = { module = "com.android.tools.build:gradle", version.ref = "androidGradleplugin" }

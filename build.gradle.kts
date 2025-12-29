@@ -20,8 +20,7 @@ buildscript {
         classpath(libs.plugin.buildKonfig)
         classpath(libs.plugin.detekt)
         classpath(libs.plugin.atomic)
-        // TODO wait for stable 7.3 AGP
-//        classpath(libs.googleServices)
+        classpath(libs.googleServices)
     }
 }
 

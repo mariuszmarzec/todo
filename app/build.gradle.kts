@@ -79,6 +79,8 @@ dependencies {
     implementation(compose.ui)
     implementation(compose.uiTooling)
     implementation(compose.foundation)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.fcm)
 
 }
 
