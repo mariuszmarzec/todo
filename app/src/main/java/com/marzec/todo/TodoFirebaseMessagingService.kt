@@ -9,9 +9,13 @@ import com.google.firebase.messaging.RemoteMessage
 import com.marzec.todo.api.TaskDto
 import android.content.Intent
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 class TodoFirebaseMessagingService : FirebaseMessagingService() {
+
+    private val coroutineScope = CoroutineScope(DI.ioDispatcher)
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         // 1. Check if the message contains data
@@ -61,6 +65,9 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        coroutineScope.launch {
+            DI.deviceTokenRepository.saveToken(token)
+        }
     }
 
 
