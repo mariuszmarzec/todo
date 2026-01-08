@@ -13,6 +13,7 @@ import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.logger.Logger
 import com.marzec.resource.ResourceLoaderImpl
+import com.marzec.todo.repository.NoOpDeviceTokenRepositoryImpl
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
 import java.net.URI
@@ -45,6 +46,8 @@ fun main() {
         },
         MemoryCache()
     )
+
+    DI.deviceTokenRepository = NoOpDeviceTokenRepositoryImpl()
 
     DI.copyToClipBoardHelper = CopyToClipBoardHelper()
 

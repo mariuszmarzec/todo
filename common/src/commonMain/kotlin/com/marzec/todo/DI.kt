@@ -68,6 +68,7 @@ import com.marzec.todo.network.CommonTodoDataSource
 import com.marzec.todo.network.CompositeDataSource
 import com.marzec.todo.network.DataSource
 import com.marzec.todo.network.LocalDataSource
+import com.marzec.todo.repository.DeviceTokenRepository
 import com.marzec.todo.repository.TodoRepository
 import com.marzec.todo.screen.addnewtask.AddNewTaskScreen
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
@@ -123,6 +124,8 @@ object DI {
 
     lateinit var memoryCache: Cache
     lateinit var resultMemoryCache: Cache
+
+    lateinit var deviceTokenRepository: DeviceTokenRepository
 
     lateinit var resourceLoader: ResourceLoader
 

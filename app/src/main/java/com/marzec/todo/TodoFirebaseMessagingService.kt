@@ -58,4 +58,10 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
 
         notificationManager.notify(task.id.hashCode(), builder.build())
     }
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+    }
+
+
 }
