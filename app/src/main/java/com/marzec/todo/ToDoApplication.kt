@@ -46,7 +46,7 @@ class ToDoApplication : Application() {
             Json
         )
 
-        DI.deviceTokenRepository = DeviceTokenRepositoryImpl(DI.fileCache, DI.client)
+        DI.deviceTokenRepository = DeviceTokenRepositoryImpl(DI.fileCache, DI.client, DI.logger)
 
         DI.copyToClipBoardHelper = CopyToClipBoardHelper(this)
 

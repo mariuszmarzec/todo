@@ -9,13 +9,56 @@ import com.google.firebase.messaging.RemoteMessage
 import com.marzec.todo.api.TaskDto
 import android.content.Intent
 import android.content.Context
+import com.marzec.cache.observeTyped
+import com.marzec.todo.repository.DeviceTokenRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 class TodoFirebaseMessagingService : FirebaseMessagingService() {
 
-    private val coroutineScope = CoroutineScope(DI.ioDispatcher)
+    private val fcmToken = MutableStateFlow<String?>(null)
+
+    private val job = SupervisorJob()
+    private val coroutineScope = CoroutineScope(DI.ioDispatcher + job)
+
+    private val deviceTokenRepository: DeviceTokenRepository by lazy {
+        DI.deviceTokenRepository
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        coroutineScope.launch {
+            combine(
+                DI.fileCache.observeTyped<String>(PreferencesKeys.AUTHORIZATION),
+                fcmToken,
+            ) { (authToken, fcmToken) ->
+                authToken to fcmToken
+            }
+                .runningReduce { (oldAuthorization, oldFcmToken), (newAuthorization, newFcmToken) ->
+                    if (oldAuthorization != newAuthorization) {
+                        if (newAuthorization == null) {
+                            deviceTokenRepository.removeCurrentToken()
+                        }
+                        if (oldAuthorization == null && newFcmToken != null) {
+                            deviceTokenRepository.saveToken(newFcmToken)
+                        }
+                    }
+                    if (oldFcmToken != newFcmToken) {
+                        if (newAuthorization != null && newFcmToken != null) {
+                            deviceTokenRepository.saveToken(newFcmToken)
+                        }
+                    }
+                    newAuthorization to newFcmToken
+                }.collect()
+        }
+    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         // 1. Check if the message contains data
@@ -55,9 +98,11 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent) // Open app on click
             .setAutoCancel(true)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val channel = NotificationChannel(channelId, "Tasks", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel =
+            NotificationChannel(channelId, "Tasks", NotificationManager.IMPORTANCE_DEFAULT)
         notificationManager.createNotificationChannel(channel)
 
         notificationManager.notify(task.id.hashCode(), builder.build())
@@ -66,9 +111,12 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         coroutineScope.launch {
-            DI.deviceTokenRepository.saveToken(token)
+            fcmToken.emit(token)
         }
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
 }
