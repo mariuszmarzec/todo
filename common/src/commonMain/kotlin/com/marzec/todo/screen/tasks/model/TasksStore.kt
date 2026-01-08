@@ -30,6 +30,7 @@ import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.navigation.TodoDestination
+import com.marzec.todo.repository.DeviceTokenRepository
 import com.marzec.todo.repository.TodoRepository
 
 class TasksStore(
@@ -38,6 +39,7 @@ class TasksStore(
     private val stateCache: StateCache,
     private val todoRepository: TodoRepository,
     private val loginRepository: LoginRepository,
+    private val deviceTokenRepository: DeviceTokenRepository,
     private val urlDelegate: UrlDelegate,
     private val dialogDelegate: DialogDelegate<Int>,
     private val removeTaskDelegate: RemoveTaskDelegate,
@@ -129,6 +131,7 @@ class TasksStore(
 
     fun logout() = intent<Content<Unit>> {
         onTrigger {
+            deviceTokenRepository.removeCurrentToken()
             loginRepository.logout()
         }
 

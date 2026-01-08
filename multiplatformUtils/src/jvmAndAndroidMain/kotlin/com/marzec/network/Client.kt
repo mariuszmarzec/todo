@@ -13,6 +13,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import okhttp3.logging.HttpLoggingInterceptor
 
 actual fun createHttpClient(
     fileCache: FileCache,
@@ -52,9 +53,9 @@ actual fun createHttpClient(
             }
             response
         }
-//        addNetworkInterceptor(HttpLoggingInterceptor().apply {
-//            level = HttpLoggingInterceptor.Level.BODY
-//        })
+        addNetworkInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
     }
     block()
 }

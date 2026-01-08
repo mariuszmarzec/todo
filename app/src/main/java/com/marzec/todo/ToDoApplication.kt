@@ -9,6 +9,10 @@ import androidx.core.content.getSystemService
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.initialize
+import com.google.firebase.messaging.FirebaseMessaging
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.logger.Logger
 import com.marzec.cache.PreferencesCache
@@ -23,7 +27,6 @@ class ToDoApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
         DI.quickCacheEnabled = false
 
         Logger.logger = object : Logger {

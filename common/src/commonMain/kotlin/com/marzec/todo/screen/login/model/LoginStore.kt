@@ -18,8 +18,10 @@ import com.marzec.repository.LoginRepository
 import com.marzec.screen.featuretoggle.FeatureToggles
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.navigation.TodoDestination
+import com.marzec.todo.repository.DeviceTokenRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.map
 
 @ExperimentalCoroutinesApi
 class LoginStore(
@@ -29,6 +31,7 @@ class LoginStore(
     private val cacheKey: String,
     initialState: State<LoginData>,
     private val loginRepository: LoginRepository,
+    private val deviceTokenRepository: DeviceTokenRepository,
     private val featureTogglePickOptions: PickItemOptions<FeatureToggle>
 ) : Store4Impl<State<LoginData>>(
     scope, stateCache.get(cacheKey) ?: initialState
@@ -50,6 +53,13 @@ class LoginStore(
         }
 
         postSideEffect {
+            intent<Unit> {
+                onTrigger {
+                    deviceTokenRepository.sendCurrentToken()
+                    null
+                }
+            }
+
             navigationStore.next(
                 NavigationAction(
                     TodoDestination.Tasks,

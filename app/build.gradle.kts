@@ -8,8 +8,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("io.gitlab.arturbosch.detekt")
-     // TODO wait for stable 7.3 AGP
-//    id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 }
 
 android {
