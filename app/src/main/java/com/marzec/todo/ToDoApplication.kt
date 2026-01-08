@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import com.marzec.network.createHttpClient
 import com.marzec.cache.MemoryCache
 import com.marzec.resource.ResourceLoaderImpl
+import com.marzec.todo.repository.DeviceTokenRepositoryImpl
 import kotlinx.serialization.json.Json
 
 class ToDoApplication : Application() {
@@ -44,6 +45,8 @@ class ToDoApplication : Application() {
             dataStore,
             Json
         )
+
+        DI.deviceTokenRepository = DeviceTokenRepositoryImpl(DI.fileCache, DI.client)
 
         DI.copyToClipBoardHelper = CopyToClipBoardHelper(this)
 
