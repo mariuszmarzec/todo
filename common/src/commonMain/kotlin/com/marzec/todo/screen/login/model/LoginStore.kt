@@ -53,12 +53,7 @@ class LoginStore(
         }
 
         postSideEffect {
-            intent<Unit> {
-                onTrigger {
-                    deviceTokenRepository.sendCurrentToken()
-                    null
-                }
-            }
+            deviceTokenRepository.sendCurrentToken()
 
             navigationStore.next(
                 NavigationAction(
