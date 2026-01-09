@@ -63,7 +63,7 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
 
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("New Task Scheduled")
+            .setContentTitle("New Task:")
             .setContentText(task.description) // Showing the description field
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent) // Open app on click
