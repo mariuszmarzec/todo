@@ -19,3 +19,13 @@ interface Logger {
         }
     }
 }
+
+class MultiLogger(private val loggers: List<Logger>) : Logger {
+    override fun log(tag: String, message: String) {
+        loggers.forEach { it.log(tag, message) }
+    }
+
+    override fun log(tag: String, message: String, t: Throwable) {
+        loggers.forEach { it.log(tag, message, t) }
+    }
+}

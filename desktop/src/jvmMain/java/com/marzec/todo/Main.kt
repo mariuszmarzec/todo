@@ -12,6 +12,7 @@ import com.marzec.cache.MemoryCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.logger.Logger
+import com.marzec.logger.MultiLogger
 import com.marzec.resource.ResourceLoaderImpl
 import com.marzec.todo.repository.NoOpDeviceTokenRepositoryImpl
 import com.marzec.todo.screen.main.HomeScreen
@@ -25,7 +26,7 @@ import kotlinx.serialization.json.Json
 @ExperimentalCoroutinesApi
 fun main() {
 
-    Logger.logger = object : Logger {
+    val consoleLogger = object : Logger {
         override fun log(tag: String, message: String) {
             println("$tag: $message")
         }
@@ -35,6 +36,7 @@ fun main() {
             t.printStackTrace()
         }
     }
+    Logger.logger = MultiLogger(listOf(consoleLogger))
 
     DI.memoryCache = MemoryCache()
     DI.resultMemoryCache = MemoryCache()
