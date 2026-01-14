@@ -53,9 +53,9 @@ actual fun createHttpClient(
             }
             response
         }
-        addNetworkInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        })
+//        addNetworkInterceptor(HttpLoggingInterceptor().apply {
+//            level = HttpLoggingInterceptor.Level.BODY
+//        })
     }
     block()
 }
