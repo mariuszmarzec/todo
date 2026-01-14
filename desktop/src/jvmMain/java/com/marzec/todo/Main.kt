@@ -17,6 +17,7 @@ import com.marzec.resource.ResourceLoaderImpl
 import com.marzec.todo.repository.NoOpDeviceTokenRepositoryImpl
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
+import java.io.File
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,7 +37,7 @@ fun main() {
             t.printStackTrace()
         }
     }
-    Logger.logger = MultiLogger(listOf(consoleLogger))
+    Logger.logger = MultiLogger(listOf(consoleLogger, FileLogger(File("."))))
 
     DI.memoryCache = MemoryCache()
     DI.resultMemoryCache = MemoryCache()
