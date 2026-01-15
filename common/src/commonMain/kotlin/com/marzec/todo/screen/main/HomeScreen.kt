@@ -17,11 +17,6 @@ import com.marzec.view.NavigationHost
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {
-
-    LaunchedEffect(Unit) {
-        DI.todoRepository.receiveSse()
-    }
-
     CompositionLocalProvider(
         LocalScrollStateMap provides DI.scrollStateCache,
         LocalScrollListStateMap provides DI.listScrollStateCache

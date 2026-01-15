@@ -1,5 +1,6 @@
 package com.marzec.todo
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,8 @@ import java.io.File
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
@@ -61,6 +64,10 @@ fun main() {
     DI.resourceLoader = ResourceLoaderImpl()
 
     DI.ioDispatcher = Dispatchers.IO
+
+    GlobalScope.launch {
+        DI.todoRepository.receiveSse()
+    }
 
     application {
         Window(
