@@ -92,9 +92,16 @@ fun AddNewTaskScreen(
                         }
                     }
                     if (state.data.taskId == null) {
-                        Box(modifier = Modifier.padding(16.dp)) {
-                            TextButton({ store.addManyTasks() }) {
-                                Text("Create tasks line by line")
+                        Row {
+                            Box(modifier = Modifier.padding(16.dp)) {
+                                TextButton({ store.addManyTasks() }) {
+                                    Text("Create tasks line by line")
+                                }
+                            }
+                            Box(modifier = Modifier.padding(16.dp)) {
+                                TextButton({ store.createTree() }) {
+                                    Text("Create tree")
+                                }
                             }
                         }
                     }
