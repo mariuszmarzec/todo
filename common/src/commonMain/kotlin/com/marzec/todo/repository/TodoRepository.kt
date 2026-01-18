@@ -271,4 +271,36 @@ class TodoRepository(
             }
         }
     }
+
+    fun createTaskTree(
+        description: String,
+        parentTaskId: Int?,
+        highestPriorityAsDefault: Boolean,
+        schedulerWithOptions: Scheduler?
+    ): Flow<Content<Unit>> = asContentWithListUpdate {
+        val lines = description.lines().filter { it.isNotBlank() }
+        val levelToParentId = mutableMapOf<Int, Int>()
+
+        lines.forEach { line ->
+            val descriptionWithoutDash = line.trimStart('-')
+            val level = line.length - descriptionWithoutDash.length
+            val taskDescription = descriptionWithoutDash.trim()
+
+            val currentParentTaskId = if (level > 0) {
+                levelToParentId[level - 1]
+            } else {
+                parentTaskId
+            }
+
+            val createdTask = dataSource.create(
+                CreateTaskDto(
+                    description = taskDescription,
+                    parentTaskId = currentParentTaskId,
+                    highestPriorityAsDefault = highestPriorityAsDefault,
+                    scheduler = schedulerWithOptions?.toDto()
+                )
+            )
+            levelToParentId[level] = createdTask.id
+        }
+    }
 }

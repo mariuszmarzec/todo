@@ -233,9 +233,31 @@ class AddNewTaskStore(
         }
     }
 
-    fun createTree() {
-        TODO("Not yet implemented")
+    fun createTree() = intent<Content<Unit>>("createTree") {
+        onTrigger {
+            state.ifDataAvailable {
+                todoRepository.createTaskTree(
+                    description,
+                    parentTaskId,
+                    highestPriorityAsDefault,
+                    schedulerWithOptions
+                )
+            }
+        }
+
+        cancelTrigger(runSideEffectAfterCancel = true) {
+            resultNonNull() is Content.Data
+        }
+
+        reducer {
+            state.reduceContentToLoadingWithNoChanges(resultNonNull())
+        }
+
+        sideEffect {
+            navigateOutAfterCall()
+        }
     }
+
 }
 
 const val REQUEST_KEY_SCHEDULER = 1
