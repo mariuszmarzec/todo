@@ -111,10 +111,6 @@ class DatePickerStore(
     scope, stateCache.get(cacheKey) ?: initialState
 ) {
 
-    init {
-        println("DatePickerStore " + cacheKey)
-    }
-
     fun onYearChange(year: Int) = reducerIntent {
         state.copy(year = year)
     }
