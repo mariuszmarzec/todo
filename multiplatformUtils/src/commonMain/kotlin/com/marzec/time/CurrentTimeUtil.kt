@@ -16,17 +16,17 @@ const val SHORT_DATE_FORMAT = "yyyy-MM-dd"
 
 object CurrentTimeUtil {
 
-    internal var clock = Clock.systemDefaultZone()
+    internal var clock: () -> Clock = { Clock.systemDefaultZone() }
 
     fun setOtherTime(day: Int, month: Int, year: Int) {
         val instant =
             LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant()
-        clock = Clock.fixed(instant, ZoneId.systemDefault())
+        clock = { Clock.fixed(instant, ZoneId.systemDefault()) }
     }
 }
 
 fun currentTime(): LocalDateTime =
-    java.time.LocalDateTime.now(CurrentTimeUtil.clock).toKotlinLocalDateTime()
+    java.time.LocalDateTime.now(CurrentTimeUtil.clock()).toKotlinLocalDateTime()
 
 fun LocalDateTime.withStartOfDay(): LocalDateTime =
     toJavaLocalDateTime()
@@ -37,7 +37,7 @@ fun LocalDateTime.withStartOfDay(): LocalDateTime =
         .toKotlinLocalDateTime()
 
 fun currentMillis(): Long =
-    java.time.LocalDateTime.now(CurrentTimeUtil.clock).toInstant(OffsetDateTime.now().offset)
+    java.time.LocalDateTime.now(CurrentTimeUtil.clock()).toInstant(OffsetDateTime.now().offset)
         .toEpochMilli()
 
 fun LocalDateTime.formatDate(dateFormat: String = DEFAULT_DATE_FORMAT): String =
