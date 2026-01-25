@@ -97,78 +97,54 @@ fun TaskListView(
                         pinned = it.parentTaskId != null
                     )
                 },
+            key = { _, listItem -> listItem.id }
         ) { index, listItem ->
             val id = listItem.id
             val selected = id in selected
-            key(id) {
-                Row(modifier = Modifier
-                    .height(IntrinsicSize.Max)
-                    .fillMaxWidth()
-                    .letIf({ dragEnteredIndex.value == index }) {
-                        background(Color.LightGray)
+            Row(modifier = Modifier
+                .height(IntrinsicSize.Max)
+                .fillMaxWidth()
+                .letIf({ dragEnteredIndex.value == index }) {
+                    background(Color.LightGray)
+                }
+                .dragAndDrop(
+                    index = index,
+                    dragEnteredIndex = dragEnteredIndex,
+                    onDrop = { draggedIndex: Int, targetIndex: Int ->
+                        onDragAndDrop?.invoke(draggedIndex, targetIndex)
                     }
-                    .dragAndDrop(
-                        index = index,
-                        dragEnteredIndex = dragEnteredIndex,
-                        onDrop = { draggedIndex: Int, targetIndex: Int ->
-                            onDragAndDrop?.invoke(draggedIndex, targetIndex)
-                        }
-                    )) {
-                    if (reorderMode) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .width(56.dp)
-                                .background(Color.Gray)
-                        )
-                    }
-                    SelectableRow(
-                        backgroundColor = when {
-                            selected -> Color.Gray
-                            !listItem.isToDo -> Color.LightGray
-                            else -> Color.Transparent
+                )) {
+                if (reorderMode) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(56.dp)
+                            .background(Color.Gray)
+                    )
+                }
+                SelectableRow(
+                    backgroundColor = when {
+                        selected -> Color.Gray
+                        !listItem.isToDo -> Color.LightGray
+                        else -> Color.Transparent
+                    },
+                    selectable = selectable,
+                    selected = selected,
+                    onSelectedChange = { onSelectedChange?.invoke(id) }
+                ) {
+                    TextListItemView(
+                        state = listItem.item,
+                        backgroundColor = Color.Transparent,
+                        onLongClickListener = selectable.ifFalse {
+                            onSelectedChange?.let { { it(id) } }
                         },
-                        selectable = selectable,
-                        selected = selected,
-                        onSelectedChange = { onSelectedChange?.invoke(id) }
+                        onClickListener = selectable.ifFalse {
+                            { onClickListener(it.id.toInt()) }
+                        }
                     ) {
-                        TextListItemView(
-                            state = listItem.item,
-                            backgroundColor = Color.Transparent,
-                            onLongClickListener = selectable.ifFalse {
-                                onSelectedChange?.let { { it(id) } }
-                            },
-                            onClickListener = selectable.ifFalse {
-                                { onClickListener(it.id.toInt()) }
-                            }
-                        ) {
-                            if (showButtonsInColumns) {
-                                if (!reorderMode) {
-                                    Column {
-                                        OpenUrl(listItem.urlToOpen, onOpenUrlClick)
-                                        ShowCheck(
-                                            listItem.id,
-                                            listItem.isToDo,
-                                            onCheckClick,
-                                            onUncheckClick
-                                        )
-                                    }
-                                }
+                        if (showButtonsInColumns) {
+                            if (!reorderMode) {
                                 Column {
-                                    MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
-                                }
-                                if (!reorderMode) {
-                                    Column {
-                                        ManageButtons(
-                                            id,
-                                            pinned = listItem.pinned,
-                                            onRemoveButtonClick,
-                                            onPinButtonClick
-                                        )
-                                    }
-                                }
-                            } else {
-                                if (!reorderMode) {
                                     OpenUrl(listItem.urlToOpen, onOpenUrlClick)
                                     ShowCheck(
                                         listItem.id,
@@ -177,15 +153,38 @@ fun TaskListView(
                                         onUncheckClick
                                     )
                                 }
+                            }
+                            Column {
                                 MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
-                                if (!reorderMode) {
+                            }
+                            if (!reorderMode) {
+                                Column {
                                     ManageButtons(
-                                        id = id,
+                                        id,
                                         pinned = listItem.pinned,
-                                        onRemoveButtonClick = onRemoveButtonClick,
-                                        onPinButtonClick = onPinButtonClick
+                                        onRemoveButtonClick,
+                                        onPinButtonClick
                                     )
                                 }
+                            }
+                        } else {
+                            if (!reorderMode) {
+                                OpenUrl(listItem.urlToOpen, onOpenUrlClick)
+                                ShowCheck(
+                                    listItem.id,
+                                    listItem.isToDo,
+                                    onCheckClick,
+                                    onUncheckClick
+                                )
+                            }
+                            MoveButtons(id, onMoveToTopClick, onMoveToBottomClick)
+                            if (!reorderMode) {
+                                ManageButtons(
+                                    id = id,
+                                    pinned = listItem.pinned,
+                                    onRemoveButtonClick = onRemoveButtonClick,
+                                    onPinButtonClick = onPinButtonClick
+                                )
                             }
                         }
                     }
