@@ -28,6 +28,7 @@ dateTime = "0.4.1"
 viewModel = "2.0.0"
 quickMvi = "1.1.0"
 composeIcons = "1.7.3"
+immutable = "0.4.0"
 
 composePlugin = "1.10.0"
 composeCompiler = "1.5.11"
@@ -49,6 +50,7 @@ androidxAppCompat = { module = "androidx.appcompat:appcompat", version.ref = "ap
 androidMaterial = { module = "com.google.android.material:material", version.ref = "material" }
 activityCompose = { module = "androidx.activity:activity-compose", version.ref = "composePlugin" }
 kotlinDateTime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "dateTime" }
+kotlinImmutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "immutable" }
 googleServices = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 imageLoader = { module = "com.github.bumptech.glide:compose", version.ref = "glide" }
 exoPlayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoPlayer" }
