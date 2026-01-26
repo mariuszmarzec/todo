@@ -1,7 +1,6 @@
 package com.marzec.todo.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
@@ -28,18 +26,16 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.marzec.extensions.applyIf
-import com.marzec.todo.extensions.descriptionWithProgress
-import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.extensions.ifFalse
 import com.marzec.extensions.letIf
 import com.marzec.modifier.dragAndDrop
+import com.marzec.todo.extensions.descriptionWithProgress
+import com.marzec.todo.extensions.filterWithSearch
 import com.marzec.todo.extensions.subDescription
 import com.marzec.todo.extensions.urlToOpen
 import com.marzec.todo.model.Task
@@ -97,10 +93,11 @@ fun TaskListView(
                         pinned = it.parentTaskId != null
                     )
                 },
-            key = { _, listItem -> listItem.id }
+            key = { _, listItem -> "${listItem.id} $selectable $selected $reorderMode" }
         ) { index, listItem ->
             val id = listItem.id
             val selected = id in selected
+
             Row(modifier = Modifier
                 .height(IntrinsicSize.Max)
                 .fillMaxWidth()
