@@ -117,6 +117,14 @@ object DI {
     val logger: Logger by lazy {
         Logger.logger
     }
+
+    val json by lazy {
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
+    }
+
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
     var ioDispatcher: CoroutineDispatcher = Dispatchers.Default
@@ -169,7 +177,7 @@ object DI {
     val featureTogglesManagerInitializer by lazy {
         FeatureTogglesManagerInitializerImpl(
             resourceLoader,
-            Json,
+            DI.json,
             featureToggleRepository,
             memoryCache,
             updaterCoroutineScope,
@@ -644,7 +652,7 @@ object DI {
     private fun provideCommonDataSource(): CommonTodoDataSource = CrudDataSource(
         EndpointProviderImpl(
             Api.Todo.TASKS
-        ), client, Json
+        ), client, DI.json
     )
 
     @Composable

@@ -46,7 +46,7 @@ class ToDoApplication : Application() {
 
         DI.fileCache = PreferencesCache(
             dataStore,
-            Json
+            DI.json
         )
 
         DI.deviceTokenRepository = DeviceTokenRepositoryImpl(DI.fileCache, DI.client, DI.logger)

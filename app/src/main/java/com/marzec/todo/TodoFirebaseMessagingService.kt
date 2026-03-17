@@ -39,7 +39,7 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
 
             if (type == "TASK_SCHEDULED" && taskJson != null) {
                 // 2. Parse TaskDto (using Gson or Kotlin Serialization)
-                val taskDto = Json.decodeFromString<TaskDto>(taskJson)
+                val taskDto = DI.json.decodeFromString<TaskDto>(taskJson)
 
                 // 3. Show the notification
                 showNotification(taskDto)
