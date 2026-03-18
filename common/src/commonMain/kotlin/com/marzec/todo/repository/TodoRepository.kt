@@ -44,9 +44,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 
-// TODO task.ownerId != null is not right - we should check if user is logged is not an owner
+// TODO task.ownerId != null is not right - we should check if user is logged is not an owner, probably we need adding caching currentUserId which is taken during login and need to be cleared after logout
 class TodoRepository(
     private val dataSource: DataSource,
     private val memoryCache: Cache,
