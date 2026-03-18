@@ -1,5 +1,6 @@
 package com.marzec.todo.network
 
+import com.marzec.api.UserDto
 import com.marzec.datasource.CrudDataSource
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.LeaveShareDto
@@ -20,6 +21,8 @@ interface DataSource : CommonTodoDataSource {
     suspend fun sse(): Flow<ServerSentEvent>
 
     suspend fun leaveShare(leaveShareDto: LeaveShareDto): TaskDto
+
+    suspend fun getUsers(): List<UserDto>
 }
 
 typealias CommonTodoDataSource = CrudDataSource<Int, TaskDto, CreateTaskDto, UpdateTaskDto>

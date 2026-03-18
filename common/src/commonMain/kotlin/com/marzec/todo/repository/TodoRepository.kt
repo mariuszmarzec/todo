@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
+// TODO task.ownerId != null is not right - we should check if user is logged is not an owner
 class TodoRepository(
     private val dataSource: DataSource,
     private val memoryCache: Cache,
@@ -335,6 +336,7 @@ class TodoRepository(
         }
     }
 
+    // TODO extract userDataSource to wrap http client call
     fun getUsers(): Flow<Content<List<User>>> = flow {
         emit(Content.Loading())
         try {
