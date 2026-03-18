@@ -6,6 +6,7 @@ import com.marzec.time.formatDate
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
+import com.marzec.todo.api.TaskShareDto
 import com.marzec.todo.api.UpdateTaskDto
 import kotlin.reflect.KProperty1
 import kotlinx.datetime.DayOfWeek
@@ -22,7 +23,24 @@ data class Task(
     val subTasks: List<Task>,
     val isToDo: Boolean,
     val priority: Int,
-    val scheduler: Scheduler?
+    val scheduler: Scheduler?,
+    val shares: List<TaskShare>,
+    val ownerId: Int?
+)
+
+data class TaskShare(
+    val userId: String,
+    val permission: String
+)
+
+fun TaskShare.toDto() = TaskShareDto(
+    userId = userId,
+    permission = permission
+)
+
+fun TaskShareDto.toDomain() = TaskShare(
+    userId = userId,
+    permission = permission
 )
 
 fun SchedulerDto.toDomain(): Scheduler = when (type) {
@@ -243,7 +261,9 @@ fun Task.toDto(): TaskDto = TaskDto(
     subTasks = subTasks.map { it.toDto() },
     isToDo = isToDo,
     priority = priority,
-    scheduler = scheduler?.toDto()
+    scheduler = scheduler?.toDto(),
+    shares = shares.map { it.toDto() },
+    ownerId = ownerId
 )
 
 fun TaskDto.toDomain(): Task = Task(
@@ -255,7 +275,9 @@ fun TaskDto.toDomain(): Task = Task(
     subTasks = subTasks.map { it.toDomain() },
     isToDo = isToDo,
     priority = priority,
-    scheduler = scheduler?.toDomain()
+    scheduler = scheduler?.toDomain(),
+    shares = shares.map { it.toDomain() },
+    ownerId = ownerId
 )
 
 data class CreateTask(
@@ -263,14 +285,16 @@ data class CreateTask(
     val parentTaskId: Int?,
     val priority: Int? = null,
     val highestPriorityAsDefault: Boolean? = null,
-    val scheduler: Scheduler? = null
+    val scheduler: Scheduler? = null,
+    val shares: List<TaskShare>? = null
 )
 
 fun CreateTaskDto.toDomain() = CreateTask(
     description = description,
     parentTaskId = parentTaskId,
     priority = priority,
-    scheduler = scheduler?.toDomain()
+    scheduler = scheduler?.toDomain(),
+    shares = shares?.map { it.toDomain() }
 )
 
 fun CreateTask.toDto() = CreateTaskDto(
@@ -278,7 +302,8 @@ fun CreateTask.toDto() = CreateTaskDto(
     parentTaskId = parentTaskId,
     priority = priority,
     highestPriorityAsDefault = highestPriorityAsDefault,
-    scheduler = scheduler?.toDto()
+    scheduler = scheduler?.toDto(),
+    shares = shares?.map { it.toDto() }
 )
 
 data class UpdateTask(
@@ -286,7 +311,8 @@ data class UpdateTask(
     val parentTaskId: NullableField<Int>? = null,
     val priority: Int? = null,
     val isToDo: Boolean? = null,
-    val scheduler: NullableField<Scheduler>? = null
+    val scheduler: NullableField<Scheduler>? = null,
+    val shares: List<TaskShare>? = null
 )
 
 fun UpdateTask.toDto() = UpdateTaskDto(
@@ -294,5 +320,6 @@ fun UpdateTask.toDto() = UpdateTaskDto(
     parentTaskId = parentTaskId?.toDto(),
     priority = priority,
     isToDo = isToDo,
-    scheduler = scheduler?.toDto{ it?.toDto() }
+    scheduler = scheduler?.toDto{ it?.toDto() },
+    shares = shares?.map { it.toDto() }
 )

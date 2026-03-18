@@ -1,5 +1,7 @@
 package com.marzec.todo.repository
 
+import com.marzec.api.UserDto
+import com.marzec.api.toDomain
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
 import com.marzec.cache.asContentWithListUpdate
@@ -10,20 +12,27 @@ import com.marzec.content.asContent
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.dto.NullableFieldDto
+import com.marzec.model.User
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
 import com.marzec.todo.Api
+import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.extensions.flatMapTask
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
+import com.marzec.todo.model.TaskShare
 import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.model.toDomain
 import com.marzec.todo.model.toDto
 import com.marzec.todo.network.DataSource
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +41,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -40,7 +50,8 @@ class TodoRepository(
     private val dataSource: DataSource,
     private val memoryCache: Cache,
     private val fileCache: FileCache,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val client: HttpClient
 ) {
 
     suspend fun observeTasks(): Flow<Content<List<Task>>> = getTasksCacheFirst().map { content ->
@@ -69,7 +80,8 @@ class TodoRepository(
         description: String,
         parentTaskId: Int?,
         highestPriorityAsDefault: Boolean,
-        scheduler: Scheduler?
+        scheduler: Scheduler?,
+        shares: List<TaskShare>? = null
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             dataSource.create(
@@ -77,7 +89,8 @@ class TodoRepository(
                     description = description,
                     parentTaskId = parentTaskId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
-                    scheduler = scheduler?.toDto()
+                    scheduler = scheduler?.toDto(),
+                    shares = shares?.map { it.toDto() }
                 )
             )
         }
@@ -195,25 +208,43 @@ class TodoRepository(
 
     fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.removeTask(taskId)
+            val task = dataSource.getById(taskId)
+            if (task.ownerId != null) {
+                dataSource.leaveShare(LeaveShareDto(taskId))
+            } else {
+                dataSource.removeTask(taskId)
+            }
         }
 
     fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             taskIds.forEach {
-                dataSource.removeTask(it)
+                val task = dataSource.getById(it)
+                if (task.ownerId != null) {
+                    dataSource.leaveShare(LeaveShareDto(it))
+                } else {
+                    dataSource.removeTask(it)
+                }
             }
         }
 
     fun removeTaskWithSubtasks(task: Task): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            dataSource.removeTask(taskId = task.id, removeSubtasks = true)
+            if (task.ownerId != null) {
+                dataSource.leaveShare(LeaveShareDto(task.id))
+            } else {
+                dataSource.removeTask(taskId = task.id, removeSubtasks = true)
+            }
         }
 
     fun removeTasksWithSubtasks(tasks: List<Task>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             tasks.forEach { task ->
-                dataSource.removeTask(taskId = task.id, removeSubtasks = true)
+                if (task.ownerId != null) {
+                    dataSource.leaveShare(LeaveShareDto(task.id))
+                } else {
+                    dataSource.removeTask(taskId = task.id, removeSubtasks = true)
+                }
             }
         }
 
@@ -259,7 +290,7 @@ class TodoRepository(
 
     suspend fun receiveSse() {
         fileCache.observeTyped<String>(PreferencesKeys.AUTHORIZATION).flatMapLatest {
-            if(it?.isNotEmpty() == true) {
+            if (it?.isNotEmpty() == true) {
                 dataSource.sse()
             } else {
                 flowOf(null)
@@ -302,5 +333,19 @@ class TodoRepository(
             )
             levelToParentId[level] = createdTask.id
         }
+    }
+
+    fun getUsers(): Flow<Content<List<User>>> = flow {
+        emit(Content.Loading())
+        try {
+            val users = client.get(DI.Todo.USERS).body<List<UserDto>>().map { it.toDomain() }
+            emit(Content.Data(users))
+        } catch (e: Exception) {
+            emit(Content.Error(e))
+        }
+    }
+
+    fun leaveShare(taskId: Int): Flow<Content<Unit>> = asContentWithListUpdate {
+        dataSource.leaveShare(LeaveShareDto(taskId))
     }
 }

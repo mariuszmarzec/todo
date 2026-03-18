@@ -4,6 +4,7 @@ import com.marzec.todo.Api
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.cache.Cache
+import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.model.toDomain
@@ -66,4 +67,8 @@ class CompositeDataSource(
     }
 
     override suspend fun sse(): Flow<ServerSentEvent> = apiDataSource.sse()
+
+    override suspend fun leaveShare(leaveShareDto: LeaveShareDto): TaskDto = update {
+        leaveShare(leaveShareDto)
+    }
 }

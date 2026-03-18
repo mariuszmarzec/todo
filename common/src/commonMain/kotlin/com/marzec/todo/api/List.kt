@@ -13,7 +13,9 @@ data class TaskDto(
     val subTasks: List<TaskDto>,
     val isToDo: Boolean,
     val priority: Int,
-    val scheduler: SchedulerDto? = null
+    val scheduler: SchedulerDto? = null,
+    val shares: List<TaskShareDto> = emptyList(),
+    val ownerId: Int? = null
 )
 
 @Serializable
@@ -22,7 +24,8 @@ data class CreateTaskDto(
     val parentTaskId: Int? = null,
     val priority: Int? = null,
     val highestPriorityAsDefault: Boolean? = null,
-    val scheduler: SchedulerDto?
+    val scheduler: SchedulerDto?,
+    val shares: List<TaskShareDto>? = null
 )
 
 @Serializable
@@ -31,7 +34,19 @@ data class UpdateTaskDto(
     val parentTaskId: NullableFieldDto<Int>? = null,
     val priority: Int? = null,
     val isToDo: Boolean? = null,
-    val scheduler: NullableFieldDto<SchedulerDto>? = null
+    val scheduler: NullableFieldDto<SchedulerDto>? = null,
+    val shares: List<TaskShareDto>? = null
+)
+
+@Serializable
+data class TaskShareDto(
+    val userId: String,
+    val permission: String
+)
+
+@Serializable
+data class LeaveShareDto(
+    val id: Int
 )
 
 @Serializable

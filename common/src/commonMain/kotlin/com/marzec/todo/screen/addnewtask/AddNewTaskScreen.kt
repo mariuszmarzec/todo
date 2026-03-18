@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
@@ -16,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +46,7 @@ fun AddNewTaskScreen(
     val state: State<AddNewTaskState> by store.collectState {
         store.initialLoad()
         store.onSchedulerRequest()
+        store.onUsersRequest()
     }
 
     Scaffold(
@@ -56,63 +59,91 @@ fun AddNewTaskScreen(
                 val focusRequester = remember { FocusRequester() }
 
                 LaunchedEffect(Unit) {
-                    focusRequester.requestFocus()
+                    if (state.data.taskId == null) {
+                        focusRequester.requestFocus()
+                    }
                 }
+
+                val isSharedWithUs = state.data.task?.ownerId != null
+                val isReviewer = isSharedWithUs && state.data.task?.shares?.any { it.permission == "READ" } == true
 
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+                    if (isSharedWithUs) {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = "Shared by owner: ${state.data.task?.ownerId}"
+                        )
+                    }
+
                     Box(modifier = Modifier.padding(16.dp)) {
                         TextFieldStateful(
                             modifier = Modifier.focusRequester(focusRequester),
                             value = state.data.description,
+                            enabled = !isReviewer,
                             onValueChange = {
                                 store.onDescriptionChanged(it)
                             })
                     }
-                    if (state.data.taskId == null || state.data.scheduler != null) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = state.data.highestPriorityAsDefault,
-                                onCheckedChange = { store.toggleHighestPriority() }
-                            )
-                            TextButton({ store.toggleHighestPriority() }) {
-                                Text("Highest priority as default")
-                            }
-                        }
-                    }
-                    Box(modifier = Modifier.padding(16.dp)) {
-                        TextButton({ store.addNewTask() }) {
-                            Text(text = state.data.taskId?.let { "Update" } ?: "Create")
-                        }
-                    }
-                    if (state.data.taskId == null) {
-                        Row {
-                            Box(modifier = Modifier.padding(16.dp)) {
-                                TextButton({ store.addManyTasks() }) {
-                                    Text("Create tasks line by line")
-                                }
-                            }
-                            Box(modifier = Modifier.padding(16.dp)) {
-                                TextButton({ store.createTree() }) {
-                                    Text("Create tree")
+                    if (!isReviewer) {
+                        if (state.data.taskId == null || state.data.scheduler != null) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = state.data.highestPriorityAsDefault,
+                                    onCheckedChange = { store.toggleHighestPriority() }
+                                )
+                                TextButton({ store.toggleHighestPriority() }) {
+                                    Text("Highest priority as default")
                                 }
                             }
                         }
+                        Box(modifier = Modifier.padding(16.dp)) {
+                            TextButton({ store.addNewTask() }) {
+                                Text(text = state.data.taskId?.let { "Update" } ?: "Create")
+                            }
+                        }
+                        if (state.data.taskId == null) {
+                            Row {
+                                Box(modifier = Modifier.padding(16.dp)) {
+                                    TextButton({ store.addManyTasks() }) {
+                                        Text("Create tasks line by line")
+                                    }
+                                }
+                                Box(modifier = Modifier.padding(16.dp)) {
+                                    TextButton({ store.createTree() }) {
+                                        Text("Create tree")
+                                    }
+                                }
+                            }
+                        }
                     }
-                    if (state.data.parentTaskId == null) {
+
+                    if (isSharedWithUs) {
+                        Button(onClick = { store.leaveShare() }) {
+                            Text("Leave share")
+                        }
+                    }
+
+                    if (!isReviewer && state.data.parentTaskId == null) {
                         ScheduleRow(
                             scheduler = state.data.scheduler,
                             onScheduleButtonClick = { store.onScheduleButtonClick() },
                             onRemoveSchedulerButtonClick = { store.onRemoveSchedulerButtonClick() }
                         )
+
+                        UsersRow(
+                            shares = state.data.shares,
+                            onUsersButtonClick = { store.onUsersButtonClick() },
+                            onRemoveShareButtonClick = { store.onRemoveShareButtonClick(it) }
+                        )
                     }
-                    if (state.data.scheduler is Scheduler.OneShot) {
+                    if (!isReviewer && state.data.scheduler is Scheduler.OneShot) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -126,7 +157,7 @@ fun AddNewTaskScreen(
                             }
                         }
                     }
-                    if (state.data.scheduler != null) {
+                    if (!isReviewer && state.data.scheduler != null) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -139,7 +170,6 @@ fun AddNewTaskScreen(
                                 Text("Show notification")
                             }
                         }
-
                     }
                 }
             }
@@ -178,6 +208,35 @@ fun ScheduleRow(
             onScheduleButtonClick()
         }) {
             Text("Schedule")
+        }
+    }
+}
+
+@Composable
+fun UsersRow(
+    shares: List<com.marzec.todo.model.TaskShare>,
+    onUsersButtonClick: () -> Unit,
+    onRemoveShareButtonClick: (String) -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (shares.isNotEmpty()) {
+            Text("Shared with:")
+            shares.forEach { share ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(share.userId)
+                    IconButton({ onRemoveShareButtonClick(share.userId) }) {
+                        Icon(Icons.Default.Clear, "Remove share")
+                    }
+                }
+            }
+        }
+        Button(onClick = { onUsersButtonClick() }) {
+            Icon(Icons.Default.Person, contentDescription = null)
+            Text("Share")
         }
     }
 }

@@ -3,6 +3,7 @@ package com.marzec.todo.screen.addnewtask.model
 import com.marzec.mvi.State
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
+import com.marzec.todo.model.TaskShare
 
 data class AddNewTaskState(
     val taskId: Int?,
@@ -14,7 +15,8 @@ data class AddNewTaskState(
     val highestPriorityAsDefault: Boolean,
     val removeAfterSchedule: Boolean,
     val showNotification: Boolean,
-    val scheduler: Scheduler? = null
+    val scheduler: Scheduler? = null,
+    val shares: List<TaskShare> = emptyList()
 ) {
 
     val schedulerWithOptions: Scheduler?

@@ -2,7 +2,9 @@ package com.marzec.todo.network
 
 import com.marzec.logger.Logger
 import com.marzec.todo.Api
+import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
+import com.marzec.todo.api.TaskDto
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.sse.sse
 import io.ktor.client.request.delete
@@ -49,6 +51,12 @@ class ApiDataSource(
     override suspend fun markAsToDo(request: MarkAsToDoDto) {
         client.post(Api.Todo.MARK_AS_TO_DO) {
             setBody(request)
+        }
+    }
+
+    override suspend fun leaveShare(leaveShareDto: LeaveShareDto): TaskDto {
+        return client.post(Api.Todo.LEAVE_SHARE) {
+            setBody(leaveShareDto)
         }
     }
 }
