@@ -121,7 +121,7 @@ class AddNewTaskStore(
             val userIds = resultNonNull().toSet()
             state.reduceData {
                 copy(
-                    shares = userIds.map { TaskShare(it, "EDIT") }
+                    shares = userIds.map { TaskShare(it, "EDITOR_AND_VIEWER") }
                 )
             }
         }

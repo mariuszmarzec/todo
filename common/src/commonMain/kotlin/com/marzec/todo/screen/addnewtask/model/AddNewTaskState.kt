@@ -62,17 +62,20 @@ data class AddNewTaskState(
 
         fun initial(
             taskId: Int?,
-            parentTaskId: Int?
+            parentTaskId: Int?,
+            isTaskSharingEnabled: Boolean,
         ): State<AddNewTaskState> = taskId?.let {
             State.Loading(
                 default(
                     taskId = taskId,
-                    parentTaskId = parentTaskId
+                    parentTaskId = parentTaskId,
+                    isTaskSharingEnabled = isTaskSharingEnabled,
                 )
             )
         } ?: State.Data(
             default(
-                parentTaskId = parentTaskId
+                parentTaskId = parentTaskId,
+                isTaskSharingEnabled = isTaskSharingEnabled,
             )
         )
     }

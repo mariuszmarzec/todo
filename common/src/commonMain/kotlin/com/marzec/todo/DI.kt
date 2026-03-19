@@ -384,7 +384,8 @@ object DI {
             stateCache = stateCache,
             initialState = AddNewTaskState.initial(
                 taskId = taskId,
-                parentTaskId = parentTaskId
+                parentTaskId = parentTaskId,
+                isTaskSharingEnabled = featureTogglesManager.get("todo.taskSharing")
             ),
             todoRepository = todoRepository,
             loginRepository = loginRepository,

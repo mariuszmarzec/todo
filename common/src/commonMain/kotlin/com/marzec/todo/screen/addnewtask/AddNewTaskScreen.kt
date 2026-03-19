@@ -70,7 +70,7 @@ fun AddNewTaskScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (state.data.isTaskSharingEnabled && state.data.ownedTask) {
+                    if (state.data.isTaskSharingEnabled && state.data.task.ownerId != null && state.data.ownedTask) {
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = "Shared by owner: ${state.data.task?.ownerId}"
@@ -128,7 +128,7 @@ fun AddNewTaskScreen(
                         }
                     }
 
-                    if (state.data.isTaskSharingEnabled && state.data.isEditor && state.data.parentTaskId == null) {
+                    if (state.data.isEditor && state.data.parentTaskId == null) {
                         ScheduleRow(
                             scheduler = state.data.scheduler,
                             onScheduleButtonClick = { store.onScheduleButtonClick() },
