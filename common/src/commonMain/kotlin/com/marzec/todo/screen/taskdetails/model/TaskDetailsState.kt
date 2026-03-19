@@ -15,7 +15,8 @@ data class TaskDetailsState(
     override val dialog: DialogState<Int>,
     override val selected: Set<Int>,
     override val search: SearchState,
-    override val reorderMode: ReorderMode
+    override val reorderMode: ReorderMode,
+    val users: List<com.marzec.model.User> = emptyList()
 ) : WithTasks<TaskDetailsState>,
     WithSelection<Int, TaskDetailsState>,
     WithSearch<TaskDetailsState>,

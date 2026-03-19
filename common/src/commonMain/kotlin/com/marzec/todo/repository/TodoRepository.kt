@@ -12,9 +12,11 @@ import com.marzec.content.asContent
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.dto.NullableFieldDto
+import com.marzec.featuretoggle.FeatureTogglesManager
 import com.marzec.model.User
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
+import com.marzec.repository.LoginRepository
 import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
@@ -45,14 +47,16 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-// TODO task.ownerId != null is not right - we should check if user is logged is not an owner, probably we need adding caching currentUserId which is taken during login and need to be cleared after logout
 class TodoRepository(
     private val dataSource: DataSource,
     private val memoryCache: Cache,
     private val fileCache: FileCache,
     private val dispatcher: CoroutineDispatcher,
-    private val client: HttpClient
+    private val client: HttpClient,
+    private val loginRepository: LoginRepository,
 ) {
+
+    private suspend fun currentUserId(): Int? = loginRepository.getCurrentUser()?.id
 
     suspend fun observeTasks(): Flow<Content<List<Task>>> = getTasksCacheFirst().map { content ->
         content.mapData { tasks ->
@@ -90,7 +94,7 @@ class TodoRepository(
                     parentTaskId = parentTaskId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     scheduler = scheduler?.toDto(),
-                    shares = shares?.map { it.toDto() }
+                    shares = if (DI.featureTogglesManager.get("todo.taskSharing")) shares?.map { it.toDto() } else null
                 )
             )
         }
@@ -209,7 +213,7 @@ class TodoRepository(
     fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             val task = dataSource.getById(taskId)
-            if (task.ownerId != null) {
+            if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
                 dataSource.leaveShare(LeaveShareDto(taskId))
             } else {
                 dataSource.removeTask(taskId)
@@ -220,7 +224,7 @@ class TodoRepository(
         asContentWithListUpdate {
             taskIds.forEach {
                 val task = dataSource.getById(it)
-                if (task.ownerId != null) {
+                if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
                     dataSource.leaveShare(LeaveShareDto(it))
                 } else {
                     dataSource.removeTask(it)
@@ -230,7 +234,7 @@ class TodoRepository(
 
     fun removeTaskWithSubtasks(task: Task): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            if (task.ownerId != null) {
+            if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
                 dataSource.leaveShare(LeaveShareDto(task.id))
             } else {
                 dataSource.removeTask(taskId = task.id, removeSubtasks = true)
@@ -240,7 +244,7 @@ class TodoRepository(
     fun removeTasksWithSubtasks(tasks: List<Task>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             tasks.forEach { task ->
-                if (task.ownerId != null) {
+                if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
                     dataSource.leaveShare(LeaveShareDto(task.id))
                 } else {
                     dataSource.removeTask(taskId = task.id, removeSubtasks = true)
@@ -336,10 +340,10 @@ class TodoRepository(
     }
 
     // TODO extract userDataSource to wrap http client call
-    fun getUsers(): Flow<Content<List<User>>> = flow {
+    fun getUsers(): Flow<Content<List<User>>> = flow<Content<List<User>>> {
         emit(Content.Loading())
         try {
-            val users = client.get(DI.Todo.USERS).body<List<UserDto>>().map { it.toDomain() }
+            val users = client.get(Api.Todo.GET_USERS).body<List<UserDto>>().map { it.toDomain() }
             emit(Content.Data(users))
         } catch (e: Exception) {
             emit(Content.Error(e))

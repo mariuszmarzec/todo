@@ -30,7 +30,8 @@ class AddSubTaskStore(
     private val todoRepository: TodoRepository,
     private val taskId: Int,
     selectionDelegate: SelectionDelegate<Int>,
-    searchDelegate: SearchDelegate
+    searchDelegate: SearchDelegate,
+    private val loginRepository: com.marzec.repository.LoginRepository
 ) : Store4Impl<State<AddSubTaskData>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), SelectionDelegate<Int> by selectionDelegate, SearchDelegate by searchDelegate {
@@ -41,10 +42,11 @@ class AddSubTaskStore(
 
     fun initialLoad() = intent<Content<List<Task>>> {
         onTrigger {
+            val currentUserId = loginRepository.getCurrentUser()?.id
             todoRepository.observeTasks().map { content ->
                 content.mapData { tasks ->
                     val rootId = tasks.findRootIdOrNull(taskId)
-                    tasks.filterNot { it.id == rootId }
+                    tasks.filterNot { it.id == rootId }.filter { it.ownerId == currentUserId }
                 }
             }
         }

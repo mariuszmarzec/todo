@@ -16,7 +16,10 @@ data class AddNewTaskState(
     val removeAfterSchedule: Boolean,
     val showNotification: Boolean,
     val scheduler: Scheduler? = null,
-    val shares: List<TaskShare> = emptyList()
+    val shares: List<TaskShare> = emptyList(),
+    val isTaskSharingEnabled: Boolean = false,
+    val ownedTask: Boolean = true,
+    val isEditor: Boolean = true,
 ) {
 
     val schedulerWithOptions: Scheduler?
@@ -43,16 +46,18 @@ data class AddNewTaskState(
         fun default(
             taskId: Int? = null,
             parentTaskId: Int? = null,
+            isTaskSharingEnabled: Boolean = false,
         ) = AddNewTaskState(
             taskId = taskId,
             task = null,
             parentTaskId = parentTaskId,
-            description = "",
             priority = 0,
             isToDo = true,
+            description = "",
             highestPriorityAsDefault = false,
             removeAfterSchedule = false,
             showNotification = false,
+            isTaskSharingEnabled = isTaskSharingEnabled,
         )
 
         fun initial(

@@ -1,5 +1,6 @@
 package com.marzec.todo.network
 
+import com.marzec.api.UserDto
 import com.marzec.cache.FileCache
 import com.marzec.cache.getTyped
 import com.marzec.cache.putTyped
@@ -9,6 +10,7 @@ import com.marzec.locker.Locker
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.UpdateTaskDto
@@ -240,6 +242,12 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
     }
 
     override suspend fun sse(): Flow<ServerSentEvent> = flowOf()
+
+    override suspend fun leaveShare(leaveShareDto: LeaveShareDto): TaskDto {
+        throw UnsupportedOperationException("Sharing tasks is not supported for local data source")
+    }
+
+    override suspend fun getUsers(): List<UserDto> = emptyList<UserDto>()
 
     private suspend fun <T> update(action: suspend () -> T): T =
         synchronized(finally = { updateStorage() }) {
@@ -494,3 +502,6 @@ private class SchedulerChecker(
         private const val WEEK_DAYS_COUNT = 7
     }
 }
+
+
+

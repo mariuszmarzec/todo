@@ -10,6 +10,7 @@ import com.marzec.todo.api.UpdateTaskDto
 import com.marzec.todo.model.toDomain
 import io.ktor.sse.ServerSentEvent
 import kotlinx.coroutines.flow.Flow
+import com.marzec.api.UserDto
 
 class CompositeDataSource(
     private val localDataSource: LocalDataSource,
@@ -71,4 +72,6 @@ class CompositeDataSource(
     override suspend fun leaveShare(leaveShareDto: LeaveShareDto): TaskDto = update {
         leaveShare(leaveShareDto)
     }
+
+    override suspend fun getUsers(): List<UserDto> = apiDataSource.getUsers()
 }

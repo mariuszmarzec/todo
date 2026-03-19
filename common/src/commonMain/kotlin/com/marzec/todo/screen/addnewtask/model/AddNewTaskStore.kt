@@ -1,7 +1,9 @@
 package com.marzec.todo.screen.addnewtask.model
 
 import com.marzec.content.Content
+import com.marzec.content.combineContentsFlows
 import com.marzec.content.ifDataSuspend
+import com.marzec.featuretoggle.FeatureTogglesManager
 import com.marzec.model.User
 import com.marzec.model.toNullableUpdate
 import com.marzec.model.toUpdate
@@ -16,6 +18,8 @@ import com.marzec.navigation.NavigationOptions
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.PopEntryTarget
 import com.marzec.preferences.StateCache
+import com.marzec.repository.LoginRepository
+import com.marzec.screen.featuretoggle.FeatureToggleDetails
 import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.todo.extensions.asInstance
 import com.marzec.todo.model.Scheduler
@@ -34,6 +38,8 @@ class AddNewTaskStore(
     private val stateCache: StateCache,
     private val initialState: State<AddNewTaskState>,
     private val todoRepository: TodoRepository,
+    private val loginRepository: LoginRepository,
+    private val featureTogglesManager: FeatureTogglesManager,
     private val usersPickOptions: PickItemOptions<User>
 ) : Store4Impl<State<AddNewTaskState>>(
     scope, stateCache.get(cacheKey) ?: initialState
@@ -41,11 +47,16 @@ class AddNewTaskStore(
 
     fun initialLoad() = (stateCache.get(cacheKey) ?: initialState)
         .asInstance<State.Loading<AddNewTaskState>> {
-            intent<Content<Task>>("load") {
+            intent<Content<Pair<Task, User>>>("load") {
                 onTrigger {
                     state.ifDataAvailable(blockOnLoading = false) {
                         taskId?.let {
-                            todoRepository.observeTask(it)
+                            combineContentsFlows(
+                                todoRepository.observeTask(it),
+                                loginRepository.observeCurrentUser()
+                            ) { task, user ->
+                                task to user
+                            }
                         }
                     }
                 }
@@ -55,24 +66,29 @@ class AddNewTaskStore(
                             result = resultNonNull(),
                             defaultData = AddNewTaskState.default(
                                 taskId = 0,
-                                parentTaskId = null
+                                parentTaskId = null,
+                                isTaskSharingEnabled = featureTogglesManager.get("todo.taskSharing"),
                             )
                         ) { result ->
+                            val (task, user) = result.data
                             copy(
-                                taskId = result.data.id,
-                                task = result.data,
-                                parentTaskId = result.data.parentTaskId,
-                                description = result.data.description,
-                                priority = result.data.priority,
-                                isToDo = result.data.isToDo,
-                                scheduler = result.data.scheduler,
-                                shares = result.data.shares,
-                                highestPriorityAsDefault = result.data.scheduler?.highestPriorityAsDefault
+                                taskId = task.id,
+                                task = task,
+                                parentTaskId = task.parentTaskId,
+                                description = task.description,
+                                priority = task.priority,
+                                isToDo = task.isToDo,
+                                scheduler = task.scheduler,
+                                shares = task.shares,
+                                highestPriorityAsDefault = task.scheduler?.highestPriorityAsDefault
                                     ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT,
-                                removeAfterSchedule = (result.data.scheduler as? Scheduler.OneShot)?.removeScheduled
+                                removeAfterSchedule = (task.scheduler as? Scheduler.OneShot)?.removeScheduled
                                     ?: Scheduler.REMOVE_SCHEDULED,
-                                showNotification = result.data.scheduler?.showNotification
-                                    ?: Scheduler.SHOW_NOTIFICATION
+                                showNotification = task.scheduler?.showNotification
+                                    ?: Scheduler.SHOW_NOTIFICATION,
+                                isTaskSharingEnabled = featureTogglesManager.get("todo.taskSharing"),
+                                ownedTask = task.ownerId == user.id,
+                                isEditor = task.ownerId == user.id || task.shares.firstOrNull { it.userId.toInt() == user.id }?.permission == "EDITOR_AND_VIEWER"
                             )
                         }
                     } ?: state
@@ -98,11 +114,11 @@ class AddNewTaskStore(
 
     fun onUsersRequest() = intent("onUsersRequest") {
         onTrigger {
-            navigationStore.observe<Set<String>>(REQUEST_KEY_USERS)?.filterNotNull()
+            navigationStore.observe<List<String>>(REQUEST_KEY_USERS)?.filterNotNull()
         }
 
         reducer {
-            val userIds = resultNonNull()
+            val userIds = resultNonNull().toSet()
             state.reduceData {
                 copy(
                     shares = userIds.map { TaskShare(it, "EDIT") }

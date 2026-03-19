@@ -64,15 +64,13 @@ fun AddNewTaskScreen(
                     }
                 }
 
-                val isSharedWithUs = state.data.task?.ownerId != null
-                val isReviewer = isSharedWithUs && state.data.task?.shares?.any { it.permission == "READ" } == true
 
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (isSharedWithUs) {
+                    if (state.data.isTaskSharingEnabled && state.data.ownedTask) {
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = "Shared by owner: ${state.data.task?.ownerId}"
@@ -83,12 +81,12 @@ fun AddNewTaskScreen(
                         TextFieldStateful(
                             modifier = Modifier.focusRequester(focusRequester),
                             value = state.data.description,
-                            enabled = !isReviewer,
+                            enabled = !state.data.isTaskSharingEnabled || state.data.isEditor,
                             onValueChange = {
                                 store.onDescriptionChanged(it)
                             })
                     }
-                    if (!isReviewer) {
+                    if (state.data.isEditor) {
                         if (state.data.taskId == null || state.data.scheduler != null) {
                             Row(
                                 modifier = Modifier.padding(16.dp),
@@ -124,26 +122,28 @@ fun AddNewTaskScreen(
                         }
                     }
 
-                    if (isSharedWithUs) {
+                    if (state.data.isTaskSharingEnabled && !state.data.ownedTask) {
                         Button(onClick = { store.leaveShare() }) {
                             Text("Leave share")
                         }
                     }
 
-                    if (!isReviewer && state.data.parentTaskId == null) {
+                    if (state.data.isTaskSharingEnabled && state.data.isEditor && state.data.parentTaskId == null) {
                         ScheduleRow(
                             scheduler = state.data.scheduler,
                             onScheduleButtonClick = { store.onScheduleButtonClick() },
                             onRemoveSchedulerButtonClick = { store.onRemoveSchedulerButtonClick() }
                         )
 
-                        UsersRow(
-                            shares = state.data.shares,
-                            onUsersButtonClick = { store.onUsersButtonClick() },
-                            onRemoveShareButtonClick = { store.onRemoveShareButtonClick(it) }
-                        )
+                        if (state.data.isTaskSharingEnabled && state.data.ownedTask) {
+                            UsersRow(
+                                shares = state.data.shares,
+                                onUsersButtonClick = { store.onUsersButtonClick() },
+                                onRemoveShareButtonClick = { store.onRemoveShareButtonClick(it) }
+                            )
+                        }
                     }
-                    if (!isReviewer && state.data.scheduler is Scheduler.OneShot) {
+                    if (state.data.isEditor && state.data.scheduler is Scheduler.OneShot) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -157,7 +157,7 @@ fun AddNewTaskScreen(
                             }
                         }
                     }
-                    if (!isReviewer && state.data.scheduler != null) {
+                    if (state.data.isEditor && state.data.scheduler != null) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -223,7 +223,9 @@ fun UsersRow(
             Text("Shared with:")
             shares.forEach { share ->
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clickable { onUsersButtonClick() },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -233,10 +235,11 @@ fun UsersRow(
                     }
                 }
             }
-        }
-        Button(onClick = { onUsersButtonClick() }) {
-            Icon(Icons.Default.Person, contentDescription = null)
-            Text("Share")
+        } else {
+            Button(onClick = { onUsersButtonClick() }) {
+                Icon(Icons.Default.Person, contentDescription = null)
+                Text("Share")
+            }
         }
     }
 }

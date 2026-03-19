@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -191,6 +192,34 @@ fun TaskDetailsScreen(
                                 }
                             )
                         }
+                    }
+                    var currentUserId by remember { mutableStateOf<Int?>(null) }
+                    LaunchedEffect(Unit) {
+                        currentUserId = store.loginRepository.getCurrentUser()?.id
+                    }
+                    val ownerInfo = when {
+                        task.ownerId != currentUserId -> {
+                            val owner = state.data.users.firstOrNull { it.id == task.ownerId }
+                            owner?.let { "Owner: ${it.email}" }
+                        }
+                        task.shares.isNotEmpty() -> {
+                            val sharedUsers = state.data.users.filter { user ->
+                                task.shares.any { it.userId == user.email }
+                            }
+                            if (sharedUsers.isNotEmpty()) {
+                                "Shared with: ${sharedUsers.joinToString { it.email }}"
+                            } else {
+                                null
+                            }
+                        }
+                        else -> null
+                    }
+                    ownerInfo?.let {
+                        Text(
+                            text = it,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
                     }
                     Row(
                         modifier = Modifier

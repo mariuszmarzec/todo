@@ -14,6 +14,7 @@ import com.marzec.cache.FileCache
 import com.marzec.cache.MemoryCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
+import com.marzec.content.mapData
 import com.marzec.datasource.CrudDataSource
 import com.marzec.datasource.EndpointProviderImpl
 import com.marzec.delegate.DialogDelegateImpl
@@ -99,10 +100,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.sse.SSE
+import kotlin.math.log
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
@@ -186,6 +190,30 @@ object DI {
     }
 
     val featureTogglesManager by lazy { featureTogglesManagerInitializer.create() }
+
+    val usersPickOptions = PickItemOptions(
+        loadData = {
+            val currentUser = loginRepository.getCurrentUser()
+            todoRepository.getUsers().map { result ->
+                result.mapData { users ->
+                    users.filter {
+                        it.id != currentUser?.id
+                    }
+                }
+            }
+        },
+        mapItemToId = { it.id.toString() },
+        itemRow = { item, _ ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            ) {
+                Text(item.email)
+            }
+        },
+        stringsToCompare = { listOf(it.email) },
+        returnIdOnly = true,
+        multipleChoice = true
+    )
 
     fun router(
         destination: Destination
@@ -348,17 +376,22 @@ object DI {
         taskId: Int?,
         parentTaskId: Int?,
         cacheKey: String
-    ): AddNewTaskStore = AddNewTaskStore(
-        scope = scope,
-        navigationStore = navigationStore,
-        cacheKey = cacheKey,
-        stateCache = stateCache,
-        initialState = AddNewTaskState.initial(
-            taskId = taskId,
-            parentTaskId = parentTaskId
-        ),
-        todoRepository = todoRepository,
-    )
+    ): AddNewTaskStore {
+        return AddNewTaskStore(
+            scope = scope,
+            navigationStore = navigationStore,
+            cacheKey = cacheKey,
+            stateCache = stateCache,
+            initialState = AddNewTaskState.initial(
+                taskId = taskId,
+                parentTaskId = parentTaskId
+            ),
+            todoRepository = todoRepository,
+            loginRepository = loginRepository,
+            usersPickOptions = usersPickOptions,
+            featureTogglesManager = featureTogglesManager,
+        )
+    }
 
     @Composable
     private fun provideTaskDetailsScreen(taskId: Int, cacheKey: String) {
@@ -400,7 +433,8 @@ object DI {
                 tasksToReorder = { task.subTasks }
             ) {
                 copy(reorderMode = it)
-            }
+            },
+            loginRepository = loginRepository
         )
     }
 
@@ -429,7 +463,8 @@ object DI {
         initialState = AddSubTaskData.INITIAL,
         taskId = taskId,
         selectionDelegate = SelectionDelegateImpl<Int, AddSubTaskData>(),
-        searchDelegate = SearchDelegateImpl<AddSubTaskData>()
+        searchDelegate = SearchDelegateImpl<AddSubTaskData>(),
+        loginRepository = loginRepository
     )
 
     @Composable
@@ -621,7 +656,9 @@ object DI {
             dataSource = provideDataSource(),
             memoryCache = memoryCache,
             fileCache = fileCache,
-            dispatcher = ioDispatcher
+            dispatcher = ioDispatcher,
+            client = client,
+            loginRepository = loginRepository
         )
     }
 
@@ -738,6 +775,10 @@ object Api {
             "$BASE/tasks/$taskId?removeWithSubtasks=$removeWithSubtasks"
 
         val FEATURE_TOGGLES = "$HOST/fiteo/api/$CURRENT_API_VERSION/feature_toggles"
+
+        val GET_USERS = "$HOST/fiteo/api/$CURRENT_API_VERSION/users"
+
+        val LEAVE_SHARE = "$BASE/tasks/leave-share"
 
         val SSE = "$HOST/sse"
     }

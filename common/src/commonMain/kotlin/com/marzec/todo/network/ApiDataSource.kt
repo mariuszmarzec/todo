@@ -5,7 +5,9 @@ import com.marzec.todo.Api
 import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.TaskDto
+import com.marzec.api.UserDto
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.sse.sse
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -57,6 +59,10 @@ class ApiDataSource(
     override suspend fun leaveShare(leaveShareDto: LeaveShareDto): TaskDto {
         return client.post(Api.Todo.LEAVE_SHARE) {
             setBody(leaveShareDto)
-        }
+        }.body<TaskDto>()
+    }
+
+    override suspend fun getUsers(): List<UserDto> {
+        return client.get(Api.Todo.GET_USERS).body<List<UserDto>>()
     }
 }

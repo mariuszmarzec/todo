@@ -47,6 +47,7 @@ class TaskDetailsStore(
     private val selectionDelegate: SelectionDelegate<Int>,
     private val searchDelegate: SearchDelegate,
     private val reorderDelegate: ReorderDelegate,
+    internal val loginRepository: com.marzec.repository.LoginRepository
 ) : Store4Impl<State<TaskDetailsState>>(
     scope, stateCache.get(cacheKey) ?: initialState
 ), RemoveTaskDelegate by removeTaskDelegate,
@@ -88,6 +89,14 @@ class TaskDetailsStore(
                     ),
                     reorderMode = this?.reorderMode ?: ReorderMode.Disabled
                 )
+            }
+        }
+        sideEffect {
+            state.asData {
+                if (com.marzec.todo.DI.featureTogglesManager.get("todo.taskSharing") && 
+                    (task.shares.isNotEmpty() || task.ownerId != loginRepository.getCurrentUser()?.id)) {
+                    loadUsers()
+                }
             }
         }
     }
@@ -248,6 +257,17 @@ class TaskDetailsStore(
         sideEffect {
             state.asData {
                 disableReorderMode()
+            }
+        }
+    }
+
+    fun loadUsers() = intent<Content<List<com.marzec.model.User>>>("loadUsers") {
+        onTrigger {
+            todoRepository.getUsers()
+        }
+        reducer {
+            state.reduceDataWithContent(resultNonNull()) { users ->
+                this!! .copy(users = users)
             }
         }
     }
