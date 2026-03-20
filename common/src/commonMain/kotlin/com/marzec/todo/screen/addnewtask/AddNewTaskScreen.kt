@@ -70,7 +70,7 @@ fun AddNewTaskScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (state.data.isTaskSharingEnabled && state.data.task.ownerId != null && state.data.ownedTask) {
+                    if (state.data.isTaskSharingEnabled && state.data.task?.ownerId != null && state.data.ownedTask) {
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = "Shared by owner: ${state.data.task?.ownerId}"

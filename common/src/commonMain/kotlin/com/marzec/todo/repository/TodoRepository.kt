@@ -42,6 +42,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -212,8 +214,8 @@ class TodoRepository(
 
     fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            val task = dataSource.getById(taskId)
-            if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
+            val task = (observeTask(taskId).firstOrNull() as? Content.Data)?.data
+            if (task != null && DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
                 dataSource.leaveShare(LeaveShareDto(taskId))
             } else {
                 dataSource.removeTask(taskId)

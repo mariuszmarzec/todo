@@ -205,10 +205,11 @@ inline fun <
 
 inline fun <ID, reified MODEL_DTO : Any, reified CREATE_DTO : Any, reified UPDATE_DTO : Any> createDataSource(
     endpoint: String,
-    client: HttpClient
+    client: HttpClient,
+    json: Json = Json { ignoreUnknownKeys = true }
 ): CrudDataSourceImpl<ID, MODEL_DTO, CREATE_DTO, UPDATE_DTO> =
     CrudDataSource(
         endpointProvider = EndpointProviderImpl(endpoint),
         client = client,
-        json = Json
+        json = json
     )
