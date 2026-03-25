@@ -12,6 +12,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -27,10 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.mvi.collectState
 import com.marzec.time.formatDate
 import com.marzec.todo.model.Scheduler
+import com.marzec.todo.model.TaskShare
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.view.ActionBarProvider
@@ -53,7 +56,7 @@ fun AddNewTaskScreen(
         topBar = {
             actionBarProvider.provide("Tasks")
         }
-    ) {
+    ) { padding ->
         when (val state = state) {
             is State.Data -> {
                 val focusRequester = remember { FocusRequester() }
@@ -138,8 +141,8 @@ fun AddNewTaskScreen(
                         if (state.data.isTaskSharingEnabled && state.data.ownedTask) {
                             UsersRow(
                                 shares = state.data.shares,
-                                onUsersButtonClick = { store.onUsersButtonClick() },
-                                onRemoveShareButtonClick = { store.onRemoveShareButtonClick(it) }
+                                users = state.data.users,
+                                onUsersButtonClick = { store.onUsersButtonClick() }
                             )
                         }
                     }
@@ -214,29 +217,27 @@ fun ScheduleRow(
 
 @Composable
 fun UsersRow(
-    shares: List<com.marzec.todo.model.TaskShare>,
-    onUsersButtonClick: () -> Unit,
-    onRemoveShareButtonClick: (String) -> Unit
+    shares: List<TaskShare>,
+    users: List<User>,
+    onUsersButtonClick: () -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(16.dp)
+            .clickable { onUsersButtonClick() },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         if (shares.isNotEmpty()) {
             Text("Shared with:")
-            shares.forEach { share ->
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .clickable { onUsersButtonClick() },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(share.userId)
-                    IconButton({ onRemoveShareButtonClick(share.userId) }) {
-                        Icon(Icons.Default.Clear, "Remove share")
+            val sharedWith =
+                shares.mapNotNull { users.firstOrNull { user -> user.id == it.userId.toInt() } }
+                    .fold("") { acc, user ->
+                        acc + " ${user.email}"
                     }
-                }
-            }
+            Text(sharedWith)
+
         } else {
-            Button(onClick = { onUsersButtonClick() }) {
+            OutlinedButton(onClick = { onUsersButtonClick() }) {
                 Icon(Icons.Default.Person, contentDescription = null)
                 Text("Share")
             }

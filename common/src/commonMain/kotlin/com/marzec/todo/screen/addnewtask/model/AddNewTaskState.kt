@@ -1,5 +1,6 @@
 package com.marzec.todo.screen.addnewtask.model
 
+import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
@@ -20,6 +21,7 @@ data class AddNewTaskState(
     val isTaskSharingEnabled: Boolean = false,
     val ownedTask: Boolean = true,
     val isEditor: Boolean = true,
+    val users: List<User> = emptyList(),
 ) {
 
     val schedulerWithOptions: Scheduler?

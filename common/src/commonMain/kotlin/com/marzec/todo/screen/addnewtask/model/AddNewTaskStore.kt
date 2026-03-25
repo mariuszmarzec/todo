@@ -28,6 +28,7 @@ import com.marzec.todo.model.TaskShare
 import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.repository.TodoRepository
+import kotlin.math.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -47,15 +48,16 @@ class AddNewTaskStore(
 
     fun initialLoad() = (stateCache.get(cacheKey) ?: initialState)
         .asInstance<State.Loading<AddNewTaskState>> {
-            intent<Content<Pair<Task, User>>>("load") {
+            intent<Content<Triple<Task, User, List<User>>>>("load") {
                 onTrigger {
                     state.ifDataAvailable(blockOnLoading = false) {
                         taskId?.let {
                             combineContentsFlows(
                                 todoRepository.observeTask(it),
-                                loginRepository.observeCurrentUser()
-                            ) { task, user ->
-                                task to user
+                                loginRepository.observeCurrentUser(),
+                                todoRepository.getUsers()
+                            ) { task, user, users ->
+                                Triple(task, user, users)
                             }
                         }
                     }
@@ -70,7 +72,7 @@ class AddNewTaskStore(
                                 isTaskSharingEnabled = featureTogglesManager.get("todo.taskSharing"),
                             )
                         ) { result ->
-                            val (task, user) = result.data
+                            val (task, user, users) = result.data
                             copy(
                                 taskId = task.id,
                                 task = task,
@@ -88,7 +90,8 @@ class AddNewTaskStore(
                                     ?: Scheduler.SHOW_NOTIFICATION,
                                 isTaskSharingEnabled = featureTogglesManager.get("todo.taskSharing"),
                                 ownedTask = task.ownerId == user.id,
-                                isEditor = task.ownerId == user.id || task.shares.firstOrNull { it.userId.toInt() == user.id }?.permission == "EDITOR_AND_VIEWER"
+                                isEditor = task.ownerId == user.id || task.shares.firstOrNull { it.userId.toInt() == user.id }?.permission == "EDITOR_AND_VIEWER",
+                                users = users,
                             )
                         }
                     } ?: state
