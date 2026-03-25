@@ -120,7 +120,7 @@ fun TaskDetailsScreen(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add subtask")
             }
         }
-    ) {
+    ) { padding ->
         when (val state = state) {
             is State.Data -> {
                 Column(
@@ -193,18 +193,14 @@ fun TaskDetailsScreen(
                             )
                         }
                     }
-                    var currentUserId by remember { mutableStateOf<Int?>(null) }
-                    LaunchedEffect(Unit) {
-                        currentUserId = store.loginRepository.getCurrentUser()?.id
-                    }
                     val ownerInfo = when {
-                        task.ownerId != currentUserId -> {
+                        task.shares.isNotEmpty() && task.ownerId != state.data.currentUserId -> {
                             val owner = state.data.users.firstOrNull { it.id == task.ownerId }
                             owner?.let { "Owner: ${it.email}" }
                         }
                         task.shares.isNotEmpty() -> {
                             val sharedUsers = state.data.users.filter { user ->
-                                task.shares.any { it.userId == user.email }
+                                task.shares.any { it.userId.toInt() == user.id }
                             }
                             if (sharedUsers.isNotEmpty()) {
                                 "Shared with: ${sharedUsers.joinToString { it.email }}"

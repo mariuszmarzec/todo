@@ -3,6 +3,7 @@ package com.marzec.todo.screen.taskdetails.model
 import com.marzec.delegate.DialogState
 import com.marzec.delegate.WithSearch
 import com.marzec.delegate.WithSelection
+import com.marzec.model.User
 import com.marzec.mvi.State
 import com.marzec.todo.delegates.dialog.WithTasks
 import com.marzec.todo.delegates.reorder.ReorderMode
@@ -16,7 +17,8 @@ data class TaskDetailsState(
     override val selected: Set<Int>,
     override val search: SearchState,
     override val reorderMode: ReorderMode,
-    val users: List<com.marzec.model.User> = emptyList()
+    val users: List<User> = emptyList(),
+    val currentUserId: Int? = null
 ) : WithTasks<TaskDetailsState>,
     WithSelection<Int, TaskDetailsState>,
     WithSearch<TaskDetailsState>,

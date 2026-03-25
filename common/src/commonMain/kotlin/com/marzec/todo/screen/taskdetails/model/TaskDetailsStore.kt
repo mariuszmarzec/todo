@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.taskdetails.model
 
 import com.marzec.content.Content
+import com.marzec.content.combineContentsFlows
 import com.marzec.content.ifDataSuspend
 import com.marzec.mvi.delegates
 import com.marzec.extensions.asInstance
@@ -72,31 +73,36 @@ class TaskDetailsStore(
         )
     }
 
-    fun loadDetails() = intent<Content<Task>>("loadDetails") {
+    fun loadDetails() = intent<Content<Triple<Task, com.marzec.model.User, List<com.marzec.model.User>>>>("loadDetails") {
         onTrigger {
-            todoRepository.observeTask(taskId)
+            val taskFlow = todoRepository.observeTask(taskId)
+            val currentUserFlow = loginRepository.observeCurrentUser()
+            val usersFlow = todoRepository.getUsers()
+            
+            combineContentsFlows(
+                taskFlow,
+                currentUserFlow,
+                usersFlow
+            ) { task, user, users ->
+                Triple(task, user, users)
+            }
         }
         reducer {
             state.reduceDataWithContent(resultNonNull()) { result ->
-                val taskIds = result.subTasks.map { it.id }.toSet()
+                val (task, currentUser, users) = result
+                val taskIds = task.subTasks.map { it.id }.toSet()
                 TaskDetailsState(
-                    task = result,
+                    task = task,
                     dialog = DialogState.NoDialog(),
                     selected = this?.selected?.filter { it in taskIds }?.toSet().orEmpty(),
                     search = this?.search ?: SearchState(
                         value = "",
                         focused = false
                     ),
-                    reorderMode = this?.reorderMode ?: ReorderMode.Disabled
+                    reorderMode = this?.reorderMode ?: ReorderMode.Disabled,
+                    currentUserId = currentUser.id,
+                    users = users
                 )
-            }
-        }
-        sideEffect {
-            state.asData {
-                if (com.marzec.todo.DI.featureTogglesManager.get("todo.taskSharing") && 
-                    (task.shares.isNotEmpty() || task.ownerId != loginRepository.getCurrentUser()?.id)) {
-                    loadUsers()
-                }
             }
         }
     }
@@ -261,14 +267,4 @@ class TaskDetailsStore(
         }
     }
 
-    fun loadUsers() = intent<Content<List<com.marzec.model.User>>>("loadUsers") {
-        onTrigger {
-            todoRepository.getUsers()
-        }
-        reducer {
-            state.reduceDataWithContent(resultNonNull()) { users ->
-                this!! .copy(users = users)
-            }
-        }
-    }
 }
