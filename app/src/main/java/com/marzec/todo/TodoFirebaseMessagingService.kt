@@ -1,26 +1,20 @@
 package com.marzec.todo
 
-import android.app.NotificationManager
 import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.marzec.todo.api.TaskDto
-import android.content.Intent
-import android.content.Context
 import com.marzec.cache.getTyped
-import com.marzec.cache.observeTyped
 import com.marzec.logger.Logger
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.repository.DeviceTokenRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 
 class TodoFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -37,12 +31,20 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
             val type = remoteMessage.data["type"]
             val taskJson = remoteMessage.data["data"]
 
-            if (type == "TASK_SCHEDULED" && taskJson != null) {
-                // 2. Parse TaskDto (using Gson or Kotlin Serialization)
+            if (taskJson != null) {
+                // 2. Parse TaskDto
                 val taskDto = DI.json.decodeFromString<TaskDto>(taskJson)
 
-                // 3. Show the notification
-                showNotification(taskDto)
+                when (type) {
+                    "TASK_SCHEDULED" -> {
+                        // 3. Show the notification
+                        showNotification(taskDto)
+                    }
+                    "TASK_REMOVED" -> {
+                        // 4. Cancel the notification
+                        cancelNotification(taskDto)
+                    }
+                }
             }
         }
     }
@@ -70,13 +72,19 @@ class TodoFirebaseMessagingService : FirebaseMessagingService() {
             .setAutoCancel(true)
 
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val channel =
             NotificationChannel(channelId, "Tasks", NotificationManager.IMPORTANCE_DEFAULT)
         notificationManager.createNotificationChannel(channel)
 
         notificationManager.notify(task.id.hashCode(), builder.build())
+    }
+
+    private fun cancelNotification(task: TaskDto) {
+        val notificationManager =
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(task.id.hashCode())
     }
 
     override fun onNewToken(token: String) {
