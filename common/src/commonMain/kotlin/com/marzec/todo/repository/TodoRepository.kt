@@ -225,8 +225,8 @@ class TodoRepository(
     fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             taskIds.forEach {
-                val task = dataSource.getById(it)
-                if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
+                val task = (observeTask(it).firstOrNull() as? Content.Data)?.data
+                if (task != null && DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
                     dataSource.leaveShare(LeaveShareDto(it))
                 } else {
                     dataSource.removeTask(it)
