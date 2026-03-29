@@ -73,11 +73,15 @@ fun AddNewTaskScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (state.data.isTaskSharingEnabled && state.data.task?.ownerId != null && state.data.ownedTask) {
-                        Text(
-                            modifier = Modifier.padding(16.dp),
-                            text = "Shared by owner: ${state.data.task?.ownerId}"
-                        )
+                    if (state.data.isTaskSharingEnabled) {
+                        val sharingUser =
+                            state.data.task?.ownerId?.let { state.data.users.firstOrNull { user -> user.id == it } }
+                        if (sharingUser != null && state.data.task?.ownerId != null && !state.data.ownedTask) {
+                            Text(
+                                modifier = Modifier.padding(16.dp),
+                                text = "Shared by owner: ${sharingUser.email}"
+                            )
+                        }
                     }
 
                     Box(modifier = Modifier.padding(16.dp)) {
