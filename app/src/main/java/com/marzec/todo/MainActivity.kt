@@ -16,11 +16,16 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.marzec.common.OpenUrlHelper
 import com.marzec.todo.screen.main.HomeScreenSaveable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+
+    private var wasBackgrounded = false
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -80,5 +85,20 @@ class MainActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (wasBackgrounded) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                DI.todoRepository.observeTasks().collect()
+            }
+        }
+        wasBackgrounded = false
+    }
+
+    override fun onStop() {
+        super.onStop()
+        wasBackgrounded = true
     }
 }
