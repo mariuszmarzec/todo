@@ -110,7 +110,7 @@ Used when creating a new task.
     "shares": [ // Optional sharing configuration
         {
             "userId": "456",
-            "permission": "EDIT"
+            "permission": "EDITOR_AND_VIEWER"
         }
     ]
 }
@@ -129,7 +129,7 @@ Used to update an existing task. Most fields are optional and are only updated i
     "shares": [ // Optional
         {
             "userId": "456",
-            "permission": "READ"
+            "permission": "EDITOR_AND_VIEWER"
         }
     ]
 }
@@ -140,7 +140,7 @@ Describes sharing permission for a specific user on a task.
 ```json
 {
     "userId": "456", // ID of the user the task is shared with
-    "permission": "READ" // The level of permission (e.g., READ, EDIT)
+    "permission": "EDITOR_AND_VIEWER" // The level of permission (e.g., EDITOR_AND_VIEWER)
 }
 ```
 
@@ -149,7 +149,7 @@ Describes sharing configuration when modifying shares.
 ```json
 {
     "userId": "456",
-    "permission": "READ"
+    "permission": "EDITOR_AND_VIEWER"
 }
 ```
 
