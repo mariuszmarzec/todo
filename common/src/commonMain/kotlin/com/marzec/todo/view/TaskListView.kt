@@ -93,7 +93,7 @@ fun TaskListView(
                         pinned = it.parentTaskId != null
                     )
                 },
-            key = { _, listItem -> "${listItem.id} $selectable $selected $reorderMode" }
+            key = { _, listItem -> "${listItem.id} $selectable $selected $reorderMode ${listItem.isToDo}" }
         ) { index, listItem ->
             val id = listItem.id
             val selected = id in selected
