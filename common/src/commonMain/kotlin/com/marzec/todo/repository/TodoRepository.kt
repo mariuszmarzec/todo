@@ -12,7 +12,6 @@ import com.marzec.content.asContent
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.dto.NullableFieldDto
-import com.marzec.featuretoggle.FeatureTogglesManager
 import com.marzec.model.User
 import com.marzec.model.toDto
 import com.marzec.model.toNullableUpdate
@@ -42,7 +41,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -215,44 +213,41 @@ class TodoRepository(
     fun removeTask(taskId: Int): Flow<Content<Unit>> =
         asContentWithListUpdate {
             val task = (observeTask(taskId).firstOrNull() as? Content.Data)?.data
-            if (task != null && DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
-                dataSource.leaveShare(LeaveShareDto(taskId))
-            } else {
-                dataSource.removeTask(taskId)
-            }
+            task?.let { removeTaskInternal(task) }
         }
+
+    private suspend fun hasPermissionToRemove(task: Task?): Boolean {
+        val currentUserId = currentUserId()
+        return task != null && (currentUserId == task.ownerId || task.shares.firstOrNull { it.userId.toInt() == currentUserId }?.permission == "EDITOR_AND_VIEWER")
+    }
 
     fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             taskIds.forEach {
                 val task = (observeTask(it).firstOrNull() as? Content.Data)?.data
-                if (task != null && DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
-                    dataSource.leaveShare(LeaveShareDto(it))
-                } else {
-                    dataSource.removeTask(it)
-                }
+                task?.let { removeTaskInternal(task) }
             }
         }
 
     fun removeTaskWithSubtasks(task: Task): Flow<Content<Unit>> =
         asContentWithListUpdate {
-            if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
-                dataSource.leaveShare(LeaveShareDto(task.id))
-            } else {
-                dataSource.removeTask(taskId = task.id, removeSubtasks = true)
-            }
+            removeTaskInternal(task, removeSubtasks = true)
         }
 
     fun removeTasksWithSubtasks(tasks: List<Task>): Flow<Content<Unit>> =
         asContentWithListUpdate {
             tasks.forEach { task ->
-                if (DI.featureTogglesManager.get("todo.taskSharing") && currentUserId() != task.ownerId) {
-                    dataSource.leaveShare(LeaveShareDto(task.id))
-                } else {
-                    dataSource.removeTask(taskId = task.id, removeSubtasks = true)
-                }
+                removeTaskInternal(task, removeSubtasks = true)
             }
         }
+
+    private suspend fun removeTaskInternal(task: Task, removeSubtasks: Boolean = false) {
+        if (hasPermissionToRemove(task)) {
+            dataSource.removeTask(taskId = task.id, removeSubtasks)
+        } else {
+            dataSource.leaveShare(LeaveShareDto(task.id))
+        }
+    }
 
     fun copyTask(taskId: Int): Flow<Content<Unit>> = asContentWithListUpdate {
         dataSource.copyTask(taskId)
