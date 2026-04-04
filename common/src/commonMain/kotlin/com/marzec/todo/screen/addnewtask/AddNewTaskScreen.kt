@@ -38,6 +38,7 @@ import com.marzec.todo.screen.addnewtask.model.AddNewTaskState
 import com.marzec.todo.screen.addnewtask.model.AddNewTaskStore
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.TextFieldStateful
+import java.util.Locale
 import kotlinx.datetime.LocalDateTime
 
 @Composable
@@ -240,8 +241,13 @@ fun ExpirationDateRow(
             IconButton({ onRemoveExpirationDateButtonClick() }) {
                 Icon(Icons.Default.Clear, "Remove expiration date")
             }
+            val dateFormatted = expirationDate.formatSimple() + if (expirationDate.hour != 0 || expirationDate.minute != 0) {
+                " at " + String.format(Locale.getDefault(), " at %02d:%02d", expirationDate.hour, expirationDate.minute)
+            } else {
+                ""
+            }
             Text(
-                text = "Expires: ${expirationDate.formatSimple()}"
+                text = "Expires: $dateFormatted"
             )
         }
     } else {

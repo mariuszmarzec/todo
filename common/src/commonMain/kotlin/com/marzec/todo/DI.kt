@@ -251,7 +251,7 @@ object DI {
 
             is TodoDestination.DatePicker -> @Composable { destination, cacheKey ->
                 destination as TodoDestination.DatePicker
-                provideDatePickerScreen(cacheKey, destination.date)
+                provideDatePickerScreen(cacheKey, destination.date, destination.showHourPicker)
             }
 
             TodoDestination.Login -> @Composable { _, cacheKey ->
@@ -502,12 +502,13 @@ object DI {
     }
 
     @Composable
-    private fun provideDatePickerScreen(cacheKey: String, date: LocalDateTime?) {
+    private fun provideDatePickerScreen(cacheKey: String, date: LocalDateTime?, showHourPicker: Boolean) {
         DatePickerScreen(
             store = provideDatePickerStore(
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey,
-                date = date
+                date = date,
+                showHourPicker = showHourPicker
             ),
             actionBarProvider = provideActionBarProvider()
         )
@@ -516,14 +517,15 @@ object DI {
     private fun provideDatePickerStore(
         scope: CoroutineScope,
         cacheKey: String,
-        date: LocalDateTime?
+        date: LocalDateTime?,
+        showHourPicker: Boolean
     ): DatePickerStore {
         return DatePickerStore(
             scope = scope,
             navigationStore = navigationStore,
             stateCache = stateCache,
             cacheKey = cacheKey,
-            initialState = DatePickerState.from(date, blockPastDates = true)
+            initialState = DatePickerState.from(date, blockPastDates = true, showHourPicker = showHourPicker)
         )
     }
 

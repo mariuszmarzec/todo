@@ -45,10 +45,8 @@ fun LocalDateTime.formatDate(dateFormat: String = DEFAULT_DATE_FORMAT): String =
 
 fun String.shortDateToLocalDateTime() = "${this}T00:00:00".toLocalDateTime()
 
-fun time(day: Int, month: Int, year: Int): LocalDateTime =
-    LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault())
-        .toLocalDateTime()
-        .toKotlinLocalDateTime()
+fun time(day: Int, month: Int, year: Int, hour: Int = 0, minute: Int = 0): LocalDateTime =
+    java.time.LocalDateTime.of(year, month, day, hour, minute).toKotlinLocalDateTime()
 
 fun LocalDateTime.lengthOfMonth(): Int = YearMonth.of(year, monthNumber).lengthOfMonth()
 

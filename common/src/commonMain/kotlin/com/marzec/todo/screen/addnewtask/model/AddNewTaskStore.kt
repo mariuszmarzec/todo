@@ -289,7 +289,7 @@ class AddNewTaskStore(
     fun onExpirationDateButtonClick() = sideEffectIntent {
         state.ifDataAvailable {
             navigationStore.next(
-                NavigationAction(TodoDestination.DatePicker(expirationDate ?: com.marzec.time.currentTime())),
+                NavigationAction(TodoDestination.DatePicker(expirationDate ?: com.marzec.time.currentTime(), showHourPicker = true)),
                 requestId = REQUEST_KEY_EXPIRATION_DATE
             )
         }

@@ -83,21 +83,27 @@ data class DatePickerState(
     val year: Int = currentTime().year,
     val monthInYear: Int = currentTime().monthNumber,
     val dayInMonth: Int = currentTime().dayOfMonth,
+    val hour: Int = currentTime().hour,
+    val minute: Int = currentTime().minute,
     val currentSelectedDay: LocalDateTime? = null,
-    val blockPastDates: Boolean = false
+    val blockPastDates: Boolean = false,
+    val showHourPicker: Boolean = false
 ) {
-    fun toLocalDateTime() = time(dayInMonth, monthInYear, year)
+    fun toLocalDateTime() = time(dayInMonth, monthInYear, year, hour, minute)
 
     companion object {
-        fun from(dateTime: LocalDateTime?, blockPastDates: Boolean) = dateTime?.let {
+        fun from(dateTime: LocalDateTime?, blockPastDates: Boolean, showHourPicker: Boolean = false) = dateTime?.let {
             DatePickerState(
-                dateTime.year,
-                dateTime.monthNumber,
-                dateTime.dayOfMonth,
-                dateTime,
-                blockPastDates
+                year = dateTime.year,
+                monthInYear = dateTime.monthNumber,
+                dayInMonth = dateTime.dayOfMonth,
+                hour = dateTime.hour,
+                minute = dateTime.minute,
+                currentSelectedDay = dateTime,
+                blockPastDates = blockPastDates,
+                showHourPicker = showHourPicker
             )
-        } ?: DatePickerState()
+        } ?: DatePickerState(showHourPicker = showHourPicker)
     }
 }
 
@@ -117,6 +123,14 @@ class DatePickerStore(
 
     fun onMonthChange(month: Int) = reducerIntent {
         state.copy(monthInYear = month)
+    }
+
+    fun onHourChange(hour: Int) = reducerIntent {
+        state.copy(hour = hour)
+    }
+
+    fun onMinuteChange(minute: Int) = reducerIntent {
+        state.copy(minute = minute)
     }
 
     fun onDayClick(day: Int, month: Int) = intent<Unit> {
@@ -163,6 +177,28 @@ fun DatePickerScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         actionBarProvider.provide { }
+
+        if (state.showHourPicker) {
+            Row {
+                val hours = (0..23).toList()
+                val minutes = (0..59).toList()
+                SpinnerView(
+                    label = "Hour",
+                    items = hours.map { it.toString() },
+                    selectedItemIndex = hours.indexOf(state.hour)
+                ) {
+                    store.onHourChange(hours[it])
+                }
+                SpinnerView(
+                    label = "Minute",
+                    items = minutes.map { it.toString() },
+                    selectedItemIndex = minutes.indexOf(state.minute)
+                ) {
+                    store.onMinuteChange(minutes[it])
+                }
+            }
+        }
+
         val yearIndex = years.indexOfFirst { it == state.year }
         Row(horizontalArrangement = Arrangement.Center) {
             if (yearIndex < years.lastIndex) {

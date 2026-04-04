@@ -20,6 +20,9 @@ sealed class TodoDestination : com.marzec.navigation.Destination {
         val additionalOptionsAvailable: Boolean = false
     ) : TodoDestination()
 
-    data class DatePicker(val date: LocalDateTime) : TodoDestination()
+    data class DatePicker(
+        val date: LocalDateTime,
+        val showHourPicker: Boolean = false
+    ) : TodoDestination()
     data class PickItem<ITEM : Any>(val options: PickItemOptions<ITEM>) : TodoDestination()
 }
