@@ -14,6 +14,7 @@ data class TaskDto(
     val isToDo: Boolean,
     val priority: Int,
     val scheduler: SchedulerDto? = null,
+    val expirationDate: String? = null,
     val shares: List<TaskShareDto> = emptyList(),
     val ownerId: Int? = null
 )
@@ -25,6 +26,7 @@ data class CreateTaskDto(
     val priority: Int? = null,
     val highestPriorityAsDefault: Boolean? = null,
     val scheduler: SchedulerDto?,
+    val expirationDate: String? = null,
     val shares: List<TaskShareDto>? = null
 )
 
@@ -35,6 +37,7 @@ data class UpdateTaskDto(
     val priority: Int? = null,
     val isToDo: Boolean? = null,
     val scheduler: NullableFieldDto<SchedulerDto>? = null,
+    val expirationDate: NullableFieldDto<String>? = null,
     val shares: List<TaskShareDto>? = null
 )
 

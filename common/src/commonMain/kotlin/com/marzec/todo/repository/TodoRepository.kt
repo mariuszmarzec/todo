@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDateTime
 
 class TodoRepository(
     private val dataSource: DataSource,
@@ -85,6 +86,7 @@ class TodoRepository(
         parentTaskId: Int?,
         highestPriorityAsDefault: Boolean,
         scheduler: Scheduler?,
+        expirationDate: LocalDateTime? = null,
         shares: List<TaskShare>? = null
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
@@ -94,6 +96,7 @@ class TodoRepository(
                     parentTaskId = parentTaskId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     scheduler = scheduler?.toDto(),
+                    expirationDate = expirationDate?.toString(),
                     shares = if (DI.featureTogglesManager.get("todo.taskSharing")) shares?.map { it.toDto() } else null
                 )
             )
@@ -103,7 +106,8 @@ class TodoRepository(
         highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
         descriptions: List<String>,
-        scheduler: Scheduler?
+        scheduler: Scheduler?,
+        expirationDate: LocalDateTime? = null
     ): Flow<Content<Unit>> =
         asContentWithListUpdate {
             descriptions.forEach {
@@ -112,7 +116,8 @@ class TodoRepository(
                         description = it,
                         parentTaskId = parentTaskId,
                         highestPriorityAsDefault = highestPriorityAsDefault,
-                        scheduler = scheduler?.toDto()
+                        scheduler = scheduler?.toDto(),
+                        expirationDate = expirationDate?.toString()
                     )
                 )
             }
@@ -308,7 +313,8 @@ class TodoRepository(
         description: String,
         parentTaskId: Int?,
         highestPriorityAsDefault: Boolean,
-        schedulerWithOptions: Scheduler?
+        schedulerWithOptions: Scheduler?,
+        expirationDate: LocalDateTime? = null
     ): Flow<Content<Unit>> = asContentWithListUpdate {
         val lines = description.lines().filter { it.isNotBlank() }
         val levelToParentId = mutableMapOf<Int, Int>()
@@ -329,7 +335,8 @@ class TodoRepository(
                     description = taskDescription,
                     parentTaskId = currentParentTaskId,
                     highestPriorityAsDefault = highestPriorityAsDefault,
-                    scheduler = schedulerWithOptions?.toDto()
+                    scheduler = schedulerWithOptions?.toDto(),
+                    expirationDate = expirationDate?.toString()
                 )
             )
             levelToParentId[level] = createdTask.id

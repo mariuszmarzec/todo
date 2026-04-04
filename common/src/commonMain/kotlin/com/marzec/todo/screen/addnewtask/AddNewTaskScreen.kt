@@ -49,6 +49,7 @@ fun AddNewTaskScreen(
     val state: State<AddNewTaskState> by store.collectState {
         store.initialLoad()
         store.onSchedulerRequest()
+        store.onExpirationDateRequest()
         store.onUsersRequest()
     }
 
@@ -149,6 +150,12 @@ fun AddNewTaskScreen(
                                 onUsersButtonClick = { store.onUsersButtonClick() }
                             )
                         }
+
+                        ExpirationDateRow(
+                            expirationDate = state.data.expirationDate,
+                            onExpirationDateButtonClick = { store.onExpirationDateButtonClick() },
+                            onRemoveExpirationDateButtonClick = { store.onRemoveExpirationDateButtonClick() }
+                        )
                     }
                     if (state.data.isEditor && state.data.scheduler is Scheduler.OneShot) {
                         Row(
@@ -215,6 +222,33 @@ fun ScheduleRow(
             onScheduleButtonClick()
         }) {
             Text("Schedule")
+        }
+    }
+}
+
+@Composable
+fun ExpirationDateRow(
+    expirationDate: LocalDateTime?,
+    onExpirationDateButtonClick: () -> Unit,
+    onRemoveExpirationDateButtonClick: () -> Unit
+) {
+    if (expirationDate != null) {
+        Row(
+            modifier = Modifier.clickable { onExpirationDateButtonClick() },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton({ onRemoveExpirationDateButtonClick() }) {
+                Icon(Icons.Default.Clear, "Remove expiration date")
+            }
+            Text(
+                text = "Expires: ${expirationDate.formatSimple()}"
+            )
+        }
+    } else {
+        OutlinedButton(onClick = {
+            onExpirationDateButtonClick()
+        }) {
+            Text("Expiration date")
         }
     }
 }

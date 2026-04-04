@@ -31,6 +31,7 @@ import com.marzec.todo.repository.TodoRepository
 import kotlin.math.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.datetime.LocalDateTime
 
 class AddNewTaskStore(
     scope: CoroutineScope,
@@ -81,6 +82,7 @@ class AddNewTaskStore(
                                 priority = task.priority,
                                 isToDo = task.isToDo,
                                 scheduler = task.scheduler,
+                                expirationDate = task.expirationDate,
                                 shares = task.shares,
                                 highestPriorityAsDefault = task.scheduler?.highestPriorityAsDefault
                                     ?: Scheduler.HIGHEST_PRIORITY_AS_DEFAULT,
@@ -110,6 +112,21 @@ class AddNewTaskStore(
                 copy(
                     scheduler = scheduler,
                     removeAfterSchedule = scheduler is Scheduler.OneShot
+                )
+            }
+        }
+    }
+
+    fun onExpirationDateRequest() = intent("onExpirationDateRequest") {
+        onTrigger {
+            navigationStore.observe<LocalDateTime>(REQUEST_KEY_EXPIRATION_DATE)?.filterNotNull()
+        }
+
+        reducer {
+            val expirationDate = resultNonNull()
+            state.reduceData {
+                copy(
+                    expirationDate = expirationDate
                 )
             }
         }
@@ -148,6 +165,7 @@ class AddNewTaskStore(
                             priority = priority.toUpdate(task.priority),
                             isToDo = isToDo.toUpdate(task.isToDo),
                             scheduler = schedulerWithOptions.toNullableUpdate(task.scheduler),
+                            expirationDate = expirationDate.toNullableUpdate(task.expirationDate),
                             shares = shares.toUpdate(task.shares)
                         )
                     )
@@ -157,6 +175,7 @@ class AddNewTaskStore(
                         parentTaskId = parentTaskId,
                         highestPriorityAsDefault = highestPriorityAsDefault,
                         scheduler = schedulerWithOptions,
+                        expirationDate = expirationDate,
                         shares = shares
                     )
                 }
@@ -189,7 +208,8 @@ class AddNewTaskStore(
                             it
                         }
                     },
-                    scheduler = schedulerWithOptions
+                    scheduler = schedulerWithOptions,
+                    expirationDate = expirationDate
                 )
             }
         }
@@ -266,6 +286,15 @@ class AddNewTaskStore(
         }
     }
 
+    fun onExpirationDateButtonClick() = sideEffectIntent {
+        state.ifDataAvailable {
+            navigationStore.next(
+                NavigationAction(TodoDestination.DatePicker(expirationDate ?: com.marzec.time.currentTime())),
+                requestId = REQUEST_KEY_EXPIRATION_DATE
+            )
+        }
+    }
+
     fun onUsersButtonClick() = sideEffectIntent {
         state.ifDataAvailable {
             navigationStore.next(
@@ -279,6 +308,14 @@ class AddNewTaskStore(
         reducer {
             state.reduceData {
                 copy(scheduler = null)
+            }
+        }
+    }
+
+    fun onRemoveExpirationDateButtonClick() = intent<Unit> {
+        reducer {
+            state.reduceData {
+                copy(expirationDate = null)
             }
         }
     }
@@ -298,7 +335,8 @@ class AddNewTaskStore(
                     description,
                     parentTaskId,
                     highestPriorityAsDefault,
-                    schedulerWithOptions
+                    schedulerWithOptions,
+                    expirationDate
                 )
             }
         }
@@ -335,3 +373,4 @@ class AddNewTaskStore(
 
 const val REQUEST_KEY_SCHEDULER = 1
 const val REQUEST_KEY_USERS = 2
+const val REQUEST_KEY_EXPIRATION_DATE = 3

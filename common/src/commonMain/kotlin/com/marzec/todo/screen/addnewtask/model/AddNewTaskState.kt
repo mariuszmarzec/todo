@@ -5,6 +5,7 @@ import com.marzec.mvi.State
 import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.Task
 import com.marzec.todo.model.TaskShare
+import kotlinx.datetime.LocalDateTime
 
 data class AddNewTaskState(
     val taskId: Int?,
@@ -17,6 +18,7 @@ data class AddNewTaskState(
     val removeAfterSchedule: Boolean,
     val showNotification: Boolean,
     val scheduler: Scheduler? = null,
+    val expirationDate: LocalDateTime? = null,
     val shares: List<TaskShare> = emptyList(),
     val isTaskSharingEnabled: Boolean = false,
     val ownedTask: Boolean = true,

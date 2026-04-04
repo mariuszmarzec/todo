@@ -24,6 +24,7 @@ data class Task(
     val isToDo: Boolean,
     val priority: Int,
     val scheduler: Scheduler?,
+    val expirationDate: LocalDateTime?,
     val shares: List<TaskShare>,
     val ownerId: Int?
 )
@@ -262,6 +263,7 @@ fun Task.toDto(): TaskDto = TaskDto(
     isToDo = isToDo,
     priority = priority,
     scheduler = scheduler?.toDto(),
+    expirationDate = expirationDate?.formatDate(),
     shares = shares.map { it.toDto() },
     ownerId = ownerId
 )
@@ -276,6 +278,7 @@ fun TaskDto.toDomain(): Task = Task(
     isToDo = isToDo,
     priority = priority,
     scheduler = scheduler?.toDomain(),
+    expirationDate = expirationDate?.toLocalDateTime(),
     shares = shares.map { it.toDomain() },
     ownerId = ownerId
 )
@@ -286,6 +289,7 @@ data class CreateTask(
     val priority: Int? = null,
     val highestPriorityAsDefault: Boolean? = null,
     val scheduler: Scheduler? = null,
+    val expirationDate: LocalDateTime? = null,
     val shares: List<TaskShare>? = null
 )
 
@@ -294,6 +298,7 @@ fun CreateTaskDto.toDomain() = CreateTask(
     parentTaskId = parentTaskId,
     priority = priority,
     scheduler = scheduler?.toDomain(),
+    expirationDate = expirationDate?.toLocalDateTime(),
     shares = shares?.map { it.toDomain() }
 )
 
@@ -303,6 +308,7 @@ fun CreateTask.toDto() = CreateTaskDto(
     priority = priority,
     highestPriorityAsDefault = highestPriorityAsDefault,
     scheduler = scheduler?.toDto(),
+    expirationDate = expirationDate?.formatDate(),
     shares = shares?.map { it.toDto() }
 )
 
@@ -312,6 +318,7 @@ data class UpdateTask(
     val priority: Int? = null,
     val isToDo: Boolean? = null,
     val scheduler: NullableField<Scheduler>? = null,
+    val expirationDate: NullableField<LocalDateTime>? = null,
     val shares: List<TaskShare>? = null
 )
 
@@ -321,5 +328,6 @@ fun UpdateTask.toDto() = UpdateTaskDto(
     priority = priority,
     isToDo = isToDo,
     scheduler = scheduler?.toDto{ it?.toDto() },
+    expirationDate = expirationDate?.toDto { it?.formatDate() },
     shares = shares?.map { it.toDto() }
 )
