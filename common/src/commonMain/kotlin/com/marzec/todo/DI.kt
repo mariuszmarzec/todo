@@ -602,7 +602,7 @@ object DI {
         createHttpClient(
             fileCache = fileCache,
             authorizationHeader = Api.Headers.AUTHORIZATION,
-            preferencesHeaderKey = PreferencesKeys.AUTHORIZATION
+            preferencesHeaderKey = PreferencesKeys.AUTHORIZATION,
         )
     }
 
@@ -610,20 +610,22 @@ object DI {
         createHttpClient(
             fileCache = fileCache,
             authorizationHeader = Api.Headers.AUTHORIZATION,
-            preferencesHeaderKey = PreferencesKeys.AUTHORIZATION
+            preferencesHeaderKey = PreferencesKeys.AUTHORIZATION,
+            retryOnConnectionFailure = true
         ) {
             install(SSE)
+
             install(HttpTimeout) {
-                connectTimeoutMillis = 60 * 60 * 1000L
-                socketTimeoutMillis = 60 * 60 * 1000L
-                connectTimeoutMillis = 60 * 60 * 1000L
+                connectTimeoutMillis = 30_000
+                socketTimeoutMillis = Long.MAX_VALUE
             }
+
             install(HttpRequestRetry) {
                 retryOnServerErrors()
+                exponentialDelay()
             }
         }
     }
-
     val loginRepository: LoginRepository by lazy {
         if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(
             client,

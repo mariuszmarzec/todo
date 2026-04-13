@@ -63,7 +63,7 @@ fun main() {
 
     DI.ioDispatcher = Dispatchers.IO
 
-    GlobalScope.launch {
+    GlobalScope.launch(DI.ioDispatcher) {
         DI.todoRepository.receiveSse()
     }
 

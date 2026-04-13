@@ -8,5 +8,6 @@ expect fun createHttpClient(
     fileCache: FileCache,
     authorizationHeader: String,
     preferencesHeaderKey: String,
+    retryOnConnectionFailure: Boolean = false,
     block: HttpClientConfig<*>.() -> Unit = {}
 ): HttpClient

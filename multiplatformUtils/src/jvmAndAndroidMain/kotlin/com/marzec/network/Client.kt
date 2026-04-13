@@ -15,6 +15,7 @@ actual fun createHttpClient(
     fileCache: FileCache,
     authorizationHeader: String,
     preferencesHeaderKey: String,
+    retryOnConnectionFailure: Boolean,
     block: HttpClientConfig<*>.() -> Unit
 ): HttpClient = HttpClient(OkHttp) {
     install(ContentNegotiation) {
@@ -36,6 +37,11 @@ actual fun createHttpClient(
     }
 
     engine {
+        config {
+            if (retryOnConnectionFailure) {
+                retryOnConnectionFailure(true)
+            }
+        }
 //        addNetworkInterceptor(HttpLoggingInterceptor().apply {
 //            level = HttpLoggingInterceptor.Level.BODY
 //        })
