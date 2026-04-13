@@ -25,9 +25,13 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -75,6 +79,25 @@ fun TaskListView(
 
     val dragEnteredIndex: MutableIntState = remember { mutableIntStateOf(-1) }
 
+// DIRTY HACK AGAINST SCROLLING TO MOVED ITEM
+    var lastIndex by remember { mutableIntStateOf(0) }
+    var lastOffset by remember { mutableIntStateOf(0) }
+
+    SideEffect {
+        if (!scrollState.isScrollInProgress) {
+            lastIndex = scrollState.firstVisibleItemIndex
+            lastOffset = scrollState.firstVisibleItemScrollOffset
+        }
+    }
+
+    LaunchedEffect(tasks) {
+        if (scrollState.firstVisibleItemIndex != lastIndex ||
+            scrollState.firstVisibleItemScrollOffset != lastOffset) {
+
+            scrollState.scrollToItem(lastIndex, lastOffset)
+        }
+    }
+// END HACK
     val selectable = selectionModeEnabled && !reorderMode
     LazyColumn(state = scrollState) {
         itemsIndexed(
