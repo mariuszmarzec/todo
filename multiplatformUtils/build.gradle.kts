@@ -17,6 +17,7 @@ kotlin {
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
             useJUnit()
+            systemProperty("java.awt.headless", "true")
         }
     }
 

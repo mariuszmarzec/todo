@@ -130,7 +130,7 @@ class NavigationStoreTest {
             NavigationEntry(destination = TestDestination.A, cacheKeyProvider())
         )
     )
-    val overrideLastClose: (NavigationState.() -> NavigationState)? = null
+    val overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null
 
     @Before
     fun setUp() {
@@ -429,8 +429,8 @@ class NavigationStoreTest {
     @Test
     fun goBack_withOverrideClosingLast() = runTest {
         var calledLastClose = false
-        val overrideLastClose: NavigationState.() -> NavigationState =
-            { calledLastClose = true; this }
+        val overrideLastClose: NavigationState.() -> NavigationUpdate =
+            { calledLastClose = true; NavigationUpdate(this, emptyList()) }
         val initialState = navigationState(
             backStack = listOf(
                 NavigationEntry(destination = TestDestination.A, "0")
@@ -911,8 +911,8 @@ class NavigationStoreTest {
     @Test
     fun goBack_withOverrideClosingLast_withFlows_shouldNot_subFlowHas2Screens() = runTest {
         var calledLastClose = false
-        val overrideLastClose: NavigationState.() -> NavigationState =
-            { calledLastClose = true; this }
+        val overrideLastClose: NavigationState.() -> NavigationUpdate =
+            { calledLastClose = true; NavigationUpdate(this, emptyList()) }
         val initialState = navigationState(
             backStack = listOf(
                 NavigationEntry(
@@ -1317,10 +1317,10 @@ class NavigationStoreTest {
             )
         )
         var calledLastClose = false
-        val overrideLastClose: NavigationState.() -> NavigationState =
+        val overrideLastClose: NavigationState.() -> NavigationUpdate =
             {
                 calledLastClose = true
-                this
+                NavigationUpdate(this, emptyList())
             }
         runTest {
         store = navigationStore(initialState, overrideLastClose)
@@ -1338,7 +1338,7 @@ class NavigationStoreTest {
 
     private fun StoreTest<NavigationState, NavigationStore>.navigationStore(
         initialState: NavigationState = defaultState,
-        overrideLastClose: (NavigationState.() -> NavigationState)? = this@NavigationStoreTest.overrideLastClose
+        overrideLastClose: (NavigationState.() -> NavigationUpdate)? = this@NavigationStoreTest.overrideLastClose
     ) =
         NavigationStore(
             scope = scope,

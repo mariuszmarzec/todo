@@ -24,6 +24,7 @@ glide = "1.0.0-alpha.1"
 exoPlayer = "2.18.5"
 vlc = "4.7.0"
 mockk = "1.13.2"
+junit = "4.13.2"
 dateTime = "0.4.1"
 viewModel = "2.0.0"
 quickMvi = "1.1.0"
@@ -56,6 +57,7 @@ imageLoader = { module = "com.github.bumptech.glide:compose", version.ref = "gli
 exoPlayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoPlayer" }
 vlc = { module = "uk.co.caprica:vlcj", version.ref = "vlc" }
 mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
+junit = { module = "junit:junit", version.ref = "junit" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "viewModel" }

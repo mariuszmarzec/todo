@@ -80,7 +80,7 @@ dependencies {
     implementation(compose.foundation)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.fcm)
-
+    testImplementation(libs.junit)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
