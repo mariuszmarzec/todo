@@ -38,6 +38,8 @@ import com.marzec.navigation.NavigationEntryCache
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
+import com.marzec.navigation.Router
+import com.marzec.navigation.createRouter
 import com.marzec.network.createHttpClient
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.preferences.StateCache
@@ -215,11 +217,9 @@ object DI {
         multipleChoice = true
     )
 
-    fun router(
-        destination: Destination
-    ): @Composable (destination: Destination, cacheKey: String) -> Unit =
-        when (destination) {
-            is FeatureToggles -> @Composable { destination, cacheKey ->
+    private val routerProvider: Router by lazy {
+        createRouter(
+            FeatureToggles::class to @Composable { destination, cacheKey ->
                 destination as FeatureToggles
                 provideFeatureTogglesScreen(
                     provideActionBarProvider(),
@@ -228,59 +228,51 @@ object DI {
                     navigationStore,
                     stateCache
                 )
-            }
-
-            is FeatureToggleDetails -> @Composable { destination, cacheKey ->
+            },
+            FeatureToggleDetails::class to @Composable { destination, cacheKey ->
                 destination as FeatureToggleDetails
                 provideFeatureToggleScreen(destination, cacheKey)
-            }
-
-            is TodoDestination.AddNewTask -> @Composable { destination, cacheKey ->
+            },
+            TodoDestination.AddNewTask::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.AddNewTask
                 provideAddNewTaskScreen(
                     taskId = destination.taskToEditId,
                     parentTaskId = destination.parentTaskId,
                     cacheKey
                 )
-            }
-
-            is TodoDestination.AddSubTask -> @Composable { destination, cacheKey ->
+            },
+            TodoDestination.AddSubTask::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.AddSubTask
                 provideAddSubTaskScreen(destination.taskId, cacheKey)
-            }
-
-            is TodoDestination.DatePicker -> @Composable { destination, cacheKey ->
+            },
+            TodoDestination.DatePicker::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.DatePicker
                 provideDatePickerScreen(cacheKey, destination.date, destination.showHourPicker)
-            }
-
-            TodoDestination.Login -> @Composable { _, cacheKey ->
+            },
+            TodoDestination.Login::class to @Composable { _, cacheKey ->
                 provideLoginScreen(cacheKey)
-            }
-
-            is TodoDestination.PickItem<*> -> @Composable { destination, cacheKey ->
+            },
+            TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.PickItem<Any>
                 providePickItemScreen(destination, cacheKey)
-            }
-
-            is TodoDestination.Schedule -> @Composable { destination, cacheKey ->
+            },
+            TodoDestination.Schedule::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.Schedule
                 provideSchedulerScreen(cacheKey, destination)
-            }
-
-            is TodoDestination.TaskDetails -> @Composable { destination, cacheKey ->
+            },
+            TodoDestination.TaskDetails::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.TaskDetails
                 provideTaskDetailsScreen(destination.taskId, cacheKey)
-            }
-
-            TodoDestination.Tasks -> @Composable { _, cacheKey ->
+            },
+            TodoDestination.Tasks::class to @Composable { _, cacheKey ->
                 provideTasksScreen(cacheKey)
             }
+        )
+    }
 
-            else -> {
-                throw error("Unknown destination: $destination")
-            }
-        }
+    fun router(
+        destination: Destination
+    ): @Composable (destination: Destination, cacheKey: String) -> Unit = routerProvider(destination)
 
     @Composable
     private fun provideFeatureToggleScreen(destination: FeatureToggleDetails, cacheKey: String) {
