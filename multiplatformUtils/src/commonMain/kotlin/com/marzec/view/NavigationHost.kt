@@ -88,7 +88,7 @@ fun navigationStore(
 ) = NavigationStore(
     scope = scope,
     stateCache = stateCache,
-    resultCache = ResultCache(MemoryCache()),
+    resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = initialState,

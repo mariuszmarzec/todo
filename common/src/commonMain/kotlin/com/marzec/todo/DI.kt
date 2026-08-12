@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
-import com.marzec.cache.MemoryCache
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.common.OpenUrlHelper
 import com.marzec.content.mapData
@@ -34,6 +33,7 @@ import com.marzec.mvi.Store
 import com.marzec.mvi.toCachable
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationAction
+import com.marzec.navigation.NavigationCache
 import com.marzec.navigation.NavigationEntryCache
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
@@ -139,6 +139,10 @@ object DI {
     lateinit var memoryCache: Cache
     lateinit var resultMemoryCache: Cache
 
+    val navigationCache: NavigationCache by lazy {
+        NavigationCacheProxy(memoryCache)
+    }
+
     lateinit var deviceTokenRepository: DeviceTokenRepository
 
     lateinit var resourceLoader: ResourceLoader
@@ -172,11 +176,11 @@ object DI {
     }
     val navigationStoreCacheKey by lazy { cacheKeyProvider.invoke() }
 
-    val scrollStateCache: Cache by lazy {
-        NavigationEntryCache(navigationStore, MemoryCache())
+    val scrollStateCache: NavigationCache by lazy {
+        NavigationEntryCache(navigationStore, navigationCache)
     }
-    val listScrollStateCache: Cache by lazy {
-        NavigationEntryCache(navigationStore, MemoryCache())
+    val listScrollStateCache: NavigationCache by lazy {
+        NavigationEntryCache(navigationStore, navigationCache)
     }
 
 

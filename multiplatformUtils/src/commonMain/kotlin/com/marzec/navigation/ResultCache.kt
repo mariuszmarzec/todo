@@ -1,12 +1,11 @@
 package com.marzec.navigation
 
-import com.marzec.cache.Cache
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-class ResultCache(private val memoryCache: Cache) {
+class ResultCache(private val memoryCache: NavigationCache) {
 
     suspend fun observe(
         requesterKey: String,
