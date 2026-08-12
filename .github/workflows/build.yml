@@ -1,0 +1,51 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Create local.properties
+        run: |
+          cat > local.properties <<EOF
+          sdk.dir=$ANDROID_HOME
+          environment=m
+          prod.apiUrl=http://localhost/
+          prod.authHeader=Authorization
+          test.apiUrl=http://localhost/test
+          test.authHeader=Authorization-Test
+          storeFile=dummy.keystore
+          keyAlias=dummy
+          storePassword=dummy
+          keyPassword=dummy
+          EOF
+
+      - name: Unit tests
+        run: |
+          export JDK_17="$JAVA_HOME"
+          ./gradlew :app:testDebugUnitTest :multiplatformUtils:desktopTest :common:desktopTest :desktop:jvmTest
+
+      - name: Upload artifact on tests failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unit test report
+          path: '**/build/reports/tests/**'

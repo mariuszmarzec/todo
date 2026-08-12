@@ -18,7 +18,7 @@ class StoreTest<STATE : Any, STORE : Store4Impl<STATE>> {
     lateinit var values: TestCollector<STATE>
 
     fun run(block: suspend StoreTest<STATE, STORE>.() -> Unit): Unit = scope.runTest {
-        Store4.stateThread = dispatcher
+        Store4Impl.stateThread = dispatcher
 
         block()
     }
