@@ -7,12 +7,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.marzec.cache.Cache
 import com.marzec.cache.MemoryCache
+import com.marzec.navigation.NavigationCache
 import kotlinx.coroutines.runBlocking
 
-val LocalScrollStateMap = staticCompositionLocalOf<Cache> { MemoryCache() }
-val LocalScrollListStateMap = staticCompositionLocalOf<Cache> { MemoryCache() }
+val LocalScrollStateMap = staticCompositionLocalOf<NavigationCache> { NavigationCacheProxy(MemoryCache()) }
+val LocalScrollListStateMap = staticCompositionLocalOf<NavigationCache> { NavigationCacheProxy(MemoryCache()) }
 
 data class Scroll(
     val value: Int

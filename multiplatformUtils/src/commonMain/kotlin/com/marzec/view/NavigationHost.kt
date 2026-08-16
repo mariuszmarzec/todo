@@ -18,7 +18,7 @@ import com.marzec.navigation.ResultCache
 import com.marzec.navigation.currentFlow
 import com.marzec.navigation.currentScreen
 import com.marzec.navigation.navigationState
-import com.marzec.navigation.NavigationCache
+import com.marzec.preferences.StateCache
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -58,7 +58,7 @@ fun NavigationHost(
 
 fun navigationStore(
     scope: CoroutineScope,
-    stateCache: NavigationCache,
+    stateCache: StateCache,
     cacheKeyProvider: () -> String,
     navigationStoreCacheKey: String,
     defaultDestination: Destination,
@@ -78,7 +78,7 @@ fun navigationStore(
 
 fun navigationStore(
     scope: CoroutineScope,
-    stateCache: NavigationCache,
+    stateCache: StateCache,
     navigationStoreCacheKey: String,
     cacheKeyProvider: () -> String,
     initialState: NavigationFlow,
@@ -88,7 +88,7 @@ fun navigationStore(
 ) = NavigationStore(
     scope = scope,
     stateCache = stateCache,
-    resultCache = ResultCache(MemoryCache()),
+    resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = initialState,
