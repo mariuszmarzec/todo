@@ -21,13 +21,14 @@ kotlin {
         }
     }
 
-    sourceSets {
-        named("commonMain") {
+sourceSets {
+        val commonMain by getting {
             dependencies {
+                api(project(":navigation"))
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
-                implementation(compose.components.resources)
+                api(compose.components.resources)
                 api(libs.kotlinStdlib)
                 api(libs.coroutineCore)
                 api(libs.ktorClient)
