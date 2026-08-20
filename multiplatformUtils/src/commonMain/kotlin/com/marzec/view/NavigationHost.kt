@@ -6,20 +6,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.marzec.cache.MemoryCache
-import com.marzec.mvi.collectState
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
 import com.marzec.navigation.NavigationStore
-import com.marzec.navigation.NavigationUpdate
-import com.marzec.navigation.ResultCache
 import com.marzec.navigation.currentFlow
 import com.marzec.navigation.currentScreen
-import com.marzec.navigation.navigationState
-import com.marzec.preferences.StateCache
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun NavigationHost(
@@ -55,59 +48,3 @@ fun NavigationHost(
         }
     }
 }
-
-fun navigationStore(
-    scope: CoroutineScope,
-    stateCache: StateCache,
-    cacheKeyProvider: () -> String,
-    navigationStoreCacheKey: String,
-    defaultDestination: Destination,
-    overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
-    onNewStateCallback: ((NavigationState) -> Unit)? = null,
-    onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
-): NavigationStore = navigationStore(
-    scope,
-    stateCache,
-    navigationStoreCacheKey,
-    cacheKeyProvider,
-    initialState(defaultDestination, cacheKeyProvider),
-    overrideLastClose,
-    onNewStateCallback,
-    onAfterClosed
-)
-
-fun navigationStore(
-    scope: CoroutineScope,
-    stateCache: StateCache,
-    navigationStoreCacheKey: String,
-    cacheKeyProvider: () -> String,
-    initialState: NavigationFlow,
-    overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
-    onNewStateCallback: ((NavigationState) -> Unit)? = null,
-    onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
-) = NavigationStore(
-    scope = scope,
-    stateCache = stateCache,
-    resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
-    cacheKey = navigationStoreCacheKey,
-    cacheKeyProvider = cacheKeyProvider,
-    initialState = initialState,
-    overrideLastClose = overrideLastClose,
-    onAfterClosed = onAfterClosed
-).apply {
-    if (onNewStateCallback != null) {
-        this.onNewStateCallback = onNewStateCallback
-    }
-}
-
-fun initialState(
-    defaultDestination: Destination,
-    cacheKeyProvider: () -> String
-) = navigationState(
-    backStack = listOf(
-        NavigationEntry(
-            destination = defaultDestination,
-            cacheKey = cacheKeyProvider()
-        )
-    )
-)
