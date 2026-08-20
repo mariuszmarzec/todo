@@ -22,10 +22,6 @@ class NavigationStateCacheProxy(private val cache: NavigationCache) : Navigation
 
     override fun set(key: String, value: Any) = put(key, value)
 
-    override fun <T> get(key: String): T? = get(key)
-
-    override fun remove(key: String) = remove(key)
-
     override suspend fun read(key: String): Any? = get(key)
 
     override suspend fun write(key: String, value: Any?) {
