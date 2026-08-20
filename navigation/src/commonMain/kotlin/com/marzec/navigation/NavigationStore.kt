@@ -12,14 +12,14 @@ import kotlinx.coroutines.flow.map
 
 class NavigationStore(
     scope: CoroutineScope,
-    private val stateCache: NavigationStateCache,
+    private val navigationStateCache: NavigationStateCache,
     private val resultCache: ResultCache,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState,
     private val overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
-) : Store4Impl<NavigationState>(scope, stateCache.read(cacheKey) ?: initialState) {
+) : Store4Impl<NavigationState>(scope, navigationStateCache.read(cacheKey) ?: initialState) {
 
     fun next(
         action: NavigationAction,
