@@ -12,15 +12,14 @@ import kotlinx.coroutines.flow.map
 
 class NavigationStore(
     scope: CoroutineScope,
-    private val stateReader: StateReader,
-    private val stateEditor: StateEditor,
+    private val stateCache: NavigationStateCache,
     private val resultCache: ResultCache,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState,
     private val overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
-) : Store4Impl<NavigationState>(scope, stateReader.read(cacheKey) ?: initialState) {
+) : Store4Impl<NavigationState>(scope, stateCache.read(cacheKey) ?: initialState) {
 
     fun next(
         action: NavigationAction,
@@ -290,7 +289,7 @@ class NavigationStore(
         entry.subFlow?.backStack?.forEach {
             clearCache(it)
         }
-        stateEditor.remove(entry.cacheKey)
+        navigationStateCache.remove(entry.cacheKey)
         resultCache.remove(entry.cacheKey)
     }
 
@@ -322,7 +321,7 @@ class NavigationStore(
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
         onNewStateCallback?.invoke(newState)
-        stateEditor.write(cacheKey, newState)
+        navigationStateCache.write(cacheKey, newState)
     }
 }
 
