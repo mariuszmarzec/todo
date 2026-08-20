@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.jetbrainsCompose)
     kotlin("multiplatform")
-    id("org.jetbrains.kotlinx.atomicfu")
 }
 
 kotlin {
