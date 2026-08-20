@@ -1,16 +1,10 @@
 plugins {
-    id("com.android.library")
-    // id(libs.plugins.compose-compiler.pluginId)  // Removed - use alias instead
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.jetbrainsCompose)
     kotlin("multiplatform")
+    kotlin("plugin.serialization")
     id("org.jetbrains.kotlinx.atomicfu")
 }
 
 kotlin {
-    androidTarget {
-        compileSdk = 35
-    }
     jvm("desktop")
 
     sourceSets {
@@ -18,9 +12,8 @@ kotlin {
             dependencies {
                 api(libs.kotlinStdlib)
                 api(libs.quickMvi)
-                api(libs.quickMvi.compose)
                 api(libs.coroutineCore)
-                api(libs.kotlinDateTime)
+                api(libs.serializationJson)
             }
         }
         val desktopTest by getting {
