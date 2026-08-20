@@ -87,7 +87,8 @@ fun navigationStore(
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) = NavigationStore(
     scope = scope,
-    stateCache = stateCache,
+    stateReader = StateCacheProxy(stateCache),
+    stateEditor = StateCacheProxy(stateCache),
     resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
