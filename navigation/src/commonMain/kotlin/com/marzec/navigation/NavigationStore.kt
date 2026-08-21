@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class NavigationStore(
     scope: CoroutineScope,
@@ -21,7 +22,16 @@ class NavigationStore(
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) : Store4Impl<NavigationState>(scope, stateCache.read(cacheKey) ?: initialState) {
 
-    var onNewStateCallback: ((NavigationState) -> Unit)? = null
+    init {
+        scope.launch {
+            val cached = stateCache.read<NavigationState>(cacheKey)
+            if (cached != null) {
+                updateState(cached)
+            } else {
+                stateCache.write(cacheKey, state)
+            }
+        }
+    }
 
     fun next(
         action: NavigationAction,
@@ -322,7 +332,6 @@ class NavigationStore(
 
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
-        onNewStateCallback?.invoke(newState)
         stateCache.write(cacheKey, newState)
     }
 }
