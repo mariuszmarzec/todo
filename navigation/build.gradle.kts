@@ -14,6 +14,7 @@ kotlin {
                 api(libs.quickMvi)
                 api(libs.coroutineCore)
                 api(libs.serializationJson)
+                api(project(":multiplatformUtils"))
             }
         }
         val desktopTest by getting {
