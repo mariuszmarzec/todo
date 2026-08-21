@@ -20,9 +20,9 @@ class NavigationStore(
     initialState: NavigationState,
     private val overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
-) : Store4Impl<NavigationState>(scope, stateCache.read(cacheKey) ?: initialState) {
+) : Store4Impl<NavigationState>(scope, initialState) {
 
-    var onNewStateCallback: ((NavigationState) -> Unit)? = null
+    override var onNewStateCallback: (NavigationState) -> Unit = {}
 
     fun next(
         action: NavigationAction,
@@ -322,8 +322,6 @@ class NavigationStore(
         }
 
     override suspend fun onNewState(newState: NavigationState) {
-        super.onNewState(newState)
-        onNewStateCallback?.invoke(newState)
         stateCache.write(cacheKey, newState)
     }
 }
