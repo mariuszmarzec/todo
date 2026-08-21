@@ -31,6 +31,8 @@ kotlin {
                 api(libs.okHttpClientLogger)
                 api(libs.ktorSerialization)
                 api(libs.quickMvi)
+                api(libs.quickMvi.compose)
+                api(project(":navigation"))
                 implementation(libs.kotlinDateTime)
             }
         }
