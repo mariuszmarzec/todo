@@ -24,4 +24,9 @@ class NavigationCacheImpl : NavigationCache {
     }
 
     override suspend fun toMap(): Map<String, Any?> = store.mapValues { it.value.value }
+
+    private fun updateFlow(key: String, value: () -> Any?) {
+        val flow = store.getOrPut(key) { MutableStateFlow(null) }
+        flow.value = value()
+    }
 }

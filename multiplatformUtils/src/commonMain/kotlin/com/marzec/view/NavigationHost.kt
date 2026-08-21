@@ -12,6 +12,7 @@ import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
+import com.marzec.navigation.NavigationStateCache
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.NavigationUpdate
 import com.marzec.navigation.ResultCache
@@ -58,7 +59,7 @@ fun NavigationHost(
 
 fun navigationStore(
     scope: CoroutineScope,
-    stateCache: StateCache,
+    stateCache: NavigationStateCache,
     cacheKeyProvider: () -> String,
     navigationStoreCacheKey: String,
     defaultDestination: Destination,
@@ -78,7 +79,7 @@ fun navigationStore(
 
 fun navigationStore(
     scope: CoroutineScope,
-    stateCache: StateCache,
+    stateCache: NavigationStateCache,
     navigationStoreCacheKey: String,
     cacheKeyProvider: () -> String,
     initialState: NavigationFlow,
@@ -87,8 +88,7 @@ fun navigationStore(
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) = NavigationStore(
     scope = scope,
-    stateReader = StateCacheProxy(stateCache),
-    stateEditor = StateCacheProxy(stateCache),
+    navigationStateCache = stateCache,
     resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
