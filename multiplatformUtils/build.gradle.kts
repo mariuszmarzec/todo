@@ -37,6 +37,7 @@ kotlin {
                 api(libs.serializationJson)
                 api(libs.quickMvi)
                 api(libs.quickMvi.compose)
+                api(project(":navigation"))
                 implementation(libs.kotlinDateTime)
                 implementation(libs.compose.icons)
             }
