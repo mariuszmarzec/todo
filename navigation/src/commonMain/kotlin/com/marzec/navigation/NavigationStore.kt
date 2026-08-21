@@ -22,16 +22,7 @@ class NavigationStore(
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) : Store4Impl<NavigationState>(scope, initialState) {
 
-    init {
-        scope.launch {
-            val cached = stateCache.read<NavigationState>(cacheKey)
-            if (cached != null) {
-                intent<Unit> { reducer { cached } }
-            } else {
-                stateCache.write(cacheKey, state)
-            }
-        }
-    }
+    override var onNewStateCallback: (NavigationState) -> Unit = {}
 
     fun next(
         action: NavigationAction,
@@ -309,11 +300,6 @@ class NavigationStore(
         currentScreen()?.cacheKey?.let { requesterKey -> resultCache.remove(requesterKey) }
     }
 
-    override suspend fun onNewState(newState: NavigationState) {
-        super.onNewState(newState)
-        stateCache.write(cacheKey, newState)
-    }
-
     @Suppress("unchecked_cast")
     suspend fun <T : Any> observe(requestId: Int): Flow<T>? =
         state.value.backStack.currentScreen()?.let {
@@ -334,6 +320,10 @@ class NavigationStore(
                     )
                 }
         }
+
+    override suspend fun onNewState(newState: NavigationState) {
+        stateCache.write(cacheKey, newState)
+    }
 }
 
 fun NavigationStore.next(destination: Destination) =
