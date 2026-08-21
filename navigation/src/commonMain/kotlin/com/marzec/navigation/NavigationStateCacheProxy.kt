@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.Flow
  */
 class NavigationStateCacheProxy(private val cache: NavigationCache) : NavigationStateCache {
 
-    override suspend fun <T> read(key: String): T? = cache.get(key)
+    override fun <T> get(key: String): T? = cache.get(key)
 
-    override suspend fun write(key: String, value: Any?) {
+    override fun set(key: String, value: Any) {
         if (value != null) {
             cache.put(key, value)
         } else {
@@ -20,5 +20,5 @@ class NavigationStateCacheProxy(private val cache: NavigationCache) : Navigation
         }
     }
 
-    override suspend fun remove(key: String) = cache.remove(key)
+    override fun remove(key: String) = cache.remove(key)
 }

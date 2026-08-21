@@ -322,7 +322,7 @@ class NavigationStore(
         }
 
     override suspend fun onNewState(newState: NavigationState) {
-        stateCache.write(cacheKey, newState)
+        stateCache.set(cacheKey, newState)
     }
 }
 
