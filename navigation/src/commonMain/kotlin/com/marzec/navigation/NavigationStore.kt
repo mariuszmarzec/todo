@@ -26,7 +26,7 @@ class NavigationStore(
         scope.launch {
             val cached = stateCache.read<NavigationState>(cacheKey)
             if (cached != null) {
-                updateState(cached)
+                intent<Unit> { reducer { cached } }
             } else {
                 stateCache.write(cacheKey, state)
             }
@@ -309,8 +309,9 @@ class NavigationStore(
         currentScreen()?.cacheKey?.let { requesterKey -> resultCache.remove(requesterKey) }
     }
 
-    private fun updateState(newState: NavigationState) {
-        reduce { newState }
+    override suspend fun onNewState(newState: NavigationState) {
+        super.onNewState(newState)
+        stateCache.write(cacheKey, newState)
     }
 
     @Suppress("unchecked_cast")
@@ -333,11 +334,6 @@ class NavigationStore(
                     )
                 }
         }
-
-    override suspend fun onNewState(newState: NavigationState) {
-        super.onNewState(newState)
-        stateCache.write(cacheKey, newState)
-    }
 }
 
 fun NavigationStore.next(destination: Destination) =
