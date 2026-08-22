@@ -2,7 +2,7 @@ package com.marzec.preferences
 
 import com.marzec.navigation.NavigationStateCache
 
-class StateCacheProxy(private val stateCache: StateCache) : NavigationStateCache {
+class NavigationStateCacheProxy(private val stateCache: StateCache) : NavigationStateCache {
 
     override fun <T> get(key: String): T? = stateCache.get(key)
 

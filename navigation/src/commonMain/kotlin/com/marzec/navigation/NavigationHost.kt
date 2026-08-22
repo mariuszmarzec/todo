@@ -19,7 +19,6 @@ import com.marzec.navigation.ResultCache
 import com.marzec.navigation.currentFlow
 import com.marzec.navigation.currentScreen
 import com.marzec.navigation.navigationState
-import com.marzec.preferences.StateCache
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
