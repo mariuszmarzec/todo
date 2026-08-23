@@ -152,7 +152,7 @@ object DI {
     var quickCacheEnabled: Boolean = false
 
     val stateCache: StateCache = MemoryStateCache()
-    val navigationStateCache: NavigationStateCache = NavigationStateCacheProxy(navigationCache)
+    val navigationStateCache: NavigationStateCache = NavigationStateCacheProxy(stateCache)
 
     val updaterCoroutineScope = CoroutineScope(newSingleThreadContext("updater"))
 
