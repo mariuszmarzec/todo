@@ -18,6 +18,7 @@ kotlin {
         }
         val desktopTest by getting {
             dependencies {
+                implementation(project(":multiplatformUtils"))
                 implementation(kotlin("test"))
                 implementation(libs.coroutineTest)
                 implementation(libs.mockk)
