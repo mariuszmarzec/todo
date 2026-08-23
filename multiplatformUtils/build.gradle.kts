@@ -22,18 +22,24 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        named("commonMain") {
             dependencies {
-                api(project(":navigation"))
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.material)
+                implementation(compose.components.resources)
                 api(libs.kotlinStdlib)
                 api(libs.coroutineCore)
                 api(libs.ktorClient)
                 api(libs.okHttpClientLogger)
                 api(libs.ktorSerialization)
+                api(libs.ktorContentNegotiation)
+                api(libs.serializationJson)
                 api(libs.quickMvi)
                 api(libs.quickMvi.compose)
                 api(project(":navigation"))
                 implementation(libs.kotlinDateTime)
+                implementation(libs.compose.icons)
             }
         }
         val desktopTest by getting {
