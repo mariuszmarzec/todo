@@ -96,7 +96,7 @@ import com.marzec.view.DateDelegateImpl
 import com.marzec.view.DatePickerScreen
 import com.marzec.view.DatePickerState
 import com.marzec.view.DatePickerStore
-import com.marzec.view.NavigationCacheProxy
+import com.marzec.view.NavigationStateCacheProxy
 import com.marzec.view.initialState
 import com.marzec.view.navigationStore
 import io.ktor.client.HttpClient
