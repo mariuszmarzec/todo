@@ -14,5 +14,6 @@ interface NavigationCache {
     suspend fun <T> observe(key: String): Flow<T?>
 
     suspend fun toMap(): Map<String, Any?>
-}
+
+    }
 
