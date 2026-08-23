@@ -152,6 +152,7 @@ object DI {
     var quickCacheEnabled: Boolean = false
 
     val stateCache: StateCache = MemoryStateCache()
+    val navigationStateCache: NavigationStateCache = NavigationStateCacheProxy(navigationCache)
 
     val updaterCoroutineScope = CoroutineScope(newSingleThreadContext("updater"))
 
@@ -538,7 +539,7 @@ object DI {
         val defaultScreen = getDefaultNavigationState()
         return navigationStore(
             scope = scope,
-            stateCache = stateCache,
+            stateCache = navigationStateCache,
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             defaultDestination = defaultScreen,
@@ -558,7 +559,7 @@ object DI {
     ): NavigationStore {
         return navigationStore(
             scope = scope,
-            stateCache = stateCache,
+            stateCache = navigationStateCache,
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             initialState = initialState
