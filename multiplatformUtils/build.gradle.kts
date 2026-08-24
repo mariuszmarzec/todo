@@ -20,27 +20,27 @@ kotlin {
             systemProperty("java.awt.headless", "true")
         }
     }
-
+  
     sourceSets {
         named("commonMain") {
             dependencies {
                 api(project(":navigation"))
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.material)
+                implementation(compose.components.resources)
                 api(libs.kotlinStdlib)
                 api(libs.coroutineCore)
                 api(libs.ktorClient)
                 api(libs.okHttpClientLogger)
                 api(libs.ktorSerialization)
+                api(libs.ktorContentNegotiation)
+                api(libs.serializationJson)
                 api(libs.quickMvi)
-implementation(libs.kotlinDateTime)
-                 api(compose.runtime)
-                 api(compose.foundation)
-                 api(compose.material)
-                 implementation(compose.components.resources)
-                 api(libs.ktorContentNegotiation)
-                 api(libs.serializationJson)
-                 api(libs.quickMvi.compose)
-                 implementation(libs.compose.icons)
-             }
+                api(libs.quickMvi.compose)
+                implementation(libs.kotlinDateTime)
+                implementation(libs.compose.icons)
+            }
         }
         val desktopTest by getting {
             dependencies {
