@@ -11,7 +11,6 @@ plugins {
     id("org.jetbrains.kotlinx.atomicfu")
 }
 
-
 kotlin {
     androidTarget()
     jvm("desktop") {
