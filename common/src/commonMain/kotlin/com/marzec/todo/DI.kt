@@ -37,6 +37,7 @@ import com.marzec.navigation.NavigationCache
 import com.marzec.navigation.NavigationEntryCache
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
+import com.marzec.navigation.NavigationStateCache
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.Router
 import com.marzec.navigation.createRouter
@@ -152,6 +153,7 @@ object DI {
     var quickCacheEnabled: Boolean = false
 
     val stateCache: StateCache = MemoryStateCache()
+    val navigationStateCache: NavigationStateCache = NavigationStateCacheProxy(stateCache)
 
     val updaterCoroutineScope = CoroutineScope(newSingleThreadContext("updater"))
 
