@@ -543,6 +543,7 @@ object DI {
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             defaultDestination = defaultScreen,
+            resultCache = navigationCache,
             onAfterClosed = {
                 runBlocking {
                     scrollStateCache.remove(it.cacheKey)
@@ -562,7 +563,8 @@ object DI {
             stateCache = navigationStateCache,
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
-            initialState = initialState
+            initialState = initialState,
+            resultCache = navigationCache
         )
     }
 

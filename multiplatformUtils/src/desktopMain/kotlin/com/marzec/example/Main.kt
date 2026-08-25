@@ -22,10 +22,12 @@ import com.marzec.logger.Logger
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
+import com.marzec.cache.MemoryCache
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.NavigationUpdate
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.view.ActionBarProvider
+import com.marzec.view.NavigationCacheProxy
 import com.marzec.view.NavigationHost
 import com.marzec.view.navigationStore
 import kotlinx.coroutines.CoroutineScope
@@ -95,6 +97,7 @@ object DI {
         cacheKeyProvider = cacheKeyProvider,
         navigationStoreCacheKey = navigationStoreCacheKey,
         defaultDestination = NavigationExampleDestination.HomeScreen,
+        resultCache = NavigationCacheProxy(MemoryCache()),
         overrideLastClose = overrideLastClose,
         onNewStateCallback = ::onNewStateCallback
     )

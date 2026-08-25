@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.marzec.cache.MemoryCache
 import com.marzec.mvi.collectState
 import com.marzec.navigation.NavigationStateCache
 import com.marzec.preferences.StateCache
@@ -53,6 +52,7 @@ fun navigationStore(
     cacheKeyProvider: () -> String,
     navigationStoreCacheKey: String,
     defaultDestination: Destination,
+    resultCache: NavigationCache,
     overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     onNewStateCallback: ((NavigationState) -> Unit)? = null,
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
@@ -62,6 +62,7 @@ fun navigationStore(
     navigationStoreCacheKey,
     cacheKeyProvider,
     initialState(defaultDestination, cacheKeyProvider),
+    resultCache,
     overrideLastClose,
     onNewStateCallback,
     onAfterClosed
@@ -73,13 +74,14 @@ fun navigationStore(
     navigationStoreCacheKey: String,
     cacheKeyProvider: () -> String,
     initialState: NavigationFlow,
+    resultCache: NavigationCache,
     overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     onNewStateCallback: ((NavigationState) -> Unit)? = null,
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) = NavigationStore(
     scope = scope,
     navigationStateCache = stateCache,
-    resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
+    resultCache = ResultCache(resultCache),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = initialState,
