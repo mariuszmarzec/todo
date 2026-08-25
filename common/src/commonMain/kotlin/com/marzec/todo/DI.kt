@@ -540,6 +540,7 @@ object DI {
         return navigationStore(
             scope = scope,
             stateCache = navigationStateCache,
+            resultCache = navigationCache,
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             defaultDestination = defaultScreen,
@@ -560,6 +561,7 @@ object DI {
         return navigationStore(
             scope = scope,
             stateCache = navigationStateCache,
+            resultCache = navigationCache,
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             initialState = initialState

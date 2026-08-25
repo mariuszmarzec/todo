@@ -14,21 +14,23 @@ import kotlinx.coroutines.launch
 class NavigationStore(
     scope: CoroutineScope,
     private val stateCache: NavigationStateCache,
-    private val resultCache: ResultCache,
+    private val resultCache: NavigationCache,
     private val cacheKey: String,
     private val cacheKeyProvider: () -> String,
     initialState: NavigationState,
     private val overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
-) : Store4Impl<NavigationState>(scope, stateCache.read(cacheKey) ?: initialState) {
+) : Store4Impl<NavigationState>(scope, initialState) {
+
+    private val resultCache = ResultCache(resultCache)
+
+    override var onNewStateCallback: (NavigationState) -> Unit = {}
 
     init {
         scope.launch {
             val cached = stateCache.read<NavigationState>(cacheKey)
             if (cached != null) {
                 updateState(cached)
-            } else {
-                stateCache.write(cacheKey, state)
             }
         }
     }
@@ -331,7 +333,6 @@ class NavigationStore(
         }
 
     override suspend fun onNewState(newState: NavigationState) {
-        super.onNewState(newState)
         stateCache.write(cacheKey, newState)
     }
 }
