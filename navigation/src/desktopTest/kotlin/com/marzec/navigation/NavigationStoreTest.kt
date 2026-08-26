@@ -134,7 +134,7 @@ class NavigationStoreTest {
 
     @Before
     fun setUp() {
-        coEvery { stateCache.read<NavigationState>(any()) } returns null
+        coEvery { stateCache.get<NavigationState>(any()) } returns null
     }
 
     @Test
@@ -152,7 +152,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.read<NavigationState>("navigation_cache_key")
+                stateCache.get<NavigationState>("navigation_cache_key")
                 resultCache wasNot called
             }
         }
@@ -178,7 +178,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
 
@@ -215,7 +215,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
         }
@@ -253,7 +253,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
         }
@@ -292,7 +292,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
         }
@@ -335,7 +335,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 stateCache.remove("2")
                 resultCache.remove("2")
                 stateCache.remove("1")
@@ -383,7 +383,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 stateCache.remove("2")
                 resultCache.remove("2")
                 stateCache.remove("1")
@@ -519,7 +519,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
 
@@ -576,7 +576,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
 
@@ -636,7 +636,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
                 resultCache.remove("0")
             }
 
@@ -685,7 +685,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
 
                 resultCache.remove("4")
                 stateCache.remove("4")
@@ -753,7 +753,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
 
                 resultCache.remove("4")
                 stateCache.remove("4")
@@ -839,7 +839,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
 
                 resultCache.remove("4")
                 stateCache.remove("4")
@@ -894,7 +894,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
 
                 resultCache.remove("3")
                 stateCache.remove("3")
@@ -1250,7 +1250,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
 
                 resultCache.remove("4")
                 stateCache.remove("4")
@@ -1290,7 +1290,7 @@ class NavigationStoreTest {
             )
 
             coVerify {
-                stateCache.write("navigation_cache_key", any())
+                stateCache.set("navigation_cache_key", any())
 
                 resultCache.save(RequestKey(
                     requesterKey = "1",
