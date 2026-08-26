@@ -22,17 +22,6 @@ class NavigationStore(
     private val onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) : Store4Impl<NavigationState>(scope, stateCache.get(cacheKey) ?: initialState) {
 
-    init {
-        scope.launch {
-            val cached = stateCache.get<NavigationState>(cacheKey)
-            if (cached != null) {
-                updateState(cached)
-            } else {
-                stateCache.set(cacheKey, state)
-            }
-        }
-    }
-
     fun next(
         action: NavigationAction,
         requestId: Int? = null,
@@ -332,6 +321,7 @@ class NavigationStore(
 
     override suspend fun onNewState(newState: NavigationState) {
         super.onNewState(newState)
+        onNewStateCallback?.invoke(newState)
         stateCache.set(cacheKey, newState)
     }
 }
