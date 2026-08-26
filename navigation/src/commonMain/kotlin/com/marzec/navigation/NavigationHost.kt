@@ -1,4 +1,4 @@
-package com.marzec.view
+package com.marzec.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -6,19 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.marzec.cache.MemoryCache
 import com.marzec.mvi.collectState
-import com.marzec.navigation.Destination
-import com.marzec.navigation.NavigationEntry
-import com.marzec.navigation.NavigationFlow
-import com.marzec.navigation.NavigationState
-import com.marzec.navigation.NavigationStore
-import com.marzec.navigation.NavigationUpdate
-import com.marzec.navigation.ResultCache
-import com.marzec.navigation.currentFlow
-import com.marzec.navigation.currentScreen
-import com.marzec.navigation.navigationState
-import com.marzec.preferences.StateCache
+import com.marzec.navigation.NavigationStateCache
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -58,37 +47,40 @@ fun NavigationHost(
 
 fun navigationStore(
     scope: CoroutineScope,
-    stateCache: StateCache,
+    stateCache: NavigationStateCache,
     cacheKeyProvider: () -> String,
     navigationStoreCacheKey: String,
     defaultDestination: Destination,
+    resultCache: NavigationCache,
     overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     onNewStateCallback: ((NavigationState) -> Unit)? = null,
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ): NavigationStore = navigationStore(
-    scope,
-    stateCache,
-    navigationStoreCacheKey,
-    cacheKeyProvider,
-    initialState(defaultDestination, cacheKeyProvider),
-    overrideLastClose,
-    onNewStateCallback,
-    onAfterClosed
+    scope = scope,
+    stateCache = stateCache,
+    navigationStoreCacheKey = navigationStoreCacheKey,
+    cacheKeyProvider = cacheKeyProvider,
+    initialState = initialState(defaultDestination, cacheKeyProvider),
+    resultCache = resultCache,
+    overrideLastClose = overrideLastClose,
+    onNewStateCallback = onNewStateCallback,
+    onAfterClosed = onAfterClosed
 )
 
 fun navigationStore(
     scope: CoroutineScope,
-    stateCache: StateCache,
+    stateCache: NavigationStateCache,
     navigationStoreCacheKey: String,
     cacheKeyProvider: () -> String,
     initialState: NavigationFlow,
+    resultCache: NavigationCache,
     overrideLastClose: (NavigationState.() -> NavigationUpdate)? = null,
     onNewStateCallback: ((NavigationState) -> Unit)? = null,
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) = NavigationStore(
     scope = scope,
     stateCache = stateCache,
-    resultCache = ResultCache(NavigationCacheProxy(MemoryCache())),
+    resultCache = ResultCache(resultCache),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,
     initialState = initialState,

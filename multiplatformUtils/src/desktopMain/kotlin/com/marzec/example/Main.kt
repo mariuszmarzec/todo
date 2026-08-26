@@ -22,12 +22,16 @@ import com.marzec.logger.Logger
 import com.marzec.navigation.Destination
 import com.marzec.navigation.NavigationEntry
 import com.marzec.navigation.NavigationState
+import com.marzec.cache.MemoryCache
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.NavigationUpdate
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.view.ActionBarProvider
-import com.marzec.view.NavigationHost
-import com.marzec.view.navigationStore
+import com.marzec.view.NavigationCacheProxy
+import com.marzec.navigation.NavigationHost
+import com.marzec.navigation.NavigationStateCache
+import com.marzec.navigation.navigationStore
+import com.marzec.view.NavigationStateCacheProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
@@ -76,7 +80,7 @@ fun main() {
 }
 
 object DI {
-    val stateCache = MemoryStateCache()
+    val stateCache = NavigationStateCacheProxy(MemoryStateCache())
 
     val cacheKeyProvider by lazy {
         { Random.nextInt(Int.MAX_VALUE).toString() }
@@ -95,6 +99,7 @@ object DI {
         cacheKeyProvider = cacheKeyProvider,
         navigationStoreCacheKey = navigationStoreCacheKey,
         defaultDestination = NavigationExampleDestination.HomeScreen,
+        resultCache = NavigationCacheProxy(MemoryCache()),
         overrideLastClose = overrideLastClose,
         onNewStateCallback = ::onNewStateCallback
     )

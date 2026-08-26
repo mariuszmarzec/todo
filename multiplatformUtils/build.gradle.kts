@@ -11,7 +11,6 @@ plugins {
     id("org.jetbrains.kotlinx.atomicfu")
 }
 
-
 kotlin {
     androidTarget()
     jvm("desktop") {
@@ -20,10 +19,11 @@ kotlin {
             systemProperty("java.awt.headless", "true")
         }
     }
-
+  
     sourceSets {
         named("commonMain") {
             dependencies {
+                api(project(":navigation"))
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)

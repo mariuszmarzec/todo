@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.marzec.todo.DI
-import com.marzec.view.NavigationHost
+import com.marzec.navigation.NavigationHost
 
 @Composable
 fun HomeScreenSaveable() {

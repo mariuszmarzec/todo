@@ -3,7 +3,7 @@ package com.marzec.example.navigation.screens.b
 import com.marzec.mvi.Store4Impl
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.next
-import com.marzec.view.navigationStore
+import com.marzec.navigation.navigationStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

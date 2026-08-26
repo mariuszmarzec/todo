@@ -2,7 +2,6 @@ package com.marzec.navigation
 
 import com.marzec.core.StoreTest
 import com.marzec.core.runStoreTest
-import com.marzec.preferences.StateCache
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -121,7 +120,7 @@ class NavigationStoreTest {
 
     var keyProviderIncrement = 0
 
-    val stateCache: StateCache = mockk(relaxed = true)
+    val stateCache: NavigationStateCache = mockk(relaxed = true)
     val resultCache: ResultCache = mockk(relaxed = true)
     val cacheKey: String = "navigation_cache_key"
     val cacheKeyProvider: () -> String = { keyProviderIncrement++.toString() }
