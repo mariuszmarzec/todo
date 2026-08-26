@@ -2,7 +2,6 @@ package com.marzec.navigation
 
 import com.marzec.core.StoreTest
 import com.marzec.core.runStoreTest
-import com.marzec.navigation.NavigationStateCache
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify

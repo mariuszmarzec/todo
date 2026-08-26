@@ -28,8 +28,10 @@ import com.marzec.navigation.NavigationUpdate
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.view.ActionBarProvider
 import com.marzec.view.NavigationCacheProxy
-import com.marzec.view.NavigationHost
-import com.marzec.view.navigationStore
+import com.marzec.navigation.NavigationHost
+import com.marzec.navigation.NavigationStateCache
+import com.marzec.navigation.navigationStore
+import com.marzec.view.NavigationStateCacheProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
@@ -78,7 +80,7 @@ fun main() {
 }
 
 object DI {
-    val stateCache = MemoryStateCache()
+    val stateCache = NavigationStateCacheProxy(MemoryStateCache())
 
     val cacheKeyProvider by lazy {
         { Random.nextInt(Int.MAX_VALUE).toString() }

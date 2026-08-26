@@ -13,7 +13,7 @@ import com.marzec.navigation.NavigationStore
 import com.marzec.todo.DI
 import com.marzec.view.LocalScrollListStateMap
 import com.marzec.view.LocalScrollStateMap
-import com.marzec.view.NavigationHost
+import com.marzec.navigation.NavigationHost
 
 @Composable
 fun HomeScreen(navigationStore: NavigationStore) {

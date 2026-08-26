@@ -27,7 +27,6 @@ compose.desktop {
     application {
         mainClass = "com.marzec.todo.MainKt"
         println(System.getenv("JDK_17"))
-        javaHome = System.getenv("JDK_17")
 
         nativeDistributions {
             version = "1.0.0"

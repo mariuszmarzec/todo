@@ -1,4 +1,7 @@
 plugins {
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+
     kotlin("multiplatform")
     kotlin("plugin.serialization")
     id("org.jetbrains.kotlinx.atomicfu")
@@ -10,17 +13,15 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.material)
+                implementation(compose.components.resources)
                 api(libs.kotlinStdlib)
                 api(libs.quickMvi)
+                api(libs.quickMvi.compose)
                 api(libs.coroutineCore)
                 api(libs.serializationJson)
-            }
-        }
-        val desktopTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.coroutineTest)
-                implementation(libs.mockk)
             }
         }
         val commonTest by getting {

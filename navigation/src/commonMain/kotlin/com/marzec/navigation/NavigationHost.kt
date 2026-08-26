@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.marzec.mvi.collectState
 import com.marzec.navigation.NavigationStateCache
-import com.marzec.preferences.StateCache
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -57,15 +56,15 @@ fun navigationStore(
     onNewStateCallback: ((NavigationState) -> Unit)? = null,
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ): NavigationStore = navigationStore(
-    scope,
-    stateCache,
-    navigationStoreCacheKey,
-    cacheKeyProvider,
-    initialState(defaultDestination, cacheKeyProvider),
-    resultCache,
-    overrideLastClose,
-    onNewStateCallback,
-    onAfterClosed
+    scope = scope,
+    stateCache = stateCache,
+    navigationStoreCacheKey = navigationStoreCacheKey,
+    cacheKeyProvider = cacheKeyProvider,
+    initialState = initialState(defaultDestination, cacheKeyProvider),
+    resultCache = resultCache,
+    overrideLastClose = overrideLastClose,
+    onNewStateCallback = onNewStateCallback,
+    onAfterClosed = onAfterClosed
 )
 
 fun navigationStore(
@@ -80,7 +79,7 @@ fun navigationStore(
     onAfterClosed: ((entry: NavigationEntry) -> Unit)? = null
 ) = NavigationStore(
     scope = scope,
-    navigationStateCache = stateCache,
+    stateCache = stateCache,
     resultCache = ResultCache(resultCache),
     cacheKey = navigationStoreCacheKey,
     cacheKeyProvider = cacheKeyProvider,

@@ -37,6 +37,7 @@ import com.marzec.navigation.NavigationCache
 import com.marzec.navigation.NavigationEntryCache
 import com.marzec.navigation.NavigationFlow
 import com.marzec.navigation.NavigationState
+import com.marzec.navigation.NavigationStateCache
 import com.marzec.navigation.NavigationStore
 import com.marzec.navigation.Router
 import com.marzec.navigation.createRouter
@@ -97,8 +98,9 @@ import com.marzec.view.DatePickerScreen
 import com.marzec.view.DatePickerState
 import com.marzec.view.DatePickerStore
 import com.marzec.view.NavigationStateCacheProxy
-import com.marzec.view.initialState
-import com.marzec.view.navigationStore
+import com.marzec.navigation.initialState
+import com.marzec.navigation.navigationStore
+import com.marzec.view.NavigationCacheProxy
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
@@ -543,7 +545,7 @@ object DI {
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             defaultDestination = defaultScreen,
-            resultCache = navigationCache,
+            resultCache = NavigationCacheProxy(resultMemoryCache),
             onAfterClosed = {
                 runBlocking {
                     scrollStateCache.remove(it.cacheKey)
@@ -564,7 +566,7 @@ object DI {
             cacheKeyProvider = cacheKeyProvider,
             navigationStoreCacheKey = navigationStoreCacheKey,
             initialState = initialState,
-            resultCache = navigationCache
+            resultCache = NavigationCacheProxy(resultMemoryCache)
         )
     }
 
