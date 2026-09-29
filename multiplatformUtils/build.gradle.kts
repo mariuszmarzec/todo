@@ -23,7 +23,7 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
-                api(project(":navigation"))
+                api(libs.quickMvi.navigation)
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)

@@ -1,4 +1,4 @@
 {
-  "todo.doneButtonOnTaskList": "false",
-  "todo.taskSharing": "true"
+  "todo.doneButtonOnTaskList": "true",
+  "todo.taskSharing": "false"
 }
