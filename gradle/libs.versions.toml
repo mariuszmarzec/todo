@@ -28,6 +28,7 @@ junit = "4.13.2"
 dateTime = "0.4.1"
 viewModel = "2.0.0"
 quickMvi = "1.1.0"
+quickMviNavigation = "1.2.0-SNAPSHOT"
 composeIcons = "1.7.3"
 immutable = "0.4.0"
 
@@ -65,6 +66,7 @@ compose-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose",
 compose-icons = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "composeIcons" }
 quickMvi = {module = "io.github.mariuszmarzec:quickmvi", version.ref = "quickMvi" }
 quickMvi-compose = {module = "io.github.mariuszmarzec:quickmvi-compose", version.ref = "quickMvi" }
+quickMvi-navigation = {module = "io.github.mariuszmarzec:quickmvi-navigation", version.ref = "quickMviNavigation" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-fcm = { module = "com.google.firebase:firebase-messaging" }
 

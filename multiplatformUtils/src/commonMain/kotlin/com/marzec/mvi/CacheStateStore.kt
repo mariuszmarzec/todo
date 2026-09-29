@@ -1,7 +1,7 @@
 package com.marzec.mvi
 
 import com.marzec.preferences.StateCache
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.marzec.mvi.StateContainer
 
 fun <State : Any> Store4<State>.toCachable(
     stateCache: StateCache,
@@ -18,7 +18,7 @@ private class CacheStateStore<State : Any>(
         val defaultStateInitializer = store.stateInitializer
         store.stateInitializer = {
             stateCache.get<State>(cacheKey)?.let {
-                MutableStateFlow(it)
+                StateContainerImpl(it)
             } ?: defaultStateInitializer()
         }
         store.onNewStateCallback = {
