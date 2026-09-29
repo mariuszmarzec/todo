@@ -28,7 +28,7 @@ junit = "4.13.2"
 dateTime = "0.4.1"
 viewModel = "2.0.0"
 quickMvi = "1.1.0"
-quickMviNavigation = "1.2.0-SNAPSHOT"
+quickMviNavigation = "1.3.0"
 composeIcons = "1.7.3"
 immutable = "0.4.0"
 
