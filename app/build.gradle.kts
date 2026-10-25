@@ -59,14 +59,6 @@ android {
     buildFeatures {
         compose = true
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
@@ -84,16 +76,13 @@ dependencies {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.freeCompilerArgs = listOf(
-        *kotlinOptions.freeCompilerArgs.toTypedArray(),
-        "-Xskip-prerelease-check")
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.addAll("-Xskip-prerelease-check")
+    }
 }
 
 detekt {
-    source = files(
-        "src/main/kotlin"
-    )
-
-    config = files("../config/detekt/detekt.yml")
+    source.setFrom("src/main/kotlin")
+    config.setFrom("../config/detekt/detekt.yml")
 }

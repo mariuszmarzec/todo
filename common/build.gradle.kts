@@ -104,10 +104,6 @@ android {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-
     sourceSets {
         named("main") {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -118,11 +114,12 @@ android {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.freeCompilerArgs = listOf(
-        *kotlinOptions.freeCompilerArgs.toTypedArray(),
-        "-Xallow-jvm-ir-dependencies",
-        "-Xskip-prerelease-check")
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-Xallow-jvm-ir-dependencies",
+            "-Xskip-prerelease-check")
+    }
 }
 
 buildkonfig {

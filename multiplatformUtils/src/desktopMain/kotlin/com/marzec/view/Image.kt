@@ -73,14 +73,12 @@ fun loadImage(
     val image by loadImageState(url, imageLoader)
 
     return image?.let {
-        runCatching {
-            if (animationEnabled && it.isAnimated()) {
-                it.toAnimatedImage().animate()
-            }
-            else {
-                it.bytes.toImageBitmap()
-            }
-        }.getOrNull()
+        if (animationEnabled && it.isAnimated()) {
+            it.toAnimatedImage().animate()
+        }
+        else {
+            it.bytes.toImageBitmap()
+        }
     }
 }
 
