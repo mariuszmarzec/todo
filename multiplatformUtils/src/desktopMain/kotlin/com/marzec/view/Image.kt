@@ -8,14 +8,49 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.animatedimage.animate
+import org.jetbrains.compose.animatedimage.AnimatedImage
 import kotlin.String
+import kotlin.runCatching
 
 const val IMAGES_DIR = "images"
+
+/**
+ * Result of safely decoding an image. Encapsulates the fallback behavior:
+ * if decoding fails (malformed/corrupt image), returns null instead of propagating the exception.
+ */
+internal sealed interface DecodedImage {
+    data class Static(val bitmap: ImageBitmap) : DecodedImage
+    data class Animated(val animatedImage: AnimatedImage) : DecodedImage
+    object Failure : DecodedImage
+}
+
+/**
+ * Safely performs the non-composable decode/conversion work for an [Image].
+ * Failures during decode (malformed/corrupt data, unsupported format) are caught and
+ * result in [DecodedImage.Failure], preserving the previous fallback semantics.
+ * Composable functions (like [animate]) are NOT invoked here.
+ */
+internal fun decodeImageSafely(image: Image, animationEnabled: Boolean): DecodedImage {
+    return if (animationEnabled && image.isAnimated()) {
+        runCatching {
+            // Non-composable: create the AnimatedImage object from bytes
+            val animatedImage = image.toAnimatedImage()
+            DecodedImage.Animated(animatedImage)
+        }.getOrElse { DecodedImage.Failure }
+    } else {
+        runCatching {
+            // Non-composable: decode bytes to ImageBitmap
+            val bitmap = image.bytes.toImageBitmap()
+            DecodedImage.Static(bitmap)
+        }.getOrElse { DecodedImage.Failure }
+    }
+}
 
 @Composable
 actual fun Image(
@@ -46,40 +81,47 @@ private fun ImageInternal(
     imageLoader: ImageLoader = ImageLoader.imageLoader,
     animationEnabled: Boolean = true
 ) {
-    val image = loadImage(url, imageLoader, animationEnabled)
+    val decoded = loadImage(url, imageLoader, animationEnabled)
 
-    if (image != null) {
-        Image(
-            modifier = modifier,
-            bitmap = image,
-            contentDescription = contentDescription,
-            contentScale = contentScale
-        )
-    } else {
-        Image(
-            modifier = modifier,
-            painter = placeholder,
-            contentDescription = contentDescription
-        )
+    when (decoded) {
+        is DecodedImage.Static -> {
+            Image(
+                modifier = modifier,
+                painter = BitmapPainter(decoded.bitmap),
+                contentDescription = contentDescription,
+                contentScale = contentScale
+            )
+        }
+        is DecodedImage.Animated -> {
+            // animate() is a @Composable that returns ImageBitmap - safe to call here in composable context
+            Image(
+                modifier = modifier,
+                bitmap = decoded.animatedImage.animate(),
+                contentDescription = contentDescription,
+                contentScale = contentScale
+            )
+        }
+        DecodedImage.Failure -> {
+            Image(
+                modifier = modifier,
+                painter = placeholder,
+                contentDescription = contentDescription
+            )
+        }
     }
 }
 
 @Composable
-fun loadImage(
+private fun loadImage(
     url: String,
     imageLoader: ImageLoader,
     animationEnabled: Boolean
-): ImageBitmap? {
+): DecodedImage {
     val image by loadImageState(url, imageLoader)
 
-    return image?.let {
-        if (animationEnabled && it.isAnimated()) {
-            it.toAnimatedImage().animate()
-        }
-        else {
-            it.bytes.toImageBitmap()
-        }
-    }
+    return image?.let { loadedImage ->
+        decodeImageSafely(loadedImage, animationEnabled)
+    } ?: DecodedImage.Failure
 }
 
 @Composable
