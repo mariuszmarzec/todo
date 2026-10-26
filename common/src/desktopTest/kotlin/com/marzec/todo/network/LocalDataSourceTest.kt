@@ -7,8 +7,8 @@ import com.marzec.todo.api.TaskDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.KSerializer
 import kotlinx.datetime.isoDayNumber
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -26,6 +26,7 @@ class LocalDataSourceTest {
         val todayDate = today.date.toString()
         val weekday = today.dayOfWeek.isoDayNumber
         val source = LocalDataSource(InMemoryFileCache())
+
         source.init(
             listOf(
                 TaskDto(
@@ -33,23 +34,23 @@ class LocalDataSourceTest {
                     description = "Weekly task",
                     addedTime = "${todayDate}T00:00:00",
                     modifiedTime = "${todayDate}T00:00:00",
-                        parentTaskId = null,
-                        subTasks = emptyList(),
-                        isToDo = true,
-                        priority = 0,
-                        scheduler = SchedulerDto(
-                            hour = 0,
-                            minute = 0,
-                            startDate = "${todayDate}T00:00:00",
-                            daysOfWeek = listOf(weekday),
-                            dayOfMonth = 0,
-                            repeatCount = -1,
-                            repeatInEveryPeriod = 1,
-                            type = "Weekly"
-                        )
+                    parentTaskId = null,
+                    subTasks = emptyList(),
+                    isToDo = true,
+                    priority = 0,
+                    scheduler = SchedulerDto(
+                        hour = 0,
+                        minute = 0,
+                        startDate = "${todayDate}T00:00:00",
+                        daysOfWeek = listOf(weekday),
+                        dayOfMonth = 0,
+                        repeatCount = -1,
+                        repeatInEveryPeriod = 1,
+                        type = "Weekly"
                     )
                 )
             )
+        )
 
         val tasks = source.getAll()
 
