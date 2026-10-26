@@ -24,6 +24,7 @@ class LocalDataSourceTest {
     fun weeklySchedulerRunsOnSelectedWeekday() = runTest {
         val today = currentTime()
         val todayDate = today.date.toString()
+        // The API serializes weekdays as ISO 1-7; exercise that same representation here.
         val weekday = today.dayOfWeek.isoDayNumber
         val source = LocalDataSource(InMemoryFileCache())
         source.init(listOf(weeklyTask(todayDate, weekday)))
