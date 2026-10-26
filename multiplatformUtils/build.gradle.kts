@@ -6,14 +6,24 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
 
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     kotlin("multiplatform")
     kotlin("plugin.serialization")
     id("org.jetbrains.kotlinx.atomicfu")
 }
 
 kotlin {
-    androidTarget()
+    android {
+        namespace = "com.marzec"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
+        compilerOptions {
+            jvmTarget.set(JVM_17)
+        }
+        androidResources {
+            enable = true
+        }
+    }
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
             useJUnit()
@@ -53,7 +63,6 @@ kotlin {
             }
         }
         named("androidMain") {
-            kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
                 api("androidx.core:core-ktx:1.3.1")
                 implementation(libs.androidxAppCompat)
@@ -71,8 +80,6 @@ kotlin {
                 api(libs.datastore)
             }
         }
-        val androidUnitTest by getting
-
         named("desktopMain") {
             kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
@@ -95,31 +102,10 @@ kotlin {
     }
 }
 
-android {
 
-    namespace = "com.marzec"
-
-    compileSdk = libs.versions.compileSdk.get().toInt()
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    sourceSets {
-        named("main") {
-            manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-            res.srcDirs("src/androidMain/res")
-        }
+androidComponents {
+    onVariants { variant ->
+        variant.sources.kotlin?.addStaticSourceDirectory("src/jvmAndAndroidMain/kotlin")
     }
 }
 
