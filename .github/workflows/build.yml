@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - fix/45-ktor-3.6.0-final
   pull_request:
     branches:
       - '*'
