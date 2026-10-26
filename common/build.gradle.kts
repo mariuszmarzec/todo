@@ -24,11 +24,21 @@ val testAuthHeader = properties.getProperty("test.authHeader")
 
 tasks.register<Copy>("copyCommonResourcesToRaw") {
     from("src/commonMain/resources/$environment")
-    into("src/main/assets")
+    into("src/androidMain/assets")
 }
 
-tasks.named("preBuild") {
-    dependsOn("copyCommonResourcesToRaw")
+androidComponents {
+    onVariants { variant ->
+        variant.sources.assets?.addStaticSourceDirectory("src/androidMain/assets")
+    }
+}
+
+// The Android-KMP library plugin does not register the legacy AGP preBuild task.
+// Make generated assets available before the Android asset merge task executes.
+tasks.configureEach {
+    if (name == "mergeAndroidMainAssets") {
+        dependsOn("copyCommonResourcesToRaw")
+    }
 }
 
 kotlin {
