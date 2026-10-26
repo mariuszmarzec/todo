@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.compose.compose
 import com.codingfeline.buildkonfig.compiler.FieldSpec
 import java.util.Properties
@@ -115,7 +116,7 @@ android {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget.set(JVM_17)
         freeCompilerArgs.addAll(
             "-Xallow-jvm-ir-dependencies",
             "-Xskip-prerelease-check")
