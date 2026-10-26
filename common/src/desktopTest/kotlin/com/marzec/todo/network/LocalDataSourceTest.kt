@@ -1,13 +1,14 @@
 package com.marzec.todo.network
 
 import com.marzec.cache.FileCache
-import com.marzec.time.CurrentTimeUtil
+import com.marzec.time.currentTime
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
+import kotlinx.datetime.isoDayNumber
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -21,18 +22,17 @@ class LocalDataSourceTest {
 
     @Test
     fun weeklySchedulerRunsOnSelectedWeekday() = runTest {
-        val originalClock = CurrentTimeUtil.clock
-        try {
-            // Wednesday, 28 October 2026. The weekly schedule explicitly selects Wednesday (ISO 3).
-            CurrentTimeUtil.setOtherTime(day = 28, month = 10, year = 2026)
-            val source = LocalDataSource(InMemoryFileCache())
-            source.init(
-                listOf(
-                    TaskDto(
-                        id = 1,
-                        description = "Weekly task",
-                        addedTime = "2026-10-26T00:00:00",
-                        modifiedTime = "2026-10-26T00:00:00",
+        val today = currentTime()
+        val todayDate = today.date.toString()
+        val weekday = today.dayOfWeek.isoDayNumber
+        val source = LocalDataSource(InMemoryFileCache())
+        source.init(
+            listOf(
+                TaskDto(
+                    id = 1,
+                    description = "Weekly task",
+                    addedTime = "${todayDate}T00:00:00",
+                    modifiedTime = "${todayDate}T00:00:00",
                         parentTaskId = null,
                         subTasks = emptyList(),
                         isToDo = true,
@@ -40,8 +40,8 @@ class LocalDataSourceTest {
                         scheduler = SchedulerDto(
                             hour = 0,
                             minute = 0,
-                            startDate = "2026-10-26T00:00:00",
-                            daysOfWeek = listOf(3),
+                            startDate = "${todayDate}T00:00:00",
+                            daysOfWeek = listOf(weekday),
                             dayOfMonth = 0,
                             repeatCount = -1,
                             repeatInEveryPeriod = 1,
@@ -51,16 +51,13 @@ class LocalDataSourceTest {
                 )
             )
 
-            val tasks = source.getAll()
+        val tasks = source.getAll()
 
-            assertEquals(2, tasks.size)
-            assertEquals(1, tasks[0].id)
-            assertEquals("2026-10-28T00:00:00", tasks[0].scheduler?.lastDate)
-            assertEquals(2, tasks[1].id)
-            assertNull(tasks[1].scheduler)
-        } finally {
-            CurrentTimeUtil.clock = originalClock
-        }
+        assertEquals(2, tasks.size)
+        assertEquals(1, tasks[0].id)
+        assertEquals(todayDate, tasks[0].scheduler?.lastDate?.substringBefore("T"))
+        assertEquals(2, tasks[1].id)
+        assertNull(tasks[1].scheduler)
     }
 }
 
