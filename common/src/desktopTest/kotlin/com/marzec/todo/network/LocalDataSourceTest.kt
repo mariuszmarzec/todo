@@ -26,31 +26,7 @@ class LocalDataSourceTest {
         val todayDate = today.date.toString()
         val weekday = today.dayOfWeek.isoDayNumber
         val source = LocalDataSource(InMemoryFileCache())
-
-        source.init(
-            listOf(
-                TaskDto(
-                    id = 1,
-                    description = "Weekly task",
-                    addedTime = "${todayDate}T00:00:00",
-                    modifiedTime = "${todayDate}T00:00:00",
-                    parentTaskId = null,
-                    subTasks = emptyList(),
-                    isToDo = true,
-                    priority = 0,
-                    scheduler = SchedulerDto(
-                        hour = 0,
-                        minute = 0,
-                        startDate = "${todayDate}T00:00:00",
-                        daysOfWeek = listOf(weekday),
-                        dayOfMonth = 0,
-                        repeatCount = -1,
-                        repeatInEveryPeriod = 1,
-                        type = "Weekly"
-                    )
-                )
-            )
-        )
+        source.init(listOf(weeklyTask(todayDate, weekday)))
 
         val tasks = source.getAll()
 
@@ -60,7 +36,42 @@ class LocalDataSourceTest {
         assertEquals(2, tasks[1].id)
         assertNull(tasks[1].scheduler)
     }
+
+    @Test
+    fun weeklySchedulerDoesNotRunOnAnUnselectedWeekday() = runTest {
+        val today = currentTime()
+        val todayDate = today.date.toString()
+        val unselectedWeekday = today.dayOfWeek.isoDayNumber % 7 + 1
+        val source = LocalDataSource(InMemoryFileCache())
+        source.init(listOf(weeklyTask(todayDate, unselectedWeekday)))
+
+        val tasks = source.getAll()
+
+        assertEquals(1, tasks.size)
+        assertNull(tasks.single().scheduler?.lastDate)
+    }
 }
+
+private fun weeklyTask(todayDate: String, weekday: Int) = TaskDto(
+    id = 1,
+    description = "Weekly task",
+    addedTime = "${todayDate}T00:00:00",
+    modifiedTime = "${todayDate}T00:00:00",
+    parentTaskId = null,
+    subTasks = emptyList(),
+    isToDo = true,
+    priority = 0,
+    scheduler = SchedulerDto(
+        hour = 0,
+        minute = 0,
+        startDate = "${todayDate}T00:00:00",
+        daysOfWeek = listOf(weekday),
+        dayOfMonth = 0,
+        repeatCount = -1,
+        repeatInEveryPeriod = 1,
+        type = "Weekly"
+    )
+)
 
 private class InMemoryFileCache : FileCache {
     private val json = Json { ignoreUnknownKeys = true }
