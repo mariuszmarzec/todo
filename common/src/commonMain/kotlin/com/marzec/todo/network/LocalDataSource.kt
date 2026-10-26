@@ -19,13 +19,13 @@ import com.marzec.todo.model.Scheduler
 import com.marzec.todo.model.highestPriorityAsDefault
 import com.marzec.todo.model.toDomain
 import io.ktor.sse.ServerSentEvent
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.time.YearMonth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.serialization.Serializable
@@ -437,23 +437,23 @@ private class SchedulerChecker(
     }
 
     private fun Scheduler.Weekly.shouldBeCreated(today: LocalDateTime): Boolean {
-        if (daysOfWeek.isNotEmpty() && today.dayOfWeek !in daysOfWeek) {
+        if (daysOfWeek.isNotEmpty() && DayOfWeek(today.dayOfWeek.value) !in daysOfWeek) {
             return false
         }
 
         return shouldCreate(
             today,
             calcFirstPeriodDate = { startDate: LocalDate ->
-                startDate.findFirstDate { it.dayOfWeek in daysOfWeek }
+                startDate.findFirstDate { DayOfWeek(it.dayOfWeek.value) in daysOfWeek }
                     ?.findFirstDate(
                         mutate = { it.plusDays(-1) },
-                        predicate = { it.dayOfWeek == DayOfWeek.MONDAY }
+                        predicate = { DayOfWeek(it.dayOfWeek.value) == DayOfWeek.MONDAY }
                     )
             },
             calcPeriodNumber = { firstPeriodDate, todayLocalDate ->
                 val firstPeriodDayOfToday = todayLocalDate.findFirstDate(
                     mutate = { it.plusDays(-1) },
-                    predicate = { it.dayOfWeek == DayOfWeek.MONDAY }
+                    predicate = { DayOfWeek(it.dayOfWeek.value) == DayOfWeek.MONDAY }
                 )
                 val daysBetween = Period.between(firstPeriodDate, firstPeriodDayOfToday).days
                 daysBetween / WEEK_DAYS_COUNT + 1

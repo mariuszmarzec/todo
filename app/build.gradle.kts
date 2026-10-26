@@ -83,6 +83,16 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     }
 }
 
+configurations.all {
+    resolutionStrategy.force(
+        "com.squareup.okhttp3:okhttp:5.3.0",
+        "com.squareup.okhttp3:okhttp-android:5.3.0",
+        "com.squareup.okhttp3:okhttp-sse:5.3.0",
+        "com.squareup.okio:okio:3.12.0",
+        "com.squareup.okio:okio-jvm:3.12.0",
+    )
+}
+
 detekt {
     source.setFrom("src/main/kotlin")
     config.setFrom("../config/detekt/detekt.yml")
