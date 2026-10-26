@@ -91,6 +91,7 @@ android {
     namespace = "com.marzec.todo.common"
 
     compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdkMinor = 0
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
