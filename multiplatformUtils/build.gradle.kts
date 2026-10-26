@@ -12,6 +12,12 @@ plugins {
     id("org.jetbrains.kotlinx.atomicfu")
 }
 
+atomicfu {
+    // This module only uses kotlinx.atomicfu.locks; bytecode transformation is not needed for JVM/Android.
+    // Disable the legacy transform task that assumes the old KMP androidMainClasses task.
+    transformJvm = false
+}
+
 kotlin {
     android {
         namespace = "com.marzec"
