@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.compose.ComposePlugin.DesktopComponentsDependencies
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
@@ -109,10 +110,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-
     buildFeatures {
         compose = true
     }
@@ -127,10 +124,11 @@ android {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.freeCompilerArgs = listOf(
-        *kotlinOptions.freeCompilerArgs.toTypedArray(),
-        "-Xallow-jvm-ir-dependencies",
-        "-Xskip-prerelease-check"
-    )
+    compilerOptions {
+        jvmTarget.set(JVM_17)
+        freeCompilerArgs.addAll(
+            "-Xallow-jvm-ir-dependencies",
+            "-Xskip-prerelease-check"
+        )
+    }
 }
