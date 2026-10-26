@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.compose.ComposePlugin.DesktopComponentsDependencies
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
@@ -124,7 +125,7 @@ android {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget.set(JVM_17)
         freeCompilerArgs.addAll(
             "-Xallow-jvm-ir-dependencies",
             "-Xskip-prerelease-check"
