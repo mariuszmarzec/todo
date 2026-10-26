@@ -41,7 +41,7 @@ jobs:
       - name: Install Android SDK platform 37
         run: |
           echo "Installing Android SDK platform 37 and AGP-compatible build-tools..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-37" "build-tools;36.0.0"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
       - name: Compile Android variants and verify HTTP dependency graph
         run: |
           export JDK_17="$JAVA_HOME"
