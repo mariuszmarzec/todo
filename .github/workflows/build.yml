@@ -41,11 +41,11 @@ jobs:
       - name: Install Android SDK platform 37
         run: |
           echo "Installing Android SDK platform 37 and AGP-compatible build-tools..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
       - name: Compile Android variants and verify HTTP dependency graph
         run: |
           export JDK_17="$JAVA_HOME"
-          ./gradlew :app:compileDebugKotlinAndroid :common:compileDebugKotlinAndroid :multiplatformUtils:compileDebugKotlinAndroid
+          ./gradlew :app:assembleDebug :common:compileKotlinDesktop :multiplatformUtils:compileKotlinDesktop
           ./gradlew :app:dependencies --configuration debugRuntimeClasspath | tee /tmp/app-runtime-dependencies.txt
           grep -E 'com.squareup.okhttp3:okhttp:5.5.0|com.squareup.okhttp3:logging-interceptor:5.5.0|com.squareup.okio:okio:3.18.2' /tmp/app-runtime-dependencies.txt
           if grep -Fq 'com.squareup.okhttp3:okhttp:5.3.0' /tmp/app-runtime-dependencies.txt || grep -Fq 'com.squareup.okio:okio:3.12.0' /tmp/app-runtime-dependencies.txt; then
