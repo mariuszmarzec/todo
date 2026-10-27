@@ -46,6 +46,13 @@ jobs:
         run: |
           export JDK_17="$JAVA_HOME"
           ./gradlew :app:assembleDebug
+          apk_entries="$(unzip -Z1 app/build/outputs/apk/debug/app-debug.apk)"
+          for environment in m p t; do
+            if ! printf '%s\n' "$apk_entries" | grep -Eq "assets/composeResources/.+/files/${environment}/feature_toggle_conf\\.json$"; then
+              echo "Missing Compose Multiplatform feature-toggle resource for environment: ${environment}"
+              exit 1
+            fi
+          done
           ./gradlew :app:dependencies --configuration debugRuntimeClasspath | tee /tmp/app-runtime-dependencies.txt
           grep -Fq 'com.squareup.okhttp3:okhttp:5.5.0' /tmp/app-runtime-dependencies.txt
           grep -Fq 'com.squareup.okhttp3:logging-interceptor:5.5.0' /tmp/app-runtime-dependencies.txt
