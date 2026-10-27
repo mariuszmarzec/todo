@@ -14,10 +14,6 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
-compose.resources {
-    packageOfResClass = "com.marzec.todo.common.generated.resources"
-}
-
 val properties: Properties = Properties()
 properties.load(project.rootProject.file("local.properties").inputStream())
 val environment = properties.getProperty("environment")
@@ -48,7 +44,6 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":multiplatformUtils"))
-                implementation(compose.components.resources)
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)

@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import com.marzec.network.createHttpClient
 import com.marzec.cache.MemoryCache
 import com.marzec.resource.ResourceLoaderImpl
-import com.marzec.resource.ResourceUriLoaderImpl
 import com.marzec.todo.repository.DeviceTokenRepositoryImpl
 import kotlinx.serialization.json.Json
 
@@ -41,7 +40,6 @@ class ToDoApplication : Application() {
         }
 
         DI.resourceLoader = ResourceLoaderImpl(this)
-        DI.resourceUriLoader = ResourceUriLoaderImpl(this)
 
         DI.memoryCache = MemoryCache()
         DI.resultMemoryCache = MemoryCache()

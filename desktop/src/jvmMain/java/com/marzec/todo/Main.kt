@@ -15,7 +15,6 @@ import com.marzec.common.OpenUrlHelper
 import com.marzec.logger.Logger
 import com.marzec.logger.MultiLogger
 import com.marzec.resource.ResourceLoaderImpl
-import com.marzec.resource.ResourceUriLoaderImpl
 import com.marzec.todo.repository.NoOpDeviceTokenRepositoryImpl
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
@@ -61,7 +60,6 @@ fun main() {
     }
 
     DI.resourceLoader = ResourceLoaderImpl()
-    DI.resourceUriLoader = ResourceUriLoaderImpl()
 
     DI.ioDispatcher = Dispatchers.IO
 

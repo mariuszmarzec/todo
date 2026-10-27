@@ -11,11 +11,11 @@ class FeatureTogglesManagerInitializerImpl(
     private val featureToggleRepository: FeatureToggleRepository,
     private val memoryCache: Cache,
     private val updaterCoroutineScope: CoroutineScope,
-    private val featureToggleConfUri: String
+    private val featureToggleConfFile: String
 ) : FeatureTogglesManagerInitializer {
 
     override fun create(): FeatureTogglesManager {
-        val featureTogglesDefaults: Map<String, String> = resourceLoader.loadResource(featureToggleConfUri)
+        val featureTogglesDefaults: Map<String, String> = resourceLoader.loadComonResourceFile(featureToggleConfFile)
             ?.let {
                 try {
                     json.decodeFromString<Map<String, String>>(it)

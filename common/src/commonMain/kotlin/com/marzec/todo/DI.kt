@@ -49,9 +49,7 @@ import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
 import com.marzec.repository.createDataSource
 import com.marzec.repository.fileAndMemoryCacheCrudRepository
-import com.marzec.resource.ComposeResourceLoader
 import com.marzec.resource.ResourceLoader
-import com.marzec.resource.ResourceUriLoader
 import com.marzec.screen.featuretoggle.FeatureToggleDetails
 import com.marzec.screen.featuretoggle.FeatureToggleScreen
 import com.marzec.screen.featuretoggle.FeatureToggleState
@@ -151,7 +149,6 @@ object DI {
     lateinit var deviceTokenRepository: DeviceTokenRepository
 
     lateinit var resourceLoader: ResourceLoader
-    lateinit var resourceUriLoader: ResourceUriLoader
 
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = false
@@ -193,7 +190,7 @@ object DI {
 
     val featureTogglesManagerInitializer by lazy {
         FeatureTogglesManagerInitializerImpl(
-            ComposeResourceLoader(resourceUriLoader),
+            resourceLoader,
             DI.json,
             featureToggleRepository,
             memoryCache,
