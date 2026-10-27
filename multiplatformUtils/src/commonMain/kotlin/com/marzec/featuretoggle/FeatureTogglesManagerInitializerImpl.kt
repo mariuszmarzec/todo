@@ -15,7 +15,7 @@ class FeatureTogglesManagerInitializerImpl(
 ) : FeatureTogglesManagerInitializer {
 
     override fun create(): FeatureTogglesManager {
-        val featureTogglesDefaults: Map<String, String> = resourceLoader.loadResource(featureToggleConfFile)
+        val featureTogglesDefaults: Map<String, String> = resourceLoader.loadComonResourceFile(featureToggleConfFile)
             ?.let {
                 try {
                     json.decodeFromString<Map<String, String>>(it)

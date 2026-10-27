@@ -38,10 +38,10 @@ jobs:
           keyPassword=dummy
           EOF
 
-      - name: Install Android SDK platform 35
+      - name: Install Android SDK platform 37
         run: |
-          echo "Installing Android SDK platform 35..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          echo "Installing Android SDK platform 37 and AGP 9.1 build-tools..."
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
       - name: Unit tests
         run: |
           export JDK_17="$JAVA_HOME"

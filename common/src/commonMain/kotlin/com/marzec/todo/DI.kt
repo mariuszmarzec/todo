@@ -195,7 +195,7 @@ object DI {
             featureToggleRepository,
             memoryCache,
             updaterCoroutineScope,
-            "feature_toggle_conf.json"
+            "${BuildKonfig.ENVIRONMENT}/feature_toggle_conf.json"
         )
     }
 

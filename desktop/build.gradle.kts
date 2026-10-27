@@ -11,7 +11,6 @@ plugins {
 
 kotlin {
     jvm {
-        withJava()
     }
     sourceSets {
         named("jvmMain") {
