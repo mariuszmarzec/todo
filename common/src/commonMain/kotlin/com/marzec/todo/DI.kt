@@ -62,6 +62,7 @@ import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.screen.pickitemscreen.providePickItemStore
 import com.marzec.todo.Api.Todo.FEATURE_TOGGLES
+import com.marzec.todo.common.generated.resources.Res
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -117,6 +118,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 object DI {
 
@@ -188,6 +190,7 @@ object DI {
     }
 
 
+    @OptIn(ExperimentalResourceApi::class)
     val featureTogglesManagerInitializer by lazy {
         FeatureTogglesManagerInitializerImpl(
             resourceLoader,
@@ -195,7 +198,7 @@ object DI {
             featureToggleRepository,
             memoryCache,
             updaterCoroutineScope,
-            "feature_toggle_conf.json"
+            Res.getUri("files/${BuildKonfig.ENVIRONMENT}/feature_toggle_conf.json")
         )
     }
 

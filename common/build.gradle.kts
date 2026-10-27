@@ -14,20 +14,8 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
-abstract class CopyEnvironmentAssetsTask : DefaultTask() {
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputDirectory: DirectoryProperty
-
-    @get:OutputDirectory
-    abstract val outputDirectory: DirectoryProperty
-
-    @TaskAction
-    fun copyAssets() {
-        val output = outputDirectory.get().asFile
-        output.deleteRecursively()
-        inputDirectory.get().asFile.copyRecursively(output, overwrite = true)
-    }
+compose.resources {
+    packageOfResClass = "com.marzec.todo.common.generated.resources"
 }
 
 val properties: Properties = Properties()
@@ -37,11 +25,6 @@ val prodApiUrl = properties.getProperty("prod.apiUrl")
 val prodAuthHeader = properties.getProperty("prod.authHeader")
 val testApiUrl = properties.getProperty("test.apiUrl")
 val testAuthHeader = properties.getProperty("test.authHeader")
-
-val copyCommonResourcesToRaw = tasks.register<CopyEnvironmentAssetsTask>("copyCommonResourcesToRaw") {
-    inputDirectory.set(layout.projectDirectory.dir("src/commonMain/resources/$environment"))
-    outputDirectory.set(layout.buildDirectory.dir("generated/featureToggleAssets"))
-}
 
 kotlin {
     android {
@@ -63,9 +46,9 @@ kotlin {
 
     sourceSets {
         named("commonMain") {
-            resources.srcDir("src/commonMain/resources/$environment")
             dependencies {
                 api(project(":multiplatformUtils"))
+                implementation(compose.components.resources)
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
@@ -111,10 +94,6 @@ kotlin {
 androidComponents {
     onVariants { variant ->
         variant.sources.kotlin?.addStaticSourceDirectory("src/jvmAndAndroidMain/kotlin")
-        variant.sources.assets?.addGeneratedSourceDirectory(
-            copyCommonResourcesToRaw,
-            CopyEnvironmentAssetsTask::outputDirectory
-        )
     }
 }
 
