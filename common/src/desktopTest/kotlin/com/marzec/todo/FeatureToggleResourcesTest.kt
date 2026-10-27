@@ -1,6 +1,6 @@
 package com.marzec.todo
 
-import com.marzec.resource.ResourceLoaderImpl
+import com.marzec.resource.ResourceUriLoaderImpl
 import com.marzec.todo.common.generated.resources.Res
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -27,11 +27,11 @@ class FeatureToggleResourcesTest {
                 "todo.taskSharing" to "true"
             )
         )
-        val loader = ResourceLoaderImpl()
+        val loader = ResourceUriLoaderImpl()
 
         expectedByEnvironment.forEach { (environment, expected) ->
             val uri = Res.getUri("files/$environment/feature_toggle_conf.json")
-            val content = assertNotNull(loader.loadResource(uri), "Missing feature-toggle config for $environment")
+            val content = assertNotNull(loader.loadResourceUri(uri), "Missing feature-toggle config for $environment")
             val actual = Json.decodeFromString<Map<String, String>>(content)
 
             assertEquals(expected, actual, "Unexpected feature-toggle defaults for $environment")

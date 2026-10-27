@@ -49,7 +49,9 @@ import com.marzec.repository.LoginRepositoryImpl
 import com.marzec.repository.LoginRepositoryMock
 import com.marzec.repository.createDataSource
 import com.marzec.repository.fileAndMemoryCacheCrudRepository
+import com.marzec.resource.ComposeResourceLoader
 import com.marzec.resource.ResourceLoader
+import com.marzec.resource.ResourceUriLoader
 import com.marzec.screen.featuretoggle.FeatureToggleDetails
 import com.marzec.screen.featuretoggle.FeatureToggleScreen
 import com.marzec.screen.featuretoggle.FeatureToggleState
@@ -62,7 +64,6 @@ import com.marzec.screen.pickitemscreen.PickItemOptions
 import com.marzec.screen.pickitemscreen.PickItemScreen
 import com.marzec.screen.pickitemscreen.providePickItemStore
 import com.marzec.todo.Api.Todo.FEATURE_TOGGLES
-import com.marzec.todo.common.generated.resources.Res
 import com.marzec.todo.delegates.dialog.ChangePriorityDelegateImpl
 import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
@@ -118,7 +119,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 object DI {
 
@@ -151,6 +151,7 @@ object DI {
     lateinit var deviceTokenRepository: DeviceTokenRepository
 
     lateinit var resourceLoader: ResourceLoader
+    lateinit var resourceUriLoader: ResourceUriLoader
 
     lateinit var fileCache: FileCache
     var quickCacheEnabled: Boolean = false
@@ -190,15 +191,14 @@ object DI {
     }
 
 
-    @OptIn(ExperimentalResourceApi::class)
     val featureTogglesManagerInitializer by lazy {
         FeatureTogglesManagerInitializerImpl(
-            resourceLoader,
+            ComposeResourceLoader(resourceUriLoader),
             DI.json,
             featureToggleRepository,
             memoryCache,
             updaterCoroutineScope,
-            Res.getUri("files/${BuildKonfig.ENVIRONMENT}/feature_toggle_conf.json")
+            "${BuildKonfig.ENVIRONMENT}/feature_toggle_conf.json"
         )
     }
 
