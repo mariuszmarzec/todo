@@ -25,3 +25,7 @@ test.authHeader=Authorization-Test
 ```bash
 gradlew desktop:run
 ```
+
+## Migrations
+
+The `quickmvi-navigation` sample was migrated from this repository into the [QuickMVI](https://github.com/mariuszmarzec/QuickMVI) repository (issue #39, QuickMVI PR #28). The navigation utilities remain available as the `io.github.mariuszmarzec:quickmvi-navigation:1.3.0` artifact and are still used by this project via `multiplatformUtils`.
