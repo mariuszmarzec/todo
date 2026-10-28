@@ -63,7 +63,6 @@ kotlin {
                 implementation(libs.coroutineTest)
                 implementation(libs.mcpSdkClient)
                 implementation(libs.ktorClientCio)
-                implementation(libs.ktorClientSse)
             }
         }
         named("androidMain") {
