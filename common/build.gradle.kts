@@ -77,7 +77,6 @@ kotlin {
             }
         }
         named("desktopMain") {
-            kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
                 api(libs.ktorOkHttpClient)
             }
@@ -85,12 +84,6 @@ kotlin {
     }
 }
 
-
-androidComponents {
-    onVariants { variant ->
-        variant.sources.kotlin?.addStaticSourceDirectory("src/jvmAndAndroidMain/kotlin")
-    }
-}
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     compilerOptions {
@@ -116,7 +109,6 @@ detekt {
     source = files(
         "src/androidMain/kotlin",
         "src/commonMain/kotlin",
-        "src/jvmAndAndroidMain/kotlin",
         "src/desktopTest/kotlin",
         "src/desktopMain/kotlin"
     )
