@@ -61,6 +61,8 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.coroutineTest)
+                implementation(libs.mcpSdkClient)
+                implementation(libs.ktorClientCio)
             }
         }
         named("androidMain") {
@@ -79,6 +81,8 @@ kotlin {
         named("desktopMain") {
             dependencies {
                 api(libs.ktorOkHttpClient)
+                implementation(libs.mcpSdkServer)
+                implementation(libs.ktorServerCio)
             }
         }
     }
