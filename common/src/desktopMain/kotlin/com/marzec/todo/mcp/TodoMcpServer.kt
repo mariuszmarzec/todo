@@ -10,11 +10,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 
-/**
- * Minimal local MCP endpoint used by the desktop application.
- *
- * Lifecycle integration and real Todo tools are deliberately implemented in later steps.
- */
 class TodoMcpServer(
     private val port: Int
 ) {
