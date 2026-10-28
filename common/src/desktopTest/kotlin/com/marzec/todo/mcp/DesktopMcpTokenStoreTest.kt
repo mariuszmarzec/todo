@@ -2,6 +2,10 @@ package com.marzec.todo.mcp
 
 import java.util.UUID
 import java.util.prefs.Preferences
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,8 +20,14 @@ class DesktopMcpTokenStoreTest {
 
         try {
             val store = DesktopMcpTokenStore(preferences)
-            val initial = store.getOrCreateToken()
+            val tokens = coroutineScope {
+                (1..8).map {
+                    async(Dispatchers.Default) { store.getOrCreateToken() }
+                }.awaitAll()
+            }
+            val initial = tokens.first()
 
+            assertTrue(tokens.all { it == initial })
             assertTrue(isValidLocalMcpToken(initial))
             assertEquals(initial, store.getOrCreateToken())
 
