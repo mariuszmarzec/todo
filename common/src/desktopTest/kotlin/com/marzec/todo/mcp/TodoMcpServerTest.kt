@@ -15,7 +15,6 @@ class TodoMcpServerTest {
 
     @Test
     fun clientCanInitializeAndListToolsOverStreamableHttp() = runBlocking {
-        // Reserve an available port for the test server. It is released before Ktor binds to it.
         val port = ServerSocket(0).use { it.localPort }
         val server = TodoMcpServer(port)
         val httpClient = HttpClient(CIO) {
@@ -40,7 +39,6 @@ class TodoMcpServerTest {
                     url = "http://127.0.0.1:$port/mcp"
                 )
             )
-            // connect() performs the MCP initialize handshake.
             clientConnected = true
 
             val tools = client.listTools().tools
