@@ -1,6 +1,7 @@
 package com.marzec.todo.mcp
 
 import com.marzec.content.Content
+import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -32,8 +33,10 @@ class TodoMcpToolsTest {
         withConnectedClient(repository) { client ->
             val names = client.listTools().tools.map { it.name }.toSet()
             assertContains(names, "list_tasks")
+            assertContains(names, "list_scheduled_tasks")
             assertContains(names, "get_task")
             assertContains(names, "create_task")
+            assertContains(names, "create_tasks")
             assertContains(names, "create_task_tree")
             assertContains(names, "update_task")
             assertContains(names, "mark_tasks_done")
@@ -49,6 +52,21 @@ class TodoMcpToolsTest {
             assertFalse(result.isError == true)
             assertEquals("[]", (result.content.first() as TextContent).text)
             coVerify(exactly = 1) { repository.observeTasks() }
+        }
+    }
+
+
+    @Test
+    fun repositoryErrorsBecomeMcpToolErrors() = runBlocking {
+        val repository = io.mockk.mockk<TodoRepository>()
+        coEvery { repository.observeTasks() } returns flowOf(
+            Content.Error<List<Task>>(IllegalStateException("data source unavailable"))
+        )
+
+        withConnectedClient(repository) { client ->
+            val result = client.callTool("list_tasks", emptyMap())
+            assertTrue(result.isError == true)
+            assertContains((result.content.first() as TextContent).text, "data source unavailable")
         }
     }
 
