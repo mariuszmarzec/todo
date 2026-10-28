@@ -11,7 +11,8 @@ import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 
 class TodoMcpServer(
-    private val port: Int
+    private val port: Int,
+    repository: com.marzec.todo.repository.TodoRepository? = null
 ) {
     init {
         require(port in 0..65535) { "Port must be between 0 and 65535" }
@@ -34,6 +35,7 @@ class TodoMcpServer(
         ) {
             CallToolResult(content = listOf(TextContent(text = "pong")))
         }
+        repository?.let { TodoMcpTools(it).register(this) }
     }
 
     private val engine = embeddedServer(

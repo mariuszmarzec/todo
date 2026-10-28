@@ -61,6 +61,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.coroutineTest)
+                implementation(libs.mockk)
                 implementation(libs.mcpSdkClient)
                 implementation(libs.ktorClientCio)
             }
