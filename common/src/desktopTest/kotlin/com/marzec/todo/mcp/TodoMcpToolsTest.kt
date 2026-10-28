@@ -16,6 +16,7 @@ import io.mockk.every
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.net.ServerSocket
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -164,7 +165,7 @@ class TodoMcpToolsTest {
                 )
             )
             clientConnected = true
-            action(client)
+            withTimeout(30_000) { action(client) }
         } finally {
             try {
                 if (clientConnected) {
