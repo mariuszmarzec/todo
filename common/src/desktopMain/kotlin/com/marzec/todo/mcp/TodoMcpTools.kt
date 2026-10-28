@@ -25,6 +25,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.put
 
@@ -163,7 +164,7 @@ internal class TodoMcpTools(
             val update = UpdateTask(
                 description = args.optionalString("description"),
                 parentTaskId = if (args.containsKey("parentTaskId")) NullableField(args.optionalInt("parentTaskId")) else null,
-                priority = args.optionalInt("priority"),
+                priority = args.optionalSignedInt("priority"),
                 isToDo = args.optionalBoolean("isToDo"),
                 scheduler = if (args.containsKey("scheduler")) NullableField(args.optionalScheduler()) else null,
                 expirationDate = if (args.containsKey("expirationDate")) NullableField(args.optionalDate("expirationDate")) else null,
@@ -365,6 +366,7 @@ private fun JsonObject.optionalString(name: String): String? {
 
 private fun JsonObject.requiredInt(name: String): Int {
     val value = this[name] as? JsonPrimitive ?: throw IllegalArgumentException("$name must be an integer")
+    if (value.isString) throw IllegalArgumentException("$name must be an integer")
     val intValue = value.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
     if (intValue < 1) throw IllegalArgumentException("$name must be a positive integer")
     return intValue
@@ -373,16 +375,27 @@ private fun JsonObject.requiredInt(name: String): Int {
 private fun JsonObject.optionalInt(name: String): Int? {
     val value = this[name] ?: return null
     if (value == JsonNull) return null
-    val intValue = (value as? JsonPrimitive)?.intOrNull ?: throw IllegalArgumentException("$name must be an integer or null")
+    val primitive = value as? JsonPrimitive ?: throw IllegalArgumentException("$name must be an integer or null")
+    if (primitive.isString) throw IllegalArgumentException("$name must be an integer or null")
+    val intValue = primitive.intOrNull ?: throw IllegalArgumentException("$name must be an integer or null")
     if (intValue < 1) throw IllegalArgumentException("$name must be a positive integer")
     return intValue
+}
+
+private fun JsonObject.optionalSignedInt(name: String): Int? {
+    val value = this[name] ?: return null
+    if (value == JsonNull) return null
+    val primitive = value as? JsonPrimitive ?: throw IllegalArgumentException("$name must be an integer")
+    if (primitive.isString) throw IllegalArgumentException("$name must be an integer")
+    return primitive.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
 }
 
 private fun JsonObject.optionalBoolean(name: String): Boolean? {
     val value = this[name] ?: return null
     if (value == JsonNull) return null
-    return (value as? JsonPrimitive)?.content?.toBooleanStrictOrNull()
-        ?: throw IllegalArgumentException("$name must be a boolean")
+    val primitive = value as? JsonPrimitive ?: throw IllegalArgumentException("$name must be a boolean")
+    if (primitive.isString) throw IllegalArgumentException("$name must be a boolean")
+    return primitive.booleanOrNull ?: throw IllegalArgumentException("$name must be a boolean")
 }
 
 private fun JsonObject.requiredStringList(name: String): List<String> {
@@ -399,7 +412,9 @@ private fun JsonObject.requiredIdList(name: String): List<Int> {
     val list = this[name] as? JsonArray ?: throw IllegalArgumentException("$name must be an array")
     if (list.isEmpty()) throw IllegalArgumentException("$name must contain at least one ID")
     val ids = list.mapIndexed { index, value ->
-        val id = (value as? JsonPrimitive)?.intOrNull ?: throw IllegalArgumentException("$name[$index] must be an integer")
+        val primitive = value as? JsonPrimitive ?: throw IllegalArgumentException("$name[$index] must be an integer")
+        if (primitive.isString) throw IllegalArgumentException("$name[$index] must be an integer")
+        val id = primitive.intOrNull ?: throw IllegalArgumentException("$name[$index] must be an integer")
         if (id < 1) throw IllegalArgumentException("$name[$index] must be a positive integer")
         id
     }
@@ -496,20 +511,25 @@ private fun parseScheduler(element: JsonElement): Scheduler {
 }
 
 private fun JsonObject.requiredIntAllowZero(name: String): Int {
-    val value = (this[name] as? JsonPrimitive)?.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
-    return value
+    val primitive = this[name] as? JsonPrimitive ?: throw IllegalArgumentException("$name must be an integer")
+    if (primitive.isString) throw IllegalArgumentException("$name must be an integer")
+    return primitive.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
 }
 
 private fun JsonObject.optionalIntAllowZero(name: String): Int? {
     val value = this[name] ?: return null
     if (value == JsonNull) return null
-    return (value as? JsonPrimitive)?.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
+    val primitive = value as? JsonPrimitive ?: throw IllegalArgumentException("$name must be an integer")
+    if (primitive.isString) throw IllegalArgumentException("$name must be an integer")
+    return primitive.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
 }
 
 private fun JsonObject.optionalIntAllowSentinel(name: String): Int? {
     val value = this[name] ?: return null
     if (value == JsonNull) return null
-    return (value as? JsonPrimitive)?.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
+    val primitive = value as? JsonPrimitive ?: throw IllegalArgumentException("$name must be an integer")
+    if (primitive.isString) throw IllegalArgumentException("$name must be an integer")
+    return primitive.intOrNull ?: throw IllegalArgumentException("$name must be an integer")
 }
 
 private fun JsonObject.optionalShares(): List<TaskShare>? {
