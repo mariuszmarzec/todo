@@ -57,6 +57,26 @@ class TodoMcpToolsTest {
 
 
     @Test
+    fun explicitSharingOperationFailsInLocalStorageMode() = runBlocking {
+        val repository = io.mockk.mockk<TodoRepository>()
+
+        withConnectedClient(repository) { client ->
+            val result = client.callTool(
+                "create_task",
+                mapOf(
+                    "description" to "Do not silently ignore shares",
+                    "shares" to emptyList<Any>()
+                )
+            )
+            assertTrue(result.isError == true)
+            assertContains(
+                (result.content.first() as TextContent).text,
+                "not supported in local-storage/mock mode"
+            )
+        }
+    }
+
+    @Test
     fun repositoryErrorsBecomeMcpToolErrors() = runBlocking {
         val repository = io.mockk.mockk<TodoRepository>()
         coEvery { repository.observeTasks() } returns flowOf(
