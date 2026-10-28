@@ -66,6 +66,10 @@ fun main() {
     DI.ioDispatcher = Dispatchers.IO
 
     GlobalScope.launch(DI.ioDispatcher) {
+        DI.localMcpTokenStore?.getOrCreateToken()
+    }
+
+    GlobalScope.launch(DI.ioDispatcher) {
         DI.todoRepository.receiveSse()
     }
 
