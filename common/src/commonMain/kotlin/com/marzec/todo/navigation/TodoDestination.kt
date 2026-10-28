@@ -8,6 +8,7 @@ sealed class TodoDestination : com.marzec.navigation.Destination {
 
     data object Login : TodoDestination()
     data object Tasks : TodoDestination()
+    data object McpTokenSettings : TodoDestination()
     data class AddNewTask(
         val taskToEditId: Int?,
         val parentTaskId: Int?
