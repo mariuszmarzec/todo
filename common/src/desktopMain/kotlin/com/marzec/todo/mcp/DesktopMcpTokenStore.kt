@@ -4,6 +4,8 @@ import java.util.Base64
 import java.util.prefs.Preferences
 import java.security.SecureRandom
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class DesktopMcpTokenStore(
@@ -11,12 +13,16 @@ class DesktopMcpTokenStore(
     private val secureRandom: SecureRandom = SecureRandom()
 ) : McpTokenStore {
 
-    override suspend fun getOrCreateToken(): String = withContext(Dispatchers.IO) {
-        val current = preferences.get(TOKEN_KEY, null)
-        if (current != null && isValidLocalMcpToken(current)) {
-            current
-        } else {
-            generateAndStoreToken()
+    private val mutex = Mutex()
+
+    override suspend fun getOrCreateToken(): String = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            val current = preferences.get(TOKEN_KEY, null)
+            if (current != null && isValidLocalMcpToken(current)) {
+                current
+            } else {
+                generateAndStoreToken()
+            }
         }
     }
 
@@ -24,14 +30,18 @@ class DesktopMcpTokenStore(
         require(isValidLocalMcpToken(token)) {
             "Token must be 32-256 URL-safe characters using letters, digits, dot, underscore, tilde or hyphen"
         }
-        withContext(Dispatchers.IO) {
-            preferences.put(TOKEN_KEY, token)
-            preferences.flush()
+        mutex.withLock {
+            withContext(Dispatchers.IO) {
+                preferences.put(TOKEN_KEY, token)
+                preferences.flush()
+            }
         }
     }
 
-    override suspend fun regenerateToken(): String = withContext(Dispatchers.IO) {
-        generateAndStoreToken()
+    override suspend fun regenerateToken(): String = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            generateAndStoreToken()
+        }
     }
 
     private fun generateAndStoreToken(): String {
