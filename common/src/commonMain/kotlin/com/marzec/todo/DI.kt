@@ -67,6 +67,8 @@ import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.navigation.TodoDestination
+import com.marzec.todo.mcp.LocalMcpTokenSettingsScreen
+import com.marzec.todo.mcp.McpTokenStore
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CommonTodoDataSource
 import com.marzec.todo.network.CompositeDataSource
@@ -136,6 +138,7 @@ object DI {
 
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
+    var localMcpTokenStore: McpTokenStore? = null
     var ioDispatcher: CoroutineDispatcher = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
@@ -259,6 +262,13 @@ object DI {
             },
             TodoDestination.Login::class to @Composable { _, cacheKey ->
                 provideLoginScreen(cacheKey)
+            },
+            TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
+                LocalMcpTokenSettingsScreen(
+                    actionBarProvider = provideActionBarProvider(),
+                    copyToClipBoardHelper = copyToClipBoardHelper,
+                    store = localMcpTokenStore
+                )
             },
             TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.PickItem<Any>
@@ -596,8 +606,12 @@ object DI {
                     featureToggleRepository,
                     navigationStore
                 )
-
-            )
+            ),
+            onOpenLocalMcpSettings = localMcpTokenStore?.let {
+                {
+                    navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
+                }
+            }
         )
 
     val client: HttpClient by lazy {
