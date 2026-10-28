@@ -73,6 +73,7 @@ kotlin {
             }
         }
         named("androidMain") {
+            kotlin.srcDirs("src/jvmAndAndroidMain/kotlin")
             dependencies {
                 api("androidx.core:core-ktx:1.3.1")
                 implementation(libs.androidxAppCompat)
@@ -112,12 +113,6 @@ kotlin {
     }
 }
 
-
-androidComponents {
-    onVariants { variant ->
-        variant.sources.kotlin?.addStaticSourceDirectory("src/jvmAndAndroidMain/kotlin")
-    }
-}
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     compilerOptions {
