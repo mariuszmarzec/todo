@@ -80,7 +80,7 @@ internal class TodoMcpTools(
             }
         ) { args ->
             val shares = args.optionalShares()
-            if (!shares.isNullOrEmpty()) validateSharingAvailable()
+            if (args.containsKey("shares")) validateSharingAvailable()
             repository.addNewTask(
                 description = args.requiredString("description"),
                 parentTaskId = args.optionalInt("parentTaskId"),
@@ -161,7 +161,7 @@ internal class TodoMcpTools(
             val updateKeys = setOf("description", "parentTaskId", "priority", "isToDo", "scheduler", "expirationDate", "shares")
             if (updateKeys.none(args::containsKey)) throw IllegalArgumentException("At least one task field must be provided")
             val shares = if (args.containsKey("shares")) args.optionalShares() ?: emptyList() else null
-            if (!shares.isNullOrEmpty()) validateSharingAvailable()
+            if (args.containsKey("shares")) validateSharingAvailable()
             val update = UpdateTask(
                 description = args.optionalString("description"),
                 parentTaskId = if (args.containsKey("parentTaskId")) NullableField(args.optionalInt("parentTaskId")) else null,
@@ -288,7 +288,7 @@ internal class TodoMcpTools(
             "List users that can be selected for task sharing. This is unsupported in local-storage/mock mode.",
             properties = buildJsonObject {}
         ) {
-            requireRemoteSharing("User lookup")
+            validateSharingAvailable()
             JsonArray(repository.getUsers().awaitResult().map { user ->
                 buildJsonObject {
                     put("id", user.id)
