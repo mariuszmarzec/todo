@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
 
     id("com.android.application")
-    kotlin("android")
     id("io.gitlab.arturbosch.detekt")
     id("com.google.gms.google-services")
 }

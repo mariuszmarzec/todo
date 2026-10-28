@@ -45,7 +45,7 @@ jobs:
       - name: Unit tests
         run: |
           export JDK_17="$JAVA_HOME"
-          ./gradlew :app:testDebugUnitTest :multiplatformUtils:desktopTest :common:desktopTest :desktop:jvmTest
+          ./gradlew :app:assembleDebug :app:testDebugUnitTest :multiplatformUtils:desktopTest :common:desktopTest :desktop:jvmTest
 
       - name: Upload artifact on tests failure
         if: failure()
