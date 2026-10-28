@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.view.ActionBarProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,6 +49,8 @@ fun LocalMcpTokenSettingsScreen(
             val token = store.getOrCreateToken()
             currentToken = token
             draftToken = token
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (exception: Exception) {
             error = exception.message ?: "Could not load the local MCP token"
         } finally {
@@ -73,6 +76,8 @@ fun LocalMcpTokenSettingsScreen(
                 currentToken = token
                 draftToken = token
                 status = "Token updated. The previous stored token has been replaced."
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (exception: Exception) {
                 error = exception.message ?: "Could not update the local MCP token"
             } finally {
@@ -103,7 +108,10 @@ fun LocalMcpTokenSettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 TextButton(
-                    onClick = { copyToClipBoardHelper.copy(currentToken) },
+                    onClick = {
+                        copyToClipBoardHelper.copy(currentToken)
+                        status = "Token copied to clipboard."
+                    },
                     enabled = currentToken.isNotEmpty() && !saving
                 ) {
                     Text("Copy token")
