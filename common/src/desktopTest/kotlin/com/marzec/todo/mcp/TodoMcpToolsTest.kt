@@ -158,14 +158,16 @@ class TodoMcpToolsTest {
         try {
             server.start()
             serverStarted = true
-            client.connect(
-                StreamableHttpClientTransport(
-                    client = httpClient,
-                    url = "http://127.0.0.1:$port/mcp"
+            withTimeout(45_000) {
+                client.connect(
+                    StreamableHttpClientTransport(
+                        client = httpClient,
+                        url = "http://127.0.0.1:$port/mcp"
+                    )
                 )
-            )
-            clientConnected = true
-            withTimeout(30_000) { action(client) }
+                clientConnected = true
+                action(client)
+            }
         } finally {
             try {
                 if (clientConnected) {
