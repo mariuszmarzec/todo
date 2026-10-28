@@ -122,7 +122,7 @@ class TodoMcpToolsTest {
             client.connect(
                 StreamableHttpClientTransport(
                     client = httpClient,
-                    url = "http://127.0.0.1:$port/\${TodoMcpServer.MCP_PATH}"
+                    url = "http://127.0.0.1:$port/mcp"
                 )
             )
             clientConnected = true
