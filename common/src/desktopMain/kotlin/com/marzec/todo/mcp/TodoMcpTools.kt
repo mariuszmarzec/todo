@@ -17,6 +17,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -61,7 +62,7 @@ internal class TodoMcpTools(
                 put("taskId", intProperty("Task ID", minimum = 1))
             }
         ) { args ->
-            repository.observeTask(args.requiredInt("taskId")).awaitResult().toJson()
+            repository.observeTask(args.requiredInt("taskId")).awaitResult().let(::taskToJson)
         }
 
         registerTool(
