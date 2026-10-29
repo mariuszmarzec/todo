@@ -47,6 +47,14 @@ jobs:
           export JDK_17="$JAVA_HOME"
           ./gradlew :app:assembleDebug :app:testDebugUnitTest :multiplatformUtils:desktopTest :common:desktopTest :desktop:jvmTest
 
+      - name: Verify Android runtime excludes Desktop MCP server dependencies
+        run: |
+          ./gradlew :app:dependencies --configuration debugRuntimeClasspath > "$RUNNER_TEMP/android-runtime-dependencies.txt"
+          if grep -E 'io\.modelcontextprotocol:kotlin-sdk-server|io\.ktor:ktor-server-[[:alnum:]-]+' "$RUNNER_TEMP/android-runtime-dependencies.txt"; then
+            echo "Desktop-only MCP server dependencies leaked into the Android runtime graph."
+            exit 1
+          fi
+
       - name: Upload artifact on tests failure
         if: failure()
         uses: actions/upload-artifact@v4
