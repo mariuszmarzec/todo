@@ -5,7 +5,9 @@ import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.sse.SSE
+import io.ktor.http.HttpHeaders
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpClientTransport
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
@@ -143,9 +145,13 @@ class TodoMcpToolsTest {
         action: suspend (Client) -> Unit
     ) {
         val port = ServerSocket(0).use { it.localPort }
-        val server = TodoMcpServer(port, repository)
+        val tokenStore = TestMcpTokenStore()
+        val server = TodoMcpServer(port, tokenStore, repository)
         val httpClient = HttpClient(CIO) {
             install(SSE)
+            defaultRequest {
+                headers.append(HttpHeaders.Authorization, "Bearer " + tokenStore.currentToken)
+            }
         }
         val client = Client(
             clientInfo = Implementation(
