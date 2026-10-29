@@ -11,12 +11,22 @@ plugins {
 
 kotlin {
     jvm {
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
     }
     sourceSets {
         named("jvmMain") {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(project(":common"))
+            }
+        }
+        named("jvmTest") {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.coroutineTest)
+                implementation(libs.mockk)
             }
         }
     }

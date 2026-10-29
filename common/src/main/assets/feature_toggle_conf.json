@@ -1,4 +1,5 @@
 {
   "todo.doneButtonOnTaskList": "true",
-  "todo.taskSharing": "false"
+  "todo.taskSharing": "false",
+  "todo.localMcpServer": "false"
 }

@@ -13,15 +13,18 @@ class FeatureToggleResourcesTest {
         val expectedByEnvironment = mapOf(
             "m" to mapOf(
                 "todo.doneButtonOnTaskList" to "true",
-                "todo.taskSharing" to "false"
+                "todo.taskSharing" to "false",
+                "todo.localMcpServer" to "true"
             ),
             "p" to mapOf(
                 "todo.doneButtonOnTaskList" to "false",
-                "todo.taskSharing" to "true"
+                "todo.taskSharing" to "true",
+                "todo.localMcpServer" to "false"
             ),
             "t" to mapOf(
                 "todo.doneButtonOnTaskList" to "false",
-                "todo.taskSharing" to "true"
+                "todo.taskSharing" to "true",
+                "todo.localMcpServer" to "false"
             )
         )
         val loader = ResourceLoaderImpl()

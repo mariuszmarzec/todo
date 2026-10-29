@@ -17,6 +17,7 @@ import com.marzec.logger.MultiLogger
 import com.marzec.resource.ResourceLoaderImpl
 import com.marzec.todo.repository.NoOpDeviceTokenRepositoryImpl
 import com.marzec.todo.mcp.DesktopMcpTokenStore
+import com.marzec.todo.mcp.LocalMcpServerLifecycleController
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
 import java.io.File
@@ -69,13 +70,25 @@ fun main() {
         DI.localMcpTokenStore?.getOrCreateToken()
     }
 
+    val localMcpServerLifecycleController = LocalMcpServerLifecycleController(
+        featureTogglesManager = DI.featureTogglesManager,
+        loginRepository = DI.loginRepository,
+        todoRepository = DI.todoRepository,
+        tokenStore = checkNotNull(DI.localMcpTokenStore)
+    )
+    localMcpServerLifecycleController.start()
+    Runtime.getRuntime().addShutdownHook(Thread { localMcpServerLifecycleController.close() })
+
     GlobalScope.launch(DI.ioDispatcher) {
         DI.todoRepository.receiveSse()
     }
 
     application {
         Window(
-            ::exitApplication,
+            onCloseRequest = {
+                localMcpServerLifecycleController.close()
+                exitApplication()
+            },
             title = "ToDo",
             state = rememberWindowState(
                 position = WindowPosition(Alignment.Center),
