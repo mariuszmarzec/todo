@@ -30,6 +30,52 @@ import kotlin.test.assertTrue
 class TodoMcpToolsTest {
 
     @Test
+    fun authenticatedStreamableHttpSupportsReadAndWriteOperations() = runBlocking {
+        val repository = io.mockk.mockk<TodoRepository>()
+        val description = "MCP end-to-end task"
+        coEvery { repository.observeTasks() } returns flowOf(Content.Data(emptyList()))
+        every {
+            repository.addNewTask(
+                description = description,
+                parentTaskId = null,
+                highestPriorityAsDefault = false,
+                scheduler = null,
+                expirationDate = null,
+                shares = null
+            )
+        } returns flowOf(Content.Data(Unit))
+
+        withConnectedClient(repository) { client ->
+            val tools = client.listTools().tools.map { it.name }.toSet()
+            assertContains(tools, "list_tasks")
+            assertContains(tools, "create_task")
+
+            val readResult = client.callTool("list_tasks", emptyMap())
+            assertFalse(readResult.isError == true)
+            assertEquals("[]", (readResult.content.first() as TextContent).text)
+
+            val writeResult = client.callTool(
+                "create_task",
+                mapOf("description" to description)
+            )
+            assertFalse(writeResult.isError == true)
+            assertContains((writeResult.content.first() as TextContent).text, "success")
+
+            coVerify(exactly = 1) { repository.observeTasks() }
+            verify(exactly = 1) {
+                repository.addNewTask(
+                    description = description,
+                    parentTaskId = null,
+                    highestPriorityAsDefault = false,
+                    scheduler = null,
+                    expirationDate = null,
+                    shares = null
+                )
+            }
+        }
+    }
+
+    @Test
     fun registersRepositoryToolsAndListsTasksThroughMcp() = runBlocking {
         val repository = io.mockk.mockk<TodoRepository>()
         coEvery { repository.observeTasks() } returns flowOf(Content.Data(emptyList()))
