@@ -85,7 +85,7 @@ opencode
 Remove-Item Env:TODO_LOCAL_MCP_TOKEN
 ```
 
-On a POSIX shell, enter it without echoing it and start OpenCode from that shell:
+In Bash (for example, in WSL), enter it without echoing it and start OpenCode from that shell:
 
 ```bash
 read -rsp "Local Todo MCP token: " TODO_LOCAL_MCP_TOKEN
