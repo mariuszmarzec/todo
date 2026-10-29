@@ -68,6 +68,7 @@ import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.mcp.LocalMcpTokenSettingsScreen
+import com.marzec.todo.mcp.LocalMcpTokenSettingsStore
 import com.marzec.todo.mcp.McpTokenStore
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CommonTodoDataSource
@@ -263,11 +264,10 @@ object DI {
             TodoDestination.Login::class to @Composable { _, cacheKey ->
                 provideLoginScreen(cacheKey)
             },
-            TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
-                LocalMcpTokenSettingsScreen(
+TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
+LocalMcpTokenSettingsScreen(
                     actionBarProvider = provideActionBarProvider(),
-                    copyToClipBoardHelper = copyToClipBoardHelper,
-                    store = localMcpTokenStore
+                    store = provideLocalMcpTokenSettingsStore()
                 )
             },
             TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
@@ -309,7 +309,7 @@ object DI {
                 repository = featureToggleRepository,
                 dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -320,7 +320,7 @@ object DI {
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -377,7 +377,7 @@ object DI {
                 parentTaskId = parentTaskId,
                 cacheKey = cacheKey
             ),
-            actionBarProvider = provideActionBarProvider(),
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -412,7 +412,7 @@ object DI {
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -457,7 +457,7 @@ object DI {
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -486,7 +486,7 @@ object DI {
                 cacheKey = cacheKey,
                 destination = destination
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -520,7 +520,7 @@ object DI {
                 date = date,
                 showHourPicker = showHourPicker
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -598,7 +598,7 @@ object DI {
     @Composable
     private fun provideLoginScreen(cacheKey: String) =
         LoginScreen(
-            actionBarProvider = provideActionBarProvider(),
+                    actionBarProvider = provideActionBarProvider(),
             store = provideLoginStore(
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey,
@@ -725,7 +725,7 @@ object DI {
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey,
             ),
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
         )
 
     private fun <ITEM : Any> providePickItemStore(
@@ -760,8 +760,17 @@ object DI {
         }
     )
 
+fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore? =
+        localMcpTokenStore?.let {
+            LocalMcpTokenSettingsStore(
+                scope = navigationScope,
+                store = it,
+                copyToClipBoardHelper = copyToClipBoardHelper
+            )
+        }
+
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
-}
+    }
 
 object PreferencesKeys {
     const val AUTHORIZATION = "AUTHORIZATION"
