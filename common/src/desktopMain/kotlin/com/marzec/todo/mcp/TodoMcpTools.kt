@@ -68,7 +68,7 @@ internal class TodoMcpTools(
         registerTool(
             server,
             "create_task",
-            "Create one task. If parentTaskId is provided, create it as a subtask. Optional shares require remote mode and the task-sharing feature.",
+            "Create one task. If parentTaskId is provided, create it as a subtask. Returns the exact created taskId. Optional shares require remote mode and the task-sharing feature.",
             required = listOf("description"),
             properties = buildJsonObject {
                 put("description", stringProperty("Non-empty task description"))
@@ -81,7 +81,7 @@ internal class TodoMcpTools(
         ) { args ->
             val shares = args.optionalShares()
             if (args.containsKey("shares")) validateSharingAvailable()
-            repository.addNewTask(
+            val taskId = repository.addNewTaskAndGetId(
                 description = args.requiredString("description"),
                 parentTaskId = args.optionalInt("parentTaskId"),
                 highestPriorityAsDefault = args.optionalBoolean("highestPriorityAsDefault") ?: false,
@@ -89,7 +89,7 @@ internal class TodoMcpTools(
                 expirationDate = args.optionalDate("expirationDate"),
                 shares = shares
             ).awaitResult()
-            successJson()
+            successJson("taskId", taskId)
         }
 
         registerTool(
