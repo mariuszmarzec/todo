@@ -9,6 +9,7 @@ import com.marzec.cache.cacheCall
 import com.marzec.cache.observeTyped
 import com.marzec.content.Content
 import com.marzec.content.asContent
+import com.marzec.content.asContentFlow
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.dto.NullableFieldDto
@@ -46,6 +47,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.datetime.LocalDateTime
 
 class TodoRepository(
@@ -101,6 +104,39 @@ class TodoRepository(
                 )
             )
         }
+
+    /**
+     * Creates a task and emits the ID returned by the data source.
+     *
+     * Kept separate from [addNewTask] so existing UI callers retain the
+     * Content<Unit> contract while MCP clients can persist the exact created ID.
+     */
+    fun addNewTaskAndGetId(
+        description: String,
+        parentTaskId: Int?,
+        highestPriorityAsDefault: Boolean,
+        scheduler: Scheduler?,
+        expirationDate: LocalDateTime? = null,
+        shares: List<TaskShare>? = null
+    ): Flow<Content<Int>> =
+        asContentFlow {
+            dataSource.create(
+                CreateTaskDto(
+                    description = description,
+                    parentTaskId = parentTaskId,
+                    highestPriorityAsDefault = highestPriorityAsDefault,
+                    scheduler = scheduler?.toDto(),
+                    expirationDate = expirationDate?.toString(),
+                    shares = shares
+                        ?.takeIf { DI.featureTogglesManager.get("todo.taskSharing") }
+                        ?.map { it.toDto() }
+                )
+            ).id
+        }.onEach { result ->
+            if (result is Content.Data) {
+                refreshListsCache()
+            }
+        }.flowOn(dispatcher)
 
     fun addNewTasks(
         highestPriorityAsDefault: Boolean,
