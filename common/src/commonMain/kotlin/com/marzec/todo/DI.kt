@@ -266,7 +266,7 @@ object DI {
             },
             TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
                 LocalMcpTokenSettingsScreen(
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
                     store = provideLocalMcpTokenSettingsStore()
                 )
             },
@@ -309,7 +309,7 @@ object DI {
                 repository = featureToggleRepository,
                 dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
-            actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -382,7 +382,7 @@ object DI {
                 parentTaskId = parentTaskId,
                 cacheKey = cacheKey
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -417,7 +417,7 @@ object DI {
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -462,7 +462,7 @@ object DI {
                 taskId = taskId,
                 cacheKey = cacheKey
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -491,7 +491,7 @@ object DI {
                 cacheKey = cacheKey,
                 destination = destination
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -525,7 +525,7 @@ object DI {
                 date = date,
                 showHourPicker = showHourPicker
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -725,7 +725,7 @@ object DI {
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey,
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider()
         )
 
     private fun <ITEM : Any> providePickItemStore(
@@ -768,7 +768,7 @@ object DI {
         )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
-    }
+}
 
 object PreferencesKeys {
     const val AUTHORIZATION = "AUTHORIZATION"
