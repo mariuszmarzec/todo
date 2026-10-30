@@ -3,6 +3,7 @@ package com.marzec.todo.screen.addnewtask.model
 import com.marzec.content.Content
 import com.marzec.content.combineContentsFlows
 import com.marzec.content.ifDataSuspend
+import com.marzec.content.mapData
 import com.marzec.featuretoggle.FeatureTogglesManager
 import com.marzec.model.User
 import com.marzec.model.toNullableUpdate
@@ -31,6 +32,7 @@ import com.marzec.todo.repository.TodoRepository
 import kotlin.math.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateTime
 
 class AddNewTaskStore(
@@ -210,7 +212,7 @@ class AddNewTaskStore(
                     },
                     scheduler = schedulerWithOptions,
                     expirationDate = expirationDate
-                )
+                ).map { it.mapData { Unit } }
             }
         }
 

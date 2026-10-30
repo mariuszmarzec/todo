@@ -9,6 +9,7 @@ import com.marzec.cache.cacheCall
 import com.marzec.cache.observeTyped
 import com.marzec.content.Content
 import com.marzec.content.asContent
+import com.marzec.content.asContentFlow
 import com.marzec.content.ifDataSuspend
 import com.marzec.content.mapData
 import com.marzec.dto.NullableFieldDto
@@ -20,6 +21,7 @@ import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.UpdateTaskDto
@@ -46,6 +48,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.datetime.LocalDateTime
 
 class TodoRepository(
@@ -97,7 +101,7 @@ class TodoRepository(
                     highestPriorityAsDefault = highestPriorityAsDefault,
                     scheduler = scheduler?.toDto(),
                     expirationDate = expirationDate?.toString(),
-                    shares = if (DI.featureTogglesManager.get("todo.taskSharing")) shares?.map { it.toDto() } else null
+                    shares = shares?.takeIf { DI.featureTogglesManager.get("todo.taskSharing") }?.map { it.toDto() }
                 )
             )
         }
@@ -107,21 +111,27 @@ class TodoRepository(
         parentTaskId: Int? = null,
         descriptions: List<String>,
         scheduler: Scheduler?,
-        expirationDate: LocalDateTime? = null
-    ): Flow<Content<Unit>> =
-        asContentWithListUpdate {
-            descriptions.forEach {
+        expirationDate: LocalDateTime? = null,
+        shares: List<TaskShare>? = null
+    ): Flow<Content<List<TaskDto>>> =
+        asContentFlow {
+            descriptions.map { description ->
                 dataSource.create(
                     CreateTaskDto(
-                        description = it,
+                        description = description,
                         parentTaskId = parentTaskId,
                         highestPriorityAsDefault = highestPriorityAsDefault,
                         scheduler = scheduler?.toDto(),
-                        expirationDate = expirationDate?.toString()
+                        expirationDate = expirationDate?.toString(),
+                        shares = shares?.takeIf { DI.featureTogglesManager.get("todo.taskSharing") }?.map { it.toDto() }
                     )
                 )
             }
-        }
+        }.onEach { result ->
+            if (result is Content.Data) {
+                refreshListsCache()
+            }
+        }.flowOn(dispatcher)
 
     fun updateTask(
         taskId: Int,
