@@ -26,10 +26,10 @@ class LocalMcpServerLifecycleController(
     private val featureTogglesManager: FeatureTogglesManager,
     private val loginRepository: LoginRepository,
     private val todoRepository: TodoRepository,
-    private val tokenStore: McpTokenStore,
+    private val tokenStore: McpTokenRepository,
     private val port: Int = DEFAULT_PORT,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val serverFactory: (Int, TodoRepository, McpTokenStore) -> LocalMcpServerInstance = { serverPort, repository, store ->
+    private val serverFactory: (Int, TodoRepository, McpTokenRepository) -> LocalMcpServerInstance = { serverPort, repository, store ->
         TodoMcpServer(serverPort, store, repository)
     }
 ) : AutoCloseable {

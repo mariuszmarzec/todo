@@ -23,7 +23,7 @@ class TodoMcpServerTest {
     @Test
     fun clientCanInitializeAndListToolsOverAuthenticatedStreamableHttp() = runBlocking {
         val port = ServerSocket(0).use { it.localPort }
-        val tokenStore = TestMcpTokenStore()
+        val tokenStore = TestMcpTokenRepository()
         val server = TodoMcpServer(port, tokenStore)
         val httpClient = HttpClient(CIO) {
             install(SSE)
@@ -74,7 +74,7 @@ class TodoMcpServerTest {
     @Test
     fun rejectsMissingInvalidAndRotatedTokens() = runBlocking {
         val port = ServerSocket(0).use { it.localPort }
-        val tokenStore = TestMcpTokenStore()
+        val tokenStore = TestMcpTokenRepository()
         val originalToken = tokenStore.currentToken
         val server = TodoMcpServer(port, tokenStore)
         val unauthenticatedClient = HttpClient(CIO)

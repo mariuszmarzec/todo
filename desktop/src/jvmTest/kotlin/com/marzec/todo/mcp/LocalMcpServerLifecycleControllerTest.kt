@@ -88,7 +88,7 @@ class LocalMcpServerLifecycleControllerTest {
         }
     }
 
-    private class LifecycleTestTokenStore : McpTokenStore {
+    private class LifecycleTestTokenStore : McpTokenRepository {
         override suspend fun getOrCreateToken(): String = "lifecycle-test-token-012345678901234567"
 
         override suspend fun saveToken(token: String) = Unit

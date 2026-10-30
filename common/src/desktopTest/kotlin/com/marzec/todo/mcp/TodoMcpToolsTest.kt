@@ -191,7 +191,7 @@ class TodoMcpToolsTest {
         action: suspend (Client) -> Unit
     ) {
         val port = ServerSocket(0).use { it.localPort }
-        val tokenStore = TestMcpTokenStore()
+        val tokenStore = TestMcpTokenRepository()
         val server = TodoMcpServer(port, tokenStore, repository)
         val httpClient = HttpClient(CIO) {
             install(SSE)

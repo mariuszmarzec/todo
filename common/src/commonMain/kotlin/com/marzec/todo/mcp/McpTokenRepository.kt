@@ -1,6 +1,6 @@
 package com.marzec.todo.mcp
 
-interface McpTokenStore {
+interface McpTokenRepository {
     suspend fun getOrCreateToken(): String
     suspend fun saveToken(token: String)
     suspend fun regenerateToken(): String

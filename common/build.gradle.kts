@@ -17,10 +17,10 @@ plugins {
 val properties: Properties = Properties()
 properties.load(project.rootProject.file("local.properties").inputStream())
 val environment = properties.getProperty("environment")
-val prodApiUrl = properties.getProperty("prodApiUrl") ?: error("prodApiUrl is null")
-val prodAuthHeader = properties.getProperty("prodAuthHeader") ?: error("prodAuthHeader is null")
-val testApiUrl = properties.getProperty("testApiUrl") ?: error("testApiUrl is null")
-val testAuthHeader = properties.getProperty("testAuthHeader") ?: error("testAuthHeader is null")
+val prodApiUrl = properties.getProperty("prod.apiUrl")
+val prodAuthHeader = properties.getProperty("prod.authHeader")
+val testApiUrl = properties.getProperty("test.apiUrl")
+val testAuthHeader = properties.getProperty("test.authHeader")
 
 kotlin {
     android {

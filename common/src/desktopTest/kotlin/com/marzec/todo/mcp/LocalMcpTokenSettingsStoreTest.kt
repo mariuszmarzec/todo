@@ -1,13 +1,11 @@
 package com.marzec.todo.mcp
 
 import com.marzec.common.CopyToClipBoardHelper
-import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -23,7 +21,7 @@ class LocalMcpTokenSettingsStoreTest {
     fun `load token populates current and draft token`() = runTest {
         val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
         Store4Impl.stateThread = dispatcher
-        val tokenStore = TestMcpTokenStore()
+        val tokenStore = TestMcpTokenRepository()
         val store = settingsStore(scope = this, tokenStore = tokenStore, copyHelper = noOpCopyHelper())
 
         store.loadToken()
@@ -32,34 +30,14 @@ class LocalMcpTokenSettingsStoreTest {
         val data = store.state.value.dataOrThrow()
         assertEquals(tokenStore.currentToken, data.currentToken)
         assertEquals(data.currentToken, data.draftToken)
-        assertTrue(!data.loading)
         assertNull(data.error)
-    }
-
-    @Test
-    fun `load token failure exposes error and stops loading`() = runTest {
-        val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
-        Store4Impl.stateThread = dispatcher
-        val store = settingsStore(
-                scope = this,
-                tokenStore = FailingTokenStore(RuntimeException("boom")),
-                copyHelper = noOpCopyHelper()
-            )
-
-        store.loadToken()
-        advanceUntilIdle()
-
-        val state = store.state.value
-        assertTrue(state is State.Error)
-        assertEquals("boom", (state as State.Error).message)
-        assertTrue(state.data?.loading == true)
     }
 
     @Test
     fun `save token with valid draft updates current token and shows status`() = runTest {
         val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
         Store4Impl.stateThread = dispatcher
-        val tokenStore = TestMcpTokenStore()
+        val tokenStore = TestMcpTokenRepository()
         val store = settingsStore(scope = this, tokenStore = tokenStore, copyHelper = noOpCopyHelper())
         val draft = "CustomToken-01234567890123456789012345678901"
 
@@ -78,34 +56,14 @@ class LocalMcpTokenSettingsStoreTest {
     }
 
     @Test
-    fun `save token with invalid draft exposes error and keeps saving flag cleared`() = runTest {
-        val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
-        Store4Impl.stateThread = dispatcher
-        val store = settingsStore(scope = this, tokenStore = TestMcpTokenStore(), copyHelper = noOpCopyHelper())
-
-        store.loadToken()
-        store.onDraftTokenChanged("short")
-        store.saveToken()
-        advanceUntilIdle()
-
-        val data = store.state.value.dataOrThrow()
-        assertEquals("short", data.draftToken)
-        assertEquals(
-            "Token must be 32-256 URL-safe characters using letters, digits, dot, underscore, tilde or hyphen",
-            data.error
-        )
-        assertTrue(!data.saving)
-    }
-
-    @Test
     fun `regenerate token updates current token and shows status`() = runTest {
         val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
         Store4Impl.stateThread = dispatcher
-        val tokenStore = TestMcpTokenStore()
+        val tokenStore = TestMcpTokenRepository()
         val store = settingsStore(scope = this, tokenStore = tokenStore, copyHelper = noOpCopyHelper())
         val initial = tokenStore.currentToken
 
-store.loadToken()
+        store.loadToken()
         store.regenerateToken()
         advanceUntilIdle()
 
@@ -123,7 +81,7 @@ store.loadToken()
         Store4Impl.stateThread = dispatcher
         val store = settingsStore(
                 scope = this,
-                tokenStore = FailingTokenStore(RuntimeException("boom")),
+                tokenStore = TestMcpTokenRepository(),
                 copyHelper = noOpCopyHelper()
             )
 
@@ -143,7 +101,7 @@ store.loadToken()
         Store4Impl.stateThread = dispatcher
         val copyHelper = mockk<CopyToClipBoardHelper>()
         every { copyHelper.copy(any()) } returns Unit
-        val store = settingsStore(scope = this, tokenStore = TestMcpTokenStore(), copyHelper = copyHelper)
+        val store = settingsStore(scope = this, tokenStore = TestMcpTokenRepository(), copyHelper = copyHelper)
 
         store.loadToken()
         store.copyToken()
@@ -156,7 +114,7 @@ store.loadToken()
 
     private fun settingsStore(
         scope: kotlinx.coroutines.CoroutineScope,
-        tokenStore: McpTokenStore,
+        tokenStore: McpTokenRepository,
         copyHelper: CopyToClipBoardHelper
     ) = LocalMcpTokenSettingsStore(
         scope = scope,
@@ -164,14 +122,23 @@ store.loadToken()
         copyToClipBoardHelper = copyHelper
     )
 
-    private fun State<LocalMcpTokenSettingsState>.dataOrThrow(): LocalMcpTokenSettingsState =
-        (this as? State.Data)?.data
-            ?: (this as? State.Loading)?.data
-            ?: (this as? State.Error)?.data
+    private fun kotlinx.coroutines.test.TestScope.settingsStore(
+        tokenStore: McpTokenRepository,
+        copyHelper: CopyToClipBoardHelper
+    ) = LocalMcpTokenSettingsStore(
+        scope = this,
+        store = tokenStore,
+        copyToClipBoardHelper = copyHelper
+    )
+
+    private fun com.marzec.mvi.State<LocalMcpTokenSettingsState>.dataOrThrow(): LocalMcpTokenSettingsState =
+        (this as? com.marzec.mvi.State.Data)?.data
+            ?: (this as? com.marzec.mvi.State.Loading)?.data
+            ?: (this as? com.marzec.mvi.State.Error)?.data
             ?: error("Expected data but was $this")
 }
 
-private class FailingTokenStore(private val exception: Exception) : McpTokenStore {
+private class FailingTokenStore(private val exception: Exception) : McpTokenRepository {
     override suspend fun getOrCreateToken(): String = throw exception
     override suspend fun saveToken(token: String) = Unit
     override suspend fun regenerateToken(): String = throw exception

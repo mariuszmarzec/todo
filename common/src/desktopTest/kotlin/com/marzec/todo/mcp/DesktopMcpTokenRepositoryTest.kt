@@ -12,14 +12,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class DesktopMcpTokenStoreTest {
+class DesktopMcpTokenRepositoryTest {
 
     @Test
     fun tokenIsCreatedPersistedAndCanBeChangedOrRegenerated() = runBlocking {
         val preferences = Preferences.userRoot().node("com/marzec/todo/local-mcp-test-${UUID.randomUUID()}")
 
         try {
-            val store = DesktopMcpTokenStore(preferences)
+            val store = DesktopMcpTokenRepository(preferences)
             val tokens = coroutineScope {
                 (1..8).map {
                     async(Dispatchers.Default) { store.getOrCreateToken() }

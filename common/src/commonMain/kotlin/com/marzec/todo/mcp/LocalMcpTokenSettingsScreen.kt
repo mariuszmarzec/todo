@@ -24,11 +24,9 @@ import com.marzec.view.ActionBarProvider
 
 @Composable
 fun LocalMcpTokenSettingsScreen(
-    actionBarProvider: com.marzec.view.ActionBarProvider,
-    store: LocalMcpTokenSettingsStore?
+    actionBarProvider: ActionBarProvider,
+    store: LocalMcpTokenSettingsStore
 ) {
-    if (store == null) return
-
     val state: State<LocalMcpTokenSettingsState> by store.collectState {
         store.loadToken()
     }
@@ -46,7 +44,7 @@ fun LocalMcpTokenSettingsScreen(
             when (val currentState = state) {
                 is State.Data -> {
                     val data = currentState.data
-                    if (data.loading) {
+                    if (data.saving) {
                         CircularProgressIndicator()
                     } else {
                         Text("Current token", style = MaterialTheme.typography.subtitle1)

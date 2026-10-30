@@ -1,5 +1,3 @@
-@file:Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-
 package com.marzec.todo.mcp
 
 import com.marzec.common.CopyToClipBoardHelper
@@ -8,14 +6,13 @@ import com.marzec.mvi.State
 import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.reduceData
 import com.marzec.mvi.reduceWithResult
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
 class LocalMcpTokenSettingsStore(
     scope: CoroutineScope,
-    private val store: McpTokenStore,
+    private val store: McpTokenRepository,
     private val copyToClipBoardHelper: CopyToClipBoardHelper
 ) : Store4Impl<State<LocalMcpTokenSettingsState>>(
     scope, LocalMcpTokenSettingsState.INITIAL
@@ -24,13 +21,7 @@ class LocalMcpTokenSettingsStore(
     fun loadToken() = intent<Content<String>>("loadToken") {
         onTrigger {
             flow {
-                try {
-                    emit(Content.Data(store.getOrCreateToken()))
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (exception: Exception) {
-                    emit(Content.Error(exception))
-                }
+                emit(Content.Data(store.getOrCreateToken()))
             }
         }
 
@@ -39,7 +30,6 @@ class LocalMcpTokenSettingsStore(
                 copy(
                     currentToken = result.data,
                     draftToken = result.data,
-                    loading = false,
                     error = null,
                     status = null
                 )
@@ -58,18 +48,12 @@ class LocalMcpTokenSettingsStore(
             val draft = state.data?.draftToken.orEmpty()
             flow {
                 emit(Content.Loading())
-                try {
-                    require(isValidLocalMcpToken(draft)) {
-                        "Token must be 32-256 URL-safe characters using letters, " +
-                            "digits, dot, underscore, tilde or hyphen"
-                    }
-                    store.saveToken(draft)
-                    emit(Content.Data(draft))
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (exception: Exception) {
-                    emit(Content.Error(exception))
+                require(isValidLocalMcpToken(draft)) {
+                    "Token must be 32-256 URL-safe characters using letters, " +
+                        "digits, dot, underscore, tilde or hyphen"
                 }
+                store.saveToken(draft)
+                emit(Content.Data(draft))
             }
         }
 
@@ -105,14 +89,8 @@ class LocalMcpTokenSettingsStore(
         onTrigger {
             flow {
                 emit(Content.Loading())
-                try {
-                    val token = store.regenerateToken()
-                    emit(Content.Data(token))
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (exception: Exception) {
-                    emit(Content.Error(exception))
-                }
+                val token = store.regenerateToken()
+                emit(Content.Data(token))
             }
         }
 

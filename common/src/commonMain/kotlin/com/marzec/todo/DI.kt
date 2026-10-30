@@ -69,7 +69,7 @@ import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.mcp.LocalMcpTokenSettingsScreen
 import com.marzec.todo.mcp.LocalMcpTokenSettingsStore
-import com.marzec.todo.mcp.McpTokenStore
+import com.marzec.todo.mcp.McpTokenRepository
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CommonTodoDataSource
 import com.marzec.todo.network.CompositeDataSource
@@ -139,7 +139,7 @@ object DI {
 
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
-    var localMcpTokenStore: McpTokenStore? = null
+    var localMcpTokenRepository: McpTokenRepository? = null
     var ioDispatcher: CoroutineDispatcher = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
@@ -321,6 +321,11 @@ LocalMcpTokenSettingsScreen(
                 cacheKey = cacheKey
             ),
                     actionBarProvider = provideActionBarProvider(),
+            onOpenLocalMcpSettings = localMcpTokenRepository?.let {
+                {
+                    navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
+                }
+            }
         )
     }
 
@@ -606,12 +611,7 @@ LocalMcpTokenSettingsScreen(
                     featureToggleRepository,
                     navigationStore
                 )
-            ),
-            onOpenLocalMcpSettings = localMcpTokenStore?.let {
-                {
-                    navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
-                }
-            }
+            )
         )
 
     val client: HttpClient by lazy {
@@ -760,14 +760,12 @@ LocalMcpTokenSettingsScreen(
         }
     )
 
-fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore? =
-        localMcpTokenStore?.let {
-            LocalMcpTokenSettingsStore(
-                scope = navigationScope,
-                store = it,
-                copyToClipBoardHelper = copyToClipBoardHelper
-            )
-        }
+fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore =
+        LocalMcpTokenSettingsStore(
+            scope = navigationScope,
+            store = checkNotNull(localMcpTokenRepository),
+            copyToClipBoardHelper = copyToClipBoardHelper
+        )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
     }
