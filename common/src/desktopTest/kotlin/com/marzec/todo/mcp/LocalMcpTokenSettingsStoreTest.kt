@@ -6,12 +6,15 @@ import com.marzec.mvi.State
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -45,10 +48,10 @@ class LocalMcpTokenSettingsStoreTest {
         store.loadToken()
         advanceUntilIdle()
 
-        val data = store.state.value.dataOrThrow()
-        assertEquals("", data.currentToken)
-        assertEquals("", data.draftToken)
-        assertEquals("boom", data.error)
+        val errorState = store.state.value as State.Error<LocalMcpTokenSettingsState>
+        assertEquals("boom", errorState.message)
+        assertEquals("", errorState.data?.currentToken)
+        assertEquals("", errorState.data?.draftToken)
     }
 
     @Test
@@ -95,6 +98,37 @@ class LocalMcpTokenSettingsStoreTest {
         assertTrue(data.error != null)
         assertTrue(!data.saving)
         assertEquals(loadedToken, tokenStore.currentToken)
+    }
+
+    @Test
+    fun `save token failure clears saving and records the error`() = runTest {
+        val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
+        Store4Impl.stateThread = dispatcher
+        val tokenStore = SaveFailingTokenRepository()
+        val store = settingsStore(scope = this, tokenStore = tokenStore, copyHelper = noOpCopyHelper())
+        val draft = "CustomToken-01234567890123456789012345678901"
+
+        store.loadToken()
+        store.onDraftTokenChanged(draft)
+        store.saveToken()
+        advanceUntilIdle()
+
+        val data = store.state.value.dataOrThrow()
+        assertEquals("save failed", data.error)
+        assertTrue(!data.saving)
+        assertEquals(tokenStore.originalToken, data.currentToken)
+        assertEquals(tokenStore.originalToken, tokenStore.currentToken)
+    }
+
+    @Test
+    fun `token content flow propagates cancellation`() = runTest {
+        val exception = CancellationException("cancelled")
+
+        val thrown = assertFailsWith<CancellationException> {
+            FailingTokenStore(exception).getOrCreateTokenContent().toList()
+        }
+
+        assertEquals("cancelled", thrown.message)
     }
 
     @Test
@@ -174,6 +208,19 @@ private class FailingTokenStore(private val exception: Exception) : McpTokenRepo
     override suspend fun getOrCreateToken(): String = throw exception
     override suspend fun saveToken(token: String) = Unit
     override suspend fun regenerateToken(): String = throw exception
+}
+
+private class SaveFailingTokenRepository : McpTokenRepository {
+    private val delegate = TestMcpTokenRepository()
+    val originalToken = delegate.currentToken
+    val currentToken: String
+        get() = delegate.currentToken
+
+    override suspend fun getOrCreateToken(): String = delegate.getOrCreateToken()
+    override suspend fun saveToken(token: String) {
+        throw RuntimeException("save failed")
+    }
+    override suspend fun regenerateToken(): String = delegate.regenerateToken()
 }
 
 private fun noOpCopyHelper(): CopyToClipBoardHelper = mockk<CopyToClipBoardHelper>().also {
