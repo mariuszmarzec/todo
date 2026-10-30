@@ -35,7 +35,7 @@ class TodoMcpToolsTest {
         val description = "MCP end-to-end task"
         coEvery { repository.observeTasks() } returns flowOf(Content.Data(emptyList()))
         every {
-            repository.addNewTask(
+            repository.addNewTaskAndGetId(
                 description = description,
                 parentTaskId = null,
                 highestPriorityAsDefault = false,
@@ -43,7 +43,7 @@ class TodoMcpToolsTest {
                 expirationDate = null,
                 shares = null
             )
-        } returns flowOf(Content.Data(Unit))
+        } returns flowOf(Content.Data(23))
 
         withConnectedClient(repository) { client ->
             val tools = client.listTools().tools.map { it.name }.toSet()
@@ -59,11 +59,12 @@ class TodoMcpToolsTest {
                 mapOf("description" to description)
             )
             assertFalse(writeResult.isError == true)
-            assertContains((writeResult.content.first() as TextContent).text, "success")
+            assertContains((writeResult.content.first() as TextContent).text, "\"success\":true")
+            assertContains((writeResult.content.first() as TextContent).text, "\"taskId\":23")
 
             coVerify(exactly = 1) { repository.observeTasks() }
             verify(exactly = 1) {
-                repository.addNewTask(
+                repository.addNewTaskAndGetId(
                     description = description,
                     parentTaskId = null,
                     highestPriorityAsDefault = false,
@@ -144,25 +145,26 @@ class TodoMcpToolsTest {
     fun createTaskToolInvokesRepositoryWithValidatedArguments() = runBlocking {
         val repository = io.mockk.mockk<TodoRepository>()
         every {
-            repository.addNewTask(
+            repository.addNewTaskAndGetId(
                 description = "Create from MCP",
-                parentTaskId = null,
+                parentTaskId = 17,
                 highestPriorityAsDefault = false,
                 scheduler = null,
                 expirationDate = null,
                 shares = null
             )
-        } returns flowOf(Content.Data(Unit))
+        } returns flowOf(Content.Data(23))
 
         withConnectedClient(repository) { client ->
             val result = client.callTool(
                 "create_task",
-                mapOf("description" to "Create from MCP")
+                mapOf("description" to "Create from MCP", "parentTaskId" to 17)
             )
             assertFalse(result.isError == true)
             assertContains((result.content.first() as TextContent).text, "\"success\":true")
+            assertContains((result.content.first() as TextContent).text, "\"taskId\":23")
             verify(exactly = 1) {
-                repository.addNewTask(
+                repository.addNewTaskAndGetId(
                     description = "Create from MCP",
                     parentTaskId = null,
                     highestPriorityAsDefault = false,
