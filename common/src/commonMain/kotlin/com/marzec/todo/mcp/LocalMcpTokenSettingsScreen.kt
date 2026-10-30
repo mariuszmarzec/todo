@@ -100,6 +100,9 @@ fun LocalMcpTokenSettingsScreen(
 
                 is State.Error -> {
                     Text(text = currentState.message)
+                    TextButton(onClick = { store.loadToken() }) {
+                        Text("Retry")
+                    }
                 }
             }
         }
