@@ -19,11 +19,7 @@ class LocalMcpTokenSettingsStore(
 ) {
 
     fun loadToken() = intent<Content<String>>("loadToken") {
-        onTrigger {
-            flow {
-                emit(Content.Data(store.getOrCreateToken()))
-            }
-        }
+        onTrigger { store.getOrCreateTokenContent() }
 
         reducer {
             state.reduceWithResult(resultNonNull()) { result ->
@@ -46,14 +42,17 @@ class LocalMcpTokenSettingsStore(
     fun saveToken() = intent<Content<String>>("saveToken") {
         onTrigger {
             val draft = state.data?.draftToken.orEmpty()
-            flow {
-                emit(Content.Loading())
-                require(isValidLocalMcpToken(draft)) {
-                    "Token must be 32-256 URL-safe characters using letters, " +
-                        "digits, dot, underscore, tilde or hyphen"
-                }
-                store.saveToken(draft)
-                emit(Content.Data(draft))
+            if (isValidLocalMcpToken(draft)) {
+                store.saveTokenContent(draft)
+            } else {
+                flowOf(
+                    Content.Error<String>(
+                        IllegalArgumentException(
+                            "Token must be 32-256 URL-safe characters using letters, " +
+                                "digits, dot, underscore, tilde or hyphen"
+                        )
+                    )
+                )
             }
         }
 
@@ -86,13 +85,7 @@ class LocalMcpTokenSettingsStore(
     }
 
     fun regenerateToken() = intent<Content<String>>("regenerateToken") {
-        onTrigger {
-            flow {
-                emit(Content.Loading())
-                val token = store.regenerateToken()
-                emit(Content.Data(token))
-            }
-        }
+        onTrigger { store.regenerateTokenContent() }
 
         reducer {
             when (val result = resultNonNull()) {
