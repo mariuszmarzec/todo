@@ -123,7 +123,7 @@ class TodoRepository(
                         highestPriorityAsDefault = highestPriorityAsDefault,
                         scheduler = scheduler?.toDto(),
                         expirationDate = expirationDate?.toString(),
-                        shares = if (DI.featureTogglesManager.get("todo.taskSharing")) shares?.map { it.toDto() } else null
+                        shares = shares?.takeIf { DI.featureTogglesManager.get("todo.taskSharing") }?.map { it.toDto() }
                     )
                 )
             }
