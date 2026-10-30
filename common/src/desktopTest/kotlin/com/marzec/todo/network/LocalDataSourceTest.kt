@@ -2,6 +2,8 @@ package com.marzec.todo.network
 
 import com.marzec.cache.FileCache
 import com.marzec.cache.MemoryCache
+import com.marzec.logger.Logger
+import com.marzec.logger.MultiLogger
 import com.marzec.content.Content
 import com.marzec.repository.LoginRepositoryMock
 import com.marzec.time.currentTime
@@ -48,6 +50,8 @@ class LocalDataSourceTest {
 
     @Test
     fun addNewTasksReturnsCreatedChildDtoAndRefreshesParentTree() = runTest {
+        // Repository cache refreshes can log during the test; install a no-op test logger.
+        Logger.logger = MultiLogger(emptyList())
         val fileCache = InMemoryFileCache()
         val dataSource = LocalDataSource(fileCache)
         dataSource.init(listOf(rootTask()))
