@@ -266,7 +266,7 @@ object DI {
             },
             TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
                 LocalMcpTokenSettingsScreen(
-            actionBarProvider = provideActionBarProvider()
+                    actionBarProvider = provideActionBarProvider(),
                     store = provideLocalMcpTokenSettingsStore()
                 )
             },
