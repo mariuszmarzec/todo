@@ -5,7 +5,6 @@ import com.marzec.mvi.Store4Impl
 import com.marzec.mvi.State
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.TestDispatcher
