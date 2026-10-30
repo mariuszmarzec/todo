@@ -1,6 +1,7 @@
 package com.marzec.todo.mcp
 
 import com.marzec.content.Content
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import io.ktor.client.HttpClient
@@ -35,15 +36,26 @@ class TodoMcpToolsTest {
         val description = "MCP end-to-end task"
         coEvery { repository.observeTasks() } returns flowOf(Content.Data(emptyList()))
         every {
-            repository.addNewTaskAndGetId(
-                description = description,
-                parentTaskId = null,
+            repository.addNewTasks(
                 highestPriorityAsDefault = false,
+                parentTaskId = null,
+                descriptions = listOf(description),
                 scheduler = null,
                 expirationDate = null,
                 shares = null
             )
-        } returns flowOf(Content.Data(23))
+        } returns flowOf(Content.Data(listOf(
+            TaskDto(
+                id = 23,
+                description = description,
+                addedTime = "2026-10-30T10:00:00",
+                modifiedTime = "2026-10-30T10:00:00",
+                parentTaskId = null,
+                subTasks = emptyList(),
+                isToDo = true,
+                priority = 1
+            )
+        )))
 
         withConnectedClient(repository) { client ->
             val tools = client.listTools().tools.map { it.name }.toSet()
@@ -64,10 +76,10 @@ class TodoMcpToolsTest {
 
             coVerify(exactly = 1) { repository.observeTasks() }
             verify(exactly = 1) {
-                repository.addNewTaskAndGetId(
-                    description = description,
-                    parentTaskId = null,
+                repository.addNewTasks(
                     highestPriorityAsDefault = false,
+                    parentTaskId = null,
+                    descriptions = listOf(description),
                     scheduler = null,
                     expirationDate = null,
                     shares = null
@@ -145,15 +157,26 @@ class TodoMcpToolsTest {
     fun createTaskToolInvokesRepositoryWithValidatedArguments() = runBlocking {
         val repository = io.mockk.mockk<TodoRepository>()
         every {
-            repository.addNewTaskAndGetId(
-                description = "Create from MCP",
-                parentTaskId = 17,
+            repository.addNewTasks(
                 highestPriorityAsDefault = false,
+                parentTaskId = 17,
+                descriptions = listOf("Create from MCP"),
                 scheduler = null,
                 expirationDate = null,
                 shares = null
             )
-        } returns flowOf(Content.Data(23))
+        } returns flowOf(Content.Data(listOf(
+            TaskDto(
+                id = 23,
+                description = "Create from MCP",
+                addedTime = "2026-10-30T10:00:00",
+                modifiedTime = "2026-10-30T10:00:00",
+                parentTaskId = 17,
+                subTasks = emptyList(),
+                isToDo = true,
+                priority = 1
+            )
+        )))
 
         withConnectedClient(repository) { client ->
             val result = client.callTool(
@@ -164,10 +187,10 @@ class TodoMcpToolsTest {
             assertContains((result.content.first() as TextContent).text, "\"success\":true")
             assertContains((result.content.first() as TextContent).text, "\"taskId\":23")
             verify(exactly = 1) {
-                repository.addNewTaskAndGetId(
-                    description = "Create from MCP",
-                    parentTaskId = 17,
+                repository.addNewTasks(
                     highestPriorityAsDefault = false,
+                    parentTaskId = 17,
+                    descriptions = listOf("Create from MCP"),
                     scheduler = null,
                     expirationDate = null,
                     shares = null
