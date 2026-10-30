@@ -21,6 +21,7 @@ import com.marzec.todo.Api
 import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
 import com.marzec.todo.api.CreateTaskDto
+import com.marzec.todo.api.TaskDto
 import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
 import com.marzec.todo.api.UpdateTaskDto
@@ -105,59 +106,32 @@ class TodoRepository(
             )
         }
 
-    /**
-     * Creates a task and emits the ID returned by the data source.
-     *
-     * Kept separate from [addNewTask] so existing UI callers retain the
-     * Content<Unit> contract while MCP clients can persist the exact created ID.
-     */
-    fun addNewTaskAndGetId(
-        description: String,
-        parentTaskId: Int?,
-        highestPriorityAsDefault: Boolean,
-        scheduler: Scheduler?,
-        expirationDate: LocalDateTime? = null,
-        shares: List<TaskShare>? = null
-    ): Flow<Content<Int>> =
-        asContentFlow {
-            dataSource.create(
-                CreateTaskDto(
-                    description = description,
-                    parentTaskId = parentTaskId,
-                    highestPriorityAsDefault = highestPriorityAsDefault,
-                    scheduler = scheduler?.toDto(),
-                    expirationDate = expirationDate?.toString(),
-                    shares = shares
-                        ?.takeIf { DI.featureTogglesManager.get("todo.taskSharing") }
-                        ?.map { it.toDto() }
-                )
-            ).id
-        }.onEach { result ->
-            if (result is Content.Data) {
-                refreshListsCache()
-            }
-        }.flowOn(dispatcher)
-
     fun addNewTasks(
         highestPriorityAsDefault: Boolean,
         parentTaskId: Int? = null,
         descriptions: List<String>,
         scheduler: Scheduler?,
-        expirationDate: LocalDateTime? = null
-    ): Flow<Content<Unit>> =
-        asContentWithListUpdate {
-            descriptions.forEach {
+        expirationDate: LocalDateTime? = null,
+        shares: List<TaskShare>? = null
+    ): Flow<Content<List<TaskDto>>> =
+        asContentFlow {
+            descriptions.map { description ->
                 dataSource.create(
                     CreateTaskDto(
-                        description = it,
+                        description = description,
                         parentTaskId = parentTaskId,
                         highestPriorityAsDefault = highestPriorityAsDefault,
                         scheduler = scheduler?.toDto(),
-                        expirationDate = expirationDate?.toString()
+                        expirationDate = expirationDate?.toString(),
+                        shares = if (DI.featureTogglesManager.get("todo.taskSharing")) shares?.map { it.toDto() } else null
                     )
                 )
             }
-        }
+        }.onEach { result ->
+            if (result is Content.Data) {
+                refreshListsCache()
+            }
+        }.flowOn(dispatcher)
 
     fun updateTask(
         taskId: Int,
