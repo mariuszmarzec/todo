@@ -1,8 +1,8 @@
 package com.marzec.todo.mcp
 
-internal class TestMcpTokenStore(
+internal class TestMcpTokenRepository(
     initialToken: String = "test-local-mcp-token-012345678901234567890123"
-) : McpTokenStore {
+) : McpTokenRepository {
     @Volatile
     var currentToken: String = initialToken
         private set

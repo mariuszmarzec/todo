@@ -8,10 +8,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class DesktopMcpTokenStore(
+class DesktopMcpTokenRepository(
     private val preferences: Preferences = Preferences.userRoot().node("com/marzec/todo/local-mcp"),
     private val secureRandom: SecureRandom = SecureRandom()
-) : McpTokenStore {
+) : McpTokenRepository {
 
     private val mutex = Mutex()
 

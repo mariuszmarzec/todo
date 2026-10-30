@@ -27,6 +27,7 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.coroutineTest)
                 implementation(libs.mockk)
+                implementation(compose.desktop.uiTestJUnit4)
             }
         }
     }

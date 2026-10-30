@@ -15,7 +15,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,8 +33,7 @@ import com.marzec.view.TextFieldStateful
 @Composable
 fun LoginScreen(
     actionBarProvider: ActionBarProvider,
-    store: LoginStore,
-    onOpenLocalMcpSettings: (() -> Unit)? = null
+    store: LoginStore
 ) {
 
     val state: State<LoginData> by store.collectState()
@@ -47,8 +45,7 @@ fun LoginScreen(
                 login = state.data.login,
                 store = store,
                 password = state.data.password,
-                error = "",
-                onOpenLocalMcpSettings = onOpenLocalMcpSettings
+                error = ""
             )
         }
         is State.Loading -> {
@@ -61,8 +58,7 @@ fun LoginScreen(
                 login = state.data?.login.orEmpty(),
                 store = store,
                 password = state.data?.password.orEmpty(),
-                error = state.message,
-                onOpenLocalMcpSettings = onOpenLocalMcpSettings
+                error = state.message
             )
         }
     }
@@ -74,17 +70,11 @@ private fun LoginScreen(
     login: String,
     store: LoginStore,
     password: String,
-    error: String,
-    onOpenLocalMcpSettings: (() -> Unit)?
+    error: String
 ) {
     Scaffold(
         topBar = {
             actionBarProvider.provide {
-                if (onOpenLocalMcpSettings != null) {
-                    IconButton(onClick = { onOpenLocalMcpSettings() }) {
-                        Icon(imageVector = Icons.Default.Lock, contentDescription = "Local MCP token")
-                    }
-                }
                 IconButton({
                     store.onFeatureFlagClicked()
                 }) {

@@ -27,7 +27,7 @@ interface LocalMcpServerInstance {
 
 class TodoMcpServer(
     private val port: Int,
-    private val tokenStore: McpTokenStore,
+    private val tokenStore: McpTokenRepository,
     repository: TodoRepository? = null
 ) : LocalMcpServerInstance {
     init {

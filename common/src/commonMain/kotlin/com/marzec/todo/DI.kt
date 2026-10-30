@@ -68,7 +68,8 @@ import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.navigation.TodoDestination
 import com.marzec.todo.mcp.LocalMcpTokenSettingsScreen
-import com.marzec.todo.mcp.McpTokenStore
+import com.marzec.todo.mcp.LocalMcpTokenSettingsStore
+import com.marzec.todo.mcp.McpTokenRepository
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CommonTodoDataSource
 import com.marzec.todo.network.CompositeDataSource
@@ -138,7 +139,7 @@ object DI {
 
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
-    var localMcpTokenStore: McpTokenStore? = null
+    var localMcpTokenRepository: McpTokenRepository? = null
     var ioDispatcher: CoroutineDispatcher = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
@@ -266,8 +267,7 @@ object DI {
             TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
                 LocalMcpTokenSettingsScreen(
                     actionBarProvider = provideActionBarProvider(),
-                    copyToClipBoardHelper = copyToClipBoardHelper,
-                    store = localMcpTokenStore
+                    store = provideLocalMcpTokenSettingsStore()
                 )
             },
             TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
@@ -320,7 +320,12 @@ object DI {
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey
             ),
-            actionBarProvider = provideActionBarProvider()
+            actionBarProvider = provideActionBarProvider(),
+            onOpenLocalMcpSettings = localMcpTokenRepository?.let {
+                {
+                    navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
+                }
+            }
         )
     }
 
@@ -606,12 +611,7 @@ object DI {
                     featureToggleRepository,
                     navigationStore
                 )
-            ),
-            onOpenLocalMcpSettings = localMcpTokenStore?.let {
-                {
-                    navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
-                }
-            }
+            )
         )
 
     val client: HttpClient by lazy {
@@ -759,6 +759,13 @@ object DI {
             NavigationAction(TodoDestination.AddNewTask(taskToEditId = null, parentTaskId = null))
         }
     )
+
+    fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore =
+        LocalMcpTokenSettingsStore(
+            scope = navigationScope,
+            store = checkNotNull(localMcpTokenRepository),
+            copyToClipBoardHelper = copyToClipBoardHelper
+        )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
 }
