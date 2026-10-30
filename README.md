@@ -103,6 +103,10 @@ If the token is regenerated, update the environment variable before reconnecting
 
 The server exposes `list_tasks`, `list_scheduled_tasks`, `get_task`, `create_task`, `create_tasks`, `create_task_tree`, `update_task`, `mark_tasks_done`, `mark_tasks_to_do`, `reorder_tasks`, `schedule_tasks`, `copy_task`, `remove_task`, `leave_shared_task`, and `list_shareable_users`, along with the `ping` connectivity check.
 
+The `create_task` response includes the exact ID returned by the data source:
+`{"success":true,"taskId":123}`. When `parentTaskId` is supplied, that ID
+identifies the newly created child task.
+
 In mock/local mode, task-sharing operations are unsupported. In particular, `leave_shared_task`, `list_shareable_users`, and create/update requests that explicitly include `shares` return a tool error rather than silently ignoring the request. The local MCP token is separate from the app's backend session, and its possession grants access to the MCP tools available in that running desktop session.
 
 ## Verification
