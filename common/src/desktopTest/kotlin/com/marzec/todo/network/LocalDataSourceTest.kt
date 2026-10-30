@@ -1,9 +1,17 @@
 package com.marzec.todo.network
 
 import com.marzec.cache.FileCache
+import com.marzec.cache.MemoryCache
+import com.marzec.content.Content
+import com.marzec.repository.LoginRepositoryMock
 import com.marzec.time.currentTime
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
+import com.marzec.todo.repository.TodoRepository
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -39,6 +47,43 @@ class LocalDataSourceTest {
     }
 
     @Test
+    fun addNewTaskAndGetIdReturnsCreatedChildIdAndRefreshesParentTree() = runTest {
+        val fileCache = InMemoryFileCache()
+        val dataSource = LocalDataSource(fileCache)
+        dataSource.init(listOf(rootTask()))
+        val client = HttpClient(CIO)
+        val repository = TodoRepository(
+            dataSource = dataSource,
+            memoryCache = MemoryCache(),
+            fileCache = fileCache,
+            dispatcher = Dispatchers.Unconfined,
+            client = client,
+            loginRepository = LoginRepositoryMock()
+        )
+
+        try {
+            val result = repository.addNewTaskAndGetId(
+                description = "Result from Manul",
+                parentTaskId = 1,
+                highestPriorityAsDefault = false,
+                scheduler = null
+            ).first { it !is Content.Loading }
+
+            val createdTaskId = (result as Content.Data).data
+            assertEquals(2, createdTaskId)
+
+            val refreshedTasks = repository.observeTasks().first { it is Content.Data } as Content.Data
+            val root = refreshedTasks.data.single()
+            assertEquals(1, root.id)
+            assertEquals(listOf(createdTaskId), root.subTasks.map { it.id })
+            assertEquals(1, root.subTasks.single().parentTaskId)
+            assertEquals("Result from Manul", root.subTasks.single().description)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
     fun weeklySchedulerDoesNotRunOnAnUnselectedWeekday() = runTest {
         val today = currentTime()
         val todayDate = today.date.toString()
@@ -52,6 +97,17 @@ class LocalDataSourceTest {
         assertNull(tasks.single().scheduler?.lastDate)
     }
 }
+
+private fun rootTask() = TaskDto(
+    id = 1,
+    description = "Root task",
+    addedTime = "2026-10-30T10:00:00",
+    modifiedTime = "2026-10-30T10:00:00",
+    parentTaskId = null,
+    subTasks = emptyList(),
+    isToDo = true,
+    priority = 1
+)
 
 private fun weeklyTask(todayDate: String, weekday: Int) = TaskDto(
     id = 1,
