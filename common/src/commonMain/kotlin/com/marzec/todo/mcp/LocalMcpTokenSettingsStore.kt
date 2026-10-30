@@ -21,18 +21,32 @@ class LocalMcpTokenSettingsStore(
     fun loadToken() = intent<Content<String>>("loadToken") {
         onTrigger {
             flow {
-                emit(Content.Data(store.getOrCreateToken()))
+                try {
+                    emit(Content.Data(store.getOrCreateToken()))
+                } catch (e: Exception) {
+                    emit(Content.Error(e))
+                }
             }
         }
 
         reducer {
-            state.reduceWithResult(resultNonNull()) { result ->
-                copy(
-                    currentToken = result.data,
-                    draftToken = result.data,
-                    error = null,
-                    status = null
-                )
+            when (val result = resultNonNull()) {
+                is Content.Data -> state.reduceData {
+                    copy(
+                        currentToken = result.data,
+                        draftToken = result.data,
+                        error = null,
+                        status = null
+                    )
+                }
+                is Content.Error -> state.reduceData {
+                    copy(
+                        currentToken = "",
+                        draftToken = "",
+                        error = result.exception.message ?: "Could not load the local MCP token"
+                    )
+                }
+                else -> state
             }
         }
     }
@@ -47,13 +61,17 @@ class LocalMcpTokenSettingsStore(
         onTrigger {
             val draft = state.data?.draftToken.orEmpty()
             flow {
-                emit(Content.Loading())
-                require(isValidLocalMcpToken(draft)) {
-                    "Token must be 32-256 URL-safe characters using letters, " +
-                        "digits, dot, underscore, tilde or hyphen"
+                try {
+                    emit(Content.Loading())
+                    require(isValidLocalMcpToken(draft)) {
+                        "Token must be 32-256 URL-safe characters using letters, " +
+                            "digits, dot, underscore, tilde or hyphen"
+                    }
+                    store.saveToken(draft)
+                    emit(Content.Data(draft))
+                } catch (e: Exception) {
+                    emit(Content.Error(e))
                 }
-                store.saveToken(draft)
-                emit(Content.Data(draft))
             }
         }
 
@@ -88,9 +106,13 @@ class LocalMcpTokenSettingsStore(
     fun regenerateToken() = intent<Content<String>>("regenerateToken") {
         onTrigger {
             flow {
-                emit(Content.Loading())
-                val token = store.regenerateToken()
-                emit(Content.Data(token))
+                try {
+                    emit(Content.Loading())
+                    val token = store.regenerateToken()
+                    emit(Content.Data(token))
+                } catch (e: Exception) {
+                    emit(Content.Error(e))
+                }
             }
         }
 

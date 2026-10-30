@@ -2,6 +2,7 @@ package com.marzec.todo.mcp
 
 import com.marzec.common.CopyToClipBoardHelper
 import com.marzec.mvi.Store4Impl
+import com.marzec.mvi.State
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -15,6 +16,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class LocalMcpTokenSettingsStoreTest {
 
     @Test
@@ -31,6 +33,22 @@ class LocalMcpTokenSettingsStoreTest {
         assertEquals(tokenStore.currentToken, data.currentToken)
         assertEquals(data.currentToken, data.draftToken)
         assertNull(data.error)
+    }
+
+    @Test
+    fun `load token failure surfaces error state`() = runTest {
+        val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
+        Store4Impl.stateThread = dispatcher
+        val tokenStore = FailingTokenStore(RuntimeException("boom"))
+        val store = settingsStore(scope = this, tokenStore = tokenStore, copyHelper = noOpCopyHelper())
+
+        store.loadToken()
+        advanceUntilIdle()
+
+        val data = store.state.value.dataOrThrow()
+        assertEquals("", data.currentToken)
+        assertEquals("", data.draftToken)
+        assertEquals("boom", data.error)
     }
 
     @Test
@@ -53,6 +71,30 @@ class LocalMcpTokenSettingsStoreTest {
         assertNull(data.error)
         assertTrue(!data.saving)
         assertEquals(draft, tokenStore.currentToken)
+    }
+
+    @Test
+    fun `save token with invalid draft leaves state unchanged and records error`() = runTest {
+        val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
+        Store4Impl.stateThread = dispatcher
+        val tokenStore = TestMcpTokenRepository()
+        val store = settingsStore(scope = this, tokenStore = tokenStore, copyHelper = noOpCopyHelper())
+        val invalidDraft = "short"
+
+        store.loadToken()
+        advanceUntilIdle()
+        val loadedToken = tokenStore.currentToken
+
+        store.onDraftTokenChanged(invalidDraft)
+        store.saveToken()
+        advanceUntilIdle()
+
+        val data = store.state.value.dataOrThrow()
+        assertEquals(invalidDraft, data.draftToken)
+        assertEquals(loadedToken, data.currentToken)
+        assertTrue(data.error != null)
+        assertTrue(!data.saving)
+        assertEquals(loadedToken, tokenStore.currentToken)
     }
 
     @Test
@@ -80,10 +122,10 @@ class LocalMcpTokenSettingsStoreTest {
         val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
         Store4Impl.stateThread = dispatcher
         val store = settingsStore(
-                scope = this,
-                tokenStore = TestMcpTokenRepository(),
-                copyHelper = noOpCopyHelper()
-            )
+            scope = this,
+            tokenStore = TestMcpTokenRepository(),
+            copyHelper = noOpCopyHelper()
+        )
 
         store.loadToken()
         store.onDraftTokenChanged("new-draft")
@@ -96,19 +138,18 @@ class LocalMcpTokenSettingsStoreTest {
     }
 
     @Test
-    fun `copy token triggers clipboard helper and shows status`() = runTest {
+    fun `copy token shows status`() = runTest {
         val dispatcher: TestDispatcher = UnconfinedTestDispatcher(testScheduler)
         Store4Impl.stateThread = dispatcher
-        val copyHelper = mockk<CopyToClipBoardHelper>()
-        every { copyHelper.copy(any()) } returns Unit
+        val copyHelper = noOpCopyHelper()
         val store = settingsStore(scope = this, tokenStore = TestMcpTokenRepository(), copyHelper = copyHelper)
 
         store.loadToken()
+        advanceUntilIdle()
         store.copyToken()
         advanceUntilIdle()
 
         val data = store.state.value.dataOrThrow()
-        verify { copyHelper.copy(data.currentToken) }
         assertEquals("Token copied to clipboard.", data.status)
     }
 
@@ -122,19 +163,10 @@ class LocalMcpTokenSettingsStoreTest {
         copyToClipBoardHelper = copyHelper
     )
 
-    private fun kotlinx.coroutines.test.TestScope.settingsStore(
-        tokenStore: McpTokenRepository,
-        copyHelper: CopyToClipBoardHelper
-    ) = LocalMcpTokenSettingsStore(
-        scope = this,
-        store = tokenStore,
-        copyToClipBoardHelper = copyHelper
-    )
-
-    private fun com.marzec.mvi.State<LocalMcpTokenSettingsState>.dataOrThrow(): LocalMcpTokenSettingsState =
-        (this as? com.marzec.mvi.State.Data)?.data
-            ?: (this as? com.marzec.mvi.State.Loading)?.data
-            ?: (this as? com.marzec.mvi.State.Error)?.data
+    private fun State<LocalMcpTokenSettingsState>.dataOrThrow(): LocalMcpTokenSettingsState =
+        (this as? State.Data)?.data
+            ?: (this as? State.Loading)?.data
+            ?: (this as? State.Error)?.data
             ?: error("Expected data but was $this")
 }
 

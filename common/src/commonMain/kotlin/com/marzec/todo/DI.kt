@@ -264,8 +264,8 @@ object DI {
             TodoDestination.Login::class to @Composable { _, cacheKey ->
                 provideLoginScreen(cacheKey)
             },
-TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
-LocalMcpTokenSettingsScreen(
+            TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
+                LocalMcpTokenSettingsScreen(
                     actionBarProvider = provideActionBarProvider(),
                     store = provideLocalMcpTokenSettingsStore()
                 )
@@ -309,7 +309,7 @@ LocalMcpTokenSettingsScreen(
                 repository = featureToggleRepository,
                 dialogDelegate = DialogDelegateImpl<Int, FeatureToggleState>()
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider(),
         )
     }
 
@@ -320,7 +320,7 @@ LocalMcpTokenSettingsScreen(
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey
             ),
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider(),
             onOpenLocalMcpSettings = localMcpTokenRepository?.let {
                 {
                     navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
@@ -603,7 +603,7 @@ LocalMcpTokenSettingsScreen(
     @Composable
     private fun provideLoginScreen(cacheKey: String) =
         LoginScreen(
-                    actionBarProvider = provideActionBarProvider(),
+            actionBarProvider = provideActionBarProvider(),
             store = provideLoginStore(
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey,
@@ -760,7 +760,7 @@ LocalMcpTokenSettingsScreen(
         }
     )
 
-fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore =
+    fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore =
         LocalMcpTokenSettingsStore(
             scope = navigationScope,
             store = checkNotNull(localMcpTokenRepository),
