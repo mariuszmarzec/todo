@@ -81,15 +81,15 @@ internal class TodoMcpTools(
         ) { args ->
             val shares = args.optionalShares()
             if (args.containsKey("shares")) validateSharingAvailable()
-            val taskId = repository.addNewTaskAndGetId(
-                description = args.requiredString("description"),
-                parentTaskId = args.optionalInt("parentTaskId"),
+            val createdTask = repository.addNewTasks(
                 highestPriorityAsDefault = args.optionalBoolean("highestPriorityAsDefault") ?: false,
+                parentTaskId = args.optionalInt("parentTaskId"),
+                descriptions = listOf(args.requiredString("description")),
                 scheduler = args.optionalScheduler(),
                 expirationDate = args.optionalDate("expirationDate"),
                 shares = shares
-            ).awaitResult()
-            successJson("taskId", taskId)
+            ).awaitResult().single()
+            successJson("taskId", createdTask.id)
         }
 
         registerTool(
