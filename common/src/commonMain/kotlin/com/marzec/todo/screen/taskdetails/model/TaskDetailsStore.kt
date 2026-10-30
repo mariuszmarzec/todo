@@ -3,6 +3,7 @@ package com.marzec.todo.screen.taskdetails.model
 import com.marzec.content.Content
 import com.marzec.content.combineContentsFlows
 import com.marzec.content.ifDataSuspend
+import com.marzec.content.mapData
 import com.marzec.mvi.delegates
 import com.marzec.extensions.asInstance
 import com.marzec.mvi.State
@@ -31,6 +32,7 @@ import com.marzec.todo.delegates.reorder.ReorderMode
 import com.marzec.todo.model.UpdateTask
 import com.marzec.view.SearchState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 
 class TaskDetailsStore(
     scope: CoroutineScope,
@@ -175,7 +177,7 @@ class TaskDetailsStore(
     }
 
     fun explodeIntoTasks(tasks: List<String>) = intent {
-        onTrigger { todoRepository.addNewTasks(false, taskId, tasks, null) }
+        onTrigger { todoRepository.addNewTasks(false, taskId, tasks, null).map { it.mapData { Unit } } }
     }
 
     fun markAsDone(id: Int) = intent {
