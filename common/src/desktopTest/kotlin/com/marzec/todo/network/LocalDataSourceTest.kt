@@ -47,7 +47,7 @@ class LocalDataSourceTest {
     }
 
     @Test
-    fun addNewTaskAndGetIdReturnsCreatedChildIdAndRefreshesParentTree() = runTest {
+    fun addNewTasksReturnsCreatedChildDtoAndRefreshesParentTree() = runTest {
         val fileCache = InMemoryFileCache()
         val dataSource = LocalDataSource(fileCache)
         dataSource.init(listOf(rootTask()))
@@ -62,20 +62,22 @@ class LocalDataSourceTest {
         )
 
         try {
-            val result = repository.addNewTaskAndGetId(
-                description = "Result from Manul",
-                parentTaskId = 1,
+            val result = repository.addNewTasks(
                 highestPriorityAsDefault = false,
+                parentTaskId = 1,
+                descriptions = listOf("Result from Manul"),
                 scheduler = null
             ).first { it !is Content.Loading }
 
-            val createdTaskId = (result as Content.Data).data
-            assertEquals(2, createdTaskId)
+            val createdTask = (result as Content.Data).data.single()
+            assertEquals(2, createdTask.id)
+            assertEquals(1, createdTask.parentTaskId)
+            assertEquals("Result from Manul", createdTask.description)
 
             val refreshedTasks = repository.observeTasks().first { it is Content.Data } as Content.Data
             val root = refreshedTasks.data.single()
             assertEquals(1, root.id)
-            assertEquals(listOf(createdTaskId), root.subTasks.map { it.id })
+            assertEquals(listOf(createdTask.id), root.subTasks.map { it.id })
             assertEquals(1, root.subTasks.single().parentTaskId)
             assertEquals("Result from Manul", root.subTasks.single().description)
         } finally {
