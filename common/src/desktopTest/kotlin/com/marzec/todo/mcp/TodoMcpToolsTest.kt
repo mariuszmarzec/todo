@@ -166,7 +166,7 @@ class TodoMcpToolsTest {
             verify(exactly = 1) {
                 repository.addNewTaskAndGetId(
                     description = "Create from MCP",
-                    parentTaskId = null,
+                    parentTaskId = 17,
                     highestPriorityAsDefault = false,
                     scheduler = null,
                     expirationDate = null,
