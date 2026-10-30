@@ -21,32 +21,18 @@ class LocalMcpTokenSettingsStore(
     fun loadToken() = intent<Content<String>>("loadToken") {
         onTrigger {
             flow {
-                try {
-                    emit(Content.Data(store.getOrCreateToken()))
-                } catch (e: Exception) {
-                    emit(Content.Error(e))
-                }
+                emit(Content.Data(store.getOrCreateToken()))
             }
         }
 
         reducer {
-            when (val result = resultNonNull()) {
-                is Content.Data -> state.reduceData {
-                    copy(
-                        currentToken = result.data,
-                        draftToken = result.data,
-                        error = null,
-                        status = null
-                    )
-                }
-                is Content.Error -> state.reduceData {
-                    copy(
-                        currentToken = "",
-                        draftToken = "",
-                        error = result.exception.message ?: "Could not load the local MCP token"
-                    )
-                }
-                else -> state
+            state.reduceWithResult(resultNonNull()) { result ->
+                copy(
+                    currentToken = result.data,
+                    draftToken = result.data,
+                    error = null,
+                    status = null
+                )
             }
         }
     }
@@ -61,17 +47,13 @@ class LocalMcpTokenSettingsStore(
         onTrigger {
             val draft = state.data?.draftToken.orEmpty()
             flow {
-                try {
-                    emit(Content.Loading())
-                    require(isValidLocalMcpToken(draft)) {
-                        "Token must be 32-256 URL-safe characters using letters, " +
-                            "digits, dot, underscore, tilde or hyphen"
-                    }
-                    store.saveToken(draft)
-                    emit(Content.Data(draft))
-                } catch (e: Exception) {
-                    emit(Content.Error(e))
+                emit(Content.Loading())
+                require(isValidLocalMcpToken(draft)) {
+                    "Token must be 32-256 URL-safe characters using letters, " +
+                        "digits, dot, underscore, tilde or hyphen"
                 }
+                store.saveToken(draft)
+                emit(Content.Data(draft))
             }
         }
 
@@ -106,13 +88,9 @@ class LocalMcpTokenSettingsStore(
     fun regenerateToken() = intent<Content<String>>("regenerateToken") {
         onTrigger {
             flow {
-                try {
-                    emit(Content.Loading())
-                    val token = store.regenerateToken()
-                    emit(Content.Data(token))
-                } catch (e: Exception) {
-                    emit(Content.Error(e))
-                }
+                emit(Content.Loading())
+                val token = store.regenerateToken()
+                emit(Content.Data(token))
             }
         }
 
