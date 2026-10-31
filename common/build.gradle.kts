@@ -22,6 +22,11 @@ val prodAuthHeader = properties.getProperty("prod.authHeader")
 val testApiUrl = properties.getProperty("test.apiUrl")
 val testAuthHeader = properties.getProperty("test.authHeader")
 
+
+compose.resources {
+    packageOfResClass = "com.marzec.resource.generated.resources"
+}
+
 kotlin {
     android {
         namespace = "com.marzec.todo.common"
@@ -44,6 +49,7 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":multiplatformUtils"))
+                implementation(compose.components.resources)
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
