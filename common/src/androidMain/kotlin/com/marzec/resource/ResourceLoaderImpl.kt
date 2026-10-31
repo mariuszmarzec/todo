@@ -18,7 +18,10 @@ class ResourceLoaderImpl(private val context: Context) : ResourceLoader {
         val uri = Res.getUri("files/$path")
         val resourcePath = Uri.parse(uri).path ?: return null
         val assetsPrefix = "/android_asset/"
-        if (!resourcePath.startsWith(assetsPrefix)) return null
-        return context.assets.open(resourcePath.removePrefix(assetsPrefix)).bufferedReader().use { it.readText() }
+        return if (resourcePath.startsWith(assetsPrefix)) {
+            context.assets.open(resourcePath.removePrefix(assetsPrefix)).bufferedReader().use { it.readText() }
+        } else {
+            null
+        }
     }
 }
