@@ -5,6 +5,12 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.net.URI
 
 class ResourceLoaderImpl : ResourceLoader {
+    @OptIn(ExperimentalResourceApi::class)
+    override fun getComposeResourceUri(path: String): String = Res.getUri("files/$path")
+
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun loadCommonResourceBytes(path: String): ByteArray = Res.readBytes(path)
+
     override fun loadResource(name: String): String? {
         return this::class.java.classLoader?.getResource(name)?.readText()
     }

@@ -122,3 +122,20 @@ CI also checks that the Android runtime dependency graph does not contain the De
 ## Migrations
 
 The `quickmvi-navigation` sample was migrated from this repository into the [QuickMVI](https://github.com/mariuszmarzec/QuickMVI) repository (issue #39, QuickMVI PR #28). The navigation utilities remain available as the `io.github.mariuszmarzec:quickmvi-navigation:1.3.0` artifact and are still used by this project via `multiplatformUtils`.
+
+## Shared multiplatformUtils
+
+The shared Kotlin Multiplatform module is checked out as a Git submodule.
+
+For a fresh checkout, initialize it with:
+
+```bash
+git submodule sync --recursive
+git submodule update --init --recursive
+```
+
+Or clone the repository with submodules enabled:
+
+```bash
+git clone --recurse-submodules https://github.com/mariuszmarzec/todo.git
+```

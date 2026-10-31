@@ -1,0 +1,3 @@
+[submodule "multiplatformUtils"]
+	path = multiplatformUtils
+	url = https://github.com/mariuszmarzec/multiplatformUtils.git
