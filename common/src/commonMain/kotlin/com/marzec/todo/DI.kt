@@ -123,7 +123,7 @@ import kotlinx.serialization.json.Json
 
 object DI {
 
-    private val isJustLocalStorageMode: Boolean
+    val isMockEnvironment: Boolean
         get() = BuildKonfig.ENVIRONMENT == "m"
 
     val logger: Logger by lazy {
@@ -175,7 +175,7 @@ object DI {
             toDto = { toDto() },
             createToDto = { toDto() },
             updateToDto = { toDto() },
-            dataSource = if (BuildKonfig.ENVIRONMENT != "m") {
+            dataSource = if (!isMockEnvironment) {
                 createDataSource(FEATURE_TOGGLES, client)
             } else {
                 MockFeatureToggleDataSource()
@@ -592,7 +592,7 @@ object DI {
             fileCache.get(PreferencesKeys.AUTHORIZATION, String.serializer())
         }
 
-        val defaultScreen = if (!authToken.isNullOrEmpty() || isJustLocalStorageMode) {
+        val defaultScreen = if (!authToken.isNullOrEmpty() || isMockEnvironment) {
             TodoDestination.Tasks
         } else {
             TodoDestination.Login
@@ -643,7 +643,7 @@ object DI {
         }
     }
     val loginRepository: LoginRepository by lazy {
-        if (BuildKonfig.ENVIRONMENT == "m") LoginRepositoryMock() else LoginRepositoryImpl(
+        if (isMockEnvironment) LoginRepositoryMock() else LoginRepositoryImpl(
             client,
             ioDispatcher,
             fileCache,
@@ -678,13 +678,12 @@ object DI {
             memoryCache = memoryCache,
             fileCache = fileCache,
             dispatcher = ioDispatcher,
-            client = client,
             loginRepository = loginRepository
         )
     }
 
     private fun provideDataSource(): DataSource {
-        return if (isJustLocalStorageMode) {
+        return if (isMockEnvironment) {
             localDataSource
         } else if (quickCacheEnabled) {
             CompositeDataSource(

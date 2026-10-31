@@ -39,6 +39,7 @@ composePlugin = "1.10.0"
 
 ktorClient = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktorClientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktorClientMock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktorServerCio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 mcpSdkClient = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcpSdk" }
 mcpSdkServer = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcpSdk" }

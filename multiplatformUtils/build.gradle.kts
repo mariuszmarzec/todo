@@ -70,6 +70,7 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.coroutineTest)
                 implementation(libs.mockk)
+                implementation(libs.ktorClientMock)
             }
         }
         named("androidMain") {

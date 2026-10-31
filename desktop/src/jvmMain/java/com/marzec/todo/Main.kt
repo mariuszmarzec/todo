@@ -79,8 +79,10 @@ fun main() {
     localMcpServerLifecycleController.start()
     Runtime.getRuntime().addShutdownHook(Thread { localMcpServerLifecycleController.close() })
 
-    GlobalScope.launch(DI.ioDispatcher) {
-        DI.todoRepository.receiveSse()
+    if (!DI.isMockEnvironment) {
+        GlobalScope.launch(DI.ioDispatcher) {
+            DI.todoRepository.receiveSse()
+        }
     }
 
     application {
