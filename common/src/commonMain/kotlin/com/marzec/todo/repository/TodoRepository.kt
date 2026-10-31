@@ -1,6 +1,5 @@
 package com.marzec.todo.repository
 
-import com.marzec.api.UserDto
 import com.marzec.api.toDomain
 import com.marzec.cache.Cache
 import com.marzec.cache.FileCache
@@ -33,9 +32,6 @@ import com.marzec.todo.model.UpdateTask
 import com.marzec.todo.model.toDomain
 import com.marzec.todo.model.toDto
 import com.marzec.todo.network.DataSource
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +41,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -57,7 +52,6 @@ class TodoRepository(
     private val memoryCache: Cache,
     private val fileCache: FileCache,
     private val dispatcher: CoroutineDispatcher,
-    private val client: HttpClient,
     private val loginRepository: LoginRepository,
 ) {
 
@@ -305,6 +299,8 @@ class TodoRepository(
     ) = asContentWithListUpdate(dispatcher, ::refreshListsCache, request)
 
     suspend fun receiveSse() {
+        if (DI.isMockEnvironment) return
+
         fileCache.observeTyped<String>(PreferencesKeys.AUTHORIZATION).flatMapLatest {
             if (it?.isNotEmpty() == true) {
                 dataSource.sse()
@@ -353,15 +349,8 @@ class TodoRepository(
         }
     }
 
-    // TODO extract userDataSource to wrap http client call
-    fun getUsers(): Flow<Content<List<User>>> = flow<Content<List<User>>> {
-        emit(Content.Loading())
-        try {
-            val users = client.get(Api.Todo.GET_USERS).body<List<UserDto>>().map { it.toDomain() }
-            emit(Content.Data(users))
-        } catch (e: Exception) {
-            emit(Content.Error(e))
-        }
+    fun getUsers(): Flow<Content<List<User>>> = asContentFlow {
+        dataSource.getUsers().map { it.toDomain() }
     }
 
     fun leaveShare(taskId: Int): Flow<Content<Unit>> = asContentWithListUpdate {

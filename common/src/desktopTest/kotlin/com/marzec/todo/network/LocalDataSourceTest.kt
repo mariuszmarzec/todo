@@ -2,18 +2,26 @@ package com.marzec.todo.network
 
 import com.marzec.cache.FileCache
 import com.marzec.cache.MemoryCache
+import com.marzec.cache.putTyped
 import com.marzec.logger.Logger
 import com.marzec.logger.MultiLogger
 import com.marzec.content.Content
+import com.marzec.api.UserDto
+import com.marzec.model.User
+import com.marzec.todo.DI
+import com.marzec.todo.PreferencesKeys
+import io.ktor.sse.ServerSentEvent
 import com.marzec.repository.LoginRepositoryMock
 import com.marzec.time.currentTime
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.repository.TodoRepository
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -55,38 +63,71 @@ class LocalDataSourceTest {
         val fileCache = InMemoryFileCache()
         val dataSource = LocalDataSource(fileCache)
         dataSource.init(listOf(rootTask()))
-        val client = HttpClient(CIO)
         val repository = TodoRepository(
             dataSource = dataSource,
             memoryCache = MemoryCache(),
             fileCache = fileCache,
             dispatcher = Dispatchers.Unconfined,
-            client = client,
             loginRepository = LoginRepositoryMock()
         )
 
-        try {
-            val result = repository.addNewTasks(
-                highestPriorityAsDefault = false,
-                parentTaskId = 1,
-                descriptions = listOf("Result from Manul"),
-                scheduler = null
-            ).first { it !is Content.Loading }
+        val result = repository.addNewTasks(
+            highestPriorityAsDefault = false,
+            parentTaskId = 1,
+            descriptions = listOf("Result from Manul"),
+            scheduler = null
+        ).first { it !is Content.Loading }
 
-            val createdTask = (result as Content.Data).data.single()
-            assertEquals(2, createdTask.id)
-            assertEquals(1, createdTask.parentTaskId)
-            assertEquals("Result from Manul", createdTask.description)
+        val createdTask = (result as Content.Data).data.single()
+        assertEquals(2, createdTask.id)
+        assertEquals(1, createdTask.parentTaskId)
+        assertEquals("Result from Manul", createdTask.description)
 
-            val refreshedTasks = repository.observeTasks().first { it is Content.Data } as Content.Data
-            val root = refreshedTasks.data.single()
-            assertEquals(1, root.id)
-            assertEquals(listOf(createdTask.id), root.subTasks.map { it.id })
-            assertEquals(1, root.subTasks.single().parentTaskId)
-            assertEquals("Result from Manul", root.subTasks.single().description)
-        } finally {
-            client.close()
-        }
+        val refreshedTasks = repository.observeTasks().first { it is Content.Data } as Content.Data
+        val root = refreshedTasks.data.single()
+        assertEquals(1, root.id)
+        assertEquals(listOf(createdTask.id), root.subTasks.map { it.id })
+        assertEquals(1, root.subTasks.single().parentTaskId)
+        assertEquals("Result from Manul", root.subTasks.single().description)
+    }
+
+    @Test
+    fun getUsersUsesConfiguredDataSource() = runTest {
+        val dataSource = mockk<DataSource>(relaxed = true)
+        coEvery { dataSource.getUsers() } returns listOf(UserDto(7, "local@example.com"))
+        val repository = TodoRepository(
+            dataSource = dataSource,
+            memoryCache = MemoryCache(),
+            fileCache = InMemoryFileCache(),
+            dispatcher = Dispatchers.Unconfined,
+            loginRepository = LoginRepositoryMock()
+        )
+
+        val result = repository.getUsers().toList().last()
+
+        assertEquals(Content.Data(listOf(User(7, "local@example.com"))), result)
+        coVerify(exactly = 1) { dataSource.getUsers() }
+    }
+
+    @Test
+    fun receiveSseDoesNotSubscribeInMockEnvironment() = runTest {
+        if (!DI.isMockEnvironment) return@runTest
+
+        val fileCache = InMemoryFileCache()
+        fileCache.putTyped(PreferencesKeys.AUTHORIZATION, "mock-token")
+        val dataSource = mockk<DataSource>(relaxed = true)
+        coEvery { dataSource.sse() } returns kotlinx.coroutines.flow.emptyFlow<ServerSentEvent>()
+        val repository = TodoRepository(
+            dataSource = dataSource,
+            memoryCache = MemoryCache(),
+            fileCache = fileCache,
+            dispatcher = Dispatchers.Unconfined,
+            loginRepository = LoginRepositoryMock()
+        )
+
+        repository.receiveSse()
+
+        coVerify(exactly = 0) { dataSource.sse() }
     }
 
     @Test
