@@ -21,6 +21,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -102,7 +103,7 @@ class LocalDataSourceTest {
             loginRepository = LoginRepositoryMock()
         )
 
-        val result = repository.getUsers().first { it !is Content.Loading }
+        val result = repository.getUsers().toList().last()
 
         assertEquals(Content.Data(listOf(User(7, "local@example.com"))), result)
         coVerify(exactly = 1) { dataSource.getUsers() }
