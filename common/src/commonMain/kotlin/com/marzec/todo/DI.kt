@@ -67,9 +67,6 @@ import com.marzec.todo.delegates.dialog.RemoveTaskDelegateImpl
 import com.marzec.todo.delegates.dialog.UrlDelegateImpl
 import com.marzec.todo.delegates.reorder.ReorderDelegateImpl
 import com.marzec.todo.navigation.TodoDestination
-import com.marzec.todo.mcp.LocalMcpTokenSettingsScreen
-import com.marzec.todo.mcp.LocalMcpTokenSettingsStore
-import com.marzec.todo.mcp.McpTokenRepository
 import com.marzec.todo.network.ApiDataSource
 import com.marzec.todo.network.CommonTodoDataSource
 import com.marzec.todo.network.CompositeDataSource
@@ -139,7 +136,6 @@ object DI {
 
     lateinit var copyToClipBoardHelper: CopyToClipBoardHelper
     lateinit var openUrlHelper: OpenUrlHelper
-    var localMcpTokenRepository: McpTokenRepository? = null
     var ioDispatcher: CoroutineDispatcher = Dispatchers.Default
     lateinit var navigationScope: CoroutineScope
 
@@ -264,12 +260,6 @@ object DI {
             TodoDestination.Login::class to @Composable { _, cacheKey ->
                 provideLoginScreen(cacheKey)
             },
-            TodoDestination.McpTokenSettings::class to @Composable { _, _ ->
-                LocalMcpTokenSettingsScreen(
-                    actionBarProvider = provideActionBarProvider(),
-                    store = provideLocalMcpTokenSettingsStore()
-                )
-            },
             TodoDestination.PickItem::class to @Composable { destination, cacheKey ->
                 destination as TodoDestination.PickItem<Any>
                 providePickItemScreen(destination, cacheKey)
@@ -313,19 +303,14 @@ object DI {
         )
     }
 
-    @Composable
+@Composable
     private fun provideTasksScreen(cacheKey: String) {
         TasksScreen(
             store = provideTasksStore(
                 scope = rememberCoroutineScope(),
                 cacheKey = cacheKey
             ),
-            actionBarProvider = provideActionBarProvider(),
-            onOpenLocalMcpSettings = localMcpTokenRepository?.let {
-                {
-                    navigationStore.next(NavigationAction(TodoDestination.McpTokenSettings))
-                }
-            }
+            actionBarProvider = provideActionBarProvider()
         )
     }
 
@@ -758,13 +743,6 @@ object DI {
             NavigationAction(TodoDestination.AddNewTask(taskToEditId = null, parentTaskId = null))
         }
     )
-
-    fun provideLocalMcpTokenSettingsStore(): LocalMcpTokenSettingsStore =
-        LocalMcpTokenSettingsStore(
-            scope = navigationScope,
-            store = checkNotNull(localMcpTokenRepository),
-            copyToClipBoardHelper = copyToClipBoardHelper
-        )
 
     private fun provideActionBarProvider() = ActionBarProvider(navigationStore)
 }

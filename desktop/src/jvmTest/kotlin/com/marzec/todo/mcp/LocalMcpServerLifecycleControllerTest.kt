@@ -30,16 +30,14 @@ class LocalMcpServerLifecycleControllerTest {
         val loginRepository = mockk<LoginRepository>()
         coEvery { loginRepository.observeCurrentUser() } returns session
         val todoRepository = mockk<TodoRepository>()
-        val tokenStore = LifecycleTestTokenStore()
         val instances = mutableListOf<FakeLocalMcpServer>()
         val controller = LocalMcpServerLifecycleController(
             featureTogglesManager = featureTogglesManager,
             loginRepository = loginRepository,
             todoRepository = todoRepository,
-            tokenStore = tokenStore,
             port = 8765,
             dispatcher = Dispatchers.Unconfined,
-            serverFactory = { _, _, _ -> FakeLocalMcpServer().also(instances::add) }
+            serverFactory = { _, _ -> FakeLocalMcpServer().also(instances::add) }
         )
 
         try {
@@ -86,13 +84,5 @@ class LocalMcpServerLifecycleControllerTest {
         override fun stop() {
             stopCount++
         }
-    }
-
-    private class LifecycleTestTokenStore : McpTokenRepository {
-        override suspend fun getOrCreateToken(): String = "lifecycle-test-token-012345678901234567"
-
-        override suspend fun saveToken(token: String) = Unit
-
-        override suspend fun regenerateToken(): String = getOrCreateToken()
     }
 }

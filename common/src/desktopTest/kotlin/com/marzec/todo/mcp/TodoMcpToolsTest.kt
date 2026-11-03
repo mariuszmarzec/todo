@@ -6,9 +6,7 @@ import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.sse.SSE
-import io.ktor.http.HttpHeaders
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.client.StreamableHttpClientTransport
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
@@ -31,7 +29,7 @@ import kotlin.test.assertTrue
 class TodoMcpToolsTest {
 
     @Test
-    fun authenticatedStreamableHttpSupportsReadAndWriteOperations() = runBlocking {
+    fun streamableHttpSupportsReadAndWriteOperations() = runBlocking {
         val repository = io.mockk.mockk<TodoRepository>()
         val description = "MCP end-to-end task"
         coEvery { repository.observeTasks() } returns flowOf(Content.Data(emptyList()))
@@ -216,13 +214,9 @@ class TodoMcpToolsTest {
         action: suspend (Client) -> Unit
     ) {
         val port = ServerSocket(0).use { it.localPort }
-        val tokenStore = TestMcpTokenRepository()
-        val server = TodoMcpServer(port, tokenStore, repository)
+        val server = TodoMcpServer(port, repository)
         val httpClient = HttpClient(CIO) {
             install(SSE)
-            defaultRequest {
-                headers.append(HttpHeaders.Authorization, "Bearer " + tokenStore.currentToken)
-            }
         }
         val client = Client(
             clientInfo = Implementation(

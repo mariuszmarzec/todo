@@ -16,7 +16,6 @@ import com.marzec.logger.Logger
 import com.marzec.logger.MultiLogger
 import com.marzec.resource.ResourceLoaderImpl
 import com.marzec.todo.repository.NoOpDeviceTokenRepositoryImpl
-import com.marzec.todo.mcp.DesktopMcpTokenRepository
 import com.marzec.todo.mcp.LocalMcpServerLifecycleController
 import com.marzec.todo.screen.main.HomeScreen
 import java.awt.Desktop
@@ -56,7 +55,6 @@ fun main() {
     DI.deviceTokenRepository = NoOpDeviceTokenRepositoryImpl()
 
     DI.copyToClipBoardHelper = CopyToClipBoardHelper()
-    DI.localMcpTokenRepository = DesktopMcpTokenRepository()
 
     DI.openUrlHelper = object : OpenUrlHelper {
         override fun open(url: String) = Desktop.getDesktop().browse(URI(url))
@@ -66,15 +64,10 @@ fun main() {
 
     DI.ioDispatcher = Dispatchers.IO
 
-    GlobalScope.launch(DI.ioDispatcher) {
-        DI.localMcpTokenRepository?.getOrCreateToken()
-    }
-
     val localMcpServerLifecycleController = LocalMcpServerLifecycleController(
         featureTogglesManager = DI.featureTogglesManager,
         loginRepository = DI.loginRepository,
-        todoRepository = DI.todoRepository,
-        tokenStore = checkNotNull(DI.localMcpTokenRepository)
+        todoRepository = DI.todoRepository
     )
     localMcpServerLifecycleController.start()
     Runtime.getRuntime().addShutdownHook(Thread { localMcpServerLifecycleController.close() })
