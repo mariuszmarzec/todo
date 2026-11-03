@@ -68,12 +68,12 @@ class TaskDetailsStoreTest {
             taskId = taskId,
             copyToClipBoardHelper = clipboard,
             dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
-            removeTaskDelegate = RemoveTaskDelegateImpl(repository),
+            removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(repository),
             urlDelegate = UrlDelegateImpl<TaskDetailsState>(mockk<OpenUrlHelper>(relaxed = true)),
             changePriorityDelegate = changePriorityDelegate,
             selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
             searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
-            reorderDelegate = ReorderDelegateImpl(
+            reorderDelegate = ReorderDelegateImpl<TaskDetailsState>(
                 changePriorityDelegate = changePriorityDelegate,
                 tasksToReorder = { task.subTasks },
                 stateReducer = { mode -> copy(reorderMode = mode) }
