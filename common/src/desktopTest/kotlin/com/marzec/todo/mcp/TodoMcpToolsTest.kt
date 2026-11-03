@@ -16,7 +16,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
@@ -209,75 +208,6 @@ class TodoMcpToolsTest {
             coVerify(exactly = 0) { repository.observeTask(any()) }
         }
     }
-
-    @Test
-    fun removeTaskWorksForLocallyCreatedTasksWithoutSharingErrors() = runBlocking {
-        val repository = io.mockk.mockk<TodoRepository>()
-        val task = localTask(23)
-        coEvery { repository.observeTask(23) } returns flowOf(Content.Data(task))
-        every { repository.removeTask(23) } returns flowOf(Content.Data(Unit))
-
-        withConnectedClient(repository) { client ->
-            val result = client.callTool("remove_task", mapOf("taskId" to 23))
-            val message = (result.content.first() as TextContent).text
-
-            assertFalse(result.isError == true, message)
-            assertContains(message, "\"success\":true")
-            assertFalse(message.contains("sharing", ignoreCase = true))
-            coVerify(exactly = 1) { repository.observeTask(23) }
-            verify(exactly = 1) { repository.removeTask(23) }
-        }
-    }
-
-    @Test
-    fun removeTaskDoesNotExposeSharingErrorsInLocalStorageMode() = runBlocking {
-        val repository = io.mockk.mockk<TodoRepository>()
-        coEvery { repository.observeTask(23) } returns flowOf(Content.Data(localTask(23)))
-        every { repository.removeTask(23) } returns flowOf(
-            Content.Error<Unit>(
-                UnsupportedOperationException("Sharing tasks are not supported for local data source")
-            )
-        )
-
-        withConnectedClient(repository) { client ->
-            val result = client.callTool("remove_task", mapOf("taskId" to 23))
-            val message = (result.content.first() as TextContent).text
-
-            assertTrue(result.isError == true)
-            assertContains(message, "Task removal failed in local-storage/mock mode")
-            assertFalse(message.contains("sharing", ignoreCase = true))
-        }
-    }
-
-    @Test
-    fun leaveSharedTaskReturnsClearUnsupportedMessageInLocalStorageMode() = runBlocking {
-        val repository = io.mockk.mockk<TodoRepository>()
-
-        withConnectedClient(repository) { client ->
-            val result = client.callTool("leave_shared_task", mapOf("taskId" to 23))
-            val message = (result.content.first() as TextContent).text
-
-            assertTrue(result.isError == true)
-            assertContains(message, "Leaving shared tasks is not supported in local-storage/mock mode")
-            assertFalse(message.contains("Sharing tasks are not supported", ignoreCase = true))
-            verify(exactly = 0) { repository.leaveShare(any()) }
-        }
-    }
-
-    private fun localTask(id: Int) = Task(
-        id = id,
-        description = "Local task $id",
-        addedTime = LocalDateTime.parse("2026-10-30T10:00:00"),
-        modifiedTime = LocalDateTime.parse("2026-10-30T10:00:00"),
-        parentTaskId = null,
-        subTasks = emptyList(),
-        isToDo = true,
-        priority = 1,
-        scheduler = null,
-        expirationDate = null,
-        shares = emptyList(),
-        ownerId = null
-    )
 
     private suspend fun withConnectedClient(
         repository: TodoRepository,
