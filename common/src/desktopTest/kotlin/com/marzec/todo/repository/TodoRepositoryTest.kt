@@ -25,10 +25,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Covers local (mock environment) task deletion through [TodoRepository].
- * Regression guard for issue #74: removal previously fell through to
- * `dataSource.leaveShare(...)` because locally created tasks have no ownerId,
- * surfacing "Sharing tasks is not supported for local data source".
+ * Covers owner-based task removal through [TodoRepository].
+ * A null ownerId means the task belongs to the current user, so removal must
+ * use the normal remove path rather than falling through to leaveShare.
  */
 class TodoRepositoryTest {
 
@@ -51,10 +50,10 @@ class TodoRepositoryTest {
     }
 
     @Test
-    fun removeTaskDeletesLocallyCreatedTask() = runTest {
+    fun removeTaskTreatsTaskWithoutOwnerAsOwnedByCurrentUser() = runTest {
         val fileCache = InMemoryFileCache()
         val dataSource = LocalDataSource(fileCache)
-        dataSource.init(listOf(localTask(id = 1)))
+        dataSource.init(listOf(localTask(id = 1, ownerId = null)))
         val repository = newRepository(fileCache, dataSource)
 
         val result = repository.removeTask(1).first { it !is Content.Loading }
