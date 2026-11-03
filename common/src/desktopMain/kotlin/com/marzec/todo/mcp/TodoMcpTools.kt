@@ -260,10 +260,25 @@ internal class TodoMcpTools(
         ) { args ->
             val taskId = args.requiredInt("taskId")
             val task = repository.observeTask(taskId).awaitResult()
-            if (args.optionalBoolean("removeSubtasks") == true) {
-                repository.removeTaskWithSubtasks(task).awaitResult()
-            } else {
-                repository.removeTask(taskId).awaitResult()
+            try {
+                if (args.optionalBoolean("removeSubtasks") == true) {
+                    repository.removeTaskWithSubtasks(task).awaitResult()
+                } else {
+                    repository.removeTask(taskId).awaitResult()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                // A local task must never be reported as a failed sharing operation.
+                // The repository handles local ownership; this guard keeps any stale
+                // share-path exception from leaking confusing backend terminology to MCP clients.
+                if (isLocalStorageMode && error.message?.contains("sharing", ignoreCase = true) == true) {
+                    throw IllegalStateException(
+                        "Task removal failed in local-storage/mock mode",
+                        error
+                    )
+                }
+                throw error
             }
             successJson()
         }
