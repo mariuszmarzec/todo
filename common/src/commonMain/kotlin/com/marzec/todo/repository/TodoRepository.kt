@@ -53,6 +53,9 @@ class TodoRepository(
     private val fileCache: FileCache,
     private val dispatcher: CoroutineDispatcher,
     private val loginRepository: LoginRepository,
+    private val isTaskSharingEnabled: () -> Boolean = {
+        DI.featureTogglesManager.get("todo.taskSharing")
+    },
 ) {
 
     private suspend fun currentUserId(): Int? = loginRepository.getCurrentUser()?.id
@@ -227,9 +230,9 @@ class TodoRepository(
 
     private suspend fun hasPermissionToRemove(task: Task?): Boolean {
         val currentUserId = currentUserId()
-        // Locally created tasks have no remote owner by design (ownerId == null).
-        // In mock environment they are always deletable by the current user.
-        val isLocalOwner = DI.isMockEnvironment && task?.ownerId == null
+        // When task sharing is disabled, ownerless tasks belong to local storage.
+        // Use the feature toggle rather than coupling repository behavior to the build environment.
+        val isLocalOwner = !isTaskSharingEnabled() && task?.ownerId == null
         val isOwner = currentUserId == task?.ownerId
         val editorShare = task?.shares?.firstOrNull {
             it.userId.toInt() == currentUserId
