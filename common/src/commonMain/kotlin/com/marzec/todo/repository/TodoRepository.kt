@@ -227,7 +227,15 @@ class TodoRepository(
 
     private suspend fun hasPermissionToRemove(task: Task?): Boolean {
         val currentUserId = currentUserId()
-        return task != null && (currentUserId == task.ownerId || task.shares.firstOrNull { it.userId.toInt() == currentUserId }?.permission == "EDITOR_AND_VIEWER")
+        // Locally created tasks have no remote owner by design (ownerId == null).
+        // In mock environment they are always deletable by the current user.
+        val isLocalOwner = DI.isMockEnvironment && task?.ownerId == null
+        val isOwner = currentUserId == task?.ownerId
+        val editorShare = task?.shares?.firstOrNull {
+            it.userId.toInt() == currentUserId
+        }
+        val isEditor = editorShare?.permission == "EDITOR_AND_VIEWER"
+        return task != null && (isLocalOwner || isOwner || isEditor)
     }
 
     fun removeTasks(taskIds: List<Int>): Flow<Content<Unit>> =
