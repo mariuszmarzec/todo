@@ -12,7 +12,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -42,8 +41,7 @@ import com.marzec.view.rememberForeverListState
 @Composable
 fun TasksScreen(
     store: TasksStore,
-    actionBarProvider: ActionBarProvider,
-    onOpenLocalMcpSettings: (() -> Unit)? = null
+    actionBarProvider: ActionBarProvider
 ) {
 
     val state: State<TasksScreenState> by store.collectState {
@@ -91,12 +89,6 @@ fun TasksScreen(
                                 Icon(imageVector = Icons.Default.Edit, contentDescription = "Reorder")
                             }
                         }
-                    }
-                }
-
-                onOpenLocalMcpSettings?.let {
-                    TextButton(onClick = it) {
-                        Text("MCP")
                     }
                 }
 
