@@ -1,6 +1,7 @@
 package com.marzec.todo.screen.taskdetails
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -35,6 +38,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
@@ -54,6 +58,7 @@ import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
 import com.marzec.view.TextListItem
 import com.marzec.view.rememberForeverListState
+import kotlinx.coroutines.launch
 
 @Composable
 fun TaskDetailsScreen(
@@ -65,6 +70,8 @@ fun TaskDetailsScreen(
     }
 
     val listState = rememberForeverListState(store.identifier)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val topBarColor = if (state.data?.task?.isToDo == false) {
         Color.LightGray
@@ -72,6 +79,7 @@ fun TaskDetailsScreen(
         Color.Transparent
     }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             actionBarProvider.provide(
                 backgroundColor = topBarColor
@@ -210,12 +218,30 @@ fun TaskDetailsScreen(
                         }
                         else -> null
                     }
-                    ownerInfo?.let {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = it,
+                            text = "ID: ${task.id}",
                             fontSize = 12.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            modifier = Modifier.clickable {
+                                store.copyTaskId()
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Task ID copied")
+                                }
+                            }
                         )
+                        ownerInfo?.let {
+                            Text(
+                                text = it,
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                     Row(
                         modifier = Modifier
