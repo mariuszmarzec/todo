@@ -35,6 +35,7 @@ class TodoRepositoryTest {
     private suspend fun newRepository(
         fileCache: InMemoryFileCache,
         dataSource: LocalDataSource,
+        taskSharingEnabled: Boolean = false,
     ): TodoRepository {
         Logger.logger = MultiLogger(emptyList())
         val repository = TodoRepository(
@@ -42,7 +43,8 @@ class TodoRepositoryTest {
             memoryCache = MemoryCache(),
             fileCache = fileCache,
             dispatcher = Dispatchers.Unconfined,
-            loginRepository = LoginRepositoryMock()
+            loginRepository = LoginRepositoryMock(),
+            isTaskSharingEnabled = { taskSharingEnabled }
         )
         // Warm the tasks cache the same way the task list screen does before
         // any removal is attempted; removeTask resolves the task from the cache.
@@ -123,7 +125,7 @@ class TodoRepositoryTest {
                 )
             )
         )
-        val repository = newRepository(fileCache, dataSource)
+        val repository = newRepository(fileCache, dataSource, taskSharingEnabled = true)
 
         val result = repository.removeTask(1).first { it !is Content.Loading }
 
@@ -139,7 +141,20 @@ class TodoRepositoryTest {
         // fails and the repository falls through to leaveShare, which the local
         // data source does not support. The task must remain untouched.
         dataSource.init(listOf(localTask(id = 1, ownerId = 99)))
-        val repository = newRepository(fileCache, dataSource)
+        val repository = newRepository(fileCache, dataSource, taskSharingEnabled = true)
+
+        val result = repository.removeTask(1).first { it !is Content.Loading }
+
+        assertTrue(result is Content.Error, "Expected error but got $result")
+        assertEquals(1, dataSource.getAll().size)
+    }
+
+    @Test
+    fun ownerlessTaskIsNotTreatedAsLocalWhenTaskSharingIsEnabled() = runTest {
+        val fileCache = InMemoryFileCache()
+        val dataSource = LocalDataSource(fileCache)
+        dataSource.init(listOf(localTask(id = 1)))
+        val repository = newRepository(fileCache, dataSource, taskSharingEnabled = true)
 
         val result = repository.removeTask(1).first { it !is Content.Loading }
 
