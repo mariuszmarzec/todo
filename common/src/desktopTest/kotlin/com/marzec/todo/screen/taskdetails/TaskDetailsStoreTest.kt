@@ -6,6 +6,7 @@ import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.mvi.State
+import com.marzec.mvi.Store4Impl
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.repository.LoginRepository
@@ -22,6 +23,8 @@ import com.marzec.delegate.DialogState
 import com.marzec.view.SearchState
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
@@ -29,8 +32,14 @@ import kotlin.test.Test
 
 class TaskDetailsStoreTest {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun copyTaskIdCopiesOnlyTheNumericId() = runTest {
+        // QuickMVI dispatches reducers through a dedicated thread by default.
+        // Use the test scheduler so advanceUntilIdle() also waits for side effects.
+        val previousStateThread = Store4Impl.stateThread
+        Store4Impl.stateThread = UnconfinedTestDispatcher(testScheduler)
+        try {
         val taskId = 42017
         val clipboard = mockk<CopyToClipBoardHelper>(relaxed = true)
         val repository = mockk<TodoRepository>(relaxed = true)
@@ -85,5 +94,8 @@ class TaskDetailsStoreTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { clipboard.copy("42017") }
+        } finally {
+            Store4Impl.stateThread = previousStateThread
+        }
     }
 }
