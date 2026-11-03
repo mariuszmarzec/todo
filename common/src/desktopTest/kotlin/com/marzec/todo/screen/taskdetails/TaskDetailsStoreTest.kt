@@ -40,60 +40,60 @@ class TaskDetailsStoreTest {
         val previousStateThread = Store4Impl.stateThread
         Store4Impl.stateThread = UnconfinedTestDispatcher(testScheduler)
         try {
-        val taskId = 42017
-        val clipboard = mockk<CopyToClipBoardHelper>(relaxed = true)
-        val repository = mockk<TodoRepository>(relaxed = true)
-        val changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(repository)
-        val task = Task(
-            id = taskId,
-            description = "A task",
-            addedTime = LocalDateTime.parse("2026-10-30T10:00:00"),
-            modifiedTime = LocalDateTime.parse("2026-10-30T10:00:00"),
-            parentTaskId = null,
-            subTasks = emptyList(),
-            isToDo = true,
-            priority = 1,
-            scheduler = null,
-            expirationDate = null,
-            shares = emptyList(),
-            ownerId = null
-        )
-        val initialState = State.Data(
-            TaskDetailsState(
-                task = task,
-                dialog = DialogState.NoDialog(),
-                selected = emptySet(),
-                search = SearchState.DEFAULT,
-                reorderMode = ReorderMode.Disabled
+            val taskId = 42017
+            val clipboard = mockk<CopyToClipBoardHelper>(relaxed = true)
+            val repository = mockk<TodoRepository>(relaxed = true)
+            val changePriorityDelegate = ChangePriorityDelegateImpl<TaskDetailsState>(repository)
+            val task = Task(
+                id = taskId,
+                description = "A task",
+                addedTime = LocalDateTime.parse("2026-10-30T10:00:00"),
+                modifiedTime = LocalDateTime.parse("2026-10-30T10:00:00"),
+                parentTaskId = null,
+                subTasks = emptyList(),
+                isToDo = true,
+                priority = 1,
+                scheduler = null,
+                expirationDate = null,
+                shares = emptyList(),
+                ownerId = null
             )
-        )
-        val store = TaskDetailsStore(
-            scope = this,
-            navigationStore = mockk<NavigationStore>(relaxed = true),
-            cacheKey = "task-details-copy-id-test",
-            stateCache = MemoryStateCache(),
-            initialState = initialState,
-            todoRepository = repository,
-            taskId = taskId,
-            copyToClipBoardHelper = clipboard,
-            dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
-            removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(repository),
-            urlDelegate = UrlDelegateImpl<TaskDetailsState>(mockk<OpenUrlHelper>(relaxed = true)),
-            changePriorityDelegate = changePriorityDelegate,
-            selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
-            searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
-            reorderDelegate = ReorderDelegateImpl<TaskDetailsState>(
+            val initialState = State.Data(
+                TaskDetailsState(
+                    task = task,
+                    dialog = DialogState.NoDialog(),
+                    selected = emptySet(),
+                    search = SearchState.DEFAULT,
+                    reorderMode = ReorderMode.Disabled
+                )
+            )
+            val store = TaskDetailsStore(
+                scope = this,
+                navigationStore = mockk<NavigationStore>(relaxed = true),
+                cacheKey = "task-details-copy-id-test",
+                stateCache = MemoryStateCache(),
+                initialState = initialState,
+                todoRepository = repository,
+                taskId = taskId,
+                copyToClipBoardHelper = clipboard,
+                dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
+                removeTaskDelegate = RemoveTaskDelegateImpl<TaskDetailsState>(repository),
+                urlDelegate = UrlDelegateImpl<TaskDetailsState>(mockk<OpenUrlHelper>(relaxed = true)),
                 changePriorityDelegate = changePriorityDelegate,
-                tasksToReorder = { task.subTasks },
-                stateReducer = { mode -> copy(reorderMode = mode) }
-            ),
-            loginRepository = mockk<LoginRepository>(relaxed = true)
-        )
+                selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
+                searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
+                reorderDelegate = ReorderDelegateImpl<TaskDetailsState>(
+                    changePriorityDelegate = changePriorityDelegate,
+                    tasksToReorder = { task.subTasks },
+                    stateReducer = { mode -> copy(reorderMode = mode) }
+                ),
+                loginRepository = mockk<LoginRepository>(relaxed = true)
+            )
 
-        store.copyTaskId()
-        advanceUntilIdle()
+            store.copyTaskId()
+            advanceUntilIdle()
 
-        verify(exactly = 1) { clipboard.copy("42017") }
+            verify(exactly = 1) { clipboard.copy("42017") }
         } finally {
             Store4Impl.stateThread = previousStateThread
         }
