@@ -176,6 +176,12 @@ class TaskDetailsStore(
         }
     }
 
+    fun copyTaskId() = sideEffectIntent {
+        state.ifDataAvailable {
+            copyToClipBoardHelper.copy(task.id.toString())
+        }
+    }
+
     fun explodeIntoTasks(tasks: List<String>) = intent {
         onTrigger { todoRepository.addNewTasks(false, taskId, tasks, null).map { it.mapData { Unit } } }
     }
