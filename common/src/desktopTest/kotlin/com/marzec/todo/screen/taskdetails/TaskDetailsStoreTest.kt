@@ -6,7 +6,6 @@ import com.marzec.delegate.DialogDelegateImpl
 import com.marzec.delegate.SearchDelegateImpl
 import com.marzec.delegate.SelectionDelegateImpl
 import com.marzec.mvi.State
-import com.marzec.model.User
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.MemoryStateCache
 import com.marzec.repository.LoginRepository
@@ -68,12 +67,12 @@ class TaskDetailsStoreTest {
             todoRepository = repository,
             taskId = taskId,
             copyToClipBoardHelper = clipboard,
-            dialogDelegate = DialogDelegateImpl(),
+            dialogDelegate = DialogDelegateImpl<Int, TaskDetailsState>(),
             removeTaskDelegate = RemoveTaskDelegateImpl(repository),
             urlDelegate = UrlDelegateImpl<TaskDetailsState>(mockk<OpenUrlHelper>(relaxed = true)),
             changePriorityDelegate = changePriorityDelegate,
-            selectionDelegate = SelectionDelegateImpl(),
-            searchDelegate = SearchDelegateImpl(),
+            selectionDelegate = SelectionDelegateImpl<Int, TaskDetailsState>(),
+            searchDelegate = SearchDelegateImpl<TaskDetailsState>(),
             reorderDelegate = ReorderDelegateImpl(
                 changePriorityDelegate = changePriorityDelegate,
                 tasksToReorder = { task.subTasks },
