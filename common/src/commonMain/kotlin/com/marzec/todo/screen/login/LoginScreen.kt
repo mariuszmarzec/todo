@@ -82,11 +82,12 @@ private fun LoginScreen(
                 }
             }
         }
-    ) {
+    ) { padding ->
         Column(
             modifier = Modifier
                 .background(Color.White)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
