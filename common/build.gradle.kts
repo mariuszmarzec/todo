@@ -41,7 +41,8 @@ kotlin {
     }
     jvm("desktop") {
         testRuns["test"].executionTask.configure {
-            useJUnitPlatform()
+            useJUnit()
+            systemProperty("java.awt.headless", "true")
         }
     }
 
@@ -65,6 +66,8 @@ kotlin {
         }
         named("desktopTest") {
             dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(compose.desktop.uiTestJUnit4)
                 implementation(kotlin("test"))
                 implementation(libs.coroutineTest)
                 implementation(libs.mockk)
