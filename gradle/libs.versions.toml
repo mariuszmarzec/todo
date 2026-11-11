@@ -32,6 +32,7 @@ quickMvi = "1.4.1"
 quickMviNavigation = "1.4.1"
 composeIcons = "1.7.3"
 immutable = "0.4.0"
+markdown = "0.46.0"
 
 composePlugin = "1.10.0"
 
@@ -72,6 +73,8 @@ compose-icons = { module = "org.jetbrains.compose.material:material-icons-core",
 quickMvi = {module = "io.github.mariuszmarzec:quickmvi", version.ref = "quickMvi" }
 quickMvi-compose = {module = "io.github.mariuszmarzec:quickmvi-compose", version.ref = "quickMvi" }
 quickMvi-navigation = {module = "io.github.mariuszmarzec:quickmvi-navigation", version.ref = "quickMviNavigation" }
+markdownCore = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown" }
+markdownM2 = { module = "com.mikepenz:multiplatform-markdown-renderer-m2", version.ref = "markdown" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-fcm = { module = "com.google.firebase:firebase-messaging" }
 

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
+import com.mikepenz.markdown.m2.Markdown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.*
@@ -253,7 +254,12 @@ fun TaskDetailsScreen(
                     ) {
                         Box(Modifier.weight(1f)) {
                             SelectionContainer {
-                                Text(text = task.description, fontSize = 16.sp)
+                                Markdown(
+                                    content = task.description,
+                                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                                    colors = com.mikepenz.markdown.m2.markdownColor(),
+                                    typography = com.mikepenz.markdown.m2.markdownTypography()
+                                )
                             }
                         }
                         val urls = task.description.urls()

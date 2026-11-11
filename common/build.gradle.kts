@@ -61,6 +61,8 @@ kotlin {
                 implementation(libs.kotlinDateTime)
                 implementation(libs.kotlinImmutable)
                 implementation(libs.compose.icons)
+                implementation(libs.markdownCore)
+                implementation(libs.markdownM2)
             }
         }
         named("desktopTest") {
