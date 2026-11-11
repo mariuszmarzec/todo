@@ -136,7 +136,8 @@ fun TaskDetailsScreen(
         when (val state = state) {
             is State.Data -> {
                 BoxWithConstraints {
-                    val maxDescriptionHeight = (constraints.maxHeight * 0.5f).dp
+                    val availableHeightPx = if (constraints.maxHeight >= Int.MAX_VALUE / 2) 2000 else constraints.maxHeight
+                    val maxDescriptionHeight = (availableHeightPx * 0.5f).dp
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
