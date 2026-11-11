@@ -93,8 +93,8 @@ class AddNewTaskStore(
                                 showNotification = task.scheduler?.showNotification
                                     ?: Scheduler.SHOW_NOTIFICATION,
                                 isTaskSharingEnabled = featureTogglesManager.get("todo.taskSharing"),
-                                ownedTask = task.ownerId == user.id,
-                                isEditor = task.ownerId == user.id || task.shares.firstOrNull { it.userId.toInt() == user.id }?.permission == "EDITOR_AND_VIEWER",
+                                ownedTask = task.ownerId == null || task.ownerId == user.id,
+                                isEditor = task.ownerId == null || task.ownerId == user.id || task.shares.firstOrNull { it.userId.toInt() == user.id }?.permission == "EDITOR_AND_VIEWER",
                                 users = users,
                             )
                         }
