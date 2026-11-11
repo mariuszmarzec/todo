@@ -4,15 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -131,15 +135,17 @@ fun TaskDetailsScreen(
     ) { padding ->
         when (val state = state) {
             is State.Data -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
-                ) {
+                BoxWithConstraints {
+                    val maxDescriptionHeight = (constraints.maxHeight * 0.5f).dp
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
 
-                    val task = state.data.task
-                    val subTasksCount = task.subTasks.size
-                    val doneSubtasksCount = task.subTasks.count { !it.isToDo }
+                        val task = state.data.task
+                        val subTasksCount = task.subTasks.size
+                        val doneSubtasksCount = task.subTasks.count { !it.isToDo }
 
                     if (state.data.task.subTasks.isNotEmpty()) {
                         Row(
@@ -251,7 +257,12 @@ fun TaskDetailsScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(Modifier.weight(1f)) {
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = maxDescriptionHeight)
+                                .verticalScroll(rememberScrollState())
+                        ) {
                             SelectionContainer {
                                 Text(text = task.description, fontSize = 16.sp)
                             }
@@ -349,6 +360,7 @@ fun TaskDetailsScreen(
                 }
                 ShowDialog(store, state.data.dialog)
             }
+                }
 
             is State.Loading -> {
                 Text(text = "Loading")
