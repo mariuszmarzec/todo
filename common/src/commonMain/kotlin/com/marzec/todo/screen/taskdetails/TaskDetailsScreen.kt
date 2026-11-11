@@ -135,9 +135,10 @@ fun TaskDetailsScreen(
     ) { padding ->
         when (val state = state) {
             is State.Data -> {
-                BoxWithConstraints {
-                    val availableHeightPx = if (constraints.maxHeight >= Int.MAX_VALUE / 2) 2000 else constraints.maxHeight
-                    val maxDescriptionHeight = (availableHeightPx * 0.5f).dp
+                BoxWithConstraints(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val maxDescriptionHeight = maxHeight / 2
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -260,7 +261,7 @@ fun TaskDetailsScreen(
                     ) {
                         Box(
                             Modifier
-                                .fillMaxWidth()
+                                .weight(1f)
                                 .heightIn(max = maxDescriptionHeight)
                                 .verticalScroll(rememberScrollState())
                         ) {
