@@ -61,6 +61,7 @@ kotlin {
                 implementation(libs.kotlinDateTime)
                 implementation(libs.kotlinImmutable)
                 implementation(libs.compose.icons)
+                implementation(libs.mikepenzMarkdown.m2)
             }
         }
         named("desktopTest") {
@@ -70,6 +71,7 @@ kotlin {
                 implementation(libs.mockk)
                 implementation(libs.mcpSdkClient)
                 implementation(libs.ktorClientCio)
+                implementation(libs.kotlinDateTime)
             }
         }
         named("androidMain") {

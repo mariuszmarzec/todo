@@ -34,6 +34,7 @@ composeIcons = "1.7.3"
 immutable = "0.4.0"
 
 composePlugin = "1.10.0"
+mikepenzMarkdown = "0.46.0"
 
 [libraries]
 
@@ -82,6 +83,8 @@ plugin-serializationGradle = { module = "org.jetbrains.kotlin:kotlin-serializati
 plugin-buildKonfig = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfig" }
 plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 plugin-atomic = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfu" }
+
+mikepenzMarkdown-m2 = { module = "com.mikepenz:multiplatform-markdown-renderer-m2", version.ref = "mikepenzMarkdown" }
 
 [plugins]
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "composePlugin" }
