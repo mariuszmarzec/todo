@@ -56,8 +56,6 @@ fun AddNewTaskScreen(
         store.onUsersRequest()
     }
 
-    val scrollState = rememberScrollState()
-
     Scaffold(
         topBar = {
             actionBarProvider.provide("Tasks")
@@ -75,12 +73,10 @@ fun AddNewTaskScreen(
 
 
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(padding),
+                    modifier = Modifier.fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.Center
                 ) {
                     if (state.data.isTaskSharingEnabled) {
                         val sharingUser =
