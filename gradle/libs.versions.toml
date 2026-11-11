@@ -4,6 +4,7 @@ compileSdk = "37"
 minSdk = "30"
 targetSdk = "35"
 
+mikepenzMarkdown = "0.46.0"
 kotlin = "2.4.21"
 ktor = "3.6.0"
 mcpSdk = "0.15.0"
@@ -37,6 +38,7 @@ composePlugin = "1.10.0"
 
 [libraries]
 
+mikepenzMarkdown-m2 = { module = "com.mikepenz:multiplatform-markdown-renderer-m2", version.ref = "mikepenzMarkdown" }
 ktorClient = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktorClientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktorClientMock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }

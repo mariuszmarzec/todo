@@ -49,6 +49,7 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":multiplatformUtils"))
+                implementation(libs.mikepenzMarkdown.m2)
                 implementation(compose.components.resources)
                 api(compose.runtime)
                 api(compose.foundation)
