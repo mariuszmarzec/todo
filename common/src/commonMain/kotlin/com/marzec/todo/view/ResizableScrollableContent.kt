@@ -40,7 +40,7 @@ internal const val RESIZABLE_CONTENT_VIEWPORT_TAG = "resizableContentViewport"
 internal const val RESIZABLE_CONTENT_HANDLE_TAG = "resizableContentHandle"
 
 private val minimumResizeHeight = 72.dp
-private const val maximumResizeHeightFraction = 2f / 3f
+private const val maximumResizeHeightFraction = 0.6f
 
 /**
  * Displays arbitrary composable content in a vertically scrollable viewport.
@@ -126,7 +126,7 @@ fun ResizableScrollableContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(20.dp)
+                        .height(32.dp)
                         .draggable(
                             orientation = Orientation.Vertical,
                             state = rememberDraggableState { dragAmount ->
