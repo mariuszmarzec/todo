@@ -258,17 +258,15 @@ fun TaskDetailsScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        key(task.id) {
-                            ResizableScrollableContent(
-                                modifier = Modifier.weight(1f),
-                                hasSubtasks = task.subTasks.isNotEmpty()
-                            ) {
-                                SelectionContainer {
-                                    Markdown(
-                                        content = task.description,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
+                        ResizableScrollableContent(
+                            modifier = Modifier.weight(1f),
+                            isResizeable = task.subTasks.isNotEmpty()
+                        ) {
+                            SelectionContainer {
+                                Markdown(
+                                    content = task.description,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         }
                         val urls = task.description.urls()
