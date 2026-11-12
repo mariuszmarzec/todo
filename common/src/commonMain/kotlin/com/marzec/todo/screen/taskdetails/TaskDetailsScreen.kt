@@ -321,7 +321,9 @@ fun TaskDetailsScreen(
                             text = "Subtasks: $subTasksCountRow"
                         )
                     }
-                    Spacer(Modifier.size(16.dp))
+                    if (subTasksCount > 0) {
+                        Spacer(Modifier.size(16.dp))
+                    }
                     TaskListView(
                         tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items
                             ?: task.subTasks,
