@@ -94,7 +94,7 @@ class TaskDetailsDescriptionLayoutTest {
     }
 
     @Test
-    fun `description box has heightIn constraint and vertical scroll modifier - buttons accessible at very small height`() {
+    fun `description box has heightIn and vertical scroll - buttons accessible at very small height`() {
         // This test verifies the layout structure by checking that
         // long content doesn't push out the action buttons even at very small heights
         compose.setContent { DescriptionLayoutTest(longDescription, 400f) }
