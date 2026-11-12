@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -94,6 +95,12 @@ fun ResizableScrollableContent(
             .coerceIn(minResizeHeightPx, maxResizeHeightPx)
         val viewportHeight = with(density) { viewportHeightPx.toDp() }
         val shouldShowResizeHandle = hasSubtasks && contentHeightPx > initialMaxHeightPx
+
+        LaunchedEffect(contentHeightPx, initialMaxHeightPx) {
+            if (contentHeightPx <= initialMaxHeightPx) {
+                resizedHeightPx = 0
+            }
+        }
 
         Column(
             modifier = if (hasSubtasks) {
