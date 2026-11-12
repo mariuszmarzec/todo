@@ -59,7 +59,11 @@ class ResizableScrollableContentTest {
     @Test
     fun overflowingContentIsCappedAndCanBeResizedInBothDirections() {
         compose.setContent {
-            Box(Modifier.size(width = 320.dp, height = 400.dp)) {
+            Box(
+                Modifier
+                    .size(width = 320.dp, height = 400.dp)
+                    .testTag("testRoot")
+            ) {
                 ResizableScrollableContent(
                     modifier = Modifier.fillMaxSize(),
                     hasSubtasks = true
