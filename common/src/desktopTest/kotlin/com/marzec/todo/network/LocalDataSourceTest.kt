@@ -12,7 +12,6 @@ import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
 import io.ktor.sse.ServerSentEvent
 import com.marzec.repository.LoginRepositoryMock
-import java.time.Clock
 import com.marzec.time.CurrentTimeUtil
 import com.marzec.time.currentTime
 import com.marzec.todo.api.SchedulerDto
@@ -236,7 +235,7 @@ class LocalDataSourceTest {
             assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
         } finally {
             // Reset clock to system default to avoid affecting other tests
-            CurrentTimeUtil.clock = { Clock.systemDefaultZone() }
+            CurrentTimeUtil.resetClock()
         }
     }
 
@@ -294,7 +293,7 @@ class LocalDataSourceTest {
             assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
         } finally {
             // Reset clock to system default to avoid affecting other tests
-            CurrentTimeUtil.clock = { Clock.systemDefaultZone() }
+            CurrentTimeUtil.resetClock()
         }
     }
 
@@ -352,7 +351,7 @@ class LocalDataSourceTest {
             assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
         } finally {
             // Reset clock to system default to avoid affecting other tests
-            CurrentTimeUtil.clock = { Clock.systemDefaultZone() }
+            CurrentTimeUtil.resetClock()
         }
     }
 
