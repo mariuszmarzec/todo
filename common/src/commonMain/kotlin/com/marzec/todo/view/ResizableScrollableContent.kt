@@ -39,7 +39,8 @@ internal const val RESIZABLE_CONTENT_VIEWPORT_TAG = "resizableContentViewport"
 internal const val RESIZABLE_CONTENT_HANDLE_TAG = "resizableContentHandle"
 
 private val minimumResizeHeight = 72.dp
-private const val maximumResizeHeightFraction = 0.6f
+private val resizeHandleHeight = 32.dp
+private const val maximumResizeHeightFraction = 0.7f
 
 /**
  * Displays arbitrary composable content in a vertically scrollable viewport.
@@ -73,10 +74,13 @@ fun ResizableScrollableContent(
         val minResizeHeightPx = with(density) {
             minOf(minimumResizeHeight, initialMaxHeight).roundToPx()
         }
-        // Reserve at least 40% of the available height for the subtask list
-        // and the summary/spacing that follows the description row.
+        val handleHeight = minOf(resizeHandleHeight, maxHeight / 4f)
+        // The viewport plus its drag target can occupy at most 70% of the row's
+        // available height, leaving at least 30% for the subtask list and footer.
         val maxResizeHeightPx = with(density) {
-            (maxHeight * maximumResizeHeightFraction).roundToPx()
+            (maxHeight * maximumResizeHeightFraction - handleHeight)
+                .coerceAtLeast(minOf(minimumResizeHeight, initialMaxHeight))
+                .roundToPx()
         }.coerceAtLeast(minResizeHeightPx)
 
         val latestInitialHeightPx = rememberUpdatedState(initialMaxHeightPx)
@@ -125,7 +129,7 @@ fun ResizableScrollableContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(32.dp)
+                        .height(handleHeight)
                         .draggable(
                             orientation = Orientation.Vertical,
                             state = rememberDraggableState { dragAmount ->
