@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -33,8 +32,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 
 internal const val RESIZABLE_CONTENT_VIEWPORT_TAG = "resizableContentViewport"
 internal const val RESIZABLE_CONTENT_HANDLE_TAG = "resizableContentHandle"
@@ -133,7 +133,7 @@ fun ResizableScrollableContent(
                                 val currentHeightPx = resizedHeightPx
                                     .takeIf { it > 0 }
                                     ?: latestInitialHeightPx.value
-                                resizedHeightPx = (currentHeightPx + dragAmount.toInt())
+                                resizedHeightPx = (currentHeightPx + dragAmount.roundToInt())
                                     .coerceIn(latestMinHeightPx.value, latestMaxHeightPx.value)
                             }
                         )
