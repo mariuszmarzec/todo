@@ -63,6 +63,7 @@ import com.marzec.todo.view.TaskListView
 import com.marzec.view.TextListItem
 import com.marzec.view.rememberForeverListState
 import kotlinx.coroutines.launch
+import com.mikepenz.markdown.m2.Markdown
 
 @Composable
 fun TaskDetailsScreen(
@@ -268,7 +269,10 @@ fun TaskDetailsScreen(
                                 .verticalScroll(rememberScrollState())
                         ) {
                             SelectionContainer {
-                                Text(text = task.description, fontSize = 16.sp)
+                                Markdown(
+                                    content = task.description,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         }
                         val urls = task.description.urls()
