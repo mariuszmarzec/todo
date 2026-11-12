@@ -83,16 +83,16 @@ class MarkdownPlainTextExtractorTest {
     fun `extract plain text from reference link`() {
         val markdown = "[reference link][ref]\n\n[ref]: https://example.com"
         val result = markdown.toPlainText()
-        // Parser includes reference definition with blank line
-        assertEquals("reference link\n\n:", result)
+        // Reference definition syntax should be stripped from visible preview
+        assertEquals("reference link", result)
     }
 
     @Test
     fun `extract plain text from short reference link`() {
         val markdown = "[short link][]\n\n[short link]: https://example.com"
         val result = markdown.toPlainText()
-        // Parser includes reference definition with blank line
-        assertEquals("short link\n\n:", result)
+        // Reference definition syntax should be stripped from visible preview
+        assertEquals("short link", result)
     }
 
     @Test
@@ -199,5 +199,130 @@ class MarkdownPlainTextExtractorTest {
         )
         val result = t.descriptionWithProgress
         assertEquals("Main Task - 1/2", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows link text for reference link on first line`() {
+        // First line is a full reference link, definition is on later line
+        val t = task(
+            id = 1,
+            description = "[reference link][ref]\n\n[ref]: https://example.com\n\nMore details",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        // Only first physical line processed, reference definition stripped
+        assertEquals("reference link", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows link text for short reference link on first line`() {
+        // First line is a short reference link, definition is on later line
+        val t = task(
+            id = 1,
+            description = "[short link][]\n\n[short link]: https://example.com\n\nMore details",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        // Only first physical line processed, reference definition stripped
+        assertEquals("short link", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows link text for inline link on first line`() {
+        val t = task(
+            id = 1,
+            description = "[inline link](https://example.com)\n\nMore details",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("inline link", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows image alt text on first line`() {
+        val t = task(
+            id = 1,
+            description = "![screenshot](https://example.com/image.png)\n\nMore details",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("screenshot", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows heading text without markers`() {
+        val t = task(
+            id = 1,
+            description = "# **Fix login**\n\nDetails here",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("Fix login", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows emphasized text without markers`() {
+        val t = task(
+            id = 1,
+            description = "This is *important* and **bold** text",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("This is important and bold text", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows strikethrough text without markers`() {
+        val t = task(
+            id = 1,
+            description = "~~strikethrough~~ text",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("strikethrough text", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows inline code without markers`() {
+        val t = task(
+            id = 1,
+            description = "Use `code` here",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("Use code here", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress shows autolink URL as plain text`() {
+        val t = task(
+            id = 1,
+            description = "Visit <https://example.com> for info",
+            isToDo = true
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("Visit https://example.com for info", result)
+    }
+
+    @Test
+    fun `descriptionWithProgress includes subtask progress suffix`() {
+        val subTask1 = task(
+            id = 2,
+            description = "Subtask 1",
+            isToDo = false
+        )
+        val subTask2 = task(
+            id = 3,
+            description = "Subtask 2",
+            isToDo = true
+        )
+        val t = task(
+            id = 1,
+            description = "[Task with link][link]\n\n[link]: https://example.com",
+            isToDo = true,
+            subTasks = listOf(subTask1, subTask2)
+        )
+        val result = t.descriptionWithProgress
+        assertEquals("Task with link - 1/2", result)
     }
 }

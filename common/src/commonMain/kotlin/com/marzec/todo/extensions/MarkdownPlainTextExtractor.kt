@@ -11,7 +11,9 @@ import org.intellij.markdown.parser.MarkdownParser
 fun String.toPlainText(): String {
     if (this.isEmpty()) return ""
     val flavour = GFMFlavourDescriptor()
-    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
+    val parser = MarkdownParser(flavour)
+    // Use CharSequence overload to avoid deprecation warning
+    val parsedTree = parser.buildMarkdownTreeFromString(this as CharSequence)
     val sb = StringBuilder()
     parsedTree.walk(this, sb)
     return sb.toString().trim()
@@ -19,6 +21,10 @@ fun String.toPlainText(): String {
 
 private fun ASTNode.walk(originalText: String, sb: StringBuilder) {
     when (type) {
+        MarkdownElementTypes.LINK_DEFINITION -> {
+            // Skip reference link definitions entirely (e.g., [ref]: https://example.com)
+            return
+        }
         MarkdownElementTypes.INLINE_LINK,
         MarkdownElementTypes.FULL_REFERENCE_LINK,
         MarkdownElementTypes.SHORT_REFERENCE_LINK,
