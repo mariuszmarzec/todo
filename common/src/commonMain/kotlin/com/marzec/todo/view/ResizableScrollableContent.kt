@@ -60,12 +60,12 @@ private const val MAXIMUM_RESIZE_HEIGHT_FRACTION = 0.75f
 @Composable
 fun ResizableScrollableContent(
     modifier: Modifier = Modifier,
-    hasSubtasks: Boolean,
+    isResizeable: Boolean,
     content: @Composable () -> Unit
 ) {
-    val scrollState = remember(hasSubtasks) { ScrollState(0) }
-    var contentHeightPx by remember(hasSubtasks) { mutableIntStateOf(0) }
-    var resizedHeightPx by remember(hasSubtasks) { mutableIntStateOf(0) }
+    val scrollState = remember(isResizeable) { ScrollState(0) }
+    var contentHeightPx by remember(isResizeable) { mutableIntStateOf(0) }
+    var resizedHeightPx by remember(isResizeable) { mutableIntStateOf(0) }
 
     BoxWithConstraints(modifier = modifier) {
         check(maxHeight != Dp.Infinity) {
@@ -94,7 +94,7 @@ fun ResizableScrollableContent(
         val viewportHeightPx = (resizedHeightPx.takeIf { it > 0 } ?: initialMaxHeightPx)
             .coerceIn(minResizeHeightPx, maxResizeHeightPx)
         val viewportHeight = with(density) { viewportHeightPx.toDp() }
-        val shouldShowResizeHandle = hasSubtasks && contentHeightPx > initialMaxHeightPx
+        val shouldShowResizeHandle = isResizeable && contentHeightPx > initialMaxHeightPx
 
         LaunchedEffect(contentHeightPx, initialMaxHeightPx) {
             if (contentHeightPx <= initialMaxHeightPx) {
@@ -103,7 +103,7 @@ fun ResizableScrollableContent(
         }
 
         Column(
-            modifier = if (hasSubtasks) {
+            modifier = if (isResizeable) {
                 Modifier.fillMaxWidth()
             } else {
                 Modifier.fillMaxWidth().fillMaxHeight()
@@ -114,7 +114,7 @@ fun ResizableScrollableContent(
                     .fillMaxWidth()
                     .then(
                         when {
-                            !hasSubtasks -> Modifier.fillMaxHeight()
+                            !isResizeable -> Modifier.fillMaxHeight()
                             resizedHeightPx > 0 -> Modifier.height(viewportHeight)
                             else -> Modifier.heightIn(max = initialMaxHeight)
                         }
