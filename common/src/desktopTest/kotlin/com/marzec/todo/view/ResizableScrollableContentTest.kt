@@ -38,7 +38,7 @@ class ResizableScrollableContentTest {
             ) {
                 ResizableScrollableContent(
                     modifier = Modifier.fillMaxSize(),
-                    hasSubtasks = true
+                    isResizeable = true
                 ) {
                     Column {
                         Text("Composable lambda content")
@@ -63,7 +63,7 @@ class ResizableScrollableContentTest {
             ) {
                 ResizableScrollableContent(
                     modifier = Modifier.fillMaxSize(),
-                    hasSubtasks = true
+                    isResizeable = true
                 ) {
                     Column(Modifier.height(240.dp)) {
                         repeat(12) { index ->
@@ -121,7 +121,7 @@ class ResizableScrollableContentTest {
             ) {
                 ResizableScrollableContent(
                     modifier = Modifier.fillMaxSize(),
-                    hasSubtasks = false
+                    isResizeable = false
                 ) {
                     Box(Modifier.fillMaxWidth().height(600.dp)) {
                         Text("Long content without subtasks")
@@ -143,7 +143,7 @@ class ResizableScrollableContentTest {
 
     @Test
     fun changingSubtaskModeResetsManuallyResizedHeight() {
-        val hasSubtasks = mutableStateOf(true)
+        val isResizeable = mutableStateOf(true)
 
         compose.setContent {
             Box(
@@ -153,7 +153,7 @@ class ResizableScrollableContentTest {
             ) {
                 ResizableScrollableContent(
                     modifier = Modifier.fillMaxSize(),
-                    hasSubtasks = hasSubtasks.value
+                    isResizeable = isResizeable.value
                 ) {
                     Box(Modifier.fillMaxWidth().height(240.dp))
                 }
@@ -173,7 +173,7 @@ class ResizableScrollableContentTest {
         assertTrue(expandedHeight > initialHeight)
 
         compose.runOnIdle {
-            hasSubtasks.value = false
+            isResizeable.value = false
         }
         compose.waitForIdle()
 
@@ -185,7 +185,7 @@ class ResizableScrollableContentTest {
         )
 
         compose.runOnIdle {
-            hasSubtasks.value = true
+            isResizeable.value = true
         }
         compose.waitForIdle()
 
