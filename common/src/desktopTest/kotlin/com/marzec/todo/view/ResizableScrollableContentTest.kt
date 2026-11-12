@@ -34,7 +34,11 @@ class ResizableScrollableContentTest {
     @Test
     fun contentLambdaIsRenderedAndShortContentDoesNotShowResizeHandle() {
         compose.setContent {
-            Box(Modifier.size(width = 320.dp, height = 400.dp)) {
+            Box(
+                Modifier
+                    .size(width = 320.dp, height = 400.dp)
+                    .testTag("testRoot")
+            ) {
                 ResizableScrollableContent(
                     modifier = Modifier.fillMaxSize(),
                     hasSubtasks = true
@@ -72,6 +76,9 @@ class ResizableScrollableContentTest {
         compose.waitForIdle()
 
         val initialHeight = viewportHeight()
+        val parentHeight = compose.onNodeWithTag("testRoot")
+            .fetchSemanticsNode().boundsInRoot.height
+        assertTrue(initialHeight in (parentHeight / 2f - 1f)..(parentHeight / 2f + 1f))
         compose.onNodeWithTag(RESIZABLE_CONTENT_HANDLE_TAG).assertExists()
         compose.onNodeWithTag(RESIZABLE_CONTENT_VIEWPORT_TAG).assert(hasScrollAction())
 
@@ -85,7 +92,10 @@ class ResizableScrollableContentTest {
         compose.waitForIdle()
 
         val expandedHeight = viewportHeight()
+        val handleHeight = compose.onNodeWithTag(RESIZABLE_CONTENT_HANDLE_TAG)
+            .fetchSemanticsNode().boundsInRoot.height
         assertTrue(expandedHeight > initialHeight)
+        assertTrue(expandedHeight + handleHeight <= parentHeight * 0.75f + 1f)
         compose.onNodeWithTag(RESIZABLE_CONTENT_HANDLE_TAG).assertExists()
 
         compose.onNodeWithTag(RESIZABLE_CONTENT_HANDLE_TAG).performTouchInput {
