@@ -256,7 +256,7 @@ fun TaskDetailsScreen(
                             .fillMaxWidth()
                             .wrapContentHeight(),
                         horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
                         ResizableScrollableContent(
                             modifier = Modifier.weight(1f),
