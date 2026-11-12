@@ -136,7 +136,9 @@ fun TaskDetailsScreen(
         when (val state = state) {
             is State.Data -> {
                 BoxWithConstraints(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
                 ) {
                     val maxDescriptionHeight = maxHeight / 2
                     Column(
@@ -365,11 +367,17 @@ fun TaskDetailsScreen(
                 }
 
             is State.Loading -> {
-                Text(text = "Loading")
+                Text(
+                    text = "Loading",
+                    modifier = Modifier.padding(padding)
+                )
             }
 
             is State.Error -> {
-                Text(text = state.message)
+                Text(
+                    text = state.message,
+                    modifier = Modifier.padding(padding)
+                )
             }
         }
     }
