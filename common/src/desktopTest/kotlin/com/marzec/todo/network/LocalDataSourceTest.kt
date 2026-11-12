@@ -12,6 +12,8 @@ import com.marzec.todo.DI
 import com.marzec.todo.PreferencesKeys
 import io.ktor.sse.ServerSentEvent
 import com.marzec.repository.LoginRepositoryMock
+import java.time.Clock
+import com.marzec.time.CurrentTimeUtil
 import com.marzec.time.currentTime
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
@@ -174,6 +176,184 @@ class LocalDataSourceTest {
 
         assertEquals(2, tasksAfterSecondRead.size)
         assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
+    }
+
+    @Test
+    fun oneShotSchedulerWithLegacyStartDateAtNoonCatchesUpWhenAppStartsAfterExecutionHour() = runTest {
+        // Scenario from issue:
+        // - Legacy startDate stored with time 12:00 (non-midnight)
+        // - Scheduler configured to execute at 07:00 (hour=7, minute=0)
+        // - App first opens at 08:00 (after execution hour but same day)
+        // Expected: task should be dispatched (catch-up behavior)
+        
+        // Set test clock to 2026-11-12T08:00:00
+        CurrentTimeUtil.setOtherTime(12, 11, 2026)
+        try {
+            val today = currentTime() // 2026-11-12T08:00:00
+            val todayDate = today.date.toString()
+            
+            // Legacy startDate with non-midnight time (12:00)
+            val legacyStartDate = "${todayDate}T12:00:00"
+            
+            val source = LocalDataSource(InMemoryFileCache())
+            source.init(
+                listOf(
+                    TaskDto(
+                        id = 1,
+                        description = "One-shot task with legacy startDate",
+                        addedTime = "${todayDate}T00:00:00",
+                        modifiedTime = "${todayDate}T00:00:00",
+                        parentTaskId = null,
+                        subTasks = emptyList(),
+                        isToDo = true,
+                        priority = 0,
+                        scheduler = SchedulerDto(
+                            hour = 7,  // Execution hour: 07:00
+                            minute = 0,
+                            startDate = legacyStartDate,  // Legacy startDate with 12:00
+                            daysOfWeek = emptyList(),
+                            dayOfMonth = 0,
+                            repeatCount = -1,
+                            repeatInEveryPeriod = 1,
+                            type = "OneShot",
+                            options = mapOf("removeScheduled" to "false")
+                        )
+                    )
+                )
+            )
+
+            // First getAll() - should dispatch the task (catch-up)
+            val tasksAfterFirstRead = source.getAll()
+
+            assertEquals(2, tasksAfterFirstRead.size, "Task should be dispatched once")
+            assertEquals(todayDate, tasksAfterFirstRead.first().scheduler?.lastDate?.substringBefore("T"))
+            assertNull(tasksAfterFirstRead.last().scheduler)
+
+            // Second getAll() - should NOT dispatch again (no duplicate)
+            val tasksAfterSecondRead = source.getAll()
+
+            assertEquals(2, tasksAfterSecondRead.size, "No duplicate dispatch on second getAll()")
+            assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
+        } finally {
+            // Reset clock to system default to avoid affecting other tests
+            CurrentTimeUtil.clock = { Clock.systemDefaultZone() }
+        }
+    }
+
+    @Test
+    fun weeklySchedulerWithLegacyStartDateAtNoonCatchesUpWhenAppStartsAfterExecutionHour() = runTest {
+        // Weekly scheduler with legacy startDate (12:00) should also work
+        // Set test clock to 2026-11-12T08:00:00 (Thursday)
+        CurrentTimeUtil.setOtherTime(12, 11, 2026)
+        try {
+            val today = currentTime() // 2026-11-12T08:00:00
+            val todayDate = today.date.toString()
+            val todayWeekday = today.dayOfWeek.isoDayNumber
+            
+            // Legacy startDate with non-midnight time (12:00)
+            val legacyStartDate = "${todayDate}T12:00:00"
+            
+            val source = LocalDataSource(InMemoryFileCache())
+            source.init(
+                listOf(
+                    TaskDto(
+                        id = 1,
+                        description = "Weekly task with legacy startDate",
+                        addedTime = "${todayDate}T00:00:00",
+                        modifiedTime = "${todayDate}T00:00:00",
+                        parentTaskId = null,
+                        subTasks = emptyList(),
+                        isToDo = true,
+                        priority = 0,
+                        scheduler = SchedulerDto(
+                            hour = 7,  // Execution hour: 07:00
+                            minute = 0,
+                            startDate = legacyStartDate,  // Legacy startDate with 12:00
+                            daysOfWeek = listOf(todayWeekday),  // Today is selected
+                            dayOfMonth = 0,
+                            repeatCount = -1,
+                            repeatInEveryPeriod = 1,
+                            type = "Weekly",
+                            options = mapOf("showNotification" to "false")
+                        )
+                    )
+                )
+            )
+
+            // First getAll() - should dispatch the task (catch-up)
+            val tasksAfterFirstRead = source.getAll()
+
+            assertEquals(2, tasksAfterFirstRead.size, "Weekly task should be dispatched once")
+            assertEquals(todayDate, tasksAfterFirstRead.first().scheduler?.lastDate?.substringBefore("T"))
+            assertNull(tasksAfterFirstRead.last().scheduler)
+
+            // Second getAll() - should NOT dispatch again (no duplicate)
+            val tasksAfterSecondRead = source.getAll()
+
+            assertEquals(2, tasksAfterSecondRead.size, "No duplicate dispatch on second getAll()")
+            assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
+        } finally {
+            // Reset clock to system default to avoid affecting other tests
+            CurrentTimeUtil.clock = { Clock.systemDefaultZone() }
+        }
+    }
+
+    @Test
+    fun monthlySchedulerWithLegacyStartDateAtNoonCatchesUpWhenAppStartsAfterExecutionHour() = runTest {
+        // Monthly scheduler with legacy startDate (12:00) should also work
+        // Set test clock to 2026-11-12T08:00:00 (day 12)
+        CurrentTimeUtil.setOtherTime(12, 11, 2026)
+        try {
+            val today = currentTime() // 2026-11-12T08:00:00
+            val todayDate = today.date.toString()
+            val todayDayOfMonth = today.dayOfMonth
+            
+            // Legacy startDate with non-midnight time (12:00)
+            val legacyStartDate = "${todayDate}T12:00:00"
+            
+            val source = LocalDataSource(InMemoryFileCache())
+            source.init(
+                listOf(
+                    TaskDto(
+                        id = 1,
+                        description = "Monthly task with legacy startDate",
+                        addedTime = "${todayDate}T00:00:00",
+                        modifiedTime = "${todayDate}T00:00:00",
+                        parentTaskId = null,
+                        subTasks = emptyList(),
+                        isToDo = true,
+                        priority = 0,
+                        scheduler = SchedulerDto(
+                            hour = 7,  // Execution hour: 07:00
+                            minute = 0,
+                            startDate = legacyStartDate,  // Legacy startDate with 12:00
+                            daysOfWeek = emptyList(),
+                            dayOfMonth = todayDayOfMonth,  // Today is selected
+                            repeatCount = -1,
+                            repeatInEveryPeriod = 1,
+                            type = "Monthly",
+                            options = mapOf("showNotification" to "false")
+                        )
+                    )
+                )
+            )
+
+            // First getAll() - should dispatch the task (catch-up)
+            val tasksAfterFirstRead = source.getAll()
+
+            assertEquals(2, tasksAfterFirstRead.size, "Monthly task should be dispatched once")
+            assertEquals(todayDate, tasksAfterFirstRead.first().scheduler?.lastDate?.substringBefore("T"))
+            assertNull(tasksAfterFirstRead.last().scheduler)
+
+            // Second getAll() - should NOT dispatch again (no duplicate)
+            val tasksAfterSecondRead = source.getAll()
+
+            assertEquals(2, tasksAfterSecondRead.size, "No duplicate dispatch on second getAll()")
+            assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
+        } finally {
+            // Reset clock to system default to avoid affecting other tests
+            CurrentTimeUtil.clock = { Clock.systemDefaultZone() }
+        }
     }
 
     @Test

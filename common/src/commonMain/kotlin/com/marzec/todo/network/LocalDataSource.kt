@@ -9,6 +9,7 @@ import com.marzec.extensions.replaceIf
 import com.marzec.locker.Locker
 import com.marzec.time.currentTime
 import com.marzec.time.formatDate
+import com.marzec.time.withStartOfDay
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.LeaveShareDto
 import com.marzec.todo.api.MarkAsToDoDto
@@ -326,10 +327,13 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             scheduler: Scheduler
         ): LocalDateTime? {
             val pastDateDeadline = today.toLocalDate().minusMonths(1)
+            // Normalize startDate to start of day to handle legacy stored values
+            // that may contain a non-midnight time component
+            val normalizedStartDate = scheduler.startDate.withStartOfDay().toJavaLocalDateTime().toLocalDate()
             val minDateForSchedulerCheck = maxOf(
                 pastDateDeadline,
                 scheduler.lastDate?.toJavaLocalDateTime()?.toLocalDate() ?: LocalDate.MIN,
-                scheduler.startDate.toJavaLocalDateTime().toLocalDate()
+                normalizedStartDate
             )
 
             var iterator = today
