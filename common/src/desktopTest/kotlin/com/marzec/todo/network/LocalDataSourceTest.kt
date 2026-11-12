@@ -186,7 +186,7 @@ class LocalDataSourceTest {
         // Expected: task should be dispatched (catch-up behavior)
         
         // Set test clock to 2026-11-12T08:00:00
-        CurrentTimeUtil.setOtherTime(12, 11, 2026)
+        CurrentTimeUtil.setClock(12, 11, 2026, 8, 0)
         try {
             val today = currentTime() // 2026-11-12T08:00:00
             val todayDate = today.date.toString()
@@ -243,7 +243,7 @@ class LocalDataSourceTest {
     fun weeklySchedulerWithLegacyStartDateAtNoonCatchesUpWhenAppStartsAfterExecutionHour() = runTest {
         // Weekly scheduler with legacy startDate (12:00) should also work
         // Set test clock to 2026-11-12T08:00:00 (Thursday)
-        CurrentTimeUtil.setOtherTime(12, 11, 2026)
+        CurrentTimeUtil.setClock(12, 11, 2026, 8, 0)
         try {
             val today = currentTime() // 2026-11-12T08:00:00
             val todayDate = today.date.toString()
@@ -301,7 +301,7 @@ class LocalDataSourceTest {
     fun monthlySchedulerWithLegacyStartDateAtNoonCatchesUpWhenAppStartsAfterExecutionHour() = runTest {
         // Monthly scheduler with legacy startDate (12:00) should also work
         // Set test clock to 2026-11-12T08:00:00 (day 12)
-        CurrentTimeUtil.setOtherTime(12, 11, 2026)
+        CurrentTimeUtil.setClock(12, 11, 2026, 8, 0)
         try {
             val today = currentTime() // 2026-11-12T08:00:00
             val todayDate = today.date.toString()
