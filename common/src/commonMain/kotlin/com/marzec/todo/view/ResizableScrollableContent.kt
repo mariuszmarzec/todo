@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -74,7 +73,7 @@ fun ResizableScrollableContent(
         val minResizeHeightPx = with(density) {
             minOf(minimumResizeHeight, initialMaxHeight).roundToPx()
         }
-        // Reserve at least one third of the available height for the subtask list
+        // Reserve at least 40% of the available height for the subtask list
         // and the summary/spacing that follows the description row.
         val maxResizeHeightPx = with(density) {
             (maxHeight * maximumResizeHeightFraction).roundToPx()
