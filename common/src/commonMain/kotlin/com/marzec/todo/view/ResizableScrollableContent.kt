@@ -38,9 +38,12 @@ import kotlin.math.roundToInt
 internal const val RESIZABLE_CONTENT_VIEWPORT_TAG = "resizableContentViewport"
 internal const val RESIZABLE_CONTENT_HANDLE_TAG = "resizableContentHandle"
 
-private val minimumResizeHeight = 72.dp
-private val resizeHandleHeight = 32.dp
-private const val maximumResizeHeightFraction = 0.75f
+private const val MINIMUM_RESIZE_HEIGHT_DP = 72
+private const val RESIZE_HANDLE_HEIGHT_DP = 32
+private const val RESIZE_HANDLE_WIDTH_DP = 36
+private const val RESIZE_HANDLE_INDICATOR_HEIGHT_DP = 4
+private const val MAXIMUM_HANDLE_HEIGHT_FRACTION = 0.25f
+private const val MAXIMUM_RESIZE_HEIGHT_FRACTION = 0.75f
 
 /**
  * Displays arbitrary composable content in a vertically scrollable viewport.
@@ -72,14 +75,14 @@ fun ResizableScrollableContent(
         val initialMaxHeight = maxHeight / 2f
         val initialMaxHeightPx = with(density) { initialMaxHeight.roundToPx() }
         val minResizeHeightPx = with(density) {
-            minOf(minimumResizeHeight, initialMaxHeight).roundToPx()
+            minOf(MINIMUM_RESIZE_HEIGHT_DP.dp, initialMaxHeight).roundToPx()
         }
-        val handleHeight = minOf(resizeHandleHeight, maxHeight / 4f)
+        val handleHeight = minOf(RESIZE_HANDLE_HEIGHT_DP.dp, maxHeight * MAXIMUM_HANDLE_HEIGHT_FRACTION)
         // The viewport plus its drag target can occupy at most 75% of the row's
         // available height, leaving at least 25% for the subtask list and footer.
         val maxResizeHeightPx = with(density) {
-            (maxHeight * maximumResizeHeightFraction - handleHeight)
-                .coerceAtLeast(minOf(minimumResizeHeight, initialMaxHeight))
+            (maxHeight * MAXIMUM_RESIZE_HEIGHT_FRACTION - handleHeight)
+                .coerceAtLeast(minOf(MINIMUM_RESIZE_HEIGHT_DP.dp, initialMaxHeight))
                 .roundToPx()
         }.coerceAtLeast(minResizeHeightPx)
 
@@ -149,7 +152,7 @@ fun ResizableScrollableContent(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(width = 36.dp, height = 4.dp)
+                            .size(width = RESIZE_HANDLE_WIDTH_DP.dp, height = RESIZE_HANDLE_INDICATOR_HEIGHT_DP.dp)
                             .clip(CircleShape)
                             .background(Color.Gray)
                     )
