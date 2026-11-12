@@ -3,6 +3,7 @@ package com.marzec.todo.model
 import com.marzec.model.NullableField
 import com.marzec.model.toDto
 import com.marzec.time.formatDate
+import com.marzec.time.withStartOfDay
 import com.marzec.todo.api.CreateTaskDto
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
@@ -218,7 +219,7 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
     is Scheduler.OneShot -> SchedulerDto(
         hour = hour,
         minute = minute,
-        startDate = startDate.formatDate(),
+        startDate = startDate.withStartOfDay().formatDate(),
         lastDate = lastDate?.formatDate(),
         daysOfWeek = emptyList(),
         dayOfMonth = 0,
@@ -230,7 +231,7 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
     is Scheduler.Weekly -> SchedulerDto(
         hour = hour,
         minute = minute,
-        startDate = startDate.formatDate(),
+        startDate = startDate.withStartOfDay().formatDate(),
         lastDate = lastDate?.formatDate(),
         daysOfWeek = daysOfWeek.map { it.isoDayNumber },
         dayOfMonth = 0,
@@ -242,7 +243,7 @@ fun Scheduler.toDto(): SchedulerDto = when (this) {
     is Scheduler.Monthly -> SchedulerDto(
         hour = hour,
         minute = minute,
-        startDate = startDate.formatDate(),
+        startDate = startDate.withStartOfDay().formatDate(),
         lastDate = lastDate?.formatDate(),
         daysOfWeek = emptyList(),
         dayOfMonth = dayOfMonth,
