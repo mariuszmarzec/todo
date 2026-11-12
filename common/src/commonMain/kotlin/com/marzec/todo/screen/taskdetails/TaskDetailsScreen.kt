@@ -61,6 +61,8 @@ import com.marzec.view.TextListItem
 import com.marzec.view.rememberForeverListState
 import kotlinx.coroutines.launch
 import com.mikepenz.markdown.m2.Markdown
+import com.mikepenz.markdown.model.markdownAnnotator
+import com.mikepenz.markdown.model.markdownAnnotatorConfig
 
 @Composable
 fun TaskDetailsScreen(
@@ -265,7 +267,12 @@ fun TaskDetailsScreen(
                             SelectionContainer {
                                 Markdown(
                                     content = task.description,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    annotator = remember {
+                                        markdownAnnotator(
+                                            config = markdownAnnotatorConfig(eolAsNewLine = true)
+                                        )
+                                    }
                                 )
                             }
                         }
