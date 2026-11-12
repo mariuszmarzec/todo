@@ -3,20 +3,16 @@ package com.marzec.todo.screen.taskdetails
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -60,6 +56,7 @@ import com.marzec.todo.view.ManageTaskSelectionBar
 import com.marzec.todo.view.ShowCheck
 import com.marzec.view.SearchView
 import com.marzec.todo.view.TaskListView
+import com.marzec.todo.view.ResizableScrollableContent
 import com.marzec.view.TextListItem
 import com.marzec.view.rememberForeverListState
 import kotlinx.coroutines.launch
@@ -141,7 +138,6 @@ fun TaskDetailsScreen(
                         .padding(padding)
                         .fillMaxSize()
                 ) {
-                    val maxDescriptionHeight = maxHeight / 2
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -262,11 +258,9 @@ fun TaskDetailsScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            Modifier
-                                .weight(1f)
-                                .heightIn(max = maxDescriptionHeight)
-                                .verticalScroll(rememberScrollState())
+                        ResizableScrollableContent(
+                            modifier = Modifier.weight(1f),
+                            isResizeable = task.subTasks.isNotEmpty()
                         ) {
                             SelectionContainer {
                                 Markdown(
@@ -325,7 +319,9 @@ fun TaskDetailsScreen(
                             text = "Subtasks: $subTasksCountRow"
                         )
                     }
-                    Spacer(Modifier.size(16.dp))
+                    if (subTasksCount > 0) {
+                        Spacer(Modifier.size(16.dp))
+                    }
                     TaskListView(
                         tasks = (state.data.reorderMode as? ReorderMode.Enabled)?.items
                             ?: task.subTasks,
