@@ -6,6 +6,7 @@ import com.marzec.mvi.Store4Impl
 import com.marzec.navigation.NavigationStore
 import com.marzec.preferences.StateCache
 import com.marzec.time.currentTime
+import com.marzec.time.withStartOfDay
 import com.marzec.todo.model.Scheduler
 import com.marzec.view.DateDelegate
 import com.marzec.view.WithDate
@@ -89,7 +90,7 @@ class SchedulerStore(
                 hour = state.hour,
                 minute = state.minute,
                 creationDate = state.creationDate,
-                startDate = state.date,
+                startDate = state.date.withStartOfDay(),
                 lastDate = null,
                 highestPriorityAsDefault = state.highestPriorityAsDefault,
                 removeScheduled = state.removeAfterSchedule,
@@ -100,7 +101,7 @@ class SchedulerStore(
                 hour = state.hour,
                 minute = state.minute,
                 creationDate = state.creationDate,
-                startDate = state.date,
+                startDate = state.date.withStartOfDay(),
                 lastDate = null,
                 daysOfWeek = state.daysOfWeek,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,
@@ -113,7 +114,7 @@ class SchedulerStore(
                 hour = state.hour,
                 minute = state.minute,
                 creationDate = state.creationDate,
-                startDate = state.date,
+                startDate = state.date.withStartOfDay(),
                 lastDate = null,
                 dayOfMonth = state.dayOfMonth,
                 repeatCount = state.repeatCount.takeIf { state.repeatTimes } ?: -1,

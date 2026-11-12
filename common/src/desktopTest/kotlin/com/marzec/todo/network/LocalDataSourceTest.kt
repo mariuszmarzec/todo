@@ -16,6 +16,8 @@ import com.marzec.time.currentTime
 import com.marzec.todo.api.SchedulerDto
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.repository.TodoRepository
+import com.marzec.todo.model.Scheduler
+import com.marzec.todo.model.toDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -128,6 +130,88 @@ class LocalDataSourceTest {
         repository.receiveSse()
 
         coVerify(exactly = 0) { dataSource.sse() }
+    }
+
+    @Test
+    fun oneShotSchedulerCatchesUpWhenStartDateContainsHiddenTime() = runTest {
+        val today = currentTime()
+        val todayDate = today.date.toString()
+        val startDateWithHiddenTime = "${todayDate}T23:59:${today.second.toString().padStart(2, '0')}"
+        val source = LocalDataSource(InMemoryFileCache())
+        source.init(
+            listOf(
+                TaskDto(
+                    id = 1,
+                    description = "One-shot task",
+                    addedTime = "${todayDate}T00:00:00",
+                    modifiedTime = "${todayDate}T00:00:00",
+                    parentTaskId = null,
+                    subTasks = emptyList(),
+                    isToDo = true,
+                    priority = 0,
+                    scheduler = SchedulerDto(
+                        hour = today.hour,
+                        minute = 0,
+                        startDate = startDateWithHiddenTime,
+                        daysOfWeek = emptyList(),
+                        dayOfMonth = 0,
+                        repeatCount = -1,
+                        repeatInEveryPeriod = 1,
+                        type = "OneShot",
+                        options = mapOf("removeScheduled" to "false")
+                    )
+                )
+            )
+        )
+
+        val tasksAfterFirstRead = source.getAll()
+
+        assertEquals(2, tasksAfterFirstRead.size)
+        assertEquals(todayDate, tasksAfterFirstRead.first().scheduler?.lastDate?.substringBefore("T"))
+        assertNull(tasksAfterFirstRead.last().scheduler)
+
+        val tasksAfterSecondRead = source.getAll()
+
+        assertEquals(2, tasksAfterSecondRead.size)
+        assertEquals(todayDate, tasksAfterSecondRead.first().scheduler?.lastDate?.substringBefore("T"))
+    }
+
+    @Test
+    fun schedulerDtoAlwaysNormalizesStartDateToStartOfDay() = runTest {
+        val dateWithTime = currentTime()
+        val expectedStartDate = "${dateWithTime.date}T00:00:00"
+        val schedulers = listOf(
+            Scheduler.OneShot(
+                hour = 7,
+                minute = 0,
+                creationDate = dateWithTime,
+                startDate = dateWithTime,
+                lastDate = null,
+                showNotification = false
+            ),
+            Scheduler.Weekly(
+                hour = 7,
+                minute = 0,
+                creationDate = dateWithTime,
+                startDate = dateWithTime,
+                daysOfWeek = listOf(dateWithTime.dayOfWeek),
+                lastDate = null,
+                showNotification = false
+            ),
+            Scheduler.Monthly(
+                hour = 7,
+                minute = 0,
+                creationDate = dateWithTime,
+                startDate = dateWithTime,
+                dayOfMonth = dateWithTime.dayOfMonth,
+                lastDate = null,
+                showNotification = false
+            )
+        )
+
+        schedulers.forEach { scheduler ->
+            assertEquals(expectedStartDate, scheduler.toDto().startDate)
+        }
     }
 
     @Test
