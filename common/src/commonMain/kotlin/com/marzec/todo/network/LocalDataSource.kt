@@ -325,16 +325,16 @@ class LocalDataSource(private val fileCache: FileCache) : DataSource {
             today: LocalDateTime,
             scheduler: Scheduler
         ): LocalDateTime? {
-            val pastDateDeadline: LocalDateTime = today.plusMonths(-1)
-            val minDateForSchedulerCheck = listOf(
+            val pastDateDeadline = today.toLocalDate().minusMonths(1)
+            val minDateForSchedulerCheck = maxOf(
                 pastDateDeadline,
-                scheduler.lastDate?.toJavaLocalDateTime() ?: LocalDateTime.MIN,
-                scheduler.startDate.toJavaLocalDateTime()
-            ).max()
+                scheduler.lastDate?.toJavaLocalDateTime()?.toLocalDate() ?: LocalDate.MIN,
+                scheduler.startDate.toJavaLocalDateTime().toLocalDate()
+            )
 
             var iterator = today
             var highestLastDate: LocalDateTime? = null
-            while (iterator > minDateForSchedulerCheck) {
+            while (!iterator.toLocalDate().isBefore(minDateForSchedulerCheck)) {
                 if (schedulerChecker.shouldBeCreated(scheduler, iterator)) {
                     highestLastDate = iterator
                     break
