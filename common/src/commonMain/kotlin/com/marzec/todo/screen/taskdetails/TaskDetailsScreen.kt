@@ -467,8 +467,8 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
 }
 
 /**
- * Keep Markdown headings readable in task descriptions without letting them
- * dominate the content. Body text and heading levels 4-6 retain Material defaults.
+ * Scale every Markdown heading down equally while preserving the relative
+ * hierarchy. Body text retains its Material default.
  */
 @Composable
 internal fun taskDescriptionMarkdownTypography(): MarkdownTypography {
@@ -476,6 +476,9 @@ internal fun taskDescriptionMarkdownTypography(): MarkdownTypography {
     return markdownTypography(
         h1 = typography.h1.copy(fontSize = typography.h1.fontSize * 0.5f),
         h2 = typography.h2.copy(fontSize = typography.h2.fontSize * 0.5f),
-        h3 = typography.h3.copy(fontSize = typography.h3.fontSize * 0.5f)
+        h3 = typography.h3.copy(fontSize = typography.h3.fontSize * 0.5f),
+        h4 = typography.h4.copy(fontSize = typography.h4.fontSize * 0.5f),
+        h5 = typography.h5.copy(fontSize = typography.h5.fontSize * 0.5f),
+        h6 = typography.h6.copy(fontSize = typography.h6.fontSize * 0.5f)
     )
 }
