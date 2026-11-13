@@ -484,5 +484,5 @@ internal fun taskDescriptionMarkdownTypography(): MarkdownTypography {
     )
 }
 
-internal fun TextUnit.reducedForHeadingLevel(level: Int) =
-    maxOf(this - ((level - 3) * 2).sp, 14.sp)
+internal fun TextUnit.reducedForHeadingLevel(level: Int): TextUnit =
+    maxOf(value - ((level - 3) * 2f), 14f).sp
