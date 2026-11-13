@@ -106,11 +106,20 @@ class TaskDetailsDescriptionLayoutTest {
         }
 
         compose.runOnIdle {
-            assertEquals(
-                defaultHeadingSizes.map { it * 0.5f },
-                markdownHeadingSizes,
-                "h1-h6 should each use half of their Material default font size"
+            val expectedHeadingSizes = listOf(
+                defaultHeadingSizes[0] * 0.5f,
+                defaultHeadingSizes[1] * 0.5f,
+                defaultHeadingSizes[2] * 0.5f,
+                maxOf(defaultHeadingSizes[3] - 2.sp, 14.sp),
+                maxOf(defaultHeadingSizes[4] - 4.sp, 14.sp),
+                maxOf(defaultHeadingSizes[5] - 6.sp, 14.sp)
             )
+            assertEquals(
+                expectedHeadingSizes,
+                markdownHeadingSizes,
+                "h1-h3 should be halved; h4-h6 should step down by 2sp per level, never below 14sp"
+            )
+            assertTrue(markdownHeadingSizes.all { it >= 14.sp })
             assertEquals(defaultBodySize, markdownParagraphSize, "paragraph text should keep its Material default")
         }
     }
