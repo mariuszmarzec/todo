@@ -3,6 +3,7 @@ package com.marzec.todo.mcp
 import com.marzec.content.Content
 import com.marzec.todo.api.TaskDto
 import com.marzec.todo.model.Task
+import com.marzec.todo.model.Scheduler
 import com.marzec.todo.repository.TodoRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -16,6 +17,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.datetime.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
@@ -116,6 +118,72 @@ class TodoMcpToolsTest {
         }
     }
 
+
+    @Test
+    fun scheduleTasksDefaultsOneShotRemoveScheduledToTrueAndAllowsExplicitFalse() = runBlocking {
+        val repository = io.mockk.mockk<TodoRepository>()
+        val task = Task(
+            id = 23,
+            description = "Schedule from MCP",
+            addedTime = LocalDateTime.parse("2026-11-13T10:00:00"),
+            modifiedTime = LocalDateTime.parse("2026-11-13T10:00:00"),
+            parentTaskId = null,
+            subTasks = emptyList(),
+            isToDo = true,
+            priority = 1,
+            scheduler = null,
+            expirationDate = null,
+            shares = emptyList(),
+            ownerId = null
+        )
+        val expectedStartDate = LocalDateTime.parse("2026-11-20T00:00:00")
+        val defaultScheduler = Scheduler.OneShot(
+            hour = 8,
+            minute = 30,
+            creationDate = null,
+            startDate = expectedStartDate,
+            lastDate = null,
+            highestPriorityAsDefault = false,
+            removeScheduled = true,
+            showNotification = false
+        )
+        val keepSourceTaskScheduler = defaultScheduler.copy(removeScheduled = false)
+
+        coEvery { repository.observeTask(23) } returns flowOf(Content.Data(task))
+        every {
+            repository.schedule(listOf(task), defaultScheduler)
+        } returns flowOf(Content.Data(Unit))
+        every {
+            repository.schedule(listOf(task), keepSourceTaskScheduler)
+        } returns flowOf(Content.Data(Unit))
+
+        withConnectedClient(repository) { client ->
+            val schedulerArgs = mapOf<String, Any>(
+                "type" to "OneShot",
+                "hour" to 8,
+                "minute" to 30,
+                "startDate" to "2026-11-20T00:00:00"
+            )
+            val defaultResult = client.callTool(
+                "schedule_tasks",
+                mapOf("taskIds" to listOf(23), "scheduler" to schedulerArgs)
+            )
+            assertFalse(defaultResult.isError == true)
+
+            val keepSourceTaskResult = client.callTool(
+                "schedule_tasks",
+                mapOf(
+                    "taskIds" to listOf(23),
+                    "scheduler" to (schedulerArgs + ("removeScheduled" to false))
+                )
+            )
+            assertFalse(keepSourceTaskResult.isError == true)
+
+            verify(exactly = 1) { repository.schedule(listOf(task), defaultScheduler) }
+            verify(exactly = 1) { repository.schedule(listOf(task), keepSourceTaskScheduler) }
+            coVerify(exactly = 2) { repository.observeTask(23) }
+        }
+    }
 
     @Test
     fun explicitSharingOperationFailsInLocalStorageMode() = runBlocking {
