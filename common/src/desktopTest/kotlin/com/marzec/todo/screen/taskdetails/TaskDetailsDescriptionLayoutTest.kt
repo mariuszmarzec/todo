@@ -74,11 +74,9 @@ class TaskDetailsDescriptionLayoutTest {
     private val longDescription = List(100) { "Line $it https://example.com/line$it" }.joinToString("\n")
 
     @Test
-    fun `Markdown heading levels one to three use half their default font size`() {
+    fun `all Markdown heading levels are scaled down proportionally`() {
         var defaultHeadingSizes = emptyList<TextUnit>()
         var markdownHeadingSizes = emptyList<TextUnit>()
-        var markdownH4Size = TextUnit.Unspecified
-        var defaultH4Size = TextUnit.Unspecified
         var markdownParagraphSize = TextUnit.Unspecified
         var defaultBodySize = TextUnit.Unspecified
 
@@ -89,15 +87,19 @@ class TaskDetailsDescriptionLayoutTest {
                 defaultHeadingSizes = listOf(
                     defaults.h1.fontSize,
                     defaults.h2.fontSize,
-                    defaults.h3.fontSize
+                    defaults.h3.fontSize,
+                    defaults.h4.fontSize,
+                    defaults.h5.fontSize,
+                    defaults.h6.fontSize
                 )
                 markdownHeadingSizes = listOf(
                     markdownTypography.h1.fontSize,
                     markdownTypography.h2.fontSize,
-                    markdownTypography.h3.fontSize
+                    markdownTypography.h3.fontSize,
+                    markdownTypography.h4.fontSize,
+                    markdownTypography.h5.fontSize,
+                    markdownTypography.h6.fontSize
                 )
-                defaultH4Size = defaults.h4.fontSize
-                markdownH4Size = markdownTypography.h4.fontSize
                 defaultBodySize = defaults.body1.fontSize
                 markdownParagraphSize = markdownTypography.paragraph.fontSize
             }
@@ -107,9 +109,8 @@ class TaskDetailsDescriptionLayoutTest {
             assertEquals(
                 defaultHeadingSizes.map { it * 0.5f },
                 markdownHeadingSizes,
-                "h1, h2 and h3 should each use half of their Material default font size"
+                "h1-h6 should each use half of their Material default font size"
             )
-            assertEquals(defaultH4Size, markdownH4Size, "h4 should keep its Material default")
             assertEquals(defaultBodySize, markdownParagraphSize, "paragraph text should keep its Material default")
         }
     }
