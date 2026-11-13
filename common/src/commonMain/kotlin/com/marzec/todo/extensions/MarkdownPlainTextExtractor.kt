@@ -6,6 +6,7 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
+import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 import org.intellij.markdown.parser.MarkdownParser
 
 fun String.toPlainText(): String {
@@ -39,10 +40,6 @@ private fun ASTNode.walkLinkLike(originalText: String, sb: StringBuilder) {
     val linkText = children.firstOrNull { it.type == MarkdownElementTypes.LINK_TEXT }
     if (linkText != null) {
         linkText.walk(originalText, sb)
-    } else if (type == MarkdownElementTypes.AUTOLINK && children.isEmpty()) {
-        // A bare URL (or email autolink) can be represented as a leaf node.
-        // Keep its visible value instead of dropping it from the plain-text preview.
-        sb.append(getTextInNode(originalText).removeSurrounding("<", ">"))
     } else {
         children.forEach { it.walk(originalText, sb) }
     }
@@ -77,5 +74,6 @@ private val contentTokenTypes = setOf(
     MarkdownTokenTypes.HARD_LINE_BREAK,
     MarkdownTokenTypes.EOL,
     MarkdownTokenTypes.AUTOLINK,
-    MarkdownTokenTypes.EMAIL_AUTOLINK
+    MarkdownTokenTypes.EMAIL_AUTOLINK,
+    GFMTokenTypes.GFM_AUTOLINK
 )
