@@ -2,8 +2,8 @@ package com.marzec.todo.mcp
 
 import com.marzec.content.Content
 import com.marzec.todo.api.TaskDto
-import com.marzec.todo.model.Task
 import com.marzec.todo.model.Scheduler
+import com.marzec.todo.model.Task
 import com.marzec.todo.repository.TodoRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -17,10 +17,10 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.datetime.LocalDateTime
 import java.net.ServerSocket
 import kotlin.test.Test
 import kotlin.test.assertContains
