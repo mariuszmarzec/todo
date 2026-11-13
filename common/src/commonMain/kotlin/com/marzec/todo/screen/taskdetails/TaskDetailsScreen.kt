@@ -477,8 +477,11 @@ internal fun taskDescriptionMarkdownTypography(): MarkdownTypography {
         h1 = typography.h1.copy(fontSize = typography.h1.fontSize * 0.5f),
         h2 = typography.h2.copy(fontSize = typography.h2.fontSize * 0.5f),
         h3 = typography.h3.copy(fontSize = typography.h3.fontSize * 0.5f),
-        h4 = typography.h4.copy(fontSize = typography.h4.fontSize * 0.5f),
-        h5 = typography.h5.copy(fontSize = typography.h5.fontSize * 0.5f),
-        h6 = typography.h6.copy(fontSize = typography.h6.fontSize * 0.5f)
+        h4 = typography.h4.copy(fontSize = typography.h4.fontSize.reducedForHeadingLevel(4)),
+        h5 = typography.h5.copy(fontSize = typography.h5.fontSize.reducedForHeadingLevel(5)),
+        h6 = typography.h6.copy(fontSize = typography.h6.fontSize.reducedForHeadingLevel(6))
     )
 }
+
+private fun androidx.compose.ui.unit.TextUnit.reducedForHeadingLevel(level: Int) =
+    maxOf(this - ((level - 3) * 2).sp, 14.sp)
