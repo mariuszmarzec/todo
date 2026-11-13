@@ -120,6 +120,7 @@ class TaskDetailsDescriptionLayoutTest {
                 "h1-h3 should be halved; h4-h6 should step down by 2sp per level, never below 14sp"
             )
             assertTrue(markdownHeadingSizes.all { it >= 14.sp })
+            assertEquals(14.sp, 10.sp.reducedForHeadingLevel(6), "heading sizes must never go below 14sp")
             assertEquals(defaultBodySize, markdownParagraphSize, "paragraph text should keep its Material default")
         }
     }
