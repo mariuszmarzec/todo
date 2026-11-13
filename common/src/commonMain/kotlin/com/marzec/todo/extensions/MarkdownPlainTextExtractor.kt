@@ -39,6 +39,10 @@ private fun ASTNode.walkLinkLike(originalText: String, sb: StringBuilder) {
     val linkText = children.firstOrNull { it.type == MarkdownElementTypes.LINK_TEXT }
     if (linkText != null) {
         linkText.walk(originalText, sb)
+    } else if (type == MarkdownElementTypes.AUTOLINK && children.isEmpty()) {
+        // A bare URL (or email autolink) can be represented as a leaf node.
+        // Keep its visible value instead of dropping it from the plain-text preview.
+        sb.append(getTextInNode(originalText).removeSurrounding("<", ">"))
     } else {
         children.forEach { it.walk(originalText, sb) }
     }
