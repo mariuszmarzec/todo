@@ -10,14 +10,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.common.CopyToClipBoardHelper
@@ -57,6 +60,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.Rule
 
@@ -68,6 +72,58 @@ class TaskDetailsDescriptionLayoutTest {
     private val shortDescription = "Short task description https://example.com"
 
     private val longDescription = List(100) { "Line $it https://example.com/line$it" }.joinToString("\n")
+
+    @Test
+    fun `all Markdown heading levels are scaled down proportionally`() {
+        var defaultHeadingSizes = emptyList<TextUnit>()
+        var markdownHeadingSizes = emptyList<TextUnit>()
+        var markdownParagraphSize = TextUnit.Unspecified
+        var defaultBodySize = TextUnit.Unspecified
+
+        compose.setContent {
+            val defaults = MaterialTheme.typography
+            val markdownTypography = taskDescriptionMarkdownTypography()
+            SideEffect {
+                defaultHeadingSizes = listOf(
+                    defaults.h1.fontSize,
+                    defaults.h2.fontSize,
+                    defaults.h3.fontSize,
+                    defaults.h4.fontSize,
+                    defaults.h5.fontSize,
+                    defaults.h6.fontSize
+                )
+                markdownHeadingSizes = listOf(
+                    markdownTypography.h1.fontSize,
+                    markdownTypography.h2.fontSize,
+                    markdownTypography.h3.fontSize,
+                    markdownTypography.h4.fontSize,
+                    markdownTypography.h5.fontSize,
+                    markdownTypography.h6.fontSize
+                )
+                defaultBodySize = defaults.body1.fontSize
+                markdownParagraphSize = markdownTypography.paragraph.fontSize
+            }
+        }
+
+        compose.runOnIdle {
+            val expectedHeadingSizes = listOf(
+                defaultHeadingSizes[0] * 0.5f,
+                defaultHeadingSizes[1] * 0.5f,
+                defaultHeadingSizes[2] * 0.5f,
+                defaultHeadingSizes[3].reducedForHeadingLevel(4),
+                defaultHeadingSizes[4].reducedForHeadingLevel(5),
+                defaultHeadingSizes[5].reducedForHeadingLevel(6)
+            )
+            assertEquals(
+                expectedHeadingSizes,
+                markdownHeadingSizes,
+                "h1-h3 should be halved; h4-h6 should step down by 2sp per level, never below 14sp"
+            )
+            assertTrue(markdownHeadingSizes.all { it.value >= 14f })
+            assertEquals(14.sp, 10.sp.reducedForHeadingLevel(6), "heading sizes must never go below 14sp")
+            assertEquals(defaultBodySize, markdownParagraphSize, "paragraph text should keep its Material default")
+        }
+    }
 
     @Composable
     private fun DescriptionLayoutTest(description: String, availableHeightDp: Float = 800f) {

@@ -17,6 +17,7 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.mvi.State
@@ -61,6 +63,8 @@ import com.marzec.view.TextListItem
 import com.marzec.view.rememberForeverListState
 import kotlinx.coroutines.launch
 import com.mikepenz.markdown.m2.Markdown
+import com.mikepenz.markdown.m2.markdownTypography
+import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownAnnotatorConfig
 
@@ -268,6 +272,7 @@ fun TaskDetailsScreen(
                                 Markdown(
                                     content = task.description,
                                     modifier = Modifier.fillMaxWidth(),
+                                    typography = taskDescriptionMarkdownTypography(),
                                     annotator = remember {
                                         markdownAnnotator(
                                             config = markdownAnnotatorConfig(eolAsNewLine = true)
@@ -461,3 +466,23 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
         else -> Unit
     }
 }
+
+/**
+ * Scale every Markdown heading down equally while preserving the relative
+ * hierarchy. Body text retains its Material default.
+ */
+@Composable
+internal fun taskDescriptionMarkdownTypography(): MarkdownTypography {
+    val typography = MaterialTheme.typography
+    return markdownTypography(
+        h1 = typography.h1.copy(fontSize = typography.h1.fontSize * 0.5f),
+        h2 = typography.h2.copy(fontSize = typography.h2.fontSize * 0.5f),
+        h3 = typography.h3.copy(fontSize = typography.h3.fontSize * 0.5f),
+        h4 = typography.h4.copy(fontSize = typography.h4.fontSize.reducedForHeadingLevel(4)),
+        h5 = typography.h5.copy(fontSize = typography.h5.fontSize.reducedForHeadingLevel(5)),
+        h6 = typography.h6.copy(fontSize = typography.h6.fontSize.reducedForHeadingLevel(6))
+    )
+}
+
+internal fun TextUnit.reducedForHeadingLevel(level: Int): TextUnit =
+    maxOf(value - ((level - 3) * 2f), 14f).sp
