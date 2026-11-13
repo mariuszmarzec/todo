@@ -17,6 +17,7 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
@@ -61,6 +62,8 @@ import com.marzec.view.TextListItem
 import com.marzec.view.rememberForeverListState
 import kotlinx.coroutines.launch
 import com.mikepenz.markdown.m2.Markdown
+import com.mikepenz.markdown.m2.markdownTypography
+import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownAnnotatorConfig
 
@@ -268,6 +271,7 @@ fun TaskDetailsScreen(
                                 Markdown(
                                     content = task.description,
                                     modifier = Modifier.fillMaxWidth(),
+                                    typography = taskDescriptionMarkdownTypography(),
                                     annotator = remember {
                                         markdownAnnotator(
                                             config = markdownAnnotatorConfig(eolAsNewLine = true)
@@ -460,4 +464,18 @@ fun ShowDialog(store: TaskDetailsStore, dialog: DialogState<Int>) {
 
         else -> Unit
     }
+}
+
+/**
+ * Keep Markdown headings readable in task descriptions without letting them
+ * dominate the content. Body text and heading levels 4-6 retain Material defaults.
+ */
+@Composable
+internal fun taskDescriptionMarkdownTypography(): MarkdownTypography {
+    val typography = MaterialTheme.typography
+    return markdownTypography(
+        h1 = typography.h1.copy(fontSize = typography.h1.fontSize * 0.5f),
+        h2 = typography.h2.copy(fontSize = typography.h2.fontSize * 0.5f),
+        h3 = typography.h3.copy(fontSize = typography.h3.fontSize * 0.5f)
+    )
 }
