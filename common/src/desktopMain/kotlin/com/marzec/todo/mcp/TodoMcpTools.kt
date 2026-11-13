@@ -472,7 +472,7 @@ private fun parseScheduler(element: JsonElement): Scheduler {
             repeatCount = repeatCount,
             repeatInEveryPeriod = repeatEvery,
             highestPriorityAsDefault = highestPriority,
-            removeScheduled = args.optionalBoolean("removeScheduled") ?: Scheduler.REMOVE_SCHEDULED,
+            removeScheduled = args.optionalBoolean("removeScheduled") ?: true,
             showNotification = showNotification
         )
         "weekly" -> {
@@ -664,7 +664,7 @@ private fun sharesProperty(): JsonObject = buildJsonObject {
 
 private fun schedulerProperty(): JsonObject = buildJsonObject {
     put("type", "object")
-    put("description", "Schedule object. Use type OneShot, Weekly or Monthly.")
+    put("description", "Schedule object. Use type OneShot, Weekly or Monthly. For OneShot, removeScheduled defaults to true in MCP unless explicitly set to false.")
     put("properties", buildJsonObject {
         put("type", buildJsonObject {
             put("type", "string")
@@ -680,7 +680,7 @@ private fun schedulerProperty(): JsonObject = buildJsonObject {
         put("repeatInEveryPeriod", intProperty("Repeat every N periods", minimum = 1))
         put("highestPriorityAsDefault", booleanProperty("Priority default for generated tasks"))
         put("showNotification", booleanProperty("Whether generated tasks should show notifications"))
-        put("removeScheduled", booleanProperty("Whether a OneShot schedule removes its source task"))
+        put("removeScheduled", booleanProperty("Whether a OneShot schedule removes its source task after scheduling; defaults to true in MCP when omitted"))
     })
     put("required", JsonArray(listOf(JsonPrimitive("type"), JsonPrimitive("hour"), JsonPrimitive("minute"), JsonPrimitive("startDate"))))
 }
