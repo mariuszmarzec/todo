@@ -6,6 +6,7 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
+import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 import org.intellij.markdown.parser.MarkdownParser
 
 fun String.toPlainText(): String {
@@ -73,5 +74,6 @@ private val contentTokenTypes = setOf(
     MarkdownTokenTypes.HARD_LINE_BREAK,
     MarkdownTokenTypes.EOL,
     MarkdownTokenTypes.AUTOLINK,
-    MarkdownTokenTypes.EMAIL_AUTOLINK
+    MarkdownTokenTypes.EMAIL_AUTOLINK,
+    GFMTokenTypes.GFM_AUTOLINK
 )
