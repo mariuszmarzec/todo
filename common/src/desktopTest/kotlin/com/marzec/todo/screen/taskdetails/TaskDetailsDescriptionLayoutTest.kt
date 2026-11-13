@@ -10,14 +10,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marzec.common.CopyToClipBoardHelper
@@ -57,6 +60,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.Rule
 
@@ -68,6 +72,47 @@ class TaskDetailsDescriptionLayoutTest {
     private val shortDescription = "Short task description https://example.com"
 
     private val longDescription = List(100) { "Line $it https://example.com/line$it" }.joinToString("\n")
+
+    @Test
+    fun `Markdown heading levels one to three use half their default font size`() {
+        var defaultHeadingSizes = emptyList<TextUnit>()
+        var markdownHeadingSizes = emptyList<TextUnit>()
+        var markdownH4Size = TextUnit.Unspecified
+        var defaultH4Size = TextUnit.Unspecified
+        var markdownParagraphSize = TextUnit.Unspecified
+        var defaultBodySize = TextUnit.Unspecified
+
+        compose.setContent {
+            val defaults = MaterialTheme.typography
+            val markdownTypography = taskDescriptionMarkdownTypography()
+            SideEffect {
+                defaultHeadingSizes = listOf(
+                    defaults.h1.fontSize,
+                    defaults.h2.fontSize,
+                    defaults.h3.fontSize
+                )
+                markdownHeadingSizes = listOf(
+                    markdownTypography.h1.fontSize,
+                    markdownTypography.h2.fontSize,
+                    markdownTypography.h3.fontSize
+                )
+                defaultH4Size = defaults.h4.fontSize
+                markdownH4Size = markdownTypography.h4.fontSize
+                defaultBodySize = defaults.body1.fontSize
+                markdownParagraphSize = markdownTypography.paragraph.fontSize
+            }
+        }
+
+        compose.runOnIdle {
+            assertEquals(
+                defaultHeadingSizes.map { it * 0.5f },
+                markdownHeadingSizes,
+                "h1, h2 and h3 should each use half of their Material default font size"
+            )
+            assertEquals(defaultH4Size, markdownH4Size, "h4 should keep its Material default")
+            assertEquals(defaultBodySize, markdownParagraphSize, "paragraph text should keep its Material default")
+        }
+    }
 
     @Composable
     private fun DescriptionLayoutTest(description: String, availableHeightDp: Float = 800f) {
