@@ -35,7 +35,8 @@ data class SchedulerState(
     override fun copyWithDate(date: LocalDateTime): SchedulerState = copy(date = date)
 
     companion object {
-        val INITIAL = SchedulerState()
+        val INITIAL: SchedulerState
+            get() = SchedulerState()
 
         fun from(scheduler: Scheduler?, additionalOptionsAvailable: Boolean) = scheduler?.let {
             SchedulerState(
